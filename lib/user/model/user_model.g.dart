@@ -20,6 +20,12 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
         (k, e) => MapEntry(k, MonthlyStats.fromJson(e as Map<String, dynamic>)),
       ) ??
       const {},
+  badgeProgress:
+      (json['badgeProgress'] as Map<String, dynamic>?)?.map(
+        (k, e) =>
+            MapEntry(k, BadgeProgress.fromJson(e as Map<String, dynamic>)),
+      ) ??
+      const {},
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -30,4 +36,7 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'avatarName': instance.avatarName,
   'friends': instance.friends.toList(),
   'monthlyStats': instance.monthlyStats.map((k, e) => MapEntry(k, e.toJson())),
+  'badgeProgress': instance.badgeProgress.map(
+    (k, e) => MapEntry(k, e.toJson()),
+  ),
 };

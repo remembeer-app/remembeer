@@ -1,5 +1,6 @@
 import 'package:diacritic/diacritic.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:remembeer/badge/model/badge_progress.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
 
@@ -14,6 +15,7 @@ class UserModel {
   final String avatarName;
   final Set<String> friends;
   final Map<String, MonthlyStats> monthlyStats;
+  final Map<String, BadgeProgress> badgeProgress;
 
   UserModel({
     required this.id,
@@ -23,6 +25,7 @@ class UserModel {
     this.avatarName = 'jirka_kara.png',
     this.friends = const {},
     this.monthlyStats = const {},
+    this.badgeProgress = const {},
   }) : searchableUsername = searchableUsername ?? toSearchable(username);
 
   static String toSearchable(String input) {
@@ -39,6 +42,7 @@ class UserModel {
     String? avatarName,
     Set<String>? friends,
     Map<String, MonthlyStats>? monthlyStats,
+    Map<String, BadgeProgress>? badgeProgress,
   }) {
     return UserModel(
       id: id,
@@ -50,6 +54,7 @@ class UserModel {
       avatarName: avatarName ?? this.avatarName,
       friends: friends ?? this.friends,
       monthlyStats: monthlyStats ?? this.monthlyStats,
+      badgeProgress: badgeProgress ?? this.badgeProgress,
     );
   }
 
