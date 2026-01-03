@@ -1,8 +1,9 @@
+import 'package:remembeer/badge/data/onetime_badge_id.dart';
 import 'package:remembeer/badge/model/badge_category.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
 
-const _badgeDefinitions = <BadgeDefinition>[
-  BadgeDefinition(
+final _badgeDefinitions = <BadgeDefinition>[
+  const BadgeDefinition(
     id: 'centurion',
     name: 'Centurion',
     description: 'Drink 100 beers in total.',
@@ -10,7 +11,7 @@ const _badgeDefinitions = <BadgeDefinition>[
     category: BadgeCategory.beersTotal,
     goal: 100,
   ),
-  BadgeDefinition(
+  const BadgeDefinition(
     id: 'millennial',
     name: 'Millennial',
     description: 'Drink 1000 beers in total.',
@@ -19,7 +20,7 @@ const _badgeDefinitions = <BadgeDefinition>[
     goal: 1000,
   ),
 
-  BadgeDefinition(
+  const BadgeDefinition(
     id: 'alchemist',
     name: 'Alchemist',
     description: 'Drink 1 liter of alcohol.',
@@ -27,7 +28,7 @@ const _badgeDefinitions = <BadgeDefinition>[
     category: BadgeCategory.alcoholTotal,
     goal: 1000,
   ),
-  BadgeDefinition(
+  const BadgeDefinition(
     id: 'ethanol_engine',
     name: 'Ethanol Engine',
     description: 'Drink 10 liters of alcohol.',
@@ -36,7 +37,7 @@ const _badgeDefinitions = <BadgeDefinition>[
     goal: 10000,
   ),
 
-  BadgeDefinition(
+  const BadgeDefinition(
     id: 'finding_the_rhythm',
     name: 'Finding the Rhythm',
     description: 'Achieve 3-day streak.',
@@ -44,7 +45,7 @@ const _badgeDefinitions = <BadgeDefinition>[
     category: BadgeCategory.streak,
     goal: 3,
   ),
-  BadgeDefinition(
+  const BadgeDefinition(
     id: 'habit_formed',
     name: 'Habit Formed',
     description: 'Achieve 7-day streak.',
@@ -53,7 +54,7 @@ const _badgeDefinitions = <BadgeDefinition>[
     goal: 7,
   ),
 
-  BadgeDefinition(
+  const BadgeDefinition(
     id: 'night_animal',
     name: 'Night Animal',
     description: 'Have 10+ beers after 6 PM.',
@@ -61,14 +62,14 @@ const _badgeDefinitions = <BadgeDefinition>[
     category: BadgeCategory.onetimeEvent,
   ),
   BadgeDefinition(
-    id: 'you_remembeered',
+    id: OnetimeBadgeId.youRemembeered.id,
     name: 'You Remembeered',
     description: 'Log drink 5+ days after drinking it.',
     iconPath: 'assets/badges/you_remembeered.png',
     category: BadgeCategory.onetimeEvent,
   ),
   BadgeDefinition(
-    id: 'early_riser',
+    id: OnetimeBadgeId.earlyRiser.id,
     name: 'Early Riser',
     description: 'Have a beer between 6 AM and 8 AM.',
     iconPath: 'assets/badges/early_riser.png',
