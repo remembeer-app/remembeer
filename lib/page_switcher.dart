@@ -1,5 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:remembeer/badge/model/badge_definition.dart';
+import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink/page/drink_page.dart';
@@ -26,6 +30,8 @@ class _PageSwitcherState extends State<PageSwitcher> {
   int _selectedIndex = _drinkPageIndex;
 
   final _drinkService = get<DrinkService>();
+  final _badgeService = get<BadgeService>();
+  late StreamSubscription<BadgeDefinition> _badgeSubscription;
 
   static final _pages = <Widget>[
     ProfilePage(),
@@ -39,11 +45,18 @@ class _PageSwitcherState extends State<PageSwitcher> {
   void initState() {
     super.initState();
     platform.setMethodCallHandler(_handleQuickAddAction);
+
+    _badgeSubscription = _badgeService.badgeUnlockedStream.listen((badge) {
+      if (mounted) {
+        showNotification(context, '${badge.name} badge unlocked!');
+      }
+    });
   }
 
   @override
   void dispose() {
     platform.setMethodCallHandler(null);
+    _badgeSubscription.cancel();
     super.dispose();
   }
 

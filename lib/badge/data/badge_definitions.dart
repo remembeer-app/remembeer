@@ -82,3 +82,10 @@ List<BadgeDefinition> getBadgesByCategory(BadgeCategory category) {
       .where((badge) => badge.category == category)
       .toList();
 }
+
+BadgeDefinition getBadgeById(String id) {
+  return _badgeDefinitions.firstWhere(
+    (badge) => badge.id == id,
+    orElse: () => throw StateError('BadgeDefinition with ID "$id" not found.'),
+  );
+}

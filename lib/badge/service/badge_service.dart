@@ -1,12 +1,22 @@
+import 'dart:async';
+
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/data/onetime_badge_id.dart';
 import 'package:remembeer/badge/model/badge_category.dart';
+import 'package:remembeer/badge/model/badge_definition.dart';
 import 'package:remembeer/badge/model/badge_progress.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user_stats/model/user_stats.dart';
 
 class BadgeService {
+  final _badgeUnlockedController =
+      StreamController<BadgeDefinition>.broadcast();
+
   BadgeService();
+
+  /// Stream that emits a [BadgeDefinition] whenever a new badge is unlocked.
+  Stream<BadgeDefinition> get badgeUnlockedStream =>
+      _badgeUnlockedController.stream;
 
   /// Evaluates and unlocks badges based on the user's stats and the current drink.
   ///
@@ -33,7 +43,7 @@ class BadgeService {
 
     for (final badge in getBadgesByCategory(BadgeCategory.beersTotal)) {
       if (stats.totalBeersConsumed >= badge.goal!) {
-        updatedUser = _unlockIfNew(updatedUser, badge.id);
+        updatedUser = _unlockIfNew(updatedUser, badge);
       }
     }
 
@@ -45,7 +55,7 @@ class BadgeService {
 
     for (final badge in getBadgesByCategory(BadgeCategory.alcoholTotal)) {
       if (stats.totalAlcoholConsumed >= badge.goal!) {
-        updatedUser = _unlockIfNew(updatedUser, badge.id);
+        updatedUser = _unlockIfNew(updatedUser, badge);
       }
     }
 
@@ -57,7 +67,7 @@ class BadgeService {
 
     for (final badge in getBadgesByCategory(BadgeCategory.streak)) {
       if (stats.isStreakActive && stats.streakDays >= badge.goal!) {
-        updatedUser = _unlockIfNew(updatedUser, badge.id);
+        updatedUser = _unlockIfNew(updatedUser, badge);
       }
     }
 
@@ -75,7 +85,7 @@ class BadgeService {
       };
 
       if (unlocked) {
-        updatedUser = _unlockIfNew(updatedUser, badgeId.id);
+        updatedUser = _unlockIfNew(updatedUser, getBadgeById(badgeId.id));
       }
     }
 
@@ -101,14 +111,20 @@ class BadgeService {
     return difference >= 5;
   }
 
-  UserModel _unlockIfNew(UserModel user, String badgeId) {
-    if (user.isBadgeUnlocked(badgeId)) return user;
+  UserModel _unlockIfNew(UserModel user, BadgeDefinition badge) {
+    if (user.isBadgeUnlocked(badge.id)) return user;
 
     final progress = BadgeProgress(
-      badgeId: badgeId,
+      badgeId: badge.id,
       unlockedAt: DateTime.now(),
     );
 
+    _badgeUnlockedController.add(badge);
+
     return user.updateBadgeProgress(progress);
+  }
+
+  void dispose() {
+    _badgeUnlockedController.close();
   }
 }
