@@ -66,6 +66,7 @@ flutter:
   assets:
     - .env
     - assets/avatars/
+    - assets/badges/
     - assets/icons/
     - assets/seed_data/
 
