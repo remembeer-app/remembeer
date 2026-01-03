@@ -1,6 +1,6 @@
 import 'package:diacritic/diacritic.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:remembeer/badge/model/badge_progress.dart';
+import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
 
@@ -15,7 +15,7 @@ class UserModel {
   final String avatarName;
   final Set<String> friends;
   final Map<String, MonthlyStats> monthlyStats;
-  final Map<String, BadgeProgress> badgeProgress;
+  final Map<String, UnlockedBadge> unlockedBadges;
 
   UserModel({
     required this.id,
@@ -25,7 +25,7 @@ class UserModel {
     this.avatarName = 'jirka_kara.png',
     this.friends = const {},
     this.monthlyStats = const {},
-    this.badgeProgress = const {},
+    this.unlockedBadges = const {},
   }) : searchableUsername = searchableUsername ?? toSearchable(username);
 
   static String toSearchable(String input) {
@@ -42,7 +42,7 @@ class UserModel {
     String? avatarName,
     Set<String>? friends,
     Map<String, MonthlyStats>? monthlyStats,
-    Map<String, BadgeProgress>? badgeProgress,
+    Map<String, UnlockedBadge>? unlockedBadges,
   }) {
     return UserModel(
       id: id,
@@ -54,7 +54,7 @@ class UserModel {
       avatarName: avatarName ?? this.avatarName,
       friends: friends ?? this.friends,
       monthlyStats: monthlyStats ?? this.monthlyStats,
-      badgeProgress: badgeProgress ?? this.badgeProgress,
+      unlockedBadges: unlockedBadges ?? this.unlockedBadges,
     );
   }
 
@@ -127,13 +127,15 @@ class UserModel {
   }
 
   bool isBadgeUnlocked(String badgeId) {
-    final progress = badgeProgress[badgeId];
-    return progress != null && progress.unlockedAt != null;
+    final badge = unlockedBadges[badgeId];
+    return badge != null && badge.unlockedAt != null;
   }
 
-  UserModel updateBadgeProgress(BadgeProgress progress) {
-    final updatedBadgeProgress = Map<String, BadgeProgress>.from(badgeProgress);
-    updatedBadgeProgress[progress.badgeId] = progress;
-    return copyWith(badgeProgress: updatedBadgeProgress);
+  UserModel addUnlockedBadge(UnlockedBadge badge) {
+    final updatedUnlockedBadges = Map<String, UnlockedBadge>.from(
+      unlockedBadges,
+    );
+    updatedUnlockedBadges[badge.badgeId] = badge;
+    return copyWith(unlockedBadges: updatedUnlockedBadges);
   }
 }
