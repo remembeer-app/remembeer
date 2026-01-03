@@ -4,7 +4,7 @@ import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/data/onetime_badge_id.dart';
 import 'package:remembeer/badge/model/badge_category.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
-import 'package:remembeer/badge/model/badge_progress.dart';
+import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user_stats/model/user_stats.dart';
 
@@ -111,17 +111,17 @@ class BadgeService {
     return difference >= 5;
   }
 
-  UserModel _unlockIfNew(UserModel user, BadgeDefinition badge) {
-    if (user.isBadgeUnlocked(badge.id)) return user;
+  UserModel _unlockIfNew(UserModel user, BadgeDefinition badgeDefinition) {
+    if (user.isBadgeUnlocked(badgeDefinition.id)) return user;
 
-    final progress = BadgeProgress(
-      badgeId: badge.id,
+    final unlockedBadge = UnlockedBadge(
+      badgeId: badgeDefinition.id,
       unlockedAt: DateTime.now(),
     );
 
-    _badgeUnlockedController.add(badge);
+    _badgeUnlockedController.add(badgeDefinition);
 
-    return user.updateBadgeProgress(progress);
+    return user.addUnlockedBadge(unlockedBadge);
   }
 
   void dispose() {
