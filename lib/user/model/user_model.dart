@@ -81,8 +81,7 @@ class UserModel {
 
   DailyStats getDailyStats(int year, int month, int day) {
     final monthlyStats = getMonthlyStats(year, month);
-    return monthlyStats.dailyStats[day] ??
-        DailyStats(day: day, beersConsumed: 0, alcoholConsumedMl: 0);
+    return monthlyStats.dailyStats[day] ?? DailyStats(day: day);
   }
 
   UserModel _updateMonthlyStats(MonthlyStats stats) {
@@ -97,12 +96,14 @@ class UserModel {
     required int day,
     required double beersEquivalent,
     required double alcoholMl,
+    required bool after6pm,
   }) {
     final currentStats = getMonthlyStats(year, month);
     final updatedStats = currentStats.addDrink(
       day: day,
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
+      after6pm: after6pm,
     );
     return _updateMonthlyStats(updatedStats);
   }
@@ -113,12 +114,14 @@ class UserModel {
     required int day,
     required double beersEquivalent,
     required double alcoholMl,
+    required bool after6pm,
   }) {
     final currentStats = getMonthlyStats(year, month);
     final updatedStats = currentStats.removeDrink(
       day: day,
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
+      after6pm: after6pm,
     );
     return _updateMonthlyStats(updatedStats);
   }

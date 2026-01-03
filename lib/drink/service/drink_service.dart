@@ -65,6 +65,10 @@ class DrinkService {
 
   Future<void> createDrink(DrinkCreate drinkCreate) async {
     final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
+    final after6pm = _calculateIsAfter6pm(
+      drinkCreate.consumedAt,
+      effectiveDate,
+    );
 
     final beers = _beersEquivalent(
       category: drinkCreate.drinkType.category,
@@ -82,6 +86,7 @@ class DrinkService {
       day: effectiveDate.day,
       beersEquivalent: beers,
       alcoholMl: alcohol,
+      after6pm: after6pm,
     );
 
     final stats = userStatsService.fromUser(user);
@@ -98,7 +103,16 @@ class DrinkService {
     required Drink newDrink,
   }) async {
     final oldEffectiveDate = await _effectiveDate(oldDrink.consumedAt);
+    final oldAfter6pm = _calculateIsAfter6pm(
+      oldDrink.consumedAt,
+      oldEffectiveDate,
+    );
+
     final newEffectiveDate = await _effectiveDate(newDrink.consumedAt);
+    final newAfter6pm = _calculateIsAfter6pm(
+      newDrink.consumedAt,
+      newEffectiveDate,
+    );
 
     final oldBeers = _beersEquivalent(
       category: oldDrink.drinkType.category,
@@ -125,6 +139,7 @@ class DrinkService {
       day: oldEffectiveDate.day,
       beersEquivalent: oldBeers,
       alcoholMl: oldAlcohol,
+      after6pm: oldAfter6pm,
     );
 
     user = user.addDrink(
@@ -133,6 +148,7 @@ class DrinkService {
       day: newEffectiveDate.day,
       beersEquivalent: newBeers,
       alcoholMl: newAlcohol,
+      after6pm: newAfter6pm,
     );
 
     final stats = userStatsService.fromUser(user);
@@ -146,6 +162,7 @@ class DrinkService {
 
   Future<void> deleteDrink(Drink drink) async {
     final effectiveDate = await _effectiveDate(drink.consumedAt);
+    final after6pm = _calculateIsAfter6pm(drink.consumedAt, effectiveDate);
 
     final beers = _beersEquivalent(
       category: drink.drinkType.category,
@@ -163,6 +180,7 @@ class DrinkService {
       day: effectiveDate.day,
       beersEquivalent: beers,
       alcoholMl: alcohol,
+      after6pm: after6pm,
     );
 
     final stats = userStatsService.fromUser(user);
@@ -212,6 +230,16 @@ class DrinkService {
     required double alcoholPercentage,
   }) {
     return volumeInMilliliters * alcoholPercentage / 100;
+  }
+
+  bool _calculateIsAfter6pm(DateTime consumedAt, DateTime effectiveDate) {
+    final sixPmOnEffectiveDay = DateTime(
+      effectiveDate.year,
+      effectiveDate.month,
+      effectiveDate.day,
+      18,
+    );
+    return consumedAt.isAfter(sixPmOnEffectiveDay);
   }
 
   Future<DateTime> _effectiveDate(DateTime consumedAt) async {
