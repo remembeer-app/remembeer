@@ -8,6 +8,11 @@ import 'package:remembeer/user_stats/model/user_stats.dart';
 class BadgeService {
   BadgeService();
 
+  /// Evaluates and unlocks badges based on the user's stats and the current drink.
+  ///
+  /// [consumedAt] should be the **effective date** of the drink, not necessarily the
+  /// wall-clock time. This ensures that drinks consumed after midnight (but before
+  /// the custom end-of-day boundary) are correctly attributed to the previous day.
   UserModel evaluateBadges(
     UserModel user,
     UserStats stats,
@@ -65,6 +70,7 @@ class BadgeService {
     for (final badgeId in OnetimeBadgeId.values) {
       final unlocked = switch (badgeId) {
         OnetimeBadgeId.earlyRiser => _checkEarlyRiser(consumedAt),
+        OnetimeBadgeId.nightAnimal => _checkNightAnimal(user, consumedAt),
         OnetimeBadgeId.youRemembeered => _checkYouRemembeered(consumedAt),
       };
 
@@ -78,6 +84,15 @@ class BadgeService {
 
   bool _checkEarlyRiser(DateTime consumedAt) {
     return consumedAt.hour >= 6 && consumedAt.hour < 8;
+  }
+
+  bool _checkNightAnimal(UserModel user, DateTime consumedAt) {
+    final dailyStats = user.getDailyStats(
+      consumedAt.year,
+      consumedAt.month,
+      consumedAt.day,
+    );
+    return dailyStats.beersAfter6pm >= 10;
   }
 
   bool _checkYouRemembeered(DateTime consumedAt) {

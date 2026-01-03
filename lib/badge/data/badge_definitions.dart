@@ -54,8 +54,8 @@ final _badgeDefinitions = <BadgeDefinition>[
     goal: 7,
   ),
 
-  const BadgeDefinition(
-    id: 'night_animal',
+  BadgeDefinition(
+    id: OnetimeBadgeId.nightAnimal.id,
     name: 'Night Animal',
     description: 'Have 10+ beers after 6 PM.',
     iconPath: 'assets/badges/night_animal.png',

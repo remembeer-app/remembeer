@@ -90,7 +90,7 @@ class DrinkService {
     );
 
     final stats = userStatsService.fromUser(user);
-    user = badgeService.evaluateBadges(user, stats, drinkCreate.consumedAt);
+    user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
     final batch = drinkController.createBatch();
     drinkController.createSingleInBatch(dto: drinkCreate, batch: batch);
@@ -152,7 +152,7 @@ class DrinkService {
     );
 
     final stats = userStatsService.fromUser(user);
-    user = badgeService.evaluateBadges(user, stats, newDrink.consumedAt);
+    user = badgeService.evaluateBadges(user, stats, newEffectiveDate);
 
     final batch = drinkController.createBatch();
     drinkController.updateSingleInBatch(entity: newDrink, batch: batch);
@@ -184,7 +184,7 @@ class DrinkService {
     );
 
     final stats = userStatsService.fromUser(user);
-    user = badgeService.evaluateBadges(user, stats, drink.consumedAt);
+    user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
     final batch = drinkController.createBatch();
     drinkController.deleteSingleInBatch(entity: drink, batch: batch);
