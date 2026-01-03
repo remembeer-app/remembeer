@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:remembeer/badge/data/badge_definitions.dart';
+import 'package:remembeer/badge/model/badge_definition.dart';
+import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
@@ -66,6 +70,9 @@ class ProfilePage extends StatelessWidget {
                   isCurrentUser: isCurrentUser,
                 ),
                 const SizedBox(height: 30),
+                _buildBadgesSection(context, data.user.unlockedBadges),
+                const SizedBox(height: 30),
+
                 _buildConsumptionStats(data.stats),
               ],
             ),
@@ -345,11 +352,7 @@ class ProfilePage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Consumption Stats',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
+        _buildHeading('Consumption Stats'),
         Card(
           color: Colors.white,
           child: Padding(
@@ -372,6 +375,183 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildBadgesSection(
+    BuildContext context,
+    Map<String, UnlockedBadge> unlockedBadges,
+  ) {
+    if (unlockedBadges.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildHeading('Badges'),
+        Card(
+          color: Colors.white,
+          child: SizedBox(
+            height: 110,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              itemCount: unlockedBadges.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 16),
+              itemBuilder: (context, index) {
+                final unlockedBadge = unlockedBadges.values.elementAt(index);
+                final definition = getBadgeById(unlockedBadge.badgeId);
+                return _buildBadgeItem(context, unlockedBadge, definition);
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBadgeItem(
+    BuildContext context,
+    UnlockedBadge unlockedBadge,
+    BadgeDefinition definition,
+  ) {
+    return InkWell(
+      onTap: () => _showBadgeDetails(context, unlockedBadge, definition),
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 70,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.amber.shade100,
+                border: Border.all(color: Colors.amber.shade700, width: 2),
+              ),
+              child: Image.asset(definition.iconPath, fit: BoxFit.contain),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              definition.name,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showBadgeDetails(
+    BuildContext context,
+    UnlockedBadge unlockedBadge,
+    BadgeDefinition definition,
+  ) {
+    final theme = Theme.of(context);
+
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          backgroundColor: theme.colorScheme.surface,
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.amber.shade100,
+                    border: Border.all(color: Colors.amber.shade700, width: 2),
+                  ),
+                  child: Image.asset(definition.iconPath, fit: BoxFit.contain),
+                ),
+                const SizedBox(height: 20),
+
+                Text(
+                  definition.name,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+
+                Text(
+                  definition.description,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
+                if (unlockedBadge.unlockedAt != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Unlocked on ${DateFormat.yMMMd().format(unlockedBadge.unlockedAt!)}',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+
+                const SizedBox(height: 24),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeading(String title) {
+    return Column(
+      children: [
+        Text(
+          title,
+          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
       ],
     );
   }
