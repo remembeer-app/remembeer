@@ -122,4 +122,15 @@ class UserModel {
     );
     return _updateMonthlyStats(updatedStats);
   }
+
+  bool isBadgeUnlocked(String badgeId) {
+    final progress = badgeProgress[badgeId];
+    return progress != null && progress.unlockedAt != null;
+  }
+
+  UserModel updateBadgeProgress(BadgeProgress progress) {
+    final updatedBadgeProgress = Map<String, BadgeProgress>.from(badgeProgress);
+    updatedBadgeProgress[progress.badgeId] = progress;
+    return copyWith(badgeProgress: updatedBadgeProgress);
+  }
 }

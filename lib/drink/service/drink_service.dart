@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/drink/constants.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -9,6 +10,7 @@ import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
 import 'package:remembeer/user_settings/model/drink_list_sort.dart';
+import 'package:remembeer/user_stats/service/user_stats_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DrinkService {
@@ -17,6 +19,8 @@ class DrinkService {
   final UserController userController;
   final DateService dateService;
   final LocationService locationService;
+  final UserStatsService userStatsService;
+  final BadgeService badgeService;
 
   DrinkService({
     required this.userSettingsController,
@@ -24,6 +28,8 @@ class DrinkService {
     required this.userController,
     required this.dateService,
     required this.locationService,
+    required this.userStatsService,
+    required this.badgeService,
   });
 
   Stream<List<Drink>> get drinksForSelectedDateStream {
@@ -69,8 +75,8 @@ class DrinkService {
       alcoholPercentage: drinkCreate.drinkType.alcoholPercentage,
     );
 
-    final user = await userController.currentUser;
-    final updatedUser = user.addDrink(
+    var user = await userController.currentUser;
+    user = user.addDrink(
       year: effectiveDate.year,
       month: effectiveDate.month,
       day: effectiveDate.day,
@@ -78,9 +84,12 @@ class DrinkService {
       alcoholMl: alcohol,
     );
 
+    final stats = userStatsService.fromUser(user);
+    user = badgeService.evaluateBadges(user, stats);
+
     final batch = drinkController.createBatch();
     drinkController.createSingleInBatch(dto: drinkCreate, batch: batch);
-    userController.createOrUpdateInBatch(user: updatedUser, batch: batch);
+    userController.createOrUpdateInBatch(user: user, batch: batch);
     await batch.commit();
   }
 
@@ -126,6 +135,9 @@ class DrinkService {
       alcoholMl: newAlcohol,
     );
 
+    final stats = userStatsService.fromUser(user);
+    user = badgeService.evaluateBadges(user, stats);
+
     final batch = drinkController.createBatch();
     drinkController.updateSingleInBatch(entity: newDrink, batch: batch);
     userController.createOrUpdateInBatch(user: user, batch: batch);
@@ -144,8 +156,8 @@ class DrinkService {
       alcoholPercentage: drink.drinkType.alcoholPercentage,
     );
 
-    final user = await userController.currentUser;
-    final updatedUser = user.removeDrink(
+    var user = await userController.currentUser;
+    user = user.removeDrink(
       year: effectiveDate.year,
       month: effectiveDate.month,
       day: effectiveDate.day,
@@ -153,9 +165,12 @@ class DrinkService {
       alcoholMl: alcohol,
     );
 
+    final stats = userStatsService.fromUser(user);
+    user = badgeService.evaluateBadges(user, stats);
+
     final batch = drinkController.createBatch();
     drinkController.deleteSingleInBatch(entity: drink, batch: batch);
-    userController.createOrUpdateInBatch(user: updatedUser, batch: batch);
+    userController.createOrUpdateInBatch(user: user, batch: batch);
     await batch.commit();
   }
 

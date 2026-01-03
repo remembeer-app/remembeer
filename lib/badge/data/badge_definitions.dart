@@ -1,7 +1,7 @@
 import 'package:remembeer/badge/model/badge_category.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
 
-const badgeDefinitions = <BadgeDefinition>[
+const _badgeDefinitions = <BadgeDefinition>[
   BadgeDefinition(
     id: 'centurion',
     name: 'Centurion',
@@ -75,3 +75,9 @@ const badgeDefinitions = <BadgeDefinition>[
     category: BadgeCategory.onetimeEvent,
   ),
 ];
+
+List<BadgeDefinition> getBadgesByCategory(BadgeCategory category) {
+  return _badgeDefinitions
+      .where((badge) => badge.category == category)
+      .toList();
+}
