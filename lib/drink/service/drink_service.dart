@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/drink/constants.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -9,6 +10,7 @@ import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
 import 'package:remembeer/user_settings/model/drink_list_sort.dart';
+import 'package:remembeer/user_stats/service/user_stats_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DrinkService {
@@ -17,6 +19,8 @@ class DrinkService {
   final UserController userController;
   final DateService dateService;
   final LocationService locationService;
+  final UserStatsService userStatsService;
+  final BadgeService badgeService;
 
   DrinkService({
     required this.userSettingsController,
@@ -24,6 +28,8 @@ class DrinkService {
     required this.userController,
     required this.dateService,
     required this.locationService,
+    required this.userStatsService,
+    required this.badgeService,
   });
 
   Stream<List<Drink>> get drinksForSelectedDateStream {
@@ -59,6 +65,10 @@ class DrinkService {
 
   Future<void> createDrink(DrinkCreate drinkCreate) async {
     final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
+    final after6pm = _calculateIsAfter6pm(
+      drinkCreate.consumedAt,
+      effectiveDate,
+    );
 
     final beers = _beersEquivalent(
       category: drinkCreate.drinkType.category,
@@ -69,18 +79,22 @@ class DrinkService {
       alcoholPercentage: drinkCreate.drinkType.alcoholPercentage,
     );
 
-    final user = await userController.currentUser;
-    final updatedUser = user.addDrink(
+    var user = await userController.currentUser;
+    user = user.addDrink(
       year: effectiveDate.year,
       month: effectiveDate.month,
       day: effectiveDate.day,
       beersEquivalent: beers,
       alcoholMl: alcohol,
+      after6pm: after6pm,
     );
+
+    final stats = userStatsService.fromUser(user);
+    user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
     final batch = drinkController.createBatch();
     drinkController.createSingleInBatch(dto: drinkCreate, batch: batch);
-    userController.createOrUpdateInBatch(user: updatedUser, batch: batch);
+    userController.createOrUpdateInBatch(user: user, batch: batch);
     await batch.commit();
   }
 
@@ -89,7 +103,16 @@ class DrinkService {
     required Drink newDrink,
   }) async {
     final oldEffectiveDate = await _effectiveDate(oldDrink.consumedAt);
+    final oldAfter6pm = _calculateIsAfter6pm(
+      oldDrink.consumedAt,
+      oldEffectiveDate,
+    );
+
     final newEffectiveDate = await _effectiveDate(newDrink.consumedAt);
+    final newAfter6pm = _calculateIsAfter6pm(
+      newDrink.consumedAt,
+      newEffectiveDate,
+    );
 
     final oldBeers = _beersEquivalent(
       category: oldDrink.drinkType.category,
@@ -116,6 +139,7 @@ class DrinkService {
       day: oldEffectiveDate.day,
       beersEquivalent: oldBeers,
       alcoholMl: oldAlcohol,
+      after6pm: oldAfter6pm,
     );
 
     user = user.addDrink(
@@ -124,7 +148,11 @@ class DrinkService {
       day: newEffectiveDate.day,
       beersEquivalent: newBeers,
       alcoholMl: newAlcohol,
+      after6pm: newAfter6pm,
     );
+
+    final stats = userStatsService.fromUser(user);
+    user = badgeService.evaluateBadges(user, stats, newEffectiveDate);
 
     final batch = drinkController.createBatch();
     drinkController.updateSingleInBatch(entity: newDrink, batch: batch);
@@ -134,6 +162,7 @@ class DrinkService {
 
   Future<void> deleteDrink(Drink drink) async {
     final effectiveDate = await _effectiveDate(drink.consumedAt);
+    final after6pm = _calculateIsAfter6pm(drink.consumedAt, effectiveDate);
 
     final beers = _beersEquivalent(
       category: drink.drinkType.category,
@@ -144,18 +173,22 @@ class DrinkService {
       alcoholPercentage: drink.drinkType.alcoholPercentage,
     );
 
-    final user = await userController.currentUser;
-    final updatedUser = user.removeDrink(
+    var user = await userController.currentUser;
+    user = user.removeDrink(
       year: effectiveDate.year,
       month: effectiveDate.month,
       day: effectiveDate.day,
       beersEquivalent: beers,
       alcoholMl: alcohol,
+      after6pm: after6pm,
     );
+
+    final stats = userStatsService.fromUser(user);
+    user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
     final batch = drinkController.createBatch();
     drinkController.deleteSingleInBatch(entity: drink, batch: batch);
-    userController.createOrUpdateInBatch(user: updatedUser, batch: batch);
+    userController.createOrUpdateInBatch(user: user, batch: batch);
     await batch.commit();
   }
 
@@ -197,6 +230,16 @@ class DrinkService {
     required double alcoholPercentage,
   }) {
     return volumeInMilliliters * alcoholPercentage / 100;
+  }
+
+  bool _calculateIsAfter6pm(DateTime consumedAt, DateTime effectiveDate) {
+    final sixPmOnEffectiveDay = DateTime(
+      effectiveDate.year,
+      effectiveDate.month,
+      effectiveDate.day,
+      18,
+    );
+    return consumedAt.isAfter(sixPmOnEffectiveDay);
   }
 
   Future<DateTime> _effectiveDate(DateTime consumedAt) async {

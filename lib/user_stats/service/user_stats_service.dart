@@ -8,29 +8,27 @@ class UserStatsService {
   UserStatsService({required this.userController});
 
   Stream<UserStats> get userStatsStream {
-    return _computeStats(userController.currentUserStream);
+    return userController.currentUserStream.map(fromUser);
   }
 
   Stream<UserStats> userStatsStreamFor(String userId) {
-    return _computeStats(userController.userStreamFor(userId));
+    return userController.userStreamFor(userId).map(fromUser);
   }
 
-  Stream<UserStats> _computeStats(Stream<UserModel> userStream) {
-    return userStream.map((user) {
-      final (totalBeers, totalAlcohol) = _calculateTotals(user);
-      final (beersLast30Days, alcoholLast30Days) = _calculateLast30Days(user);
+  UserStats fromUser(UserModel user) {
+    final (totalBeers, totalAlcohol) = _calculateTotals(user);
+    final (beersLast30Days, alcoholLast30Days) = _calculateLast30Days(user);
 
-      final (isStreakActive, streakDays) = _calculateStreak(user);
+    final (isStreakActive, streakDays) = _calculateStreak(user);
 
-      return UserStats(
-        totalBeersConsumed: totalBeers,
-        totalAlcoholConsumed: totalAlcohol,
-        beersConsumedLast30Days: beersLast30Days,
-        alcoholConsumedLast30Days: alcoholLast30Days,
-        streakDays: streakDays,
-        isStreakActive: isStreakActive,
-      );
-    });
+    return UserStats(
+      totalBeersConsumed: totalBeers,
+      totalAlcoholConsumed: totalAlcohol,
+      beersConsumedLast30Days: beersLast30Days,
+      alcoholConsumedLast30Days: alcoholLast30Days,
+      streakDays: streakDays,
+      isStreakActive: isStreakActive,
+    );
   }
 
   (double, double) _calculateTotals(UserModel user) {

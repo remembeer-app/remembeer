@@ -34,13 +34,13 @@ class MonthlyStats {
     required int day,
     required double beersEquivalent,
     required double alcoholMl,
+    required bool after6pm,
   }) {
-    final currentDaily =
-        dailyStats[day] ??
-        DailyStats(day: day, beersConsumed: 0, alcoholConsumedMl: 0);
+    final currentDaily = dailyStats[day] ?? DailyStats(day: day);
     final updatedDaily = currentDaily.addDrink(
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
+      after6pm: after6pm,
     );
 
     return copyWith(
@@ -54,13 +54,13 @@ class MonthlyStats {
     required int day,
     required double beersEquivalent,
     required double alcoholMl,
+    required bool after6pm,
   }) {
-    final currentDaily =
-        dailyStats[day] ??
-        DailyStats(day: day, beersConsumed: 0, alcoholConsumedMl: 0);
+    final currentDaily = dailyStats[day] ?? DailyStats(day: day);
     final updatedDaily = currentDaily.removeDrink(
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
+      after6pm: after6pm,
     );
 
     return copyWith(

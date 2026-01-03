@@ -1,0 +1,92 @@
+import 'package:remembeer/badge/data/onetime_badge_id.dart';
+import 'package:remembeer/badge/model/badge_category.dart';
+import 'package:remembeer/badge/model/badge_definition.dart';
+
+// TODO(metju-ac): Add real icons. Also consider defining colors for badges.
+final _badgeDefinitions = <BadgeDefinition>[
+  const BadgeDefinition(
+    id: 'centurion',
+    name: 'Centurion',
+    description: 'Drink 100 beers in total',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.beersTotal,
+    goal: 100,
+  ),
+  const BadgeDefinition(
+    id: 'millennial',
+    name: 'Millennial',
+    description: 'Drink 1000 beers in total',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.beersTotal,
+    goal: 1000,
+  ),
+
+  const BadgeDefinition(
+    id: 'alchemist',
+    name: 'Alchemist',
+    description: 'Drink 1 liter of alcohol',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.alcoholTotal,
+    goal: 1000,
+  ),
+  const BadgeDefinition(
+    id: 'ethanol_engine',
+    name: 'Ethanol Engine',
+    description: 'Drink 10 liters of alcohol',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.alcoholTotal,
+    goal: 10000,
+  ),
+
+  const BadgeDefinition(
+    id: 'finding_the_rhythm',
+    name: 'Finding the Rhythm',
+    description: 'Achieve 3-day streak',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.streak,
+    goal: 3,
+  ),
+  const BadgeDefinition(
+    id: 'habit_formed',
+    name: 'Habit Formed',
+    description: 'Achieve 7-day streak',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.streak,
+    goal: 7,
+  ),
+
+  BadgeDefinition(
+    id: OnetimeBadgeId.nightAnimal.id,
+    name: 'Night animal',
+    description: 'Have 10+ beers after 6 pm',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.onetimeEvent,
+  ),
+  BadgeDefinition(
+    id: OnetimeBadgeId.youRemembeered.id,
+    name: 'You remembeered',
+    description: 'Log drink 5+ days after drinking it',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.onetimeEvent,
+  ),
+  BadgeDefinition(
+    id: OnetimeBadgeId.earlyRiser.id,
+    name: 'Early riser',
+    description: 'Have a beer between 6 am and 8 am',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.onetimeEvent,
+  ),
+];
+
+List<BadgeDefinition> getBadgesByCategory(BadgeCategory category) {
+  return _badgeDefinitions
+      .where((badge) => badge.category == category)
+      .toList();
+}
+
+BadgeDefinition getBadgeById(String id) {
+  return _badgeDefinitions.firstWhere(
+    (badge) => badge.id == id,
+    orElse: () => throw StateError('BadgeDefinition with ID "$id" not found.'),
+  );
+}

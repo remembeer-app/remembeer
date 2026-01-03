@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/service/date_service.dart';
 import 'package:remembeer/drink/service/drink_list_service.dart';
@@ -30,7 +31,8 @@ class IoCContainer {
       ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
       ..registerSingleton(DateService())
       ..registerSingleton(MonthService())
-      ..registerSingleton(LocationService());
+      ..registerSingleton(LocationService())
+      ..registerSingleton(BadgeService());
 
     _registerControllers();
     _registerServices();
@@ -56,12 +58,17 @@ class IoCContainer {
   static void _registerServices() {
     get
       ..registerSingleton(
+        UserStatsService(userController: get<UserController>()),
+      )
+      ..registerSingleton(
         DrinkService(
           drinkController: get<DrinkController>(),
           userController: get<UserController>(),
           userSettingsController: get<UserSettingsController>(),
           dateService: get<DateService>(),
           locationService: get<LocationService>(),
+          userStatsService: get<UserStatsService>(),
+          badgeService: get<BadgeService>(),
         ),
       )
       ..registerSingleton(
@@ -76,9 +83,6 @@ class IoCContainer {
           authService: get<AuthService>(),
           userSettingsController: get<UserSettingsController>(),
         ),
-      )
-      ..registerSingleton(
-        UserStatsService(userController: get<UserController>()),
       )
       ..registerSingleton(
         LeaderboardService(
