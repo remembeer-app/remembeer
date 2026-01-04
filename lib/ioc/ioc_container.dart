@@ -32,6 +32,7 @@ class IoCContainer {
       ..registerSingleton(DateService())
       ..registerSingleton(MonthService())
       ..registerSingleton(LocationService())
+      ..registerSingleton(UserStatsService())
       ..registerSingleton(BadgeService());
 
     _registerControllers();
@@ -57,9 +58,6 @@ class IoCContainer {
 
   static void _registerServices() {
     get
-      ..registerSingleton(
-        UserStatsService(userController: get<UserController>()),
-      )
       ..registerSingleton(
         DrinkService(
           drinkController: get<DrinkController>(),

@@ -13,8 +13,6 @@ import 'package:remembeer/user/widget/badges_section.dart';
 import 'package:remembeer/user/widget/consumption_section.dart';
 import 'package:remembeer/user/widget/social_section.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
-import 'package:remembeer/user_stats/service/user_stats_service.dart';
-import 'package:rxdart/rxdart.dart';
 
 class ProfilePage extends StatelessWidget {
   final String? userId;
@@ -22,26 +20,19 @@ class ProfilePage extends StatelessWidget {
   ProfilePage({super.key, this.userId});
 
   final _userService = get<UserService>();
-  final _userStatsService = get<UserStatsService>();
 
   @override
   Widget build(BuildContext context) {
     final isCurrentUser = userId == null;
-
     final userStream = isCurrentUser
         ? _userService.currentUserStream
         : _userService.userStreamFor(userId!);
-    final userStatsStream = isCurrentUser
-        ? _userStatsService.userStatsStream
-        : _userStatsService.userStatsStreamFor(userId!);
 
     return PageTemplate(
       title: isCurrentUser ? null : const Text('Profile'),
       child: AsyncBuilder(
-        stream: Rx.combineLatest2(userStatsStream, userStream, (stats, user) {
-          return (stats: stats, user: user);
-        }),
-        builder: (context, data) {
+        stream: userStream,
+        builder: (context, user) {
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               horizontal: 10.0,
@@ -52,20 +43,16 @@ class ProfilePage extends StatelessWidget {
               children: [
                 _buildProfileHeader(
                   context: context,
-                  user: data.user,
+                  user: user,
                   isCurrentUser: isCurrentUser,
                 ),
                 const SizedBox(height: 30),
-                SocialSection(
-                  userStats: data.stats,
-                  user: data.user,
-                  isCurrentUser: isCurrentUser,
-                ),
+                SocialSection(user: user, isCurrentUser: isCurrentUser),
                 const SizedBox(height: 30),
-                BadgesSection(user: data.user),
+                BadgesSection(user: user),
                 const SizedBox(height: 30),
 
-                ConsumptionSection(userStats: data.stats),
+                ConsumptionSection(user: user),
               ],
             ),
           );

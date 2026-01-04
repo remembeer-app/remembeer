@@ -1,19 +1,8 @@
-import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user_stats/model/user_stats.dart';
 
 class UserStatsService {
-  final UserController userController;
-
-  UserStatsService({required this.userController});
-
-  Stream<UserStats> get userStatsStream {
-    return userController.currentUserStream.map(fromUser);
-  }
-
-  Stream<UserStats> userStatsStreamFor(String userId) {
-    return userController.userStreamFor(userId).map(fromUser);
-  }
+  UserStatsService();
 
   UserStats fromUser(UserModel user) {
     final (totalBeers, totalAlcohol) = _calculateTotals(user);
