@@ -12,10 +12,12 @@ UnlockedBadge _$UnlockedBadgeFromJson(Map<String, dynamic> json) =>
       unlockedAt: json['unlockedAt'] == null
           ? null
           : DateTime.parse(json['unlockedAt'] as String),
+      isShown: json['isShown'] as bool,
     );
 
 Map<String, dynamic> _$UnlockedBadgeToJson(UnlockedBadge instance) =>
     <String, dynamic>{
       'badgeId': instance.badgeId,
       'unlockedAt': instance.unlockedAt?.toIso8601String(),
+      'isShown': instance.isShown,
     };

@@ -70,7 +70,7 @@ class ProfilePage extends StatelessWidget {
                   isCurrentUser: isCurrentUser,
                 ),
                 const SizedBox(height: 30),
-                _buildBadgesSection(context, data.user.unlockedBadges),
+                _buildBadgesSection(context, data.user),
                 const SizedBox(height: 30),
 
                 _buildConsumptionStats(data.stats),
@@ -379,11 +379,10 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgesSection(
-    BuildContext context,
-    Map<String, UnlockedBadge> unlockedBadges,
-  ) {
-    if (unlockedBadges.isEmpty) {
+  Widget _buildBadgesSection(BuildContext context, UserModel user) {
+    final shownBadges = user.shownBadges;
+
+    if (shownBadges.isEmpty) {
       return const SizedBox.shrink();
     }
 
@@ -398,10 +397,10 @@ class ProfilePage extends StatelessWidget {
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              itemCount: unlockedBadges.length,
+              itemCount: shownBadges.length,
               separatorBuilder: (_, _) => const SizedBox(width: 16),
               itemBuilder: (context, index) {
-                final unlockedBadge = unlockedBadges.values.elementAt(index);
+                final unlockedBadge = shownBadges.elementAt(index);
                 final definition = getBadgeById(unlockedBadge.badgeId);
                 return _buildBadgeItem(context, unlockedBadge, definition);
               },

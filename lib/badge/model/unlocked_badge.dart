@@ -6,8 +6,13 @@ part 'unlocked_badge.g.dart';
 class UnlockedBadge {
   final String badgeId;
   final DateTime? unlockedAt;
+  final bool isShown;
 
-  const UnlockedBadge({required this.badgeId, this.unlockedAt});
+  const UnlockedBadge({
+    required this.badgeId,
+    this.unlockedAt,
+    required this.isShown,
+  });
 
   factory UnlockedBadge.fromJson(Map<String, dynamic> json) =>
       _$UnlockedBadgeFromJson(json);
