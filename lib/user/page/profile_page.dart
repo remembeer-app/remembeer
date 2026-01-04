@@ -392,59 +392,54 @@ class ProfilePage extends StatelessWidget {
         _buildHeading('Badges'),
         Card(
           color: Colors.white,
-          child: SizedBox(
-            height: 110,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              itemCount: shownBadges.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 16),
-              itemBuilder: (context, index) {
-                final unlockedBadge = shownBadges.elementAt(index);
-                final definition = getBadgeById(unlockedBadge.badgeId);
-                return _buildBadgeItem(context, unlockedBadge, definition);
-              },
+          child: GridView.builder(
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3,
             ),
+
+            itemCount: shownBadges.length,
+            itemBuilder: (context, index) {
+              return Center(
+                child: _buildBadgeItem(context, shownBadges[index]),
+              );
+            },
           ),
         ),
       ],
     );
   }
 
-  Widget _buildBadgeItem(
-    BuildContext context,
-    UnlockedBadge unlockedBadge,
-    BadgeDefinition definition,
-  ) {
+  Widget _buildBadgeItem(BuildContext context, UnlockedBadge unlockedBadge) {
+    final definition = getBadgeById(unlockedBadge.badgeId);
+
     return InkWell(
       onTap: () => _showBadgeDetails(context, unlockedBadge, definition),
       borderRadius: BorderRadius.circular(12),
-      child: SizedBox(
-        width: 70,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 56,
-              height: 56,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.amber.shade100,
-                border: Border.all(color: Colors.amber.shade700, width: 2),
-              ),
-              child: Image.asset(definition.iconPath, fit: BoxFit.contain),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.amber.shade100,
+              border: Border.all(color: Colors.amber.shade700, width: 2),
             ),
-            const SizedBox(height: 6),
-            Text(
-              definition.name,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-            ),
-          ],
-        ),
+            child: Image.asset(definition.iconPath, fit: BoxFit.contain),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            definition.name,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+          ),
+        ],
       ),
     );
   }
