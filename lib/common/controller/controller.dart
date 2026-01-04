@@ -5,8 +5,7 @@ import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/model/entity.dart';
 import 'package:remembeer/common/model/value_object.dart';
 import 'package:remembeer/common/util/invariant.dart';
-
-const globalUserId = 'global';
+import 'package:remembeer/user/constants.dart';
 
 // TODO(ohtenkay): consider makind this a crud controller, Move something to controller
 abstract class Controller<T extends Entity, U extends ValueObject> {
