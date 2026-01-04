@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/constants.dart';
+import 'package:remembeer/common/widget/drag_state_provider.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/page/update_drink_page.dart';
@@ -20,6 +21,15 @@ class DrinkCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LongPressDraggable<Drink>(
       data: drink,
+      onDragStarted: () {
+        DragStateProvider.of(context).setDragging(true);
+      },
+      onDragEnd: (_) {
+        DragStateProvider.of(context).setDragging(false);
+      },
+      onDraggableCanceled: (_, _) {
+        DragStateProvider.of(context).setDragging(false);
+      },
       feedback: Material(
         elevation: 4,
         borderRadius: BorderRadius.circular(12),

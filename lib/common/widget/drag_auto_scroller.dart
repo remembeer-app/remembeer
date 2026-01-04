@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/widget/drag_state_provider.dart';
 
 // This widget is AI generated to provide auto-scrolling functionality during drag-and-drop operations.
 
@@ -73,6 +74,13 @@ class _DragAutoScrollerState extends State<DragAutoScroller> {
   }
 
   void _handlePointerMove(PointerMoveEvent event) {
+    // Only auto-scroll when an item is actually being dragged
+    final dragState = DragStateProvider.maybeOf(context);
+    if (dragState == null || !dragState.isDragging) {
+      _startScrolling(0);
+      return;
+    }
+
     final renderBox = context.findRenderObject() as RenderBox?;
     if (renderBox == null) return;
 
