@@ -121,12 +121,12 @@ class UserService {
     final updatedCurrentUser = currentUser.addFriend(otherUserId);
     final updatedOtherUser = otherUser.addFriend(currentUser.id);
 
-    final batch = friendRequestController.createBatch();
+    final batch = friendRequestController.batch;
 
     userController
       ..createOrUpdateInBatch(user: updatedCurrentUser, batch: batch)
       ..createOrUpdateInBatch(user: updatedOtherUser, batch: batch);
-    friendRequestController.deleteSingleInBatch(entity: request, batch: batch);
+    friendRequestController.deleteSingleInBatch(request, batch);
 
     await batch.commit();
   }

@@ -4,9 +4,11 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/model/entity.dart';
 import 'package:remembeer/common/model/value_object.dart';
+import 'package:remembeer/common/util/invariant.dart';
 
 const globalUserId = 'global';
 
+// TODO(ohtenkay): consider makind this a crud controller, Move something to controller
 abstract class Controller<T extends Entity, U extends ValueObject> {
   @protected
   final AuthService authService;
@@ -29,17 +31,10 @@ abstract class Controller<T extends Entity, U extends ValueObject> {
                return fromJson(json.withId(snapshot.id));
              },
              toFirestore: (_, _) =>
-                 throw StateError('Invalid write to read only collection'),
+                 never('Invalid write to read-only collection.'),
            );
 
-  void _assertNotGlobal(T entity) {
-    if (entity.userId == globalUserId) {
-      throw UnsupportedError(
-        'Cannot modify a global entity (${entity.id}) from the app.',
-      );
-    }
-  }
-
+  // TODO(ohtenkay): make this more generic, more specific in subclasses
   Stream<List<T>> get userRelatedEntitiesStream => readCollection
       .where(deletedAtField, isNull: true)
       .where(userIdField, isEqualTo: authService.authenticatedUser.uid)
@@ -72,11 +67,9 @@ abstract class Controller<T extends Entity, U extends ValueObject> {
         .update(entity.toJson().withoutId().withServerUpdateTimestamp());
   }
 
-  WriteBatch createBatch() {
-    return FirebaseFirestore.instance.batch();
-  }
+  WriteBatch get batch => FirebaseFirestore.instance.batch();
 
-  void createSingleInBatch({required U dto, required WriteBatch batch}) {
+  void createSingleInBatch(U dto, WriteBatch batch) {
     final docRef = writeCollection.doc();
     batch.set(
       docRef,
@@ -86,7 +79,7 @@ abstract class Controller<T extends Entity, U extends ValueObject> {
     );
   }
 
-  void updateSingleInBatch({required T entity, required WriteBatch batch}) {
+  void updateSingleInBatch(T entity, WriteBatch batch) {
     _assertNotGlobal(entity);
     final docRef = writeCollection.doc(entity.id);
     batch.update(
@@ -95,12 +88,19 @@ abstract class Controller<T extends Entity, U extends ValueObject> {
     );
   }
 
-  void deleteSingleInBatch({required T entity, required WriteBatch batch}) {
+  void deleteSingleInBatch(T entity, WriteBatch batch) {
     _assertNotGlobal(entity);
     final docRef = writeCollection.doc(entity.id);
     batch.update(
       docRef,
       entity.toJson().withoutId().withServerDeleteTimestamps(),
+    );
+  }
+
+  void _assertNotGlobal(T entity) {
+    invariant(
+      entity.userId != globalUserId,
+      'Cannot modify a global entity (${entity.id}) from the app.',
     );
   }
 }
