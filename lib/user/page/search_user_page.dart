@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -54,7 +55,7 @@ class _SearchUserPageState extends State<SearchUserPage> {
               prefixIcon: Icon(Icons.search),
             ),
           ),
-          const SizedBox(height: 16),
+          gap16,
           Expanded(child: _buildSearchResults()),
         ],
       ),

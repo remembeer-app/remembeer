@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/leaderboard/constants.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
@@ -51,7 +52,7 @@ class _LeaderboardFormState extends State<LeaderboardForm> {
               children: [
                 _buildNameInput(form),
                 if (!widget.isEditing) ...[
-                  const SizedBox(height: 24),
+                  gap24,
                   LeaderboardIconPicker(
                     selectedIcon: _selectedIcon,
                     onIconSelected: (icon) =>

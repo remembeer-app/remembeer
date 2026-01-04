@@ -5,11 +5,10 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-
-const _gap16 = SizedBox(height: 16);
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -49,14 +48,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildCurrentPasswordField(form),
-            _gap16,
+            gap16,
             _buildNewPasswordField(form),
-            const SizedBox(height: 8),
+            gap8,
             PasswordRequirements(password: _newPasswordController.text),
-            _gap16,
+            gap16,
             _buildConfirmPasswordField(form),
             form.buildErrorMessage(),
-            const SizedBox(height: 24),
+            gap24,
             form.buildSubmitButton(
               text: 'Change Password',
               onSubmit: () => _changePassword(context),

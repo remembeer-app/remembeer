@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drag_auto_scroller.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -97,14 +98,14 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
               size: 64,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
-            const SizedBox(height: 16),
+            gap16,
             Text(
               'No drinks logged',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            const SizedBox(height: 8),
+            gap8,
             Text(
               'Tap + to add your first drink',
               style: theme.textTheme.bodyMedium?.copyWith(

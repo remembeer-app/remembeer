@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
@@ -46,12 +47,11 @@ class ProfilePage extends StatelessWidget {
                   user: user,
                   isCurrentUser: isCurrentUser,
                 ),
-                const SizedBox(height: 30),
+                gap30,
                 SocialSection(user: user, isCurrentUser: isCurrentUser),
-                const SizedBox(height: 30),
+                gap30,
                 BadgesSection(user: user),
-                const SizedBox(height: 30),
-
+                gap30,
                 ConsumptionSection(user: user),
               ],
             ),
@@ -72,7 +72,7 @@ class ProfilePage extends StatelessWidget {
           radius: 60,
           backgroundImage: AssetImage('assets/avatars/${user.avatarName}'),
         ),
-        const SizedBox(height: 16),
+        gap16,
         InkWell(
           onTap: isCurrentUser
               ? () {
@@ -85,7 +85,7 @@ class ProfilePage extends StatelessWidget {
               : null,
           child: _buildUsernameLabel(user),
         ),
-        const SizedBox(height: 12),
+        gap12,
         if (isCurrentUser)
           _buildCurrentUserActions(context)
         else

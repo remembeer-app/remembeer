@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/page/add_friends_to_session_page.dart';
@@ -33,7 +34,7 @@ class SessionDivider extends StatelessWidget {
             size: 16,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          const SizedBox(width: 6),
+          hGap6,
           Text(
             session.name,
             style: theme.textTheme.bodyMedium?.copyWith(

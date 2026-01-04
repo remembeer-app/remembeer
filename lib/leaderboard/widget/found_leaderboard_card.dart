@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/leaderboard/constants.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
@@ -38,9 +39,9 @@ class FoundLeaderboardCard extends StatelessWidget {
                       color: theme.colorScheme.onPrimaryContainer,
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  gap12,
                   Text(leaderboard.name, style: theme.textTheme.headlineSmall),
-                  const SizedBox(height: 4),
+                  gap4,
                   Text(
                     '$memberCount ${memberCount == 1 ? 'member' : 'members'}',
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -50,7 +51,7 @@ class FoundLeaderboardCard extends StatelessWidget {
                     ),
                   ),
                   if (isFull) ...[
-                    const SizedBox(height: 4),
+                    gap4,
                     Text(
                       'Leaderboard is full',
                       style: theme.textTheme.bodySmall?.copyWith(
@@ -63,7 +64,7 @@ class FoundLeaderboardCard extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        gap16,
         SizedBox(
           width: 200,
           child: FilledButton.icon(

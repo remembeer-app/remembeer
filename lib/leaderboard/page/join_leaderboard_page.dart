@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/formatter/uppercase_formatter.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -38,9 +39,9 @@ class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
       child: Column(
         children: [
           Form(key: _formKey, child: _buildCodeInput()),
-          const SizedBox(height: 16),
+          gap16,
           _buildSearchButton(),
-          const SizedBox(height: 24),
+          gap24,
           Expanded(child: _buildResult()),
         ],
       ),
@@ -120,7 +121,7 @@ class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
             size: 48,
             color: theme.colorScheme.error.withValues(alpha: 0.7),
           ),
-          const SizedBox(height: 12),
+          gap12,
           Text(
             _errorMessage!,
             style: theme.textTheme.bodyLarge?.copyWith(

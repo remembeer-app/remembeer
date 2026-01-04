@@ -4,15 +4,13 @@ import 'package:remembeer/auth/constants.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
-
-const _gap8 = SizedBox(height: 8);
-const _gap16 = SizedBox(height: 16);
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -55,21 +53,21 @@ class _RegisterPageState extends State<RegisterPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildEmailField(form),
-            _gap16,
+            gap16,
             _buildUsernameField(form),
-            _gap16,
+            gap16,
             _buildPasswordField(form),
-            _gap8,
+            gap8,
             PasswordRequirements(password: _passwordController.text),
-            _gap16,
+            gap16,
             _buildConfirmPasswordField(form),
             form.buildErrorMessage(),
-            const SizedBox(height: 24),
+            gap24,
             form.buildSubmitButton(
               text: 'Create Account',
               onSubmit: () => _register(context),
             ),
-            _gap16,
+            gap16,
             _buildLoginLink(context, form),
           ],
         ),

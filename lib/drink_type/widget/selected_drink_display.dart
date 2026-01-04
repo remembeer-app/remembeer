@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/model/drink_type.dart';
 
@@ -12,7 +13,7 @@ class SelectedDrinkDisplay extends StatelessWidget {
     return Row(
       children: [
         DrinkIcon(category: drinkType.category, size: 24),
-        const SizedBox(width: 12),
+        hGap12,
         Expanded(
           child: Text(
             drinkType.name,

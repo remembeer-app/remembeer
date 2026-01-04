@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -31,9 +32,9 @@ class ManageLeaderboardPage extends StatelessWidget {
           return Column(
             children: [
               _buildHeader(context, currentLeaderboard),
-              const SizedBox(height: 24),
+              gap24,
               _buildMembersSection(context, currentLeaderboard),
-              const SizedBox(height: 16),
+              gap16,
               _buildDeleteButton(context),
             ],
           );
@@ -48,7 +49,7 @@ class ManageLeaderboardPage extends StatelessWidget {
 
     return Column(
       children: [
-        const SizedBox(height: 16),
+        gap16,
         InkWell(
           onTap: () => _showIconPickerDialog(context, currentLeaderboard),
           child: Stack(
@@ -78,7 +79,7 @@ class ManageLeaderboardPage extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        gap16,
         InkWell(
           onTap: () => _navigateToUpdateName(context),
           child: Row(
@@ -88,7 +89,7 @@ class ManageLeaderboardPage extends StatelessWidget {
                 currentLeaderboard.name,
                 style: theme.textTheme.headlineSmall,
               ),
-              const SizedBox(width: 8),
+              hGap8,
               Icon(
                 Icons.edit,
                 size: 20,
@@ -153,7 +154,7 @@ class ManageLeaderboardPage extends StatelessWidget {
           ),
           _buildMembersList(currentLeaderboard),
           if (currentLeaderboard.bannedMemberIds.isNotEmpty) ...[
-            const SizedBox(height: 24),
+            gap24,
             _buildSectionHeader(
               context,
               'Banned (${currentLeaderboard.bannedMemberIds.length})',
