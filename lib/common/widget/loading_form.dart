@@ -16,8 +16,8 @@ class LoadingFormState extends State<LoadingForm> {
   final _formKey = GlobalKey<FormState>();
 
   var _isLoading = false;
-
   bool get isLoading => _isLoading;
+
   String? _errorMessage;
 
   bool validate() => _formKey.currentState!.validate();
