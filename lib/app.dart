@@ -16,7 +16,6 @@ class App extends StatelessWidget {
       title: 'Remembeer',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFD4A017)),
-        useMaterial3: true,
       ),
       home: _buildAuthGate(),
     );
