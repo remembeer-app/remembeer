@@ -25,8 +25,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
       hint:
           'This time defines when a day ends. For example, if set to 6:00 AM '
           'and viewing the 10th, drinks from 10th 6:00 AM to 11th 6:00 AM '
-          'will be shown. This has no effect on statictics or streak '
-          'calculations (they always use midnight as day boundary).',
+          'will be shown. This also determines stats and streak calculations.',
       child: AsyncBuilder(
         future: _userSettingsService.currentUserSettings,
         builder: (context, userSettings) {
