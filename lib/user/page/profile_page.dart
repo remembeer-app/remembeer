@@ -1,27 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import 'package:remembeer/badge/data/badge_definitions.dart';
-import 'package:remembeer/badge/model/badge_definition.dart';
-import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/friend_request/model/friendship_status.dart';
 import 'package:remembeer/friend_request/page/friend_requests_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/page/friends_list_page.dart';
 import 'package:remembeer/user/page/search_user_page.dart';
 import 'package:remembeer/user/service/user_service.dart';
+import 'package:remembeer/user/widget/badges_section.dart';
+import 'package:remembeer/user/widget/consumption_section.dart';
+import 'package:remembeer/user/widget/social_section.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
-import 'package:remembeer/user_stats/model/user_stats.dart';
 import 'package:remembeer/user_stats/service/user_stats_service.dart';
 import 'package:rxdart/rxdart.dart';
-
-const _iconSize = 30.0;
 
 class ProfilePage extends StatelessWidget {
   final String? userId;
@@ -63,17 +56,16 @@ class ProfilePage extends StatelessWidget {
                   isCurrentUser: isCurrentUser,
                 ),
                 const SizedBox(height: 30),
-                _buildTopRow(
-                  context: context,
+                SocialSection(
                   userStats: data.stats,
                   user: data.user,
                   isCurrentUser: isCurrentUser,
                 ),
                 const SizedBox(height: 30),
-                _buildBadgesSection(context, data.user),
+                BadgesSection(user: data.user),
                 const SizedBox(height: 30),
 
-                _buildConsumptionStats(data.stats),
+                ConsumptionSection(userStats: data.stats),
               ],
             ),
           );
@@ -216,337 +208,6 @@ class ProfilePage extends StatelessWidget {
     return Text(
       user.username,
       style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
-    );
-  }
-
-  Widget _buildStatCard({
-    required IconData icon,
-    required Color color,
-    required String value,
-    required String label,
-    VoidCallback? onTap,
-  }) {
-    return Expanded(
-      child: Card(
-        color: Colors.white,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: color, size: 32),
-                const SizedBox(height: 8),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopRow({
-    required BuildContext context,
-    required UserStats userStats,
-    required UserModel user,
-    required bool isCurrentUser,
-  }) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildStatCard(
-          icon: Icons.local_fire_department,
-          color: userStats.isStreakActive
-              ? Colors.orange.shade700
-              : Colors.grey,
-          value: userStats.streakDays.toString(),
-          label: 'Day Streak',
-        ),
-        const SizedBox(width: 12),
-        _buildStatCard(
-          icon: Icons.people_alt,
-          color: Colors.blue.shade700,
-          value: user.friends.length.toString(),
-          label: 'Friends',
-          onTap: () {
-            final route = MaterialPageRoute<void>(
-              builder: (context) => FriendsListPage(userId: user.id),
-            );
-            if (isCurrentUser) {
-              Navigator.of(context).push(route);
-            } else {
-              Navigator.of(context).pushReplacement(route);
-            }
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatTile({
-    required String label,
-    required String value,
-    required Widget icon,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
-      child: Row(
-        children: [
-          icon,
-          const SizedBox(width: 12),
-          Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatSection({
-    required String title,
-    required double beersConsumed,
-    required double alcoholConsumed,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-        ),
-        const Divider(color: Colors.black26, height: 20, thickness: 1),
-        _buildStatTile(
-          label: 'Beers Consumed',
-          value: beersConsumed.toStringAsFixed(1),
-          icon: const DrinkIcon(category: DrinkCategory.beer, size: _iconSize),
-        ),
-        _buildStatTile(
-          label: 'Alcohol Consumed (ml)',
-          value: alcoholConsumed.toStringAsFixed(0),
-          icon: const DrinkIcon(category: DrinkCategory.wine, size: _iconSize),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildConsumptionStats(UserStats userStats) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeading('Consumption Stats'),
-        Card(
-          color: Colors.white,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildStatSection(
-                  title: 'Last 30 Days',
-                  beersConsumed: userStats.beersConsumedLast30Days,
-                  alcoholConsumed: userStats.alcoholConsumedLast30Days,
-                ),
-                const SizedBox(height: 24),
-                _buildStatSection(
-                  title: 'Total Lifetime',
-                  beersConsumed: userStats.totalBeersConsumed,
-                  alcoholConsumed: userStats.totalAlcoholConsumed,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBadgesSection(BuildContext context, UserModel user) {
-    final shownBadges = user.shownBadges;
-
-    if (shownBadges.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildHeading('Badges'),
-        Card(
-          color: Colors.white,
-          child: GridView.builder(
-            shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-            ),
-
-            itemCount: shownBadges.length,
-            itemBuilder: (context, index) {
-              return Center(
-                child: _buildBadgeItem(context, shownBadges[index]),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBadgeItem(BuildContext context, UnlockedBadge unlockedBadge) {
-    final definition = getBadgeById(unlockedBadge.badgeId);
-
-    return InkWell(
-      onTap: () => _showBadgeDetails(context, unlockedBadge, definition),
-      borderRadius: BorderRadius.circular(12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.amber.shade100,
-              border: Border.all(color: Colors.amber.shade700, width: 2),
-            ),
-            child: Image.asset(definition.iconPath, fit: BoxFit.contain),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            definition.name,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showBadgeDetails(
-    BuildContext context,
-    UnlockedBadge unlockedBadge,
-    BadgeDefinition definition,
-  ) {
-    final theme = Theme.of(context);
-
-    showDialog<void>(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: theme.colorScheme.surface,
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.amber.shade100,
-                    border: Border.all(color: Colors.amber.shade700, width: 2),
-                  ),
-                  child: Image.asset(definition.iconPath, fit: BoxFit.contain),
-                ),
-                const SizedBox(height: 20),
-
-                Text(
-                  definition.name,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 12),
-
-                Text(
-                  definition.description,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                if (unlockedBadge.unlockedAt != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Unlocked on ${DateFormat.yMMMd().format(unlockedBadge.unlockedAt!)}',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-                const SizedBox(height: 24),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: const Text('Close'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildHeading(String title) {
-    return Column(
-      children: [
-        Text(
-          title,
-          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-      ],
     );
   }
 }
