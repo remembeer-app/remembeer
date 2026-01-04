@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:remembeer/activity/page/activity_page.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/common/action/notifications.dart';
@@ -11,7 +12,6 @@ import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/page/leaderboards_page.dart';
-import 'package:remembeer/pages/activity_page.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user_settings/page/settings_page.dart';
 
