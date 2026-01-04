@@ -26,13 +26,7 @@ class PageSwitcher extends StatefulWidget {
 }
 
 class _PageSwitcherState extends State<PageSwitcher> {
-  static const platform = MethodChannel('quick_add_action');
-  int _selectedIndex = _drinkPageIndex;
-
-  final _drinkService = get<DrinkService>();
-  final _badgeService = get<BadgeService>();
-  late StreamSubscription<BadgeDefinition> _badgeSubscription;
-
+  var _selectedPageIndex = _drinkPageIndex;
   static final _pages = <Widget>[
     ProfilePage(),
     LeaderboardsPage(),
@@ -41,10 +35,15 @@ class _PageSwitcherState extends State<PageSwitcher> {
     SettingsPage(),
   ];
 
+  final _drinkService = get<DrinkService>();
+  final _badgeService = get<BadgeService>();
+  late StreamSubscription<BadgeDefinition> _badgeSubscription;
+  static const _platform = MethodChannel('quick_add_action');
+
   @override
   void initState() {
     super.initState();
-    platform.setMethodCallHandler(_handleQuickAddAction);
+    _platform.setMethodCallHandler(_handleQuickAddAction);
 
     _badgeSubscription = _badgeService.badgeUnlockedStream.listen((badge) {
       if (mounted) {
@@ -55,7 +54,7 @@ class _PageSwitcherState extends State<PageSwitcher> {
 
   @override
   void dispose() {
-    platform.setMethodCallHandler(null);
+    _platform.setMethodCallHandler(null);
     _badgeSubscription.cancel();
     super.dispose();
   }
@@ -63,22 +62,11 @@ class _PageSwitcherState extends State<PageSwitcher> {
   Future<void> _handleQuickAddAction(MethodCall call) async {
     if (call.method == 'quickAddPressed') {
       await _drinkService.addDefaultDrink();
+      if (!mounted) return;
 
-      if (!mounted) {
-        return;
-      }
-
-      setState(() {
-        _selectedIndex = _drinkPageIndex;
-      });
+      setState(() => _selectedPageIndex = _drinkPageIndex);
       showNotification(context, 'Default drink added!');
     }
-  }
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
   }
 
   @override
@@ -88,7 +76,7 @@ class _PageSwitcherState extends State<PageSwitcher> {
         child: Column(
           children: [
             Expanded(
-              child: IndexedStack(index: _selectedIndex, children: _pages),
+              child: IndexedStack(index: _selectedPageIndex, children: _pages),
             ),
             _buildNavigationBar(context),
           ],
@@ -100,12 +88,12 @@ class _PageSwitcherState extends State<PageSwitcher> {
   BottomNavigationBar _buildNavigationBar(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      currentIndex: _selectedIndex,
+      currentIndex: _selectedPageIndex,
       selectedItemColor: Theme.of(context).colorScheme.primary,
       unselectedItemColor: Colors.grey,
       showSelectedLabels: false,
       showUnselectedLabels: false,
-      onTap: _onItemTapped,
+      onTap: (index) => setState(() => _selectedPageIndex = index),
       items: [
         const BottomNavigationBarItem(
           icon: Icon(Icons.person),
