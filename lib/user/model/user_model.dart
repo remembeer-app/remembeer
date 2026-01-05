@@ -127,8 +127,7 @@ class UserModel {
   }
 
   bool isBadgeUnlocked(String badgeId) {
-    final badge = unlockedBadges[badgeId];
-    return badge != null && badge.unlockedAt != null;
+    return unlockedBadges[badgeId] != null;
   }
 
   UserModel addUnlockedBadge(UnlockedBadge badge) {
