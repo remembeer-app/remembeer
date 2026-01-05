@@ -33,6 +33,10 @@ class UserModel {
     return unlockedBadges.values.where((badge) => badge.isShown).toList();
   }
 
+  List<UnlockedBadge> get allBadges {
+    return unlockedBadges.values.toList();
+  }
+
   static String toSearchable(String input) {
     return removeDiacritics(input).toLowerCase().replaceAll(' ', '');
   }

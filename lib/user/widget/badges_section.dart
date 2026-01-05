@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
+import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 class BadgesSection extends StatelessWidget {
@@ -13,6 +14,7 @@ class BadgesSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shownBadges = user.shownBadges;
+    final allBadges = user.allBadges;
 
     if (shownBadges.isEmpty) {
       return const SizedBox.shrink();
@@ -21,29 +23,46 @@ class BadgesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Badges',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Badges', style: profilePageHeading),
+            if (allBadges.length > shownBadges.length)
+              InkWell(
+                onTap: () => _showAllBadgesDialog(context, allBadges),
+                child: Text(
+                  'See all (${allBadges.length})',
+                  style: TextStyle(
+                    color: Colors.blue.shade700,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+          ],
         ),
+
         const SizedBox(height: 16),
+
         Card(
           color: Colors.white,
-          child: GridView.builder(
-            shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-            ),
-
-            itemCount: shownBadges.length,
-            itemBuilder: (context, index) {
-              return Center(
-                child: _buildBadgeItem(context, shownBadges[index]),
-              );
-            },
-          ),
+          child: _buildBadgesGrid(context, shownBadges),
         ),
       ],
+    );
+  }
+
+  Widget _buildBadgesGrid(BuildContext context, List<UnlockedBadge> badges) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+      ),
+      itemCount: badges.length,
+      itemBuilder: (context, index) {
+        return Center(child: _buildBadgeItem(context, badges[index]));
+      },
     );
   }
 
@@ -71,8 +90,6 @@ class BadgesSection extends StatelessWidget {
           Text(
             definition.name,
             textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
           ),
         ],
@@ -168,6 +185,54 @@ class BadgesSection extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showAllBadgesDialog(
+    BuildContext context,
+    List<UnlockedBadge> allBadges,
+  ) {
+    showDialog<void>(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'All Badges',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: Theme.of(context).colorScheme.outline),
+
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 16),
+                  child: _buildBadgesGrid(context, allBadges),
+                ),
+              ),
+            ],
           ),
         );
       },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user_stats/service/user_stats_service.dart';
 
@@ -13,6 +14,7 @@ class ConsumptionSection extends StatelessWidget {
   ConsumptionSection({super.key, required this.user});
 
   final _userStatsService = get<UserStatsService>();
+
   @override
   Widget build(BuildContext context) {
     final userStats = _userStatsService.fromUser(user);
@@ -20,10 +22,7 @@ class ConsumptionSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Consumption Stats',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-        ),
+        const Text('Consumption Stats', style: profilePageHeading),
         const SizedBox(height: 16),
         Card(
           color: Colors.white,
