@@ -1,5 +1,6 @@
 import 'package:diacritic/diacritic.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
 
@@ -14,6 +15,7 @@ class UserModel {
   final String avatarName;
   final Set<String> friends;
   final Map<String, MonthlyStats> monthlyStats;
+  final Map<String, UnlockedBadge> unlockedBadges;
 
   UserModel({
     required this.id,
@@ -23,6 +25,7 @@ class UserModel {
     this.avatarName = 'jirka_kara.png',
     this.friends = const {},
     this.monthlyStats = const {},
+    this.unlockedBadges = const {},
   }) : searchableUsername = searchableUsername ?? toSearchable(username);
 
   static String toSearchable(String input) {
@@ -39,6 +42,7 @@ class UserModel {
     String? avatarName,
     Set<String>? friends,
     Map<String, MonthlyStats>? monthlyStats,
+    Map<String, UnlockedBadge>? unlockedBadges,
   }) {
     return UserModel(
       id: id,
@@ -50,6 +54,7 @@ class UserModel {
       avatarName: avatarName ?? this.avatarName,
       friends: friends ?? this.friends,
       monthlyStats: monthlyStats ?? this.monthlyStats,
+      unlockedBadges: unlockedBadges ?? this.unlockedBadges,
     );
   }
 
@@ -76,8 +81,7 @@ class UserModel {
 
   DailyStats getDailyStats(int year, int month, int day) {
     final monthlyStats = getMonthlyStats(year, month);
-    return monthlyStats.dailyStats[day] ??
-        DailyStats(day: day, beersConsumed: 0, alcoholConsumedMl: 0);
+    return monthlyStats.dailyStats[day] ?? DailyStats(day: day);
   }
 
   UserModel _updateMonthlyStats(MonthlyStats stats) {
@@ -92,12 +96,14 @@ class UserModel {
     required int day,
     required double beersEquivalent,
     required double alcoholMl,
+    required bool after6pm,
   }) {
     final currentStats = getMonthlyStats(year, month);
     final updatedStats = currentStats.addDrink(
       day: day,
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
+      after6pm: after6pm,
     );
     return _updateMonthlyStats(updatedStats);
   }
@@ -108,13 +114,27 @@ class UserModel {
     required int day,
     required double beersEquivalent,
     required double alcoholMl,
+    required bool after6pm,
   }) {
     final currentStats = getMonthlyStats(year, month);
     final updatedStats = currentStats.removeDrink(
       day: day,
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
+      after6pm: after6pm,
     );
     return _updateMonthlyStats(updatedStats);
+  }
+
+  bool isBadgeUnlocked(String badgeId) {
+    return unlockedBadges[badgeId] != null;
+  }
+
+  UserModel addUnlockedBadge(UnlockedBadge badge) {
+    final updatedUnlockedBadges = Map<String, UnlockedBadge>.from(
+      unlockedBadges,
+    );
+    updatedUnlockedBadges[badge.badgeId] = badge;
+    return copyWith(unlockedBadges: updatedUnlockedBadges);
   }
 }
