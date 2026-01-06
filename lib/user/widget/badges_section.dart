@@ -152,24 +152,23 @@ class BadgesSection extends StatelessWidget {
 
                 gap16,
 
-                if (unlockedBadge.unlockedAt != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Unlocked on ${DateFormat.yMMMd().format(unlockedBadge.unlockedAt!)}',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.bold,
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Unlocked on ${DateFormat.yMMMd().format(unlockedBadge.unlockedAt)}',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
 
                 gap24,
 

@@ -5,12 +5,12 @@ part 'unlocked_badge.g.dart';
 @JsonSerializable()
 class UnlockedBadge {
   final String badgeId;
-  final DateTime? unlockedAt;
+  final DateTime unlockedAt;
   final bool isShown;
 
   const UnlockedBadge({
     required this.badgeId,
-    this.unlockedAt,
+    required this.unlockedAt,
     required this.isShown,
   });
 
