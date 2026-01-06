@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
@@ -23,25 +24,26 @@ class BadgesSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Badges', style: profilePageHeading),
-            if (allBadges.length > shownBadges.length)
-              InkWell(
-                onTap: () => _showAllBadgesDialog(context, allBadges),
-                child: Text(
-                  'See all (${allBadges.length})',
-                  style: TextStyle(
-                    color: Colors.blue.shade700,
-                    fontWeight: FontWeight.w600,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Badges', style: profilePageHeading),
+              if (allBadges.length > shownBadges.length)
+                InkWell(
+                  onTap: () => _showAllBadgesDialog(context, allBadges),
+                  child: Text(
+                    'See all (${allBadges.length})',
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
-
-        const SizedBox(height: 16),
 
         Card(
           color: Colors.white,
@@ -86,7 +88,7 @@ class BadgesSection extends StatelessWidget {
             ),
             child: Image.asset(definition.iconPath, fit: BoxFit.contain),
           ),
-          const SizedBox(height: 8),
+          gap8,
           Text(
             definition.name,
             textAlign: TextAlign.center,
@@ -128,7 +130,7 @@ class BadgesSection extends StatelessWidget {
                   ),
                   child: Image.asset(definition.iconPath, fit: BoxFit.contain),
                 ),
-                const SizedBox(height: 20),
+                gap16,
 
                 Text(
                   definition.name,
@@ -137,7 +139,7 @@ class BadgesSection extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 12),
+                gap12,
 
                 Text(
                   definition.description,
@@ -147,7 +149,8 @@ class BadgesSection extends StatelessWidget {
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 20),
+
+                gap16,
 
                 if (unlockedBadge.unlockedAt != null)
                   Container(
@@ -168,7 +171,7 @@ class BadgesSection extends StatelessWidget {
                     ),
                   ),
 
-                const SizedBox(height: 24),
+                gap24,
 
                 SizedBox(
                   width: double.infinity,

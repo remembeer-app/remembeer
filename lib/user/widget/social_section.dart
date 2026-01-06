@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/page/friends_list_page.dart';
@@ -27,7 +28,7 @@ class SocialSection extends StatelessWidget {
           value: userStats.streakDays.toString(),
           label: 'Day Streak',
         ),
-        const SizedBox(width: 12),
+        hGap12,
         _buildStatCard(
           icon: Icons.people_alt,
           color: Colors.blue.shade700,
@@ -66,7 +67,7 @@ class SocialSection extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(icon, color: color, size: 32),
-                const SizedBox(height: 8),
+                gap8,
                 Text(
                   value,
                   style: const TextStyle(
@@ -74,7 +75,7 @@ class SocialSection extends StatelessWidget {
                     fontWeight: FontWeight.w900,
                   ),
                 ),
-                const SizedBox(height: 4),
+                gap4,
                 Text(
                   label,
                   style: TextStyle(

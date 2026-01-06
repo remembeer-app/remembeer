@@ -37,7 +37,7 @@ class ProfilePage extends StatelessWidget {
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(
               horizontal: 10.0,
-              vertical: 20.0,
+              vertical: 10.0,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -47,11 +47,11 @@ class ProfilePage extends StatelessWidget {
                   user: user,
                   isCurrentUser: isCurrentUser,
                 ),
-                gap30,
+                gap16,
                 SocialSection(user: user, isCurrentUser: isCurrentUser),
-                gap30,
+                gap12,
                 BadgesSection(user: user),
-                gap30,
+                gap12,
                 ConsumptionSection(user: user),
               ],
             ),
@@ -72,7 +72,7 @@ class ProfilePage extends StatelessWidget {
           radius: 60,
           backgroundImage: AssetImage('assets/avatars/${user.avatarName}'),
         ),
-        gap16,
+        gap8,
         InkWell(
           onTap: isCurrentUser
               ? () {
