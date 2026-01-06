@@ -34,7 +34,7 @@ class DrinkService {
 
   Stream<List<Drink>> get drinksForSelectedDateStream {
     return Rx.combineLatest3(
-      drinkController.userRelatedEntitiesStream,
+      drinkController.entitiesStreamForCurrentUser,
       dateService.selectedDateStream,
       userSettingsController.userSettingsStream,
       (drinks, selectedDate, userSettings) {

@@ -1,25 +1,18 @@
-import 'package:remembeer/common/controller/controller.dart';
+import 'package:remembeer/common/controller/crud_controller.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
+import 'package:remembeer/common/extension/query_firestore_helper.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_create.dart';
 
-class LeaderboardController extends Controller<Leaderboard, LeaderboardCreate> {
+class LeaderboardController
+    extends CrudController<Leaderboard, LeaderboardCreate> {
   LeaderboardController({required super.authService})
     : super(collectionPath: 'leaderboards', fromJson: Leaderboard.fromJson);
 
-  Stream<List<Leaderboard>> get myLeaderboardsStream {
-    return readCollection
-        .where(deletedAtField, isNull: true)
-        .where('memberIds', arrayContains: authService.authenticatedUser.uid)
-        .snapshots()
-        .map(
-          (querySnapshot) => List.unmodifiable(
-            querySnapshot.docs
-                .map((docSnapshot) => docSnapshot.data())
-                .toList(),
-          ),
-        );
-  }
+  Stream<List<Leaderboard>> get leaderboardsStreamWhereCurrentUserIsMember =>
+      nonDeletedEntities
+          .where('memberIds', arrayContains: authService.authenticatedUser.uid)
+          .mapToStreamList();
 
   Future<Leaderboard> findById(String id) async {
     final doc = await readCollection.doc(id).get();

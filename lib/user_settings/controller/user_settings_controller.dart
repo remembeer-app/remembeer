@@ -3,6 +3,7 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/user_settings/model/user_settings.dart';
 
+// TODO(ohtenkay): refactor
 class UserSettingsController {
   final AuthService authService;
 

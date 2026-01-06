@@ -237,7 +237,7 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
 
   Widget _buildDrinkTypeList(ScrollController scrollController) {
     return AsyncBuilder(
-      stream: _drinkTypeController.allAvailableDrinkTypesStream,
+      stream: _drinkTypeController.entitiesStreamForCurrentUser,
       builder: (context, unmodifiableDrinkTypes) {
         final drinkTypes = unmodifiableDrinkTypes.toList();
 

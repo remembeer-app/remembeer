@@ -12,7 +12,7 @@ class CustomDrinkTypeList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AsyncBuilder(
-      stream: _drinkTypeController.userRelatedEntitiesStream,
+      stream: _drinkTypeController.entitiesStreamForCurrentUser,
       builder: (builder, customDrinkTypes) {
         return ListView.separated(
           separatorBuilder: (_, _) => const Divider(),
