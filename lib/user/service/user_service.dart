@@ -170,4 +170,10 @@ class UserService {
       },
     );
   }
+
+  Future<void> updateBadgeVisibility(String badgeId, bool isShown) async {
+    final currentUser = await userController.currentUser;
+    final updatedUser = currentUser.updateBadgeVisibility(badgeId, isShown);
+    await userController.createOrUpdateUser(updatedUser);
+  }
 }

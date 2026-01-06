@@ -30,11 +30,13 @@ class UserModel extends Document {
   }) : searchableUsername = searchableUsername ?? toSearchable(username);
 
   List<UnlockedBadge> get shownBadges {
-    return unlockedBadges.values.where((badge) => badge.isShown).toList();
+    return unlockedBadges.values.where((badge) => badge.isShown).toList()
+      ..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
   }
 
   List<UnlockedBadge> get allBadges {
-    return unlockedBadges.values.toList();
+    return unlockedBadges.values.toList()
+      ..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
   }
 
   static String toSearchable(String input) {
@@ -150,6 +152,27 @@ class UserModel extends Document {
       badgeId: badgeId,
       unlockedAt: DateTime.now(),
       isShown: shownBadgesCount < maxBadgesShown,
+    );
+
+    return copyWith(unlockedBadges: updatedUnlockedBadges);
+  }
+
+  UserModel updateBadgeVisibility(String badgeId, bool isShown) {
+    final badge = unlockedBadges[badgeId];
+    if (badge == null) {
+      throw StateError(
+        'Cannot update visibility for badge $badgeId that is not unlocked.',
+      );
+    }
+
+    final updatedUnlockedBadges = Map<String, UnlockedBadge>.from(
+      unlockedBadges,
+    );
+
+    updatedUnlockedBadges[badgeId] = UnlockedBadge(
+      badgeId: badge.badgeId,
+      unlockedAt: badge.unlockedAt,
+      isShown: isShown,
     );
 
     return copyWith(unlockedBadges: updatedUnlockedBadges);
