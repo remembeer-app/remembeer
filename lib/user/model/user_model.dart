@@ -1,6 +1,7 @@
 import 'package:diacritic/diacritic.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
+import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
 
@@ -27,6 +28,14 @@ class UserModel {
     this.monthlyStats = const {},
     this.unlockedBadges = const {},
   }) : searchableUsername = searchableUsername ?? toSearchable(username);
+
+  List<UnlockedBadge> get shownBadges {
+    return unlockedBadges.values.where((badge) => badge.isShown).toList();
+  }
+
+  List<UnlockedBadge> get allBadges {
+    return unlockedBadges.values.toList();
+  }
 
   static String toSearchable(String input) {
     return removeDiacritics(input).toLowerCase().replaceAll(' ', '');
@@ -130,11 +139,18 @@ class UserModel {
     return unlockedBadges[badgeId] != null;
   }
 
-  UserModel addUnlockedBadge(UnlockedBadge badge) {
+  UserModel unlockBadge(String badgeId) {
+    final shownBadgesCount = shownBadges.length;
     final updatedUnlockedBadges = Map<String, UnlockedBadge>.from(
       unlockedBadges,
     );
-    updatedUnlockedBadges[badge.badgeId] = badge;
+
+    updatedUnlockedBadges[badgeId] = UnlockedBadge(
+      badgeId: badgeId,
+      unlockedAt: DateTime.now(),
+      isShown: shownBadgesCount < maxBadgesShown,
+    );
+
     return copyWith(unlockedBadges: updatedUnlockedBadges);
   }
 }
