@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/drink_type/model/drink_type.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
@@ -38,11 +39,7 @@ class _DefaultDrinkPageState extends State<DefaultDrinkPage> {
           return Form(
             key: _formKey,
             child: Column(
-              children: [
-                _buildDrinkTypeDropdown(),
-                const SizedBox(height: 16),
-                _buildVolumeInput(),
-              ],
+              children: [_buildDrinkTypeDropdown(), gap16, _buildVolumeInput()],
             ),
           );
         },

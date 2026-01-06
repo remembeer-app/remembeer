@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
@@ -37,7 +38,7 @@ class EditSessionPage extends StatelessWidget {
             ),
           ),
           if (session.endedAt == null) ...[
-            const SizedBox(height: 16),
+            gap16,
             _buildMarkAsDoneButton(context),
           ],
         ],
@@ -70,7 +71,7 @@ class EditSessionPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('When did the session end?'),
-                  const SizedBox(height: 16),
+                  gap16,
                   InkWell(
                     onTap: () async {
                       final newTime = await _selectDateTime(
@@ -95,7 +96,7 @@ class EditSessionPage extends StatelessWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.access_time),
-                          const SizedBox(width: 12),
+                          hGap12,
                           Text(timeFormat.format(selectedEndTime)),
                           const Spacer(),
                           const Icon(Icons.edit_outlined, size: 18),

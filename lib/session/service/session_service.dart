@@ -28,7 +28,7 @@ class SessionService {
 
   Stream<List<Session>> get mySessionsForSelectedDateStream {
     return Rx.combineLatest3(
-      sessionController.mySessionsStream,
+      sessionController.sessionsStreamWhereCurrentUserIsMember,
       dateService.selectedDateStream,
       userSettingsController.userSettingsStream,
       (sessions, selectedDate, userSettings) {

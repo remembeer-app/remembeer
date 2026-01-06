@@ -34,7 +34,7 @@ class DrinkService {
 
   Stream<List<Drink>> get drinksForSelectedDateStream {
     return Rx.combineLatest3(
-      drinkController.userRelatedEntitiesStream,
+      drinkController.entitiesStreamForCurrentUser,
       dateService.selectedDateStream,
       userSettingsController.userSettingsStream,
       (drinks, selectedDate, userSettings) {
@@ -92,8 +92,8 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
-    final batch = drinkController.createBatch();
-    drinkController.createSingleInBatch(dto: drinkCreate, batch: batch);
+    final batch = drinkController.batch;
+    drinkController.createSingleInBatch(drinkCreate, batch);
     userController.createOrUpdateInBatch(user: user, batch: batch);
     await batch.commit();
   }
@@ -154,8 +154,8 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, newEffectiveDate);
 
-    final batch = drinkController.createBatch();
-    drinkController.updateSingleInBatch(entity: newDrink, batch: batch);
+    final batch = drinkController.batch;
+    drinkController.updateSingleInBatch(newDrink, batch);
     userController.createOrUpdateInBatch(user: user, batch: batch);
     await batch.commit();
   }
@@ -186,8 +186,8 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
-    final batch = drinkController.createBatch();
-    drinkController.deleteSingleInBatch(entity: drink, batch: batch);
+    final batch = drinkController.batch;
+    drinkController.deleteSingleInBatch(drink, batch);
     userController.createOrUpdateInBatch(user: user, batch: batch);
     await batch.commit();
   }

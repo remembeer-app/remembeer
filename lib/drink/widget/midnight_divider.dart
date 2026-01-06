@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/common/constants.dart';
 
 class MidnightDivider extends StatelessWidget {
   final DateTime fromDate;
@@ -33,7 +34,7 @@ class MidnightDivider extends StatelessWidget {
                   size: 16,
                   color: theme.colorScheme.outline,
                 ),
-                const SizedBox(width: 6),
+                hGap6,
                 Text(
                   '${dateFormat.format(lowerDate)} → ${dateFormat.format(higherDate)}',
                   style: theme.textTheme.bodySmall?.copyWith(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 
-// TODO(metju-ac): move to proper location
 class ActivityPage extends StatelessWidget {
   const ActivityPage({super.key});
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink/widget/drink_card.dart';
@@ -116,10 +117,7 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (widget.drinks.isEmpty)
-          const SizedBox(height: 32)
-        else
-          ..._buildDrinkItems(),
+        if (widget.drinks.isEmpty) gap32 else ..._buildDrinkItems(),
         SessionDivider(session: widget.session!),
       ],
     );

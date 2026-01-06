@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 
 class ErrorMessageBox extends StatelessWidget {
-  const ErrorMessageBox({super.key, required this.message});
-
   final String message;
+
+  const ErrorMessageBox({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +19,7 @@ class ErrorMessageBox extends StatelessWidget {
       child: Row(
         children: [
           Icon(Icons.error_outline, color: theme.colorScheme.error),
-          const SizedBox(width: 12),
+          hGap12,
           Expanded(
             child: Text(
               message,

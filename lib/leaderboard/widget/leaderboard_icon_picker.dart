@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
 
 class LeaderboardIconPicker extends StatelessWidget {
@@ -19,7 +20,7 @@ class LeaderboardIconPicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('Icon', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 8),
+        gap8,
         Wrap(
           spacing: 8,
           runSpacing: 8,

@@ -1,26 +1,18 @@
-import 'package:remembeer/common/controller/controller.dart';
-import 'package:remembeer/common/extension/json_firestore_helper.dart';
+import 'package:remembeer/common/controller/crud_controller.dart';
+import 'package:remembeer/common/extension/query_firestore_helper.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
 
-class SessionController extends Controller<Session, SessionCreate> {
+class SessionController extends CrudController<Session, SessionCreate> {
   SessionController({required super.authService})
     : super(collectionPath: 'sessions', fromJson: Session.fromJson);
 
-  Stream<List<Session>> get mySessionsStream {
-    return readCollection
-        .where(deletedAtField, isNull: true)
-        .where('memberIds', arrayContains: authService.authenticatedUser.uid)
-        .snapshots()
-        .map(
-          (querySnapshot) => List.unmodifiable(
-            querySnapshot.docs
-                .map((docSnapshot) => docSnapshot.data())
-                .toList(),
-          ),
-        );
-  }
+  Stream<List<Session>> get sessionsStreamWhereCurrentUserIsMember =>
+      nonDeletedEntities
+          .where('memberIds', arrayContains: authService.authenticatedUser.uid)
+          .mapToStreamList();
 
+  // TODO(ohtenkay): check the usage of this
   Stream<Session> streamFor(String sessionId) {
     return readCollection.doc(sessionId).snapshots().map((snapshot) {
       final data = snapshot.data();

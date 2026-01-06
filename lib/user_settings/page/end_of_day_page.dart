@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user_settings/constants.dart';
@@ -24,8 +25,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
       hint:
           'This time defines when a day ends. For example, if set to 6:00 AM '
           'and viewing the 10th, drinks from 10th 6:00 AM to 11th 6:00 AM '
-          'will be shown. This has no effect on statictics or streak '
-          'calculations (they always use midnight as day boundary).',
+          'will be shown. This also determines stats and streak calculations.',
       child: AsyncBuilder(
         future: _userSettingsService.currentUserSettings,
         builder: (context, userSettings) {
@@ -34,7 +34,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
           return Column(
             children: [
               _buildTimeCard(context),
-              const SizedBox(height: 24),
+              gap24,
               _buildResetButton(context),
             ],
           );
@@ -64,7 +64,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
-              const SizedBox(width: 20),
+              hGap20,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +75,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
                         color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    gap4,
                     Text(
                       _selectedEndOfDayBoundary!.format(context),
                       style: Theme.of(context).textTheme.headlineMedium

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/drink_type/model/drink_type.dart';
@@ -9,7 +10,6 @@ import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/location/page/location_page.dart';
 import 'package:remembeer/location/service/location_service.dart';
 
-const _spacing = SizedBox(height: 16);
 const _defaultPosition = GeoPoint(49.2099, 16.5990);
 
 class DrinkForm extends StatefulWidget {
@@ -76,13 +76,13 @@ class _DrinkFormState extends State<DrinkForm> {
             child: ListView(
               children: [
                 _buildDrinkTypeDropdown(),
-                _spacing,
+                gap16,
                 _buildVolumeInput(form),
-                const SizedBox(height: 8),
+                gap8,
                 _buildPredefinedVolumesRow(),
-                _spacing,
+                gap16,
                 _buildConsumedAtInput(form),
-                _spacing,
+                gap16,
                 _buildLocationInput(form),
               ],
             ),
@@ -122,7 +122,7 @@ class _DrinkFormState extends State<DrinkForm> {
                 : null,
           ),
         ),
-        const SizedBox(height: 8),
+        gap8,
         Row(
           children: [
             Expanded(
@@ -138,7 +138,7 @@ class _DrinkFormState extends State<DrinkForm> {
                 label: const Text('Current location'),
               ),
             ),
-            const SizedBox(width: 8),
+            hGap8,
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: isDisabled ? null : _openLocationPicker,
@@ -267,7 +267,7 @@ class _DrinkFormState extends State<DrinkForm> {
     volumes.forEach((name, volume) {
       buttons
         ..add(_buildVolumeButton(name: name, volume: volume))
-        ..add(const SizedBox(width: 8));
+        ..add(hGap8);
     });
 
     if (buttons.isNotEmpty) {

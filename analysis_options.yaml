@@ -24,7 +24,8 @@ linter:
     avoid_equals_and_hash_code_on_mutable_classes: true
     avoid_escaping_inner_quotes: true
     avoid_final_parameters: true
-    avoid_positional_boolean_parameters: true
+    # TODO(ohtenkay): remove this, check experiemental rules
+    # avoid_positional_boolean_parameters: true
     avoid_print: true
     avoid_private_typedef_functions: true
     avoid_redundant_argument_values: true

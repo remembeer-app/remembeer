@@ -5,6 +5,7 @@ import 'package:remembeer/auth/page/register_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
 import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
@@ -12,10 +13,6 @@ import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
-
-const _gap8 = SizedBox(height: 8);
-const _gap16 = SizedBox(height: 16);
-const _gap24 = SizedBox(height: 24);
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -55,13 +52,13 @@ class _LoginPageState extends State<LoginPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildHeader(theme),
-            const SizedBox(height: 48),
+            gap48,
             _buildFormContent(context, form),
-            _gap24,
+            gap24,
             _buildDivider(theme),
-            _gap24,
+            gap24,
             _buildGoogleSignIn(form),
-            _gap16,
+            gap16,
             _buildRegisterLink(context, form),
           ],
         ),
@@ -77,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
           size: 100,
           color: theme.colorScheme.primary,
         ),
-        _gap8,
+        gap8,
         Text(
           'Remembeer',
           style: theme.textTheme.headlineLarge?.copyWith(
@@ -85,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
             color: theme.colorScheme.primary,
           ),
         ),
-        _gap8,
+        gap8,
         Text(
           'Track your drinks, compete with friends',
           style: theme.textTheme.bodyLarge?.copyWith(
@@ -112,12 +109,12 @@ class _LoginPageState extends State<LoginPage> {
             return null;
           },
         ),
-        _gap16,
+        gap16,
         _buildPasswordField(form),
         form.buildErrorMessage(),
-        _gap8,
+        gap8,
         _buildForgotPassword(context, form),
-        _gap16,
+        gap16,
         form.buildSubmitButton(text: 'Login', onSubmit: _login),
       ],
     );
@@ -227,7 +224,7 @@ class _LoginPageState extends State<LoginPage> {
               const Text(
                 "Enter your email address and we'll send you a link to reset your password.",
               ),
-              _gap16,
+              gap16,
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
