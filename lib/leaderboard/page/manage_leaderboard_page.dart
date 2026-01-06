@@ -198,7 +198,7 @@ class ManageLeaderboardPage extends StatelessWidget {
         final isOwner = userId == ownerId;
 
         return AsyncBuilder<UserModel>(
-          future: _userController.userById(userId),
+          future: _userController.findById(userId),
           builder: (context, user) {
             return MemberCard(
               user: user,
@@ -218,7 +218,7 @@ class ManageLeaderboardPage extends StatelessWidget {
     return Column(
       children: bannedMemberIds.map((userId) {
         return AsyncBuilder<UserModel>(
-          future: _userController.userById(userId),
+          future: _userController.findById(userId),
           builder: (context, user) {
             return BannedMemberCard(
               user: user,

@@ -1,6 +1,7 @@
 import 'package:diacritic/diacritic.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
+import 'package:remembeer/common/model/document.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
@@ -8,8 +9,7 @@ import 'package:remembeer/user/model/monthly_stats.dart';
 part 'user_model.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class UserModel {
-  final String id;
+class UserModel extends Document {
   final String email;
   final String username;
   final String searchableUsername;
@@ -19,7 +19,7 @@ class UserModel {
   final Map<String, UnlockedBadge> unlockedBadges;
 
   UserModel({
-    required this.id,
+    required super.id,
     required this.email,
     required this.username,
     String? searchableUsername,
@@ -44,6 +44,7 @@ class UserModel {
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
 
+  @override
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
   UserModel copyWith({
