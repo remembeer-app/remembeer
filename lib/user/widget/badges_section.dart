@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
+import 'package:remembeer/badge/widget/badge_icon.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
@@ -77,17 +78,7 @@ class BadgesSection extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.amber.shade100,
-              border: Border.all(color: Colors.amber.shade700, width: 2),
-            ),
-            child: Image.asset(definition.iconPath, fit: BoxFit.contain),
-          ),
+          BadgeIcon(badgeDefinition: definition, size: 56, padding: 8),
           gap8,
           Text(
             definition.name,
@@ -119,17 +110,7 @@ class BadgesSection extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.amber.shade100,
-                    border: Border.all(color: Colors.amber.shade700, width: 2),
-                  ),
-                  child: Image.asset(definition.iconPath, fit: BoxFit.contain),
-                ),
+                BadgeIcon(badgeDefinition: definition, size: 100, padding: 12),
                 gap16,
 
                 Text(
