@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/constants.dart';
+import 'package:remembeer/common/widget/drag_state_provider.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink/widget/drink_card.dart';
@@ -11,7 +12,7 @@ import 'package:remembeer/session/widget/session_divider.dart';
 const _sessionBackgroundColor = Color(0x1A4CAF50);
 const _sessionDragOverColor = Color(0x334CAF50);
 const _sessionBorderColor = Color(0x404CAF50);
-const _noSessionMinHeight = 120.0;
+const _noSessionMinHeight = 100.0;
 const _borderRadius = 12.0;
 
 /// A unified widget that displays a group of drinks.
@@ -45,53 +46,63 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
 
   @override
   Widget build(BuildContext context) {
-    return DragTarget<Drink>(
-      onWillAcceptWithDetails: (details) {
-        final willAccept = _shouldAcceptDrink(details.data);
-        if (willAccept && !_isDragOver) {
-          setState(() => _isDragOver = true);
-        }
-        return willAccept;
-      },
-      onLeave: (_) => setState(() => _isDragOver = false),
-      onAcceptWithDetails: (details) async {
-        setState(() => _isDragOver = false);
-        await _drinkService.updateDrinkSession(
-          details.data,
-          widget.session?.id,
-        );
-      },
-      builder: (context, candidateData, rejectedData) {
-        final content = _isSessionMode
-            ? _buildSessionContent()
-            : _buildNoSessionContent();
+    final isDragging = DragStateProvider.maybeOf(context)?.isDragging ?? false;
 
-        final decoration = _isSessionMode
-            ? BoxDecoration(
-                color: _backgroundColor,
-                borderRadius: BorderRadius.circular(_borderRadius),
-                border: Border.all(color: _sessionBorderColor),
-              )
-            : BoxDecoration(color: _backgroundColor);
-
-        if (_isSessionMode) {
-          return Container(
-            width: double.infinity,
-            decoration: decoration,
-            child: content,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: DragTarget<Drink>(
+        onWillAcceptWithDetails: (details) {
+          final willAccept = _shouldAcceptDrink(details.data);
+          if (willAccept && !_isDragOver) {
+            setState(() => _isDragOver = true);
+          }
+          return willAccept;
+        },
+        onLeave: (_) => setState(() => _isDragOver = false),
+        onAcceptWithDetails: (details) async {
+          setState(() => _isDragOver = false);
+          await _drinkService.updateDrinkSession(
+            details.data,
+            widget.session?.id,
           );
-        } else {
-          return ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: widget.minHeight ?? _noSessionMinHeight,
-            ),
-            child: DecoratedBox(
+        },
+        builder: (context, candidateData, rejectedData) {
+          final content = _isSessionMode
+              ? _buildSessionContent()
+              : _buildNoSessionContent();
+
+          final decoration = _isSessionMode
+              ? BoxDecoration(
+                  color: _backgroundColor,
+                  borderRadius: BorderRadius.circular(_borderRadius),
+                  border: Border.all(color: _sessionBorderColor),
+                )
+              : BoxDecoration(
+                  color: _backgroundColor,
+                  borderRadius: BorderRadius.circular(_borderRadius),
+                );
+
+          if (_isSessionMode) {
+            return Container(
+              width: double.infinity,
               decoration: decoration,
-              child: SizedBox(width: double.infinity, child: content),
-            ),
-          );
-        }
-      },
+              child: content,
+            );
+          } else {
+            final effectiveMinHeight = (isDragging && widget.minHeight != null)
+                ? widget.minHeight!
+                : _noSessionMinHeight;
+
+            return ConstrainedBox(
+              constraints: BoxConstraints(minHeight: effectiveMinHeight),
+              child: DecoratedBox(
+                decoration: decoration,
+                child: SizedBox(width: double.infinity, child: content),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -124,7 +135,14 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
   }
 
   Widget _buildNoSessionContent() {
-    return Column(mainAxisSize: MainAxisSize.min, children: _buildDrinkItems());
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ..._buildDrinkItems(),
+        // The floating add drink button overlaps last drink without this space.
+        const SizedBox(height: _noSessionMinHeight),
+      ],
+    );
   }
 
   List<Widget> _buildDrinkItems() {

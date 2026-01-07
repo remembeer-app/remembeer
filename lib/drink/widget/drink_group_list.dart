@@ -81,7 +81,7 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
         DrinkGroupSection(
           session: null,
           drinks: drinksWithoutSession,
-          minHeight: viewportHeight,
+          minHeight: viewportHeight / 2,
         ),
       ],
     );

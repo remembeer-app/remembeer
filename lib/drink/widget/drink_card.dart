@@ -45,6 +45,7 @@ class DrinkCard extends StatelessWidget {
 
   Widget _buildCard(BuildContext context) {
     return Card(
+      clipBehavior: Clip.hardEdge,
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: DrinkIcon(category: drink.drinkType.category),

@@ -13,16 +13,17 @@ class DragStateProvider extends StatefulWidget {
 
   const DragStateProvider({super.key, required this.child});
 
-  /// Returns the [DragStateProviderState] from the closest ancestor.
+  /// Returns the [DragStateProviderState] from the closest ancestor and subscribes to changes.
   static DragStateProviderState of(BuildContext context) {
-    final state = context.findAncestorStateOfType<DragStateProviderState>();
-    assert(state != null, 'No DragStateProvider found in context');
-    return state!;
+    final scope = context.dependOnInheritedWidgetOfExactType<_DragStateScope>();
+    assert(scope != null, 'No DragStateProvider found in context');
+    return scope!.state;
   }
 
   /// Returns the [DragStateProviderState] from the closest ancestor, or null if not found.
   static DragStateProviderState? maybeOf(BuildContext context) {
-    return context.findAncestorStateOfType<DragStateProviderState>();
+    final scope = context.dependOnInheritedWidgetOfExactType<_DragStateScope>();
+    return scope?.state;
   }
 
   @override
@@ -47,6 +48,26 @@ class DragStateProviderState extends State<DragStateProvider> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return _DragStateScope(
+      isDragging: _isDragging,
+      state: this,
+      child: widget.child,
+    );
+  }
+}
+
+class _DragStateScope extends InheritedWidget {
+  final bool isDragging;
+  final DragStateProviderState state;
+
+  const _DragStateScope({
+    required this.isDragging,
+    required this.state,
+    required super.child,
+  });
+
+  @override
+  bool updateShouldNotify(_DragStateScope oldWidget) {
+    return isDragging != oldWidget.isDragging;
   }
 }
