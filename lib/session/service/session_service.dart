@@ -30,7 +30,7 @@ class SessionService {
     return Rx.combineLatest3(
       sessionController.sessionsStreamWhereCurrentUserIsMember,
       dateService.selectedDateStream,
-      userSettingsController.userSettingsStream,
+      userSettingsController.currentUserSettingsStream,
       (sessions, selectedDate, userSettings) {
         final drinkListSort = userSettings.drinkListSort;
         final (startTime, endTime) = dateService.selectedDateBoundaries(

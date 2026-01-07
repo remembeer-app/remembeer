@@ -25,7 +25,7 @@ class UserSettingsService {
   });
 
   Stream<UserSettings> get userSettingsStream =>
-      userSettingsController.userSettingsStream;
+      userSettingsController.currentUserSettingsStream;
 
   Future<UserSettings> get currentUserSettings =>
       userSettingsController.currentUserSettings;
