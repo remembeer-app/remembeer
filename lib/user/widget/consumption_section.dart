@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -22,8 +23,10 @@ class ConsumptionSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Consumption Stats', style: profilePageHeading),
-        const SizedBox(height: 16),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8.0),
+          child: Text('Consumption Stats', style: profilePageHeading),
+        ),
         Card(
           color: Colors.white,
           child: Padding(
@@ -36,7 +39,7 @@ class ConsumptionSection extends StatelessWidget {
                   beersConsumed: userStats.beersConsumedLast30Days,
                   alcoholConsumed: userStats.alcoholConsumedLast30Days,
                 ),
-                const SizedBox(height: 24),
+                gap16,
                 _buildStatSection(
                   title: 'Total Lifetime',
                   beersConsumed: userStats.totalBeersConsumed,

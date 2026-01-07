@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
+import 'package:remembeer/badge/widget/badge_icon.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
@@ -16,38 +18,67 @@ class BadgesSection extends StatelessWidget {
     final shownBadges = user.shownBadges;
     final allBadges = user.allBadges;
 
-    if (shownBadges.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Badges', style: profilePageHeading),
-            if (allBadges.length > shownBadges.length)
-              InkWell(
-                onTap: () => _showAllBadgesDialog(context, allBadges),
-                child: Text(
-                  'See all (${allBadges.length})',
-                  style: TextStyle(
-                    color: Colors.blue.shade700,
-                    fontWeight: FontWeight.w600,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Badges', style: profilePageHeading),
+              if (allBadges.length > shownBadges.length)
+                InkWell(
+                  onTap: () => _showAllBadgesDialog(context, allBadges),
+                  child: Text(
+                    'See all (${allBadges.length})',
+                    style: TextStyle(
+                      color: Colors.blue.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
-
-        const SizedBox(height: 16),
 
         Card(
           color: Colors.white,
-          child: _buildBadgesGrid(context, shownBadges),
+          child: shownBadges.isEmpty
+              ? _buildEmptyState(context)
+              : _buildBadgesGrid(context, shownBadges),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        children: [
+          Icon(
+            Icons.emoji_events_outlined,
+            size: 48,
+            color: Colors.grey.shade300,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No badges yet',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Let's drink to unlock them!",
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+          ),
+        ],
+      ),
     );
   }
 
@@ -75,18 +106,8 @@ class BadgesSection extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.amber.shade100,
-              border: Border.all(color: Colors.amber.shade700, width: 2),
-            ),
-            child: Image.asset(definition.iconPath, fit: BoxFit.contain),
-          ),
-          const SizedBox(height: 8),
+          BadgeIcon(badgeDefinition: definition, size: 56, padding: 8),
+          gap8,
           Text(
             definition.name,
             textAlign: TextAlign.center,
@@ -117,18 +138,8 @@ class BadgesSection extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.amber.shade100,
-                    border: Border.all(color: Colors.amber.shade700, width: 2),
-                  ),
-                  child: Image.asset(definition.iconPath, fit: BoxFit.contain),
-                ),
-                const SizedBox(height: 20),
+                BadgeIcon(badgeDefinition: definition, size: 100, padding: 12),
+                gap16,
 
                 Text(
                   definition.name,
@@ -137,7 +148,7 @@ class BadgesSection extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 12),
+                gap12,
 
                 Text(
                   definition.description,
@@ -147,28 +158,28 @@ class BadgesSection extends StatelessWidget {
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 20),
 
-                if (unlockedBadge.unlockedAt != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Unlocked on ${DateFormat.yMMMd().format(unlockedBadge.unlockedAt!)}',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.bold,
-                      ),
+                gap16,
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    'Unlocked on ${DateFormat.yMMMd().format(unlockedBadge.unlockedAt)}',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
+                ),
 
-                const SizedBox(height: 24),
+                gap24,
 
                 SizedBox(
                   width: double.infinity,

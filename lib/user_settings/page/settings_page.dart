@@ -4,6 +4,7 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink_type/page/custom_drink_types_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
 import 'package:remembeer/user_settings/page/default_drink_page.dart';
 import 'package:remembeer/user_settings/page/drink_list_sort_page.dart';
 import 'package:remembeer/user_settings/page/end_of_day_page.dart';
@@ -132,6 +133,12 @@ class SettingsPage extends StatelessWidget {
             destinationPage: const ChangePasswordPage(),
           ),
         ],
+        _divider,
+        _buildSettingsCard(
+          context: context,
+          title: 'Badge visibility',
+          destinationPage: const BadgeVisibilityPage(),
+        ),
       ],
     );
   }
