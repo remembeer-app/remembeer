@@ -18,10 +18,6 @@ class BadgesSection extends StatelessWidget {
     final shownBadges = user.shownBadges;
     final allBadges = user.allBadges;
 
-    if (shownBadges.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -48,9 +44,41 @@ class BadgesSection extends StatelessWidget {
 
         Card(
           color: Colors.white,
-          child: _buildBadgesGrid(context, shownBadges),
+          child: shownBadges.isEmpty
+              ? _buildEmptyState(context)
+              : _buildBadgesGrid(context, shownBadges),
         ),
       ],
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24.0),
+      child: Column(
+        children: [
+          Icon(
+            Icons.emoji_events_outlined,
+            size: 48,
+            color: Colors.grey.shade300,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'No badges yet',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Let's drink to unlock them!",
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
+          ),
+        ],
+      ),
     );
   }
 
