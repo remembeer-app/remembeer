@@ -11,15 +11,4 @@ class SessionController extends CrudController<Session, SessionCreate> {
       nonDeletedEntities
           .where('memberIds', arrayContains: authService.authenticatedUser.uid)
           .mapToStreamList();
-
-  // TODO(ohtenkay): check the usage of this
-  Stream<Session> streamFor(String sessionId) {
-    return readCollection.doc(sessionId).snapshots().map((snapshot) {
-      final data = snapshot.data();
-      if (data == null) {
-        throw StateError('Session $sessionId not found');
-      }
-      return data;
-    });
-  }
 }
