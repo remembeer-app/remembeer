@@ -77,7 +77,10 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
                   borderRadius: BorderRadius.circular(_borderRadius),
                   border: Border.all(color: _sessionBorderColor),
                 )
-              : BoxDecoration(color: _backgroundColor);
+              : BoxDecoration(
+                  color: _backgroundColor,
+                  borderRadius: BorderRadius.circular(_borderRadius),
+                );
 
           if (_isSessionMode) {
             return Container(
