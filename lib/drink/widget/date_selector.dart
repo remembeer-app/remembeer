@@ -17,13 +17,19 @@ class DateSelector extends StatelessWidget {
       stream: _dateService.selectedDateStream,
       builder: (context, datetime) {
         final isToday = _dateService.isToday;
+        final theme = Theme.of(context);
 
         return Card(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           elevation: 0,
-          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          color: theme.colorScheme.surfaceContainerHighest,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(color: theme.colorScheme.outlineVariant),
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: InkWell(
             onTap: () => _showDatePicker(context, datetime),
+            borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: const EdgeInsets.all(4),
               child: GestureDetector(

@@ -44,6 +44,7 @@ class MonthSelector extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
                 ),
                 child: Text(
                   selectedMonth.displayName,
