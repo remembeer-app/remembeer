@@ -48,55 +48,58 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
   Widget build(BuildContext context) {
     final isDragging = DragStateProvider.maybeOf(context)?.isDragging ?? false;
 
-    return DragTarget<Drink>(
-      onWillAcceptWithDetails: (details) {
-        final willAccept = _shouldAcceptDrink(details.data);
-        if (willAccept && !_isDragOver) {
-          setState(() => _isDragOver = true);
-        }
-        return willAccept;
-      },
-      onLeave: (_) => setState(() => _isDragOver = false),
-      onAcceptWithDetails: (details) async {
-        setState(() => _isDragOver = false);
-        await _drinkService.updateDrinkSession(
-          details.data,
-          widget.session?.id,
-        );
-      },
-      builder: (context, candidateData, rejectedData) {
-        final content = _isSessionMode
-            ? _buildSessionContent()
-            : _buildNoSessionContent();
-
-        final decoration = _isSessionMode
-            ? BoxDecoration(
-                color: _backgroundColor,
-                borderRadius: BorderRadius.circular(_borderRadius),
-                border: Border.all(color: _sessionBorderColor),
-              )
-            : BoxDecoration(color: _backgroundColor);
-
-        if (_isSessionMode) {
-          return Container(
-            width: double.infinity,
-            decoration: decoration,
-            child: content,
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: DragTarget<Drink>(
+        onWillAcceptWithDetails: (details) {
+          final willAccept = _shouldAcceptDrink(details.data);
+          if (willAccept && !_isDragOver) {
+            setState(() => _isDragOver = true);
+          }
+          return willAccept;
+        },
+        onLeave: (_) => setState(() => _isDragOver = false),
+        onAcceptWithDetails: (details) async {
+          setState(() => _isDragOver = false);
+          await _drinkService.updateDrinkSession(
+            details.data,
+            widget.session?.id,
           );
-        } else {
-          final effectiveMinHeight = (isDragging && widget.minHeight != null)
-              ? widget.minHeight!
-              : _noSessionMinHeight;
+        },
+        builder: (context, candidateData, rejectedData) {
+          final content = _isSessionMode
+              ? _buildSessionContent()
+              : _buildNoSessionContent();
 
-          return ConstrainedBox(
-            constraints: BoxConstraints(minHeight: effectiveMinHeight),
-            child: DecoratedBox(
+          final decoration = _isSessionMode
+              ? BoxDecoration(
+                  color: _backgroundColor,
+                  borderRadius: BorderRadius.circular(_borderRadius),
+                  border: Border.all(color: _sessionBorderColor),
+                )
+              : BoxDecoration(color: _backgroundColor);
+
+          if (_isSessionMode) {
+            return Container(
+              width: double.infinity,
               decoration: decoration,
-              child: SizedBox(width: double.infinity, child: content),
-            ),
-          );
-        }
-      },
+              child: content,
+            );
+          } else {
+            final effectiveMinHeight = (isDragging && widget.minHeight != null)
+                ? widget.minHeight!
+                : _noSessionMinHeight;
+
+            return ConstrainedBox(
+              constraints: BoxConstraints(minHeight: effectiveMinHeight),
+              child: DecoratedBox(
+                decoration: decoration,
+                child: SizedBox(width: double.infinity, child: content),
+              ),
+            );
+          }
+        },
+      ),
     );
   }
 
