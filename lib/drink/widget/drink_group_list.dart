@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drag_auto_scroller.dart';
+import 'package:remembeer/common/widget/drag_state_provider.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/model/drink_list_data.dart';
 import 'package:remembeer/drink/service/drink_list_service.dart';
@@ -37,15 +38,17 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
         return Expanded(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              return DragAutoScroller(
-                scrollController: _scrollController,
-                child: SingleChildScrollView(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+              return DragStateProvider(
+                child: DragAutoScroller(
+                  scrollController: _scrollController,
+                  child: SingleChildScrollView(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    child: _buildContent(data, constraints.maxHeight),
                   ),
-                  child: _buildContent(data, constraints.maxHeight),
                 ),
               );
             },
