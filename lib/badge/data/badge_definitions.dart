@@ -1,6 +1,7 @@
 import 'package:remembeer/badge/data/onetime_badge_id.dart';
 import 'package:remembeer/badge/model/badge_category.dart';
 import 'package:remembeer/badge/model/badge_definition.dart';
+import 'package:remembeer/common/util/invariant.dart';
 
 // TODO(metju-ac): Add real icons. Also consider defining colors for badges.
 final _badgeDefinitions = <BadgeDefinition>[
@@ -87,6 +88,6 @@ List<BadgeDefinition> getBadgesByCategory(BadgeCategory category) {
 BadgeDefinition getBadgeById(String id) {
   return _badgeDefinitions.firstWhere(
     (badge) => badge.id == id,
-    orElse: () => throw StateError('BadgeDefinition with ID "$id" not found.'),
+    orElse: () => never('BadgeDefinition with id $id not found.'),
   );
 }
