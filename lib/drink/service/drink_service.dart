@@ -36,7 +36,7 @@ class DrinkService {
     return Rx.combineLatest3(
       drinkController.entitiesStreamForCurrentUser,
       dateService.selectedDateStream,
-      userSettingsController.userSettingsStream,
+      userSettingsController.currentUserSettingsStream,
       (drinks, selectedDate, userSettings) {
         final drinkListSort = userSettings.drinkListSort;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
@@ -94,7 +94,7 @@ class DrinkService {
 
     final batch = drinkController.batch;
     drinkController.createSingleInBatch(drinkCreate, batch);
-    userController.createOrUpdateInBatch(user: user, batch: batch);
+    userController.createOrUpdateUserInBatch(user: user, batch: batch);
     await batch.commit();
   }
 
@@ -156,7 +156,7 @@ class DrinkService {
 
     final batch = drinkController.batch;
     drinkController.updateSingleInBatch(newDrink, batch);
-    userController.createOrUpdateInBatch(user: user, batch: batch);
+    userController.createOrUpdateUserInBatch(user: user, batch: batch);
     await batch.commit();
   }
 
@@ -188,7 +188,7 @@ class DrinkService {
 
     final batch = drinkController.batch;
     drinkController.deleteSingleInBatch(drink, batch);
-    userController.createOrUpdateInBatch(user: user, batch: batch);
+    userController.createOrUpdateUserInBatch(user: user, batch: batch);
     await batch.commit();
   }
 

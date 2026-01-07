@@ -23,10 +23,10 @@ class UserService {
 
   Stream<UserModel> get currentUserStream => userController.currentUserStream;
 
-  Future<UserModel> userById(String userId) => userController.userById(userId);
+  Future<UserModel> userById(String userId) => userController.findById(userId);
 
   Stream<UserModel> userStreamFor(String userId) =>
-      userController.userStreamFor(userId);
+      userController.streamById(userId);
 
   Future<List<UserModel>> searchUsersByUsernameOrEmail(String query) async {
     final trimmedQuery = query.trim();
@@ -41,13 +41,13 @@ class UserService {
       friendRequestController.pendingFriendRequests();
 
   Stream<List<UserModel>> friendsFor(String userId) {
-    return userController.userStreamFor(userId).switchMap((user) {
+    return userController.streamById(userId).switchMap((user) {
       if (user.friends.isEmpty) {
         return Stream.value([]);
       }
 
       final friendStreams = user.friends
-          .map(userController.userStreamFor)
+          .map(userController.streamById)
           .toList();
 
       return Rx.combineLatestList(friendStreams);
@@ -116,7 +116,7 @@ class UserService {
     }
 
     final currentUser = await userController.currentUser;
-    final otherUser = await userController.userById(otherUserId);
+    final otherUser = await userController.findById(otherUserId);
 
     final updatedCurrentUser = currentUser.addFriend(otherUserId);
     final updatedOtherUser = otherUser.addFriend(currentUser.id);
@@ -124,8 +124,8 @@ class UserService {
     final batch = friendRequestController.batch;
 
     userController
-      ..createOrUpdateInBatch(user: updatedCurrentUser, batch: batch)
-      ..createOrUpdateInBatch(user: updatedOtherUser, batch: batch);
+      ..createOrUpdateUserInBatch(user: updatedCurrentUser, batch: batch)
+      ..createOrUpdateUserInBatch(user: updatedOtherUser, batch: batch);
     friendRequestController.deleteSingleInBatch(request, batch);
 
     await batch.commit();
@@ -137,16 +137,16 @@ class UserService {
 
   Future<void> removeFriend(String otherUserId) async {
     final currentUser = await userController.currentUser;
-    final otherUser = await userController.userById(otherUserId);
+    final otherUser = await userController.findById(otherUserId);
 
     final updatedCurrentUser = currentUser.removeFriend(otherUserId);
     final updatedOtherUser = otherUser.removeFriend(currentUser.id);
 
-    final batch = userController.createBatch();
+    final batch = userController.batch;
 
     userController
-      ..createOrUpdateInBatch(user: updatedCurrentUser, batch: batch)
-      ..createOrUpdateInBatch(user: updatedOtherUser, batch: batch);
+      ..createOrUpdateUserInBatch(user: updatedCurrentUser, batch: batch)
+      ..createOrUpdateUserInBatch(user: updatedOtherUser, batch: batch);
 
     await batch.commit();
   }

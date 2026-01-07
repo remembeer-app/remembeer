@@ -30,7 +30,7 @@ class SessionService {
     return Rx.combineLatest3(
       sessionController.sessionsStreamWhereCurrentUserIsMember,
       dateService.selectedDateStream,
-      userSettingsController.userSettingsStream,
+      userSettingsController.currentUserSettingsStream,
       (sessions, selectedDate, userSettings) {
         final drinkListSort = userSettings.drinkListSort;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
@@ -95,7 +95,7 @@ class SessionService {
   }
 
   Stream<List<UserModel>> sessionMembersStream(String sessionId) {
-    return sessionController.streamFor(sessionId).switchMap((session) {
+    return sessionController.streamById(sessionId).switchMap((session) {
       if (session.memberIds.isEmpty) {
         return Stream.value(<UserModel>[]);
       }
@@ -109,7 +109,7 @@ class SessionService {
 
   Stream<List<UserModel>> availableFriendsForSessionStream(String sessionId) {
     return Rx.combineLatest2(
-      sessionController.streamFor(sessionId),
+      sessionController.streamById(sessionId),
       userService.friendsFor(currentUserId),
       (session, friends) {
         return friends
@@ -123,7 +123,7 @@ class SessionService {
     required String sessionId,
     required String memberId,
   }) async {
-    final session = await sessionController.streamFor(sessionId).first;
+    final session = await sessionController.streamById(sessionId).first;
     final updatedMemberIds = Set<String>.from(session.memberIds)..add(memberId);
     final updatedSession = session.copyWith(memberIds: updatedMemberIds);
     await sessionController.updateSingle(updatedSession);

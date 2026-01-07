@@ -272,7 +272,7 @@ class LeaderboardService {
       return Stream.value([]);
     }
 
-    final userStreams = memberIds.map(userController.userStreamFor);
+    final userStreams = memberIds.map(userController.streamById);
 
     return Rx.combineLatestList(userStreams).map((users) {
       final entries = users.map((user) {

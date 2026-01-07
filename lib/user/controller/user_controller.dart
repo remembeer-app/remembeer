@@ -1,76 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/common/extension/json_firestore_helper.dart';
+import 'package:remembeer/common/controller/controller.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
-// TODO(ohtenkay): refactor
-class UserController {
+class UserController extends Controller<UserModel> {
   final AuthService authService;
 
-  UserController({required this.authService});
+  UserController({required this.authService})
+    : super(collectionPath: 'users', fromJson: UserModel.fromJson);
 
-  final _userCollection = FirebaseFirestore.instance
-      .collection('users')
-      .withConverter(
-        fromFirestore: (snapshot, _) {
-          final json = snapshot.data() ?? {};
-          return UserModel.fromJson(json.withId(snapshot.id));
-        },
-        toFirestore: (value, _) => value.toJson().withoutId(),
-      );
+  Future<UserModel> get currentUser async =>
+      findById(authService.authenticatedUser.uid);
 
-  Stream<UserModel> get currentUserStream => _userCollection
-      .doc(authService.authenticatedUser.uid)
-      .snapshots()
-      .map((docSnapshot) {
-        final data = docSnapshot.data();
-        if (data == null) {
-          throw StateError(
-            'User not found for user ${authService.authenticatedUser.uid}',
-          );
-        }
-        return data;
-      });
-
-  Future<UserModel> userById(String userId) async {
-    final doc = await _userCollection.doc(userId).get();
-
-    final data = doc.data();
-    if (data == null) {
-      throw StateError('User not found for user $userId');
-    }
-
-    return data;
-  }
-
-  Stream<UserModel> userStreamFor(String userId) =>
-      _userCollection.doc(userId).snapshots().map((docSnapshot) {
-        final data = docSnapshot.data();
-        if (data == null) {
-          throw StateError('User not found for user $userId');
-        }
-        return data;
-      });
-
-  Future<UserModel> get currentUser async {
-    final doc = await _userCollection
-        .doc(authService.authenticatedUser.uid)
-        .get();
-
-    final data = doc.data();
-    if (data == null) {
-      throw StateError(
-        'User not found for user ${authService.authenticatedUser.uid}',
-      );
-    }
-
-    return data;
-  }
+  Stream<UserModel> get currentUserStream =>
+      streamById(authService.authenticatedUser.uid);
 
   Future<List<UserModel>> searchUsersByUsernameOrEmail(String query) async {
     final searchableQuery = UserModel.toSearchable(query);
 
-    final usernameQuery = _userCollection
+    final usernameQuery = readCollection
         .where('searchableUsername', isGreaterThanOrEqualTo: searchableQuery)
         .where(
           'searchableUsername',
@@ -80,7 +29,7 @@ class UserController {
         .get();
 
     final emailQueryLower = query.toLowerCase();
-    final emailQuery = _userCollection
+    final emailQuery = readCollection
         .where('email', isGreaterThanOrEqualTo: emailQueryLower)
         .where('email', isLessThanOrEqualTo: '$emailQueryLower\uf8ff')
         .limit(10)
@@ -102,25 +51,21 @@ class UserController {
   }
 
   Future<void> createOrUpdateUser(UserModel user) {
-    if (user.id != authService.authenticatedUser.uid) {
-      throw StateError(
-        'User id (${user.id}) does not match authenticated user id '
-        '(${authService.authenticatedUser.uid}).',
-      );
-    }
+    final userId = user.id;
+    final authenticatedUserId = authService.authenticatedUser.uid;
+    invariant(
+      userId == authenticatedUserId,
+      'User id $userId must match authenticated user id $authenticatedUserId.',
+    );
 
-    return _userCollection.doc(user.id).set(user);
+    return writeCollection.doc(userId).set(user.toJson());
   }
 
-  WriteBatch createBatch() {
-    return FirebaseFirestore.instance.batch();
-  }
-
-  void createOrUpdateInBatch({
+  void createOrUpdateUserInBatch({
     required UserModel user,
     required WriteBatch batch,
   }) {
-    final docRef = _userCollection.doc(user.id);
-    batch.set(docRef, user);
+    final docRef = writeCollection.doc(user.id);
+    batch.set(docRef, user.toJson());
   }
 }

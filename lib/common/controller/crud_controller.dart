@@ -10,7 +10,7 @@ import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/constants.dart';
 
 abstract class CrudController<T extends Entity, U extends ValueObject>
-    extends Controller<T, U> {
+    extends Controller<T> {
   @protected
   final AuthService authService;
 
@@ -19,6 +19,21 @@ abstract class CrudController<T extends Entity, U extends ValueObject>
     required super.collectionPath,
     required super.fromJson,
   });
+
+  @override
+  Future<T> findById(String id) async {
+    final entity = await super.findById(id);
+    invariant(entity.deletedAt == null, '$T with id $id has been deleted.');
+    return entity;
+  }
+
+  @override
+  Stream<T> streamById(String id) {
+    return super.streamById(id).map((entity) {
+      invariant(entity.deletedAt == null, '$T with id $id has been deleted.');
+      return entity;
+    });
+  }
 
   Stream<List<T>> get entitiesStreamForCurrentUser => nonDeletedEntities
       .where(userIdField, isEqualTo: authService.authenticatedUser.uid)

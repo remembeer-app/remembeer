@@ -1,9 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/controller/crud_controller.dart';
+import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/extension/query_firestore_helper.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/friend_request/model/friend_request_create.dart';
+
+const toUserIdField = 'toUserId';
 
 class FriendRequestController
     extends CrudController<FriendRequest, FriendRequestCreate> {
@@ -14,7 +17,7 @@ class FriendRequestController
       );
 
   Stream<List<FriendRequest>> pendingFriendRequests() => nonDeletedEntities
-      .where('toUserId', isEqualTo: authService.authenticatedUser.uid)
+      .where(toUserIdField, isEqualTo: authService.authenticatedUser.uid)
       .mapToStreamList();
 
   Stream<FriendRequest?> getRequestBetween(String otherUserId) {
@@ -23,12 +26,12 @@ class FriendRequestController
         .where(
           Filter.or(
             Filter.and(
-              Filter('userId', isEqualTo: currentUserId),
-              Filter('toUserId', isEqualTo: otherUserId),
+              Filter(userIdField, isEqualTo: currentUserId),
+              Filter(toUserIdField, isEqualTo: otherUserId),
             ),
             Filter.and(
-              Filter('userId', isEqualTo: otherUserId),
-              Filter('toUserId', isEqualTo: currentUserId),
+              Filter(userIdField, isEqualTo: otherUserId),
+              Filter(toUserIdField, isEqualTo: currentUserId),
             ),
           ),
         )
