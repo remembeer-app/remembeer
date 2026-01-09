@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
@@ -174,6 +175,19 @@ class UserService {
   Future<void> updateBadgeVisibility(String badgeId, bool isShown) async {
     final currentUser = await userController.currentUser;
     final updatedUser = currentUser.updateBadgeVisibility(badgeId, isShown);
+    await userController.createOrUpdateUser(updatedUser);
+  }
+
+  Future<void> updateEndOfDayBoundary(TimeOfDay endOfDayBoundary) async {
+    final currentUser = await userController.currentUser;
+    if (currentUser.endOfDayBoundary == endOfDayBoundary) {
+      return;
+    }
+
+    final updatedUser = currentUser.copyWith(
+      endOfDayBoundary: endOfDayBoundary,
+    );
+
     await userController.createOrUpdateUser(updatedUser);
   }
 }
