@@ -34,14 +34,15 @@ class DrinkService {
   });
 
   Stream<List<Drink>> get drinksForSelectedDateStream {
-    return Rx.combineLatest3(
+    return Rx.combineLatest4(
       drinkController.entitiesStreamForCurrentUser,
       dateService.selectedDateStateStream,
       userSettingsController.currentUserSettingsStream,
-      (drinks, _, userSettings) {
+      userController.currentUserStream,
+      (drinks, _, userSettings, user) {
         final drinkListSort = userSettings.drinkListSort;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
-          userSettings.endOfDayBoundary,
+          user.endOfDayBoundary,
         );
 
         final filtered = drinks
@@ -244,8 +245,8 @@ class DrinkService {
   }
 
   Future<DateTime> _effectiveDate(DateTime consumedAt) async {
-    final userSettings = await userSettingsController.currentUserSettings;
-    final endOfDayBoundary = userSettings.endOfDayBoundary;
+    final user = await userController.currentUser;
+    final endOfDayBoundary = user.endOfDayBoundary;
 
     return effectiveDate(consumedAt, endOfDayBoundary);
   }

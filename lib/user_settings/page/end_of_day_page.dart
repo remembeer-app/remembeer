@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/user_settings/constants.dart';
-import 'package:remembeer/user_settings/service/user_settings_service.dart';
+import 'package:remembeer/user/constants.dart';
+import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user_settings/widget/settings_page_template.dart';
 
 class EndOfDayPage extends StatefulWidget {
@@ -14,7 +14,7 @@ class EndOfDayPage extends StatefulWidget {
 }
 
 class _EndOfDayPageState extends State<EndOfDayPage> {
-  final _userSettingsService = get<UserSettingsService>();
+  final _userService = get<UserService>();
 
   TimeOfDay? _selectedEndOfDayBoundary;
 
@@ -27,9 +27,9 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
           'and viewing the 10th, drinks from 10th 6:00 AM to 11th 6:00 AM '
           'will be shown. This also determines stats and streak calculations.',
       child: AsyncBuilder(
-        future: _userSettingsService.currentUserSettings,
-        builder: (context, userSettings) {
-          _selectedEndOfDayBoundary ??= userSettings.endOfDayBoundary;
+        future: _userService.currentUser,
+        builder: (context, user) {
+          _selectedEndOfDayBoundary ??= user.endOfDayBoundary;
 
           return Column(
             children: [
@@ -125,6 +125,6 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
       _selectedEndOfDayBoundary = value;
     });
 
-    await _userSettingsService.updateEndOfDayBoundary(value);
+    await _userService.updateEndOfDayBoundary(value);
   }
 }

@@ -1,10 +1,12 @@
 import 'package:diacritic/diacritic.dart';
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/common/model/document.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
+import 'package:remembeer/user/model/time_of_day_converter.dart';
 
 part 'user_model.g.dart';
 
@@ -17,6 +19,8 @@ class UserModel extends Document {
   final Set<String> friends;
   final Map<String, MonthlyStats> monthlyStats;
   final Map<String, UnlockedBadge> unlockedBadges;
+  @TimeOfDayConverter()
+  final TimeOfDay endOfDayBoundary;
 
   UserModel({
     required super.id,
@@ -27,6 +31,7 @@ class UserModel extends Document {
     this.friends = const {},
     this.monthlyStats = const {},
     this.unlockedBadges = const {},
+    this.endOfDayBoundary = defaultEndOfDayBoundary,
   }) : searchableUsername = searchableUsername ?? toSearchable(username);
 
   List<UnlockedBadge> get shownBadges {
@@ -55,6 +60,7 @@ class UserModel extends Document {
     Set<String>? friends,
     Map<String, MonthlyStats>? monthlyStats,
     Map<String, UnlockedBadge>? unlockedBadges,
+    TimeOfDay? endOfDayBoundary,
   }) {
     return UserModel(
       id: id,
@@ -67,6 +73,7 @@ class UserModel extends Document {
       friends: friends ?? this.friends,
       monthlyStats: monthlyStats ?? this.monthlyStats,
       unlockedBadges: unlockedBadges ?? this.unlockedBadges,
+      endOfDayBoundary: endOfDayBoundary ?? this.endOfDayBoundary,
     );
   }
 

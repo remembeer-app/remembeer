@@ -57,9 +57,7 @@ class IoCContainer {
 
   static void _registerServices() {
     get
-      ..registerSingleton(
-        DateService(userSettingsController: get<UserSettingsController>()),
-      )
+      ..registerSingleton(DateService(userController: get<UserController>()))
       ..registerSingleton(
         DrinkService(
           drinkController: get<DrinkController>(),

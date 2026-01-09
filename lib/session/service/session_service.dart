@@ -27,14 +27,15 @@ class SessionService {
   String get currentUserId => authService.authenticatedUser.uid;
 
   Stream<List<Session>> get mySessionsForSelectedDateStream {
-    return Rx.combineLatest3(
+    return Rx.combineLatest4(
       sessionController.sessionsStreamWhereCurrentUserIsMember,
       dateService.selectedDateStateStream,
       userSettingsController.currentUserSettingsStream,
-      (sessions, _, userSettings) {
+      userService.currentUserStream,
+      (sessions, _, userSettings, user) {
         final drinkListSort = userSettings.drinkListSort;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
-          userSettings.endOfDayBoundary,
+          user.endOfDayBoundary,
         );
 
         final filtered = sessions.where((session) {

@@ -26,6 +26,11 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
             MapEntry(k, UnlockedBadge.fromJson(e as Map<String, dynamic>)),
       ) ??
       const {},
+  endOfDayBoundary: json['endOfDayBoundary'] == null
+      ? defaultEndOfDayBoundary
+      : const TimeOfDayConverter().fromJson(
+          json['endOfDayBoundary'] as Map<String, dynamic>,
+        ),
 );
 
 Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
@@ -38,5 +43,8 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'monthlyStats': instance.monthlyStats.map((k, e) => MapEntry(k, e.toJson())),
   'unlockedBadges': instance.unlockedBadges.map(
     (k, e) => MapEntry(k, e.toJson()),
+  ),
+  'endOfDayBoundary': const TimeOfDayConverter().toJson(
+    instance.endOfDayBoundary,
   ),
 };
