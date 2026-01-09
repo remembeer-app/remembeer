@@ -10,5 +10,6 @@ class SessionController extends CrudController<Session, SessionCreate> {
   Stream<List<Session>> get sessionsStreamWhereCurrentUserIsMember =>
       nonDeletedEntities
           .where('memberIds', arrayContains: authService.authenticatedUser.uid)
+          .orderBy('startedAt', descending: true)
           .mapToStreamList();
 }
