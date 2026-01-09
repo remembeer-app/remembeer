@@ -1,10 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
+import 'package:remembeer/date/service/date_service.dart';
+import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/drink/constants.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/model/drink_create.dart';
-import 'package:remembeer/drink/service/date_service.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
@@ -35,9 +36,9 @@ class DrinkService {
   Stream<List<Drink>> get drinksForSelectedDateStream {
     return Rx.combineLatest3(
       drinkController.entitiesStreamForCurrentUser,
-      dateService.selectedDateStream,
+      dateService.selectedDateStateStream,
       userSettingsController.currentUserSettingsStream,
-      (drinks, selectedDate, userSettings) {
+      (drinks, _, userSettings) {
         final drinkListSort = userSettings.drinkListSort;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
           userSettings.endOfDayBoundary,
@@ -246,17 +247,6 @@ class DrinkService {
     final userSettings = await userSettingsController.currentUserSettings;
     final endOfDayBoundary = userSettings.endOfDayBoundary;
 
-    final boundaryTime = DateTime(
-      consumedAt.year,
-      consumedAt.month,
-      consumedAt.day,
-      endOfDayBoundary.hour,
-      endOfDayBoundary.minute,
-    );
-
-    if (consumedAt.isBefore(boundaryTime)) {
-      return consumedAt.subtract(const Duration(days: 1));
-    }
-    return consumedAt;
+    return effectiveDate(consumedAt, endOfDayBoundary);
   }
 }

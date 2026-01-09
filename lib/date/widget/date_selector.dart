@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/enum/swipe_direction.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/drink/service/date_service.dart';
+import 'package:remembeer/date/model/date_state.dart';
+import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 
 class DateSelector extends StatelessWidget {
@@ -13,10 +14,14 @@ class DateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AsyncBuilder<DateTime>(
-      stream: _dateService.selectedDateStream,
-      builder: (context, datetime) {
-        final isToday = _dateService.isToday;
+    return AsyncBuilder<DateState>(
+      stream: _dateService.selectedDateStateStream,
+      builder: (context, dateState) {
+        final isToday = DateUtils.isSameDay(
+          dateState.selectedDate,
+          dateState.effectiveToday,
+        );
+
         final theme = Theme.of(context);
 
         return Card(
@@ -28,7 +33,7 @@ class DateSelector extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
           child: InkWell(
-            onTap: () => _showDatePicker(context, datetime),
+            onTap: () => _showDatePicker(context, dateState),
             borderRadius: BorderRadius.circular(12),
             child: Padding(
               padding: const EdgeInsets.all(4),
@@ -39,7 +44,7 @@ class DateSelector extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildChevron(direction: SwipeDirection.left),
-                    _buildDateDisplay(datetime, context, isToday),
+                    _buildDateDisplay(dateState, context, isToday),
                     _buildChevron(
                       direction: SwipeDirection.right,
                       enabled: !isToday,
@@ -55,7 +60,7 @@ class DateSelector extends StatelessWidget {
   }
 
   Widget _buildDateDisplay(
-    DateTime datetime,
+    DateState dateState,
     BuildContext context,
     bool isToday,
   ) {
@@ -69,7 +74,7 @@ class DateSelector extends StatelessWidget {
               const Icon(Icons.calendar_today, size: 16),
               hGap8,
               Text(
-                _formatDate(datetime),
+                _formatDate(dateState),
                 style: Theme.of(
                   context,
                 ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
@@ -118,14 +123,15 @@ class DateSelector extends StatelessWidget {
 
   Future<void> _showDatePicker(
     BuildContext context,
-    DateTime selectedDate,
+    DateState dateState,
   ) async {
     // TODO(ohtenkay): Try out a package like https://pub.dev/packages/syncfusion_flutter_datepicker
     final pickedDate = await showDatePicker(
       context: context,
-      initialDate: selectedDate,
+      initialDate: dateState.selectedDate,
       firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
+      lastDate: dateState.effectiveToday,
+      currentDate: dateState.selectedDate,
     );
 
     if (pickedDate != null) {
@@ -133,9 +139,9 @@ class DateSelector extends StatelessWidget {
     }
   }
 
-  String _formatDate(DateTime datetime) {
-    final date = DateUtils.dateOnly(datetime);
-    final nowDate = DateUtils.dateOnly(DateTime.now());
+  String _formatDate(DateState dateState) {
+    final date = DateUtils.dateOnly(dateState.selectedDate);
+    final nowDate = DateUtils.dateOnly(dateState.effectiveToday);
 
     return switch (date.difference(nowDate).inDays) {
       0 => 'Today',

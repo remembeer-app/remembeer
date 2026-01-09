@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/page_template.dart';
+import 'package:remembeer/date/widget/date_selector.dart';
 import 'package:remembeer/drink/page/add_drink_page.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
-import 'package:remembeer/drink/widget/date_selector.dart';
 import 'package:remembeer/drink/widget/drink_group_list.dart';
 import 'package:remembeer/drink/widget/streak_indicator.dart';
 import 'package:remembeer/ioc/ioc_container.dart';

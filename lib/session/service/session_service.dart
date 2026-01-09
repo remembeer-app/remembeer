@@ -1,5 +1,5 @@
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/drink/service/date_service.dart';
+import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
@@ -29,9 +29,9 @@ class SessionService {
   Stream<List<Session>> get mySessionsForSelectedDateStream {
     return Rx.combineLatest3(
       sessionController.sessionsStreamWhereCurrentUserIsMember,
-      dateService.selectedDateStream,
+      dateService.selectedDateStateStream,
       userSettingsController.currentUserSettingsStream,
-      (sessions, selectedDate, userSettings) {
+      (sessions, _, userSettings) {
         final drinkListSort = userSettings.drinkListSort;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
           userSettings.endOfDayBoundary,
