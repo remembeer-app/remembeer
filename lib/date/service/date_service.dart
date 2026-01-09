@@ -11,14 +11,6 @@ class DateService {
 
   final _selectedDateSubject = BehaviorSubject<DateTime>.seeded(DateTime.now());
 
-  Stream<DateTime> get selectedDateStream => Rx.combineLatest2(
-    _selectedDateSubject.stream,
-    userSettingsController.currentUserSettingsStream,
-    (selectedDate, userSettings) {
-      return effectiveDate(selectedDate, userSettings.endOfDayBoundary);
-    },
-  );
-
   Stream<DateState> get selectedDateStateStream => Rx.combineLatest2(
     _selectedDateSubject.stream,
     userSettingsController.currentUserSettingsStream,

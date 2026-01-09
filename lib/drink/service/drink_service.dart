@@ -36,9 +36,9 @@ class DrinkService {
   Stream<List<Drink>> get drinksForSelectedDateStream {
     return Rx.combineLatest3(
       drinkController.entitiesStreamForCurrentUser,
-      dateService.selectedDateStream,
+      dateService.selectedDateStateStream,
       userSettingsController.currentUserSettingsStream,
-      (drinks, selectedDate, userSettings) {
+      (drinks, _, userSettings) {
         final drinkListSort = userSettings.drinkListSort;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
           userSettings.endOfDayBoundary,
