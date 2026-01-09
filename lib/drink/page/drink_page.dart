@@ -21,9 +21,10 @@ class DrinkPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           StreakIndicator(),
-          IconButton(
-            icon: const Icon(Icons.table_bar),
-            tooltip: 'Create Session',
+          TextButton.icon(
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(Icons.table_bar, size: 28),
+            label: const Text('Sessions', style: TextStyle(fontSize: 18)),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (context) => CreateSessionPage(),
