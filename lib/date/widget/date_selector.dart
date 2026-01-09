@@ -3,7 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/enum/swipe_direction.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/drink/service/date_service.dart';
+import 'package:remembeer/date/model/date_state.dart';
+import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 
 class DateSelector extends StatelessWidget {

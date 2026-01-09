@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/util/date_utils.dart';
+import 'package:remembeer/date/model/date_state.dart';
+import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
 import 'package:rxdart/rxdart.dart';
-
-typedef DateState = ({DateTime selectedDate, DateTime effectiveToday});
 
 class DateService {
   final UserSettingsController userSettingsController;

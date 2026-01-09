@@ -1,5 +1,5 @@
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/drink/service/date_service.dart';
+import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
