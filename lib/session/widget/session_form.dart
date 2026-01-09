@@ -10,6 +10,7 @@ class SessionForm extends StatefulWidget {
   final DateTime initialStartedAt;
   final String submitButtonText;
   final Future<void> Function(String name, DateTime startedAt) onSubmit;
+  final Widget? additionalActions;
 
   const SessionForm({
     super.key,
@@ -17,6 +18,7 @@ class SessionForm extends StatefulWidget {
     required this.initialStartedAt,
     required this.submitButtonText,
     required this.onSubmit,
+    this.additionalActions,
   });
 
   @override
@@ -52,11 +54,15 @@ class _SessionFormState extends State<SessionForm> {
             child: ListView(
               children: [
                 _buildNameInput(form),
-                gap24,
+                gap16,
                 _buildStartedAtInput(form),
               ],
             ),
           ),
+          if (widget.additionalActions != null) ...[
+            widget.additionalActions!,
+            gap16,
+          ],
           _buildSubmitButton(form),
         ],
       ),

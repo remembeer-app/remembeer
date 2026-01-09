@@ -17,4 +17,5 @@ const hGap4 = SizedBox(width: 4);
 const hGap6 = SizedBox(width: 6);
 const hGap8 = SizedBox(width: 8);
 const hGap12 = SizedBox(width: 12);
+const hGap16 = SizedBox(width: 16);
 const hGap20 = SizedBox(width: 20);

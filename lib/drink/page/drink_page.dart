@@ -7,7 +7,7 @@ import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink/widget/drink_group_list.dart';
 import 'package:remembeer/drink/widget/streak_indicator.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/session/page/create_session_page.dart';
+import 'package:remembeer/session/widget/session_menu_button.dart';
 
 class DrinkPage extends StatelessWidget {
   const DrinkPage({super.key});
@@ -19,18 +19,7 @@ class DrinkPage extends StatelessWidget {
     return PageTemplate(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          StreakIndicator(),
-          IconButton(
-            icon: const Icon(Icons.table_bar),
-            tooltip: 'Create Session',
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => CreateSessionPage(),
-              ),
-            ),
-          ),
-        ],
+        children: [StreakIndicator(), const SessionMenuButton()],
       ),
       padding: EdgeInsets.zero,
       floatingActionButton: GestureDetector(

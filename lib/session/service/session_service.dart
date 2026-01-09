@@ -1,4 +1,5 @@
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
@@ -25,6 +26,9 @@ class SessionService {
   });
 
   String get currentUserId => authService.authenticatedUser.uid;
+
+  Stream<List<Session>> get sessionsWhereCurrentUserIsMemberStream =>
+      sessionController.sessionsStreamWhereCurrentUserIsMember;
 
   Stream<List<Session>> get mySessionsForSelectedDateStream {
     return Rx.combineLatest4(
@@ -93,6 +97,15 @@ class SessionService {
 
   bool isSessionOwner(Session session) {
     return session.userId == currentUserId;
+  }
+
+  Future<void> deleteSession(Session session) async {
+    invariant(
+      isSessionOwner(session),
+      'Only the session owner can delete the session.',
+    );
+
+    await sessionController.deleteSingle(session);
   }
 
   Stream<List<UserModel>> sessionMembersStream(String sessionId) {
