@@ -29,7 +29,6 @@ class IoCContainer {
     get
       ..registerSingleton(FirebaseAuth.instance)
       ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
-      ..registerSingleton(DateService())
       ..registerSingleton(MonthService())
       ..registerSingleton(LocationService())
       ..registerSingleton(UserStatsService())
@@ -58,6 +57,9 @@ class IoCContainer {
 
   static void _registerServices() {
     get
+      ..registerSingleton(
+        DateService(userSettingsController: get<UserSettingsController>()),
+      )
       ..registerSingleton(
         DrinkService(
           drinkController: get<DrinkController>(),
