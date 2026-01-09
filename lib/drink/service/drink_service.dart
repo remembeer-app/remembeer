@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
+import 'package:remembeer/common/util/date_utils.dart';
 import 'package:remembeer/drink/constants.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -246,17 +247,6 @@ class DrinkService {
     final userSettings = await userSettingsController.currentUserSettings;
     final endOfDayBoundary = userSettings.endOfDayBoundary;
 
-    final boundaryTime = DateTime(
-      consumedAt.year,
-      consumedAt.month,
-      consumedAt.day,
-      endOfDayBoundary.hour,
-      endOfDayBoundary.minute,
-    );
-
-    if (consumedAt.isBefore(boundaryTime)) {
-      return consumedAt.subtract(const Duration(days: 1));
-    }
-    return consumedAt;
+    return effectiveDate(consumedAt, endOfDayBoundary);
   }
 }
