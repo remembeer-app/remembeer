@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/session/page/create_session_page.dart';
+import 'package:remembeer/session/page/session_management_page.dart';
 
 class SessionMenuButton extends StatelessWidget {
   const SessionMenuButton({super.key});
@@ -25,8 +26,11 @@ class SessionMenuButton extends StatelessWidget {
             // TODO(ohtenkay): Implement signature drinks
             break;
           case 'manage':
-            // TODO(ohtenkay): Implement session management
-            break;
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => SessionManagementPage(),
+              ),
+            );
         }
       },
       itemBuilder: (context) => [
