@@ -1,3 +1,4 @@
+import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user_stats/model/user_stats.dart';
 
@@ -34,7 +35,7 @@ class UserStatsService {
 
   (double, double) _calculateLast30Days(UserModel user) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+    final today = effectiveDate(now, user.endOfDayBoundary);
 
     var beersLast30Days = 0.0;
     var alcoholLast30Days = 0.0;
@@ -51,7 +52,7 @@ class UserStatsService {
 
   (bool, int) _calculateStreak(UserModel user) {
     final now = DateTime.now();
-    final todayDate = DateTime(now.year, now.month, now.day);
+    final todayDate = effectiveDate(now, user.endOfDayBoundary);
 
     final isStreakActive = _hadDrinkOnDate(user, todayDate);
 
