@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/session/page/create_session_page.dart';
 import 'package:remembeer/session/page/session_management_page.dart';
 
@@ -71,7 +72,7 @@ class SessionMenuButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('Sessions', style: TextStyle(fontSize: 18, color: color)),
-          const SizedBox(width: 4),
+          hGap4,
           Icon(Icons.table_bar, size: 28, color: color),
         ],
       ),

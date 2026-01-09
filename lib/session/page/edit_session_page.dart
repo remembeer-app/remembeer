@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -18,45 +19,88 @@ class EditSessionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Edit Session'),
-      child: Column(
-        children: [
-          Expanded(
-            child: SessionForm(
-              initialName: session.name,
-              initialStartedAt: session.startedAt,
-              submitButtonText: 'Save Changes',
-              onSubmit: (name, startedAt) async {
-                await _sessionService.updateSession(
-                  session: session,
-                  name: name,
-                  startedAt: startedAt,
-                );
-                if (context.mounted) {
-                  Navigator.of(context).pop();
-                }
-              },
-            ),
-          ),
-          if (session.endedAt == null) ...[
-            gap16,
-            _buildMarkAsDoneButton(context),
-          ],
-        ],
+      child: SessionForm(
+        initialName: session.name,
+        initialStartedAt: session.startedAt,
+        submitButtonText: 'Save Changes',
+        onSubmit: (name, startedAt) async {
+          await _sessionService.updateSession(
+            session: session,
+            name: name,
+            startedAt: startedAt,
+          );
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
+        },
+        additionalActions: _buildAdditionalActions(context),
       ),
     );
   }
 
-  Widget _buildMarkAsDoneButton(BuildContext context) {
+  Widget _buildAdditionalActions(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(child: _buildDeleteButton(context)),
+        const SizedBox(width: 16),
+        Expanded(child: _buildEndTimeButton(context)),
+      ],
+    );
+  }
+
+  Widget _buildEndTimeButton(BuildContext context) {
+    final isOngoing = session.endedAt == null;
+    final dateFormat = DateFormat('d MMM, H:mm');
+
+    // TODO(ohtenkay): This button date formatting is different from the form field. This entire page needs a design review.
     return OutlinedButton.icon(
-      onPressed: () => _showMarkAsDoneDialog(context),
-      icon: const Icon(Icons.check_circle_outline),
-      label: const Text('Mark Session as Done'),
+      onPressed: () => _showEndTimeDialog(context),
+      icon: Icon(isOngoing ? Icons.check_circle_outline : Icons.event),
+      label: Text(
+        isOngoing
+            ? 'Mark as Done'
+            : 'Ended ${dateFormat.format(session.endedAt!)}',
+      ),
       style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
     );
   }
 
-  Future<void> _showMarkAsDoneDialog(BuildContext context) async {
-    var selectedEndTime = DateTime.now();
+  Widget _buildDeleteButton(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return OutlinedButton.icon(
+      onPressed: () => _showDeleteConfirmationDialog(context),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: theme.colorScheme.error,
+        side: BorderSide(color: theme.colorScheme.error),
+        padding: const EdgeInsets.all(16),
+      ),
+      icon: const Icon(Icons.delete),
+      label: const Text('Delete'),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context) {
+    showConfirmationDialog(
+      context: context,
+      title: 'Delete Session',
+      text:
+          'Are you sure you want to delete "${session.name}"? '
+          'This action cannot be undone.',
+      submitButtonText: 'Delete',
+      isDestructive: true,
+      onPressed: () async {
+        await _sessionService.deleteSession(session);
+        if (context.mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      },
+    );
+  }
+
+  Future<void> _showEndTimeDialog(BuildContext context) async {
+    final isOngoing = session.endedAt == null;
+    var selectedEndTime = session.endedAt ?? DateTime.now();
     final timeFormat = DateFormat('dd MMM. yyyy, H:mm');
 
     final confirmed = await showDialog<bool>(
@@ -65,7 +109,7 @@ class EditSessionPage extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Mark Session as Done'),
+              title: Text(isOngoing ? 'Mark Session as Done' : 'Edit End Time'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -123,7 +167,7 @@ class EditSessionPage extends StatelessWidget {
     );
 
     if ((confirmed ?? false) && context.mounted) {
-      await _sessionService.markSessionAsDone(
+      await _sessionService.updateSession(
         session: session,
         endedAt: selectedEndTime,
       );
