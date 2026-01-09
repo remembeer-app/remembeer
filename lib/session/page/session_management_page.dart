@@ -24,12 +24,39 @@ class SessionManagementPage extends StatelessWidget {
             return _buildEmptyState(context);
           }
 
-          return ListView.builder(
-            itemCount: sessions.length,
-            itemBuilder: (context, index) {
-              final session = sessions[index];
-              return _buildSessionCard(context, session);
-            },
+          final now = DateTime.now();
+          final sevenDaysAgo = now.subtract(const Duration(days: 7));
+          final thirtyDaysAgo = now.subtract(const Duration(days: 30));
+
+          final thisWeek = sessions
+              .where((s) => s.startedAt.isAfter(sevenDaysAgo))
+              .toList();
+          final last30Days = sessions
+              .where(
+                (s) =>
+                    s.startedAt.isAfter(thirtyDaysAgo) &&
+                    !s.startedAt.isAfter(sevenDaysAgo),
+              )
+              .toList();
+          final older = sessions
+              .where((s) => !s.startedAt.isAfter(thirtyDaysAgo))
+              .toList();
+
+          return ListView(
+            children: [
+              if (thisWeek.isNotEmpty) ...[
+                _buildSectionHeader(context, 'This Week'),
+                ...thisWeek.map((s) => _buildSessionCard(context, s)),
+              ],
+              if (last30Days.isNotEmpty) ...[
+                _buildSectionHeader(context, 'Last 30 Days'),
+                ...last30Days.map((s) => _buildSessionCard(context, s)),
+              ],
+              if (older.isNotEmpty) ...[
+                _buildSectionHeader(context, 'Older'),
+                ...older.map((s) => _buildSessionCard(context, s)),
+              ],
+            ],
           );
         },
       ),
@@ -53,6 +80,22 @@ class SessionManagementPage extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
+      child: Text(
+        title.toUpperCase(),
+        style: theme.textTheme.labelMedium?.copyWith(
+          color: theme.colorScheme.onSurfaceVariant,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }
