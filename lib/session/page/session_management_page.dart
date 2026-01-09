@@ -4,20 +4,21 @@ import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
+import 'package:remembeer/session/page/edit_session_page.dart';
+import 'package:remembeer/session/service/session_service.dart';
 
 class SessionManagementPage extends StatelessWidget {
   SessionManagementPage({super.key});
 
-  final _sessionController = get<SessionController>();
+  final _sessionService = get<SessionService>();
 
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Session Management'),
       child: AsyncBuilder<List<Session>>(
-        stream: _sessionController.sessionsStreamWhereCurrentUserIsMember,
+        stream: _sessionService.sessionsWhereCurrentUserIsMemberStream,
         builder: (context, sessions) {
           if (sessions.isEmpty) {
             return _buildEmptyState(context);
@@ -60,6 +61,7 @@ class SessionManagementPage extends StatelessWidget {
     final theme = Theme.of(context);
     final memberCount = session.memberIds.length;
     final isOngoing = session.endedAt == null;
+    final isOwner = _sessionService.isSessionOwner(session);
     final dateFormat = DateFormat.yMMMd();
 
     // TODO(ohtenkay): somehow display the session color once custom colors are implemented
@@ -78,8 +80,11 @@ class SessionManagementPage extends StatelessWidget {
           '${dateFormat.format(session.startedAt)} · $memberCount ${memberCount == 1 ? 'member' : 'members'}',
           style: theme.textTheme.bodySmall,
         ),
-        trailing: isOngoing
-            ? Chip(
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isOngoing)
+              Chip(
                 label: Text(
                   'Ongoing',
                   style: theme.textTheme.labelSmall?.copyWith(
@@ -90,8 +95,33 @@ class SessionManagementPage extends StatelessWidget {
                 side: BorderSide.none,
                 padding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
+              ),
+            if (isOwner)
+              IconButton(
+                icon: Icon(
+                  Icons.edit_outlined,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                tooltip: 'Edit session',
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (context) => EditSessionPage(session: session),
+                  ),
+                ),
               )
-            : null,
+            else
+              IconButton(
+                icon: Icon(
+                  Icons.logout,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+                tooltip: 'Leave session',
+                onPressed: () {
+                  // TODO(ohtenkay): Implement leave session
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

@@ -26,6 +26,9 @@ class SessionService {
 
   String get currentUserId => authService.authenticatedUser.uid;
 
+  Stream<List<Session>> get sessionsWhereCurrentUserIsMemberStream =>
+      sessionController.sessionsStreamWhereCurrentUserIsMember;
+
   Stream<List<Session>> get mySessionsForSelectedDateStream {
     return Rx.combineLatest3(
       sessionController.sessionsStreamWhereCurrentUserIsMember,
