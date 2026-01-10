@@ -68,12 +68,13 @@ class ConsumptionSection extends StatelessWidget {
         const Divider(color: Colors.black26, height: 20, thickness: 1),
         _buildStatTile(
           label: 'Beers Consumed',
-          value: beersConsumed.toStringAsFixed(1),
+          value: _formatBeerCount(beersConsumed),
           icon: const DrinkIcon(category: DrinkCategory.beer, size: _iconSize),
         ),
         _buildStatTile(
-          label: 'Alcohol Consumed (ml)',
-          value: alcoholConsumed.toStringAsFixed(0),
+          // Removed specific unit from label since it is now dynamic in the value
+          label: 'Alcohol Consumed',
+          value: _formatVolume(alcoholConsumed),
           icon: const DrinkIcon(category: DrinkCategory.wine, size: _iconSize),
         ),
       ],
@@ -99,5 +100,22 @@ class ConsumptionSection extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _formatVolume(double ml) {
+    if (ml >= 1000) {
+      return '${(ml / 1000).toStringAsFixed(1)} L';
+    }
+    return '${ml.toStringAsFixed(0)} ml';
+  }
+
+  String _formatBeerCount(double count) {
+    if (count >= 1000) {
+      return '${(count / 1000).toStringAsFixed(1)}k';
+    }
+    if (count % 1 == 0) {
+      return count.toInt().toString();
+    }
+    return count.toStringAsFixed(1);
   }
 }
