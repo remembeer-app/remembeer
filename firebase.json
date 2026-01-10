@@ -1,1 +1,38 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"remembeer-pivo","appId":"1:578025081321:android:525b595153a0315609a378","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"remembeer-pivo","configurations":{"android":"1:578025081321:android:525b595153a0315609a378","ios":"1:578025081321:ios:097d191c3409fb4c09a378","web":"1:578025081321:web:7dbed881971e9a8d09a378"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "remembeer-pivo",
+          "appId": "1:578025081321:android:525b595153a0315609a378",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "remembeer-pivo",
+          "configurations": {
+            "android": "1:578025081321:android:525b595153a0315609a378",
+            "ios": "1:578025081321:ios:097d191c3409fb4c09a378",
+            "web": "1:578025081321:web:7dbed881971e9a8d09a378"
+          }
+        }
+      }
+    }
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "venv",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "runtime": "python313"
+    }
+  ]
+}
