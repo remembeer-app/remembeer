@@ -82,6 +82,7 @@ class IoCContainer {
         UserSettingsService(
           authService: get<AuthService>(),
           userSettingsController: get<UserSettingsController>(),
+          notificationService: get<NotificationService>(),
         ),
       )
       ..registerSingleton(

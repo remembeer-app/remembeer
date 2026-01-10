@@ -15,6 +15,7 @@ abstract class UserSettings with _$UserSettings implements Document {
     required int defaultDrinkSize,
     @Default(DrinkListSortOrder.descending)
     DrinkListSortOrder drinkListSortOrder,
+    String? notificationToken,
   }) = _UserSettings;
 
   factory UserSettings.fromJson(Map<String, dynamic> json) =>
