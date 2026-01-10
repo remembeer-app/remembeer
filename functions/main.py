@@ -1,21 +1,76 @@
-# Welcome to Cloud Functions for Firebase for Python!
-# To get started, simply uncomment the below code or create your own.
-# Deploy with `firebase deploy`
-
-from firebase_functions import https_fn
 from firebase_functions.options import set_global_options
-from firebase_admin import initialize_app
+from firebase_functions import firestore_fn, logger
+from firebase_admin import initialize_app, firestore, messaging
 
-# For cost control, you can set the maximum number of containers that can be
-# running at the same time. This helps mitigate the impact of unexpected
-# traffic spikes by instead downgrading performance. This limit is a per-function
-# limit. You can override the limit for each function using the max_instances
-# parameter in the decorator, e.g. @https_fn.on_request(max_instances=5).
 set_global_options(max_instances=10)
 
-# initialize_app()
-#
-#
-# @https_fn.on_request()
-# def on_request_example(req: https_fn.Request) -> https_fn.Response:
-#     return https_fn.Response("Hello world!")
+initialize_app()
+
+@firestore_fn.on_document_created(
+    document="friend_requests/{requestId}",
+    region="europe-west4"
+)
+def on_friend_request_created(event: firestore_fn.Event[firestore_fn.DocumentSnapshot]) -> None:
+    request_snapshot = event.data
+    if not request_snapshot:
+        logger.warn("Received event with no snapshot data.")
+        return
+
+    request_id = request_snapshot.id
+    request_data = request_snapshot.to_dict()
+
+    receiver_id = request_data.get("toUserId")
+    sender_id = request_data.get("userId")
+
+    log_context = {
+        "requestId": request_id,
+        "senderId": sender_id,
+        "receiverId": receiver_id
+    }
+
+    if not receiver_id or not sender_id:
+        logger.error("Invalid request data: Missing sender or receiver ID.", **log_context)
+        return
+
+    db = firestore.client()
+
+    try:
+        receiver_ref = db.collection("user_settings").document(receiver_id)
+        receiver_doc = receiver_ref.get()
+
+        if not receiver_doc.exists:
+            logger.warn(f"No settings found for user {receiver_id}", **log_context)
+            return
+
+        fcm_token = receiver_doc.to_dict().get("notificationToken")
+        if not fcm_token:
+            logger.warn(f"No FCM token registered for user {receiver_id}", **log_context)
+            return
+
+        sender_ref = db.collection("users").document(sender_id)
+        sender_doc = sender_ref.get()
+
+        if not sender_doc.exists:
+            logger.error(f"Sender profile not found for user {sender_id}", **log_context)
+            return
+
+        sender_name = sender_doc.to_dict().get("username")
+
+        message = messaging.Message(
+            notification=messaging.Notification(
+                title="New Friend Request",
+                body=f"{sender_name} wants to be your friend!",
+            ),
+            data={
+                "type": "friend_request",
+                "requestId": request_id,
+            },
+            token=fcm_token,
+        )
+
+        response = messaging.send(message)
+
+        logger.info(f"Successfully sent FCM message: {response}", **log_context)
+
+    except Exception as e:
+        logger.error(f"Error sending notification: {e}", exc_info=True, **log_context)
