@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/session/page/create_session_page.dart';
 import 'package:remembeer/session/page/session_management_page.dart';
+import 'package:remembeer/session/page/summary_page.dart';
 
 class SessionMenuButton extends StatelessWidget {
   const SessionMenuButton({super.key});
@@ -21,8 +22,9 @@ class SessionMenuButton extends StatelessWidget {
               ),
             );
           case 'summary':
-            // TODO(ohtenkay): Implement generate summary
-            break;
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (context) => SummaryPage()),
+            );
           case 'signature':
             // TODO(ohtenkay): Implement signature drinks
             break;
