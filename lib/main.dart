@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:remembeer/app.dart';
 import 'package:remembeer/firebase_options.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/seed_data/seeder.dart';
 
 Future<void> main() async {
@@ -20,6 +21,8 @@ Future<void> main() async {
   );
 
   IoCContainer.initialize();
+
+  await get<NotificationService>().initialize();
 
   if (kDebugMode) {
     await seedDatabase();
