@@ -10,12 +10,14 @@ class UserSettings extends Document {
   final DrinkType defaultDrinkType;
   final int defaultDrinkSize;
   final DrinkListSort drinkListSort;
+  final String? notificationToken;
 
   const UserSettings({
     required super.id,
     required this.defaultDrinkType,
     required this.defaultDrinkSize,
     this.drinkListSort = DrinkListSort.descending,
+    this.notificationToken,
   });
 
   factory UserSettings.fromJson(Map<String, dynamic> json) =>
@@ -28,12 +30,14 @@ class UserSettings extends Document {
     DrinkType? defaultDrinkType,
     int? defaultDrinkSize,
     DrinkListSort? drinkListSort,
+    String? notificationToken,
   }) {
     return UserSettings(
       id: id,
       defaultDrinkType: defaultDrinkType ?? this.defaultDrinkType,
       defaultDrinkSize: defaultDrinkSize ?? this.defaultDrinkSize,
       drinkListSort: drinkListSort ?? this.drinkListSort,
+      notificationToken: notificationToken ?? this.notificationToken,
     );
   }
 }

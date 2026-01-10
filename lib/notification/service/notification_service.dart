@@ -25,6 +25,8 @@ class NotificationService {
     return _firebaseMessaging.getToken();
   }
 
+  Stream<String> get onTokenRefresh => _firebaseMessaging.onTokenRefresh;
+
   void dispose() {
     _messageStreamController.close();
   }

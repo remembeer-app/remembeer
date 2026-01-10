@@ -15,6 +15,7 @@ UserSettings _$UserSettingsFromJson(Map<String, dynamic> json) => UserSettings(
   drinkListSort:
       $enumDecodeNullable(_$DrinkListSortEnumMap, json['drinkListSort']) ??
       DrinkListSort.descending,
+  notificationToken: json['notificationToken'] as String?,
 );
 
 Map<String, dynamic> _$UserSettingsToJson(UserSettings instance) =>
@@ -23,6 +24,7 @@ Map<String, dynamic> _$UserSettingsToJson(UserSettings instance) =>
       'defaultDrinkType': instance.defaultDrinkType.toJson(),
       'defaultDrinkSize': instance.defaultDrinkSize,
       'drinkListSort': _$DrinkListSortEnumMap[instance.drinkListSort]!,
+      'notificationToken': instance.notificationToken,
     };
 
 const _$DrinkListSortEnumMap = {
