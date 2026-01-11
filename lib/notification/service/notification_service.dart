@@ -11,6 +11,11 @@ class NotificationService {
 
   final _messageStreamController = BehaviorSubject<RemoteMessage>();
   Stream<RemoteMessage> get messageStream => _messageStreamController.stream;
+
+  final _notificationTapController = BehaviorSubject<RemoteMessage>();
+  Stream<RemoteMessage> get notificationTapStream =>
+      _notificationTapController.stream;
+
   Future<void> initialize() async {
     await _firebaseMessaging.requestPermission();
 
@@ -19,6 +24,15 @@ class NotificationService {
     });
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      _notificationTapController.sink.add(message);
+    });
+
+    final initialMessage = await _firebaseMessaging.getInitialMessage();
+    if (initialMessage != null) {
+      _notificationTapController.sink.add(initialMessage);
+    }
   }
 
   Future<String?> getToken() async {
@@ -29,5 +43,6 @@ class NotificationService {
 
   void dispose() {
     _messageStreamController.close();
+    _notificationTapController.close();
   }
 }

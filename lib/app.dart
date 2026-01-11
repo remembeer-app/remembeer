@@ -5,6 +5,8 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/page_switcher.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
 class App extends StatelessWidget {
   App({super.key});
 
@@ -14,6 +16,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Remembeer',
+      navigatorKey: navigatorKey,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFD4A017)),
       ),
