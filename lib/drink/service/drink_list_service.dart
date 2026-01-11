@@ -13,7 +13,7 @@ class DrinkListService {
     return Rx.combineLatest2(
       drinkService.drinksForSelectedDateStream,
       sessionService.mySessionsForSelectedDateStream,
-      (drinks, sessions) => DrinkListData(drinks: drinks, sessions: sessions),
+      (drinks, sessions) => (drinks: drinks, sessions: sessions),
     );
   }
 }
