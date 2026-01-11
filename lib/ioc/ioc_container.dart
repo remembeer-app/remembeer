@@ -76,6 +76,7 @@ class IoCContainer {
       ..registerSingleton(
         UserService(
           authService: get<AuthService>(),
+          notificationService: get<NotificationService>(),
           friendRequestController: get<FriendRequestController>(),
           userController: get<UserController>(),
         ),

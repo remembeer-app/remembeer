@@ -1,5 +1,6 @@
 enum NotificationType {
-  friendRequest('friend_request');
+  friendRequestReceived('friend_request_received'),
+  friendRequestAccepted('friend_request_accepted');
 
   final String type;
 

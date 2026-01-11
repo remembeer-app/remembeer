@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   cloud_firestore: ^6.1.1
+  cloud_functions: ^6.0.5
   cupertino_icons: ^1.0.8
   diacritic: ^0.1.6
   firebase_auth: ^6.1.3

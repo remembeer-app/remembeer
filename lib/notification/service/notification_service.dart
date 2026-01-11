@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:rxdart/rxdart.dart';
@@ -7,12 +8,20 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 class NotificationService {
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  final _firebaseFunctions = FirebaseFunctions.instanceFor(
+    region: 'europe-west4',
+  );
+
+  final _firebaseMessaging = FirebaseMessaging.instance;
+
+  Stream<String> get onTokenRefresh => _firebaseMessaging.onTokenRefresh;
 
   final _messageStreamController = BehaviorSubject<RemoteMessage>();
+
   Stream<RemoteMessage> get messageStream => _messageStreamController.stream;
 
   final _notificationTapController = BehaviorSubject<RemoteMessage>();
+
   Stream<RemoteMessage> get notificationTapStream =>
       _notificationTapController.stream;
 
@@ -39,7 +48,19 @@ class NotificationService {
     return _firebaseMessaging.getToken();
   }
 
-  Stream<String> get onTokenRefresh => _firebaseMessaging.onTokenRefresh;
+  Future<void> notifyFriendRequestAccepted(
+    String toUserId,
+    String fromUserId,
+    String fromUsername,
+  ) async {
+    await _firebaseFunctions
+        .httpsCallable('notify_friend_request_acceptance')
+        .call<void>({
+          'toUserId': toUserId,
+          'fromUserId': fromUserId,
+          'fromUsername': fromUsername,
+        });
+  }
 
   void dispose() {
     _messageStreamController.close();
