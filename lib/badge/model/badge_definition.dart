@@ -1,19 +1,17 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/badge/model/badge_category.dart';
 
-class BadgeDefinition {
-  final String id;
-  final String name;
-  final String description;
-  final String iconPath;
-  final BadgeCategory category;
-  final int? goal;
+part 'badge_definition.freezed.dart';
 
-  const BadgeDefinition({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.iconPath,
-    required this.category,
-    this.goal,
-  });
+// TODO(ohtenkay): This class could be typedef probably
+@freezed
+abstract class BadgeDefinition with _$BadgeDefinition {
+  const factory BadgeDefinition({
+    required String id,
+    required String name,
+    required String description,
+    required String iconPath,
+    required BadgeCategory category,
+    int? goal,
+  }) = _BadgeDefinition;
 }
