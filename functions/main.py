@@ -21,6 +21,7 @@ def on_friend_request_created(event: firestore_fn.Event[firestore_fn.DocumentSna
 
     receiver_id = request_data.get("toUserId")
     sender_id = request_data.get("userId")
+    sender_name = request_data.get("senderUsername")
 
     log_context = {
         "requestId": request_id,
@@ -46,15 +47,6 @@ def on_friend_request_created(event: firestore_fn.Event[firestore_fn.DocumentSna
         if not fcm_token:
             logger.warn(f"No FCM token registered for user {receiver_id}", **log_context)
             return
-
-        sender_ref = db.collection("users").document(sender_id)
-        sender_doc = sender_ref.get()
-
-        if not sender_doc.exists:
-            logger.error(f"Sender profile not found for user {sender_id}", **log_context)
-            return
-
-        sender_name = sender_doc.to_dict().get("username")
 
         message = messaging.Message(
             notification=messaging.Notification(

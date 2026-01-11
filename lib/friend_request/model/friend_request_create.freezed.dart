@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$FriendRequestCreate {
 
- String get toUserId;
+ String get toUserId; String get senderUsername;
 /// Create a copy of FriendRequestCreate
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $FriendRequestCreateCopyWith<FriendRequestCreate> get copyWith => _$FriendReques
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendRequestCreate&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendRequestCreate&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId)&&(identical(other.senderUsername, senderUsername) || other.senderUsername == senderUsername));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,toUserId);
+int get hashCode => Object.hash(runtimeType,toUserId,senderUsername);
 
 @override
 String toString() {
-  return 'FriendRequestCreate(toUserId: $toUserId)';
+  return 'FriendRequestCreate(toUserId: $toUserId, senderUsername: $senderUsername)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $FriendRequestCreateCopyWith<$Res>  {
   factory $FriendRequestCreateCopyWith(FriendRequestCreate value, $Res Function(FriendRequestCreate) _then) = _$FriendRequestCreateCopyWithImpl;
 @useResult
 $Res call({
- String toUserId
+ String toUserId, String senderUsername
 });
 
 
@@ -65,9 +65,10 @@ class _$FriendRequestCreateCopyWithImpl<$Res>
 
 /// Create a copy of FriendRequestCreate
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? toUserId = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? toUserId = null,Object? senderUsername = null,}) {
   return _then(_self.copyWith(
 toUserId: null == toUserId ? _self.toUserId : toUserId // ignore: cast_nullable_to_non_nullable
+as String,senderUsername: null == senderUsername ? _self.senderUsername : senderUsername // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -153,10 +154,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String toUserId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String toUserId,  String senderUsername)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FriendRequestCreate() when $default != null:
-return $default(_that.toUserId);case _:
+return $default(_that.toUserId,_that.senderUsername);case _:
   return orElse();
 
 }
@@ -174,10 +175,10 @@ return $default(_that.toUserId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String toUserId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String toUserId,  String senderUsername)  $default,) {final _that = this;
 switch (_that) {
 case _FriendRequestCreate():
-return $default(_that.toUserId);case _:
+return $default(_that.toUserId,_that.senderUsername);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -194,10 +195,10 @@ return $default(_that.toUserId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String toUserId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String toUserId,  String senderUsername)?  $default,) {final _that = this;
 switch (_that) {
 case _FriendRequestCreate() when $default != null:
-return $default(_that.toUserId);case _:
+return $default(_that.toUserId,_that.senderUsername);case _:
   return null;
 
 }
@@ -209,10 +210,11 @@ return $default(_that.toUserId);case _:
 @JsonSerializable()
 
 class _FriendRequestCreate implements FriendRequestCreate {
-  const _FriendRequestCreate({required this.toUserId});
+  const _FriendRequestCreate({required this.toUserId, required this.senderUsername});
   factory _FriendRequestCreate.fromJson(Map<String, dynamic> json) => _$FriendRequestCreateFromJson(json);
 
 @override final  String toUserId;
+@override final  String senderUsername;
 
 /// Create a copy of FriendRequestCreate
 /// with the given fields replaced by the non-null parameter values.
@@ -227,16 +229,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendRequestCreate&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendRequestCreate&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId)&&(identical(other.senderUsername, senderUsername) || other.senderUsername == senderUsername));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,toUserId);
+int get hashCode => Object.hash(runtimeType,toUserId,senderUsername);
 
 @override
 String toString() {
-  return 'FriendRequestCreate(toUserId: $toUserId)';
+  return 'FriendRequestCreate(toUserId: $toUserId, senderUsername: $senderUsername)';
 }
 
 
@@ -247,7 +249,7 @@ abstract mixin class _$FriendRequestCreateCopyWith<$Res> implements $FriendReque
   factory _$FriendRequestCreateCopyWith(_FriendRequestCreate value, $Res Function(_FriendRequestCreate) _then) = __$FriendRequestCreateCopyWithImpl;
 @override @useResult
 $Res call({
- String toUserId
+ String toUserId, String senderUsername
 });
 
 
@@ -264,9 +266,10 @@ class __$FriendRequestCreateCopyWithImpl<$Res>
 
 /// Create a copy of FriendRequestCreate
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? toUserId = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? toUserId = null,Object? senderUsername = null,}) {
   return _then(_FriendRequestCreate(
 toUserId: null == toUserId ? _self.toUserId : toUserId // ignore: cast_nullable_to_non_nullable
+as String,senderUsername: null == senderUsername ? _self.senderUsername : senderUsername // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

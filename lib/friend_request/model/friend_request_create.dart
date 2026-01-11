@@ -8,8 +8,10 @@ part 'friend_request_create.g.dart';
 abstract class FriendRequestCreate
     with _$FriendRequestCreate
     implements ValueObject {
-  const factory FriendRequestCreate({required String toUserId}) =
-      _FriendRequestCreate;
+  const factory FriendRequestCreate({
+    required String toUserId,
+    required String senderUsername,
+  }) = _FriendRequestCreate;
 
   factory FriendRequestCreate.fromJson(Map<String, dynamic> json) =>
       _$FriendRequestCreateFromJson(json);

@@ -16,6 +16,7 @@ abstract class FriendRequest with _$FriendRequest implements Entity {
     @TimestampConverter() DateTime? deletedAt,
 
     required String toUserId,
+    required String senderUsername,
   }) = _FriendRequest;
 
   factory FriendRequest.fromJson(Map<String, dynamic> json) =>
