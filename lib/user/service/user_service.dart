@@ -87,8 +87,13 @@ class UserService {
   }
 
   Future<void> sendFriendRequest(String toUserId) async {
+    final currentUser = await userController.currentUser;
+
     await friendRequestController.createSingle(
-      FriendRequestCreate(toUserId: toUserId),
+      FriendRequestCreate(
+        toUserId: toUserId,
+        senderUsername: currentUser.username,
+      ),
     );
   }
 
