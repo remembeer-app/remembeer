@@ -4,6 +4,7 @@ import 'package:remembeer/friend_request/controller/friend_request_controller.da
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/friend_request/model/friend_request_create.dart';
 import 'package:remembeer/friend_request/model/friendship_status.dart';
+import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/user_model.dart';
@@ -11,11 +12,13 @@ import 'package:rxdart/rxdart.dart';
 
 class UserService {
   final AuthService authService;
+  final NotificationService notificationService;
   final FriendRequestController friendRequestController;
   final UserController userController;
 
   const UserService({
     required this.authService,
+    required this.notificationService,
     required this.friendRequestController,
     required this.userController,
   });
@@ -135,6 +138,12 @@ class UserService {
     friendRequestController.deleteSingleInBatch(request, batch);
 
     await batch.commit();
+
+    await notificationService.notifyFriendRequestAccepted(
+      otherUserId,
+      currentUser.id,
+      currentUser.username,
+    );
   }
 
   Future<void> denyFriendRequest(FriendRequest request) async {

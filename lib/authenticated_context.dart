@@ -14,6 +14,7 @@ import 'package:remembeer/notification/model/notification_type.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/page_navigation_service.dart';
 import 'package:remembeer/page_switcher.dart';
+import 'package:remembeer/user/page/profile_page.dart';
 
 class AuthenticatedContext extends StatefulWidget {
   const AuthenticatedContext({super.key});
@@ -75,9 +76,17 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
     final type = NotificationType.fromString(message.data['type'] as String?);
 
     switch (type) {
-      case NotificationType.friendRequest:
+      case NotificationType.friendRequestReceived:
         Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (context) => FriendRequestsPage()),
+        );
+      case NotificationType.friendRequestAccepted:
+        final fromUserId = message.data['fromUserId'] as String;
+
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (context) => ProfilePage(userId: fromUserId),
+          ),
         );
       case null:
         // TODO(metju-ac): Handle this when we add logging.
@@ -91,8 +100,10 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
     final type = NotificationType.fromString(message.data['type'] as String?);
 
     switch (type) {
-      case NotificationType.friendRequest:
+      case NotificationType.friendRequestReceived:
         showNotification(context, 'You have a new friend request!');
+      case NotificationType.friendRequestAccepted:
+        showNotification(context, 'Your friend request was accepted!');
       case null:
         // TODO(metju-ac): Handle this when we add logging.
         debugPrint('Unknown notification type: ${message.data['type']}');
