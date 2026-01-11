@@ -1,9 +1,5 @@
-// Base class for create DTOs that can be serialized to JSON.
+// Base class for create DTOs that can be serialized to JSON, needed for type safe generics.
 // ignore_for_file: one_member_abstracts
-
-import 'package:flutter/material.dart';
-
-@immutable
 abstract class ValueObject {
   Map<String, dynamic> toJson();
 }

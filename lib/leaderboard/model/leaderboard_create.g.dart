@@ -6,8 +6,8 @@ part of 'leaderboard_create.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-LeaderboardCreate _$LeaderboardCreateFromJson(Map<String, dynamic> json) =>
-    LeaderboardCreate(
+_LeaderboardCreate _$LeaderboardCreateFromJson(Map<String, dynamic> json) =>
+    _LeaderboardCreate(
       name: json['name'] as String,
       iconName: json['iconName'] as String,
       memberIds: (json['memberIds'] as List<dynamic>)
@@ -21,7 +21,7 @@ LeaderboardCreate _$LeaderboardCreateFromJson(Map<String, dynamic> json) =>
       inviteCode: json['inviteCode'] as String,
     );
 
-Map<String, dynamic> _$LeaderboardCreateToJson(LeaderboardCreate instance) =>
+Map<String, dynamic> _$LeaderboardCreateToJson(_LeaderboardCreate instance) =>
     <String, dynamic>{
       'name': instance.name,
       'iconName': instance.iconName,
