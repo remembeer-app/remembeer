@@ -8,6 +8,7 @@ part 'friend_request.g.dart';
 @JsonSerializable()
 class FriendRequest extends Entity {
   final String toUserId;
+  final String senderUsername;
 
   const FriendRequest({
     required super.id,
@@ -16,6 +17,7 @@ class FriendRequest extends Entity {
     super.updatedAt,
     super.deletedAt,
     required this.toUserId,
+    required this.senderUsername,
   });
 
   factory FriendRequest.fromJson(Map<String, dynamic> json) =>

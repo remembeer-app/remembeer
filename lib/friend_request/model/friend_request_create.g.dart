@@ -8,4 +8,7 @@ part of 'friend_request_create.dart';
 
 Map<String, dynamic> _$FriendRequestCreateToJson(
   FriendRequestCreate instance,
-) => <String, dynamic>{'toUserId': instance.toUserId};
+) => <String, dynamic>{
+  'toUserId': instance.toUserId,
+  'senderUsername': instance.senderUsername,
+};

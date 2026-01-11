@@ -23,6 +23,7 @@ FriendRequest _$FriendRequestFromJson(Map<String, dynamic> json) =>
         const TimestampConverter().fromJson,
       ),
       toUserId: json['toUserId'] as String,
+      senderUsername: json['senderUsername'] as String,
     );
 
 Map<String, dynamic> _$FriendRequestToJson(FriendRequest instance) =>
@@ -42,6 +43,7 @@ Map<String, dynamic> _$FriendRequestToJson(FriendRequest instance) =>
         const TimestampConverter().toJson,
       ),
       'toUserId': instance.toUserId,
+      'senderUsername': instance.senderUsername,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(
