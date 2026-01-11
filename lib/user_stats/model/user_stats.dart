@@ -1,17 +1,15 @@
-class UserStats {
-  final double totalBeersConsumed;
-  final double totalAlcoholConsumed;
-  final double beersConsumedLast30Days;
-  final double alcoholConsumedLast30Days;
-  final int streakDays;
-  final bool isStreakActive;
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  const UserStats({
-    required this.totalBeersConsumed,
-    required this.totalAlcoholConsumed,
-    required this.beersConsumedLast30Days,
-    required this.alcoholConsumedLast30Days,
-    required this.streakDays,
-    required this.isStreakActive,
-  });
+part 'user_stats.freezed.dart';
+
+@freezed
+abstract class UserStats with _$UserStats {
+  const factory UserStats({
+    required double totalBeersConsumed,
+    required double totalAlcoholConsumed,
+    required double beersConsumedLast30Days,
+    required double alcoholConsumedLast30Days,
+    required int streakDays,
+    required bool isStreakActive,
+  }) = _UserStats;
 }
