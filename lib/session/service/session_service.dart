@@ -81,9 +81,9 @@ class SessionService {
     DateTime? endedAt,
   }) async {
     final updatedSession = session.copyWith(
-      name: name,
-      startedAt: startedAt,
-      endedAt: endedAt,
+      name: name ?? session.name,
+      startedAt: startedAt ?? session.startedAt,
+      endedAt: endedAt ?? session.endedAt,
     );
     await sessionController.updateSingle(updatedSession);
   }
