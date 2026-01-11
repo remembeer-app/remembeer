@@ -30,6 +30,7 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
 
   late StreamSubscription<BadgeDefinition> _badgeSubscription;
   late StreamSubscription<RemoteMessage> _notificationTapSubscription;
+  late StreamSubscription<RemoteMessage> _notificationForegroundSubscription;
 
   static const _platform = MethodChannel('quick_add_action');
 
@@ -46,6 +47,9 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
 
     _notificationTapSubscription = _notificationService.notificationTapStream
         .listen(_handleNotificationTap);
+
+    _notificationForegroundSubscription = _notificationService.messageStream
+        .listen(_handleForegroundNotification);
   }
 
   @override
@@ -53,6 +57,7 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
     _platform.setMethodCallHandler(null);
     _badgeSubscription.cancel();
     _notificationTapSubscription.cancel();
+    _notificationForegroundSubscription.cancel();
     super.dispose();
   }
 
@@ -74,6 +79,20 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
         Navigator.of(context).push(
           MaterialPageRoute<void>(builder: (context) => FriendRequestsPage()),
         );
+      case null:
+        // TODO(metju-ac): Handle this when we add logging.
+        debugPrint('Unknown notification type: ${message.data['type']}');
+    }
+  }
+
+  void _handleForegroundNotification(RemoteMessage message) {
+    if (!mounted) return;
+
+    final type = NotificationType.fromString(message.data['type'] as String?);
+
+    switch (type) {
+      case NotificationType.friendRequest:
+        showNotification(context, 'You have a new friend request!');
       case null:
         // TODO(metju-ac): Handle this when we add logging.
         debugPrint('Unknown notification type: ${message.data['type']}');
