@@ -19,3 +19,5 @@ const hGap8 = SizedBox(width: 8);
 const hGap12 = SizedBox(width: 12);
 const hGap16 = SizedBox(width: 16);
 const hGap20 = SizedBox(width: 20);
+
+const drinkPageIndex = 2;

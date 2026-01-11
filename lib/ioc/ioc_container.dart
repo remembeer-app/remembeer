@@ -13,6 +13,7 @@ import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/service/month_service.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
+import 'package:remembeer/page_navigation_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
@@ -28,6 +29,7 @@ class IoCContainer {
 
   static void initialize() {
     get
+      ..registerSingleton(PageNavigationService())
       ..registerSingleton(FirebaseAuth.instance)
       ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
       ..registerSingleton(NotificationService())

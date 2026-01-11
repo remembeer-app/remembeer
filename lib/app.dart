@@ -2,8 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/page/login_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/authenticated_context.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/page_switcher.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -35,7 +35,7 @@ class App extends StatelessWidget {
         }
 
         if (snapshot.hasData) {
-          return const PageSwitcher();
+          return const AuthenticatedContext();
         }
 
         return const LoginPage();
