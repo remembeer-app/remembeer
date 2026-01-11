@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:remembeer/common/converter/timestamp_converter.dart';
 import 'package:remembeer/common/model/entity.dart';
-import 'package:remembeer/common/model/timestamp_converter.dart';
 
 part 'session.g.dart';
 
