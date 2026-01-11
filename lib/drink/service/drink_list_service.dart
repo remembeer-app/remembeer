@@ -1,5 +1,5 @@
-import 'package:remembeer/drink/model/drink_list_data.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
+import 'package:remembeer/drink/type/drink_list_data.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:rxdart/rxdart.dart';
 
