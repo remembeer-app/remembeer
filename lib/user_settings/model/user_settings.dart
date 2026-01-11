@@ -9,13 +9,13 @@ part 'user_settings.g.dart';
 class UserSettings extends Document {
   final DrinkType defaultDrinkType;
   final int defaultDrinkSize;
-  final DrinkListSort drinkListSort;
+  final DrinkListSortOrder drinkListSort;
 
   const UserSettings({
     required super.id,
     required this.defaultDrinkType,
     required this.defaultDrinkSize,
-    this.drinkListSort = DrinkListSort.descending,
+    this.drinkListSort = DrinkListSortOrder.descending,
   });
 
   factory UserSettings.fromJson(Map<String, dynamic> json) =>
@@ -27,7 +27,7 @@ class UserSettings extends Document {
   UserSettings copyWith({
     DrinkType? defaultDrinkType,
     int? defaultDrinkSize,
-    DrinkListSort? drinkListSort,
+    DrinkListSortOrder? drinkListSort,
   }) {
     return UserSettings(
       id: id,

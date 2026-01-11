@@ -15,7 +15,7 @@ class DrinkListSortPage extends StatefulWidget {
 class _DrinkListSortPageState extends State<DrinkListSortPage> {
   final _userSettingsService = get<UserSettingsService>();
 
-  DrinkListSort? _selectedSort;
+  DrinkListSortOrder? _selectedSort;
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +28,15 @@ class _DrinkListSortPageState extends State<DrinkListSortPage> {
       child: AsyncBuilder(
         future: _userSettingsService.currentUserSettings,
         builder: (context, userSettings) {
-          _selectedSort ??= userSettings.drinkListSort;
+          _selectedSort ??= userSettings.drinkListSortOrder;
 
-          return RadioGroup<DrinkListSort>(
+          return RadioGroup<DrinkListSortOrder>(
             groupValue: _selectedSort,
             onChanged: _onSortChanged,
             child: Column(
-              children: DrinkListSort.values.map(_buildSortOption).toList(),
+              children: DrinkListSortOrder.values
+                  .map(_buildSortOption)
+                  .toList(),
             ),
           );
         },
@@ -42,12 +44,12 @@ class _DrinkListSortPageState extends State<DrinkListSortPage> {
     );
   }
 
-  Widget _buildSortOption(DrinkListSort sort) {
+  Widget _buildSortOption(DrinkListSortOrder sort) {
     final isSelected = _selectedSort == sort;
 
     return Card(
       child: ListTile(
-        leading: Radio<DrinkListSort>(value: sort),
+        leading: Radio<DrinkListSortOrder>(value: sort),
         title: Text(sort.displayName),
         subtitle: Text(sort.description),
         selected: isSelected,
@@ -56,7 +58,7 @@ class _DrinkListSortPageState extends State<DrinkListSortPage> {
     );
   }
 
-  Future<void> _onSortChanged(DrinkListSort? value) async {
+  Future<void> _onSortChanged(DrinkListSortOrder? value) async {
     if (value == null) return;
     setState(() {
       _selectedSort = value;

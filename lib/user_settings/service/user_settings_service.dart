@@ -76,15 +76,17 @@ class UserSettingsService {
     );
   }
 
-  Future<void> updateDrinkListSort(DrinkListSort drinkListSort) async {
+  Future<void> updateDrinkListSort(
+    DrinkListSortOrder drinkListSortOrder,
+  ) async {
     final currentUserSettings =
         await userSettingsController.currentUserSettings;
-    if (currentUserSettings.drinkListSort == drinkListSort) {
+    if (currentUserSettings.drinkListSortOrder == drinkListSortOrder) {
       return;
     }
 
     final updatedUserSettings = currentUserSettings.copyWith(
-      drinkListSort: drinkListSort,
+      drinkListSortOrder: drinkListSortOrder,
     );
 
     await userSettingsController.createOrUpdateUserSettings(

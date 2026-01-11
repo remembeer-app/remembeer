@@ -37,7 +37,7 @@ class SessionService {
       userSettingsController.currentUserSettingsStream,
       userService.currentUserStream,
       (sessions, _, userSettings, user) {
-        final drinkListSort = userSettings.drinkListSort;
+        final drinkListSort = userSettings.drinkListSortOrder;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
           user.endOfDayBoundary,
         );
@@ -50,9 +50,9 @@ class SessionService {
         }).toList();
 
         switch (drinkListSort) {
-          case DrinkListSort.descending:
+          case DrinkListSortOrder.descending:
             filtered.sort((a, b) => b.startedAt.compareTo(a.startedAt));
-          case DrinkListSort.ascending:
+          case DrinkListSortOrder.ascending:
             filtered.sort((a, b) => a.startedAt.compareTo(b.startedAt));
         }
 
