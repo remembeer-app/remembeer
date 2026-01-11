@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/controller/controller.dart';
+import 'package:remembeer/common/extension/searchable.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
@@ -17,7 +18,7 @@ class UserController extends Controller<UserModel> {
       streamById(authService.authenticatedUser.uid);
 
   Future<List<UserModel>> searchUsersByUsernameOrEmail(String query) async {
-    final searchableQuery = UserModel.toSearchable(query);
+    final searchableQuery = query.toSearchable();
 
     final usernameQuery = readCollection
         .where('searchableUsername', isGreaterThanOrEqualTo: searchableQuery)
