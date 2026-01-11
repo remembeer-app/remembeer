@@ -24,7 +24,7 @@ _UserSettings _$UserSettingsFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$UserSettingsToJson(_UserSettings instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'defaultDrinkType': instance.defaultDrinkType,
+      'defaultDrinkType': instance.defaultDrinkType.toJson(),
       'defaultDrinkSize': instance.defaultDrinkSize,
       'drinkListSortOrder':
           _$DrinkListSortOrderEnumMap[instance.drinkListSortOrder]!,
