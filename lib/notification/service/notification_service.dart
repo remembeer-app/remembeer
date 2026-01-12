@@ -62,6 +62,20 @@ class NotificationService {
         });
   }
 
+  Future<void> notifyAddedToSession(
+    String toUserId,
+    String fromUserName,
+    String sessionName,
+  ) async {
+    await _firebaseFunctions
+        .httpsCallable('notify_added_to_session')
+        .call<void>({
+          'toUserId': toUserId,
+          'fromUserName': fromUserName,
+          'sessionName': sessionName,
+        });
+  }
+
   void dispose() {
     _messageStreamController.close();
     _notificationTapController.close();

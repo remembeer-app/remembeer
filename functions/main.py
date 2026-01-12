@@ -75,6 +75,35 @@ def notify_friend_request_acceptance(req: https_fn.CallableRequest):
         log_context=log_context
     )
 
+@https_fn.on_call(region="europe-west4")
+def notify_added_to_session(req: https_fn.CallableRequest):
+    receiver_id = req.data.get("toUserId")
+    sender_name = req.data.get("fromUserName", "A friend")
+    session_name = req.data.get("sessionName", "a session")
+
+    log_context = {
+        "receiverId": receiver_id,
+        "senderName": sender_name,
+        "sessionName": session_name,
+        "trigger": "https_callable"
+    }
+
+    if not receiver_id:
+        logger.error("Invalid request data: Missing receiver ID.", **log_context)
+        return
+
+    _send_notification_to_user(
+        receiver_id=receiver_id,
+        title="Added to Session",
+        body=f"{sender_name} added you to {session_name}!",
+        data={
+            "type": "added_to_session",
+            "sessionName": session_name,
+            "click_action": "FLUTTER_NOTIFICATION_CLICK"
+        },
+        log_context=log_context
+    )
+
 
 def _send_notification_to_user(receiver_id: str, title: str, body: str, data: dict, log_context: dict) -> dict:
     db = firestore.client()

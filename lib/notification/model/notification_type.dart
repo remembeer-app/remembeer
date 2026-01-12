@@ -1,6 +1,7 @@
 enum NotificationType {
-  friendRequestReceived('friend_request_received'),
-  friendRequestAccepted('friend_request_accepted');
+  addedToSession('added_to_session'),
+  friendRequestAccepted('friend_request_accepted'),
+  friendRequestReceived('friend_request_received');
 
   final String type;
 

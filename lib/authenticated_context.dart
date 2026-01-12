@@ -88,6 +88,9 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
             builder: (context) => ProfilePage(userId: fromUserId),
           ),
         );
+      case NotificationType.addedToSession:
+        Navigator.of(context).popUntil((route) => route.isFirst);
+        _pageNavigationService.setPageIndex(drinkPageIndex);
       case null:
         // TODO(metju-ac): Handle this when we add logging.
         debugPrint('Unknown notification type: ${message.data['type']}');
@@ -104,6 +107,8 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
         showNotification(context, 'You have a new friend request!');
       case NotificationType.friendRequestAccepted:
         showNotification(context, 'Your friend request was accepted!');
+      case NotificationType.addedToSession:
+        showNotification(context, 'You were added to a session!');
       case null:
         // TODO(metju-ac): Handle this when we add logging.
         debugPrint('Unknown notification type: ${message.data['type']}');
