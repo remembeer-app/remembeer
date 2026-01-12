@@ -143,10 +143,7 @@ class SessionService {
     final currentUser = await userService.currentUser;
     final session = await sessionController.streamById(sessionId).first;
 
-    final updatedMemberIds = Set<String>.from(session.memberIds)..add(memberId);
-    final updatedSession = session.copyWith(memberIds: updatedMemberIds);
-
-    await sessionController.updateSingle(updatedSession);
+    await sessionController.addMemberAtomic(sessionId, memberId);
     await notificationService.notifyAddedToSession(
       memberId,
       currentUser.username,
