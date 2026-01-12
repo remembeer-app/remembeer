@@ -1,7 +1,8 @@
 /// Interface Generator for Freezed classes.
 ///
-/// This package automatically generates abstract interface classes from
-/// Freezed classes based on naming conventions configured in build.yaml.
+/// This package automatically generates abstract interface classes and
+/// extension methods from Freezed classes based on naming conventions
+/// configured in build.yaml.
 ///
 /// Configuration (in your project's build.yaml):
 /// ```yaml
@@ -20,6 +21,13 @@
 /// abstract interface class DrinkTypeFields {
 ///   String get name;
 ///   // ... other getters from constructor parameters
+/// }
+///
+/// extension DrinkTypeFieldsExtension on DrinkTypeFields {
+///   DrinkTypeCore toCore() => DrinkTypeCore(
+///     name: name,
+///     // ... other parameters
+///   );
 /// }
 /// ```
 library;

@@ -10,8 +10,6 @@ part 'drink_type.g.dart';
 
 @freezed
 abstract class DrinkType with _$DrinkType implements Entity, DrinkTypeFields {
-  const DrinkType._();
-
   const factory DrinkType({
     required String id,
     required String userId,
@@ -26,12 +24,4 @@ abstract class DrinkType with _$DrinkType implements Entity, DrinkTypeFields {
 
   factory DrinkType.fromJson(Map<String, dynamic> json) =>
       _$DrinkTypeFromJson(json);
-
-  DrinkTypeCore toEmbedded() {
-    return DrinkTypeCore(
-      name: name,
-      category: category,
-      alcoholPercentage: alcoholPercentage,
-    );
-  }
 }

@@ -17,6 +17,16 @@ abstract interface class DrinkTypeFields {
   double get alcoholPercentage;
 }
 
+/// Extension that provides a `toCore()` method on any class implementing
+/// [DrinkTypeFields], converting it to a [DrinkTypeCore] instance.
+extension DrinkTypeFieldsExtension on DrinkTypeFields {
+  DrinkTypeCore toCore() => DrinkTypeCore(
+    name: name,
+    category: category,
+    alcoholPercentage: alcoholPercentage,
+  );
+}
+
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************

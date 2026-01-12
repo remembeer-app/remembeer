@@ -4,8 +4,8 @@ import 'package:analyzer/dart/element/element.dart';
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
 
-/// Generator that creates abstract interface classes from Freezed classes
-/// based on build.yaml configuration.
+/// Generator that creates abstract interface classes and extension methods
+/// from Freezed classes based on build.yaml configuration.
 ///
 /// Configuration in build.yaml:
 /// ```yaml
@@ -19,7 +19,7 @@ import 'package:source_gen/source_gen.dart';
 /// ```
 ///
 /// Example:
-/// - Input: `DrinkTypeCore` → Output: `DrinkTypeFields`
+/// - Input: `DrinkTypeCore` → Output: `DrinkTypeFields` interface + `toCore()` extension
 class InterfaceGenerator extends Generator {
   final String classSuffix;
   final String interfaceSuffix;
@@ -68,10 +68,12 @@ class InterfaceGenerator extends Generator {
 
       // Extract parameters and build getters
       final getters = StringBuffer();
+      final constructorArgs = StringBuffer();
       for (final param in constructor.formalParameters) {
         final paramName = param.name;
         final paramType = param.type.getDisplayString();
         getters.writeln('  $paramType get $paramName;');
+        constructorArgs.writeln('      $paramName: $paramName,');
       }
 
       output.writeln('''
@@ -82,6 +84,13 @@ class InterfaceGenerator extends Generator {
 /// all the getters defined below.
 abstract interface class $interfaceName {
 $getters}
+
+/// Extension that provides a `toCore()` method on any class implementing
+/// [$interfaceName], converting it to a [$className] instance.
+extension ${interfaceName}Extension on $interfaceName {
+  $className toCore() => $className(
+$constructorArgs    );
+}
 ''');
     }
 
