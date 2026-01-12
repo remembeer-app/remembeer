@@ -143,14 +143,20 @@ class SessionService {
     final currentUser = await userService.currentUser;
     final session = await sessionController.streamById(sessionId).first;
 
-    final updatedMemberIds = Set<String>.from(session.memberIds)..add(memberId);
-    final updatedSession = session.copyWith(memberIds: updatedMemberIds);
-
-    await sessionController.updateSingle(updatedSession);
+    await sessionController.addMemberAtomic(sessionId, memberId);
     await notificationService.notifyAddedToSession(
       memberId,
       currentUser.username,
       session.name,
     );
+  }
+
+  Future<void> leaveSession(Session session) async {
+    invariant(
+      !isSessionOwner(session),
+      'Session owner cannot leave. Delete the session instead.',
+    );
+
+    await sessionController.removeMemberAtomic(session.id, currentUserId);
   }
 }

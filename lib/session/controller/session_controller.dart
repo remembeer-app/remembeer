@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/controller/crud_controller.dart';
+import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/extension/query_firestore_helper.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
@@ -12,4 +14,18 @@ class SessionController extends CrudController<Session, SessionCreate> {
           .where('memberIds', arrayContains: authService.authenticatedUser.uid)
           .orderBy('startedAt', descending: true)
           .mapToStreamList();
+
+  Future<void> addMemberAtomic(String sessionId, String memberId) {
+    return writeCollection.doc(sessionId).update({
+      'memberIds': FieldValue.arrayUnion([memberId]),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> removeMemberAtomic(String sessionId, String memberId) {
+    return writeCollection.doc(sessionId).update({
+      'memberIds': FieldValue.arrayRemove([memberId]),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
 }
