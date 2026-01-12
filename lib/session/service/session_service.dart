@@ -153,4 +153,13 @@ class SessionService {
       session.name,
     );
   }
+
+  Future<void> leaveSession(Session session) async {
+    invariant(
+      !isSessionOwner(session),
+      'Session owner cannot leave. Delete the session instead.',
+    );
+
+    await sessionController.removeMemberAtomic(session.id, currentUserId);
+  }
 }
