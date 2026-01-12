@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
+import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink/page/drink_page.dart';
@@ -23,17 +24,11 @@ class PageSwitcher extends StatefulWidget {
 
 class PageSwitcherState extends State<PageSwitcher> {
   final _pageNavigationService = get<PageNavigationService>();
+  final _authService = get<AuthService>();
   late StreamSubscription<int> _pageSubscription;
+  late List<Widget> _pages;
 
   var _selectedPageIndex = drinkPageIndex;
-
-  static final _pages = <Widget>[
-    ProfilePage(),
-    LeaderboardsPage(),
-    const DrinkPage(),
-    const ActivityPage(),
-    SettingsPage(),
-  ];
 
   @override
   void initState() {
@@ -41,6 +36,13 @@ class PageSwitcherState extends State<PageSwitcher> {
     _pageSubscription = _pageNavigationService.pageIndexStream.listen((index) {
       setState(() => _selectedPageIndex = index);
     });
+    _pages = [
+      ProfilePage(userId: _authService.authenticatedUser.uid, showTitle: false),
+      LeaderboardsPage(),
+      const DrinkPage(),
+      const ActivityPage(),
+      SettingsPage(),
+    ];
   }
 
   @override
