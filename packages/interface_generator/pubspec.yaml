@@ -1,5 +1,5 @@
 name: interface_generator
-description: Generates abstract interfaces from Freezed classes annotated with @GenerateInterface()
+description: Generates abstract interfaces from Freezed classes with a spedific suffix (Core by default).
 
 environment:
   sdk: ">=3.0.0"
