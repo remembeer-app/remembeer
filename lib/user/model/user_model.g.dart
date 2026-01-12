@@ -6,11 +6,11 @@ part of 'user_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
+_UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   id: json['id'] as String,
   email: json['email'] as String,
   username: json['username'] as String,
-  searchableUsername: json['searchableUsername'] as String?,
+  searchableUsername: json['searchableUsername'] as String,
   avatarName: json['avatarName'] as String? ?? 'jirka_kara.png',
   friends:
       (json['friends'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
@@ -33,7 +33,9 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
         ),
 );
 
-Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
+Map<String, dynamic> _$UserModelToJson(
+  _UserModel instance,
+) => <String, dynamic>{
   'id': instance.id,
   'email': instance.email,
   'username': instance.username,

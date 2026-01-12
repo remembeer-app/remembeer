@@ -1,24 +1,21 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/model/value_object.dart';
 
+part 'leaderboard_create.freezed.dart';
 part 'leaderboard_create.g.dart';
 
-@JsonSerializable()
-class LeaderboardCreate extends ValueObject {
-  final String name;
-  final String iconName;
-  final Set<String> memberIds;
-  final Set<String> bannedMemberIds;
-  final String inviteCode;
+@freezed
+abstract class LeaderboardCreate
+    with _$LeaderboardCreate
+    implements ValueObject {
+  const factory LeaderboardCreate({
+    required String name,
+    required String iconName,
+    required Set<String> memberIds,
+    @Default({}) Set<String> bannedMemberIds,
+    required String inviteCode,
+  }) = _LeaderboardCreate;
 
-  LeaderboardCreate({
-    required this.name,
-    required this.iconName,
-    required this.memberIds,
-    this.bannedMemberIds = const {},
-    required this.inviteCode,
-  });
-
-  @override
-  Map<String, dynamic> toJson() => _$LeaderboardCreateToJson(this);
+  factory LeaderboardCreate.fromJson(Map<String, dynamic> json) =>
+      _$LeaderboardCreateFromJson(json);
 }

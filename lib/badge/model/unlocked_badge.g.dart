@@ -6,14 +6,14 @@ part of 'unlocked_badge.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-UnlockedBadge _$UnlockedBadgeFromJson(Map<String, dynamic> json) =>
-    UnlockedBadge(
+_UnlockedBadge _$UnlockedBadgeFromJson(Map<String, dynamic> json) =>
+    _UnlockedBadge(
       badgeId: json['badgeId'] as String,
       unlockedAt: DateTime.parse(json['unlockedAt'] as String),
       isShown: json['isShown'] as bool,
     );
 
-Map<String, dynamic> _$UnlockedBadgeToJson(UnlockedBadge instance) =>
+Map<String, dynamic> _$UnlockedBadgeToJson(_UnlockedBadge instance) =>
     <String, dynamic>{
       'badgeId': instance.badgeId,
       'unlockedAt': instance.unlockedAt.toIso8601String(),

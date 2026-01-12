@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/extension/searchable.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/friend_request/model/friend_request_create.dart';
@@ -56,13 +57,16 @@ class UserService {
   }
 
   Future<void> createDefaultUser({String? username}) async {
+    final resolvedUsername =
+        username ??
+        authService.authenticatedUser.displayName ??
+        authService.authenticatedUser.email!;
+
     final defaultUser = UserModel(
       id: authService.authenticatedUser.uid,
       email: authService.authenticatedUser.email!,
-      username:
-          username ??
-          authService.authenticatedUser.displayName ??
-          authService.authenticatedUser.email!,
+      username: resolvedUsername,
+      searchableUsername: resolvedUsername.toSearchable(),
     );
 
     await userController.createOrUpdateUser(defaultUser);
@@ -81,7 +85,7 @@ class UserService {
       return;
     }
 
-    final updatedUser = currentUser.copyWith(username: trimmedUsername);
+    final updatedUser = currentUser.withUsername(trimmedUsername);
 
     await userController.createOrUpdateUser(updatedUser);
   }

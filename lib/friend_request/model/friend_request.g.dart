@@ -6,17 +6,15 @@ part of 'friend_request.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-FriendRequest _$FriendRequestFromJson(Map<String, dynamic> json) =>
-    FriendRequest(
+_FriendRequest _$FriendRequestFromJson(Map<String, dynamic> json) =>
+    _FriendRequest(
       id: json['id'] as String,
       userId: json['userId'] as String,
-      createdAt: _$JsonConverterFromJson<Timestamp, DateTime>(
-        json['createdAt'],
-        const TimestampConverter().fromJson,
+      createdAt: const TimestampConverterOptimistic().fromJson(
+        json['createdAt'] as Timestamp?,
       ),
-      updatedAt: _$JsonConverterFromJson<Timestamp, DateTime>(
-        json['updatedAt'],
-        const TimestampConverter().fromJson,
+      updatedAt: const TimestampConverterOptimistic().fromJson(
+        json['updatedAt'] as Timestamp?,
       ),
       deletedAt: _$JsonConverterFromJson<Timestamp, DateTime>(
         json['deletedAt'],
@@ -25,24 +23,19 @@ FriendRequest _$FriendRequestFromJson(Map<String, dynamic> json) =>
       toUserId: json['toUserId'] as String,
     );
 
-Map<String, dynamic> _$FriendRequestToJson(FriendRequest instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'userId': instance.userId,
-      'createdAt': _$JsonConverterToJson<Timestamp, DateTime>(
-        instance.createdAt,
-        const TimestampConverter().toJson,
-      ),
-      'updatedAt': _$JsonConverterToJson<Timestamp, DateTime>(
-        instance.updatedAt,
-        const TimestampConverter().toJson,
-      ),
-      'deletedAt': _$JsonConverterToJson<Timestamp, DateTime>(
-        instance.deletedAt,
-        const TimestampConverter().toJson,
-      ),
-      'toUserId': instance.toUserId,
-    };
+Map<String, dynamic> _$FriendRequestToJson(
+  _FriendRequest instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'userId': instance.userId,
+  'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
+  'updatedAt': const TimestampConverterOptimistic().toJson(instance.updatedAt),
+  'deletedAt': _$JsonConverterToJson<Timestamp, DateTime>(
+    instance.deletedAt,
+    const TimestampConverter().toJson,
+  ),
+  'toUserId': instance.toUserId,
+};
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,

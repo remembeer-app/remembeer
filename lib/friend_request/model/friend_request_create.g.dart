@@ -6,6 +6,9 @@ part of 'friend_request_create.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_FriendRequestCreate _$FriendRequestCreateFromJson(Map<String, dynamic> json) =>
+    _FriendRequestCreate(toUserId: json['toUserId'] as String);
+
 Map<String, dynamic> _$FriendRequestCreateToJson(
-  FriendRequestCreate instance,
+  _FriendRequestCreate instance,
 ) => <String, dynamic>{'toUserId': instance.toUserId};

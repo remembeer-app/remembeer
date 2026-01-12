@@ -6,7 +6,17 @@ part of 'drink_create.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Map<String, dynamic> _$DrinkCreateToJson(DrinkCreate instance) =>
+_DrinkCreate _$DrinkCreateFromJson(Map<String, dynamic> json) => _DrinkCreate(
+  consumedAt: DateTime.parse(json['consumedAt'] as String),
+  drinkType: DrinkType.fromJson(json['drinkType'] as Map<String, dynamic>),
+  volumeInMilliliters: (json['volumeInMilliliters'] as num).toInt(),
+  location: _$JsonConverterFromJson<GeoPoint, GeoPoint>(
+    json['location'],
+    const GeoPointConverter().fromJson,
+  ),
+);
+
+Map<String, dynamic> _$DrinkCreateToJson(_DrinkCreate instance) =>
     <String, dynamic>{
       'consumedAt': instance.consumedAt.toIso8601String(),
       'drinkType': instance.drinkType.toJson(),
@@ -16,6 +26,11 @@ Map<String, dynamic> _$DrinkCreateToJson(DrinkCreate instance) =>
         const GeoPointConverter().toJson,
       ),
     };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,

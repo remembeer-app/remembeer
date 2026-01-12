@@ -1,21 +1,16 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+part 'unlocked_badge.freezed.dart';
 part 'unlocked_badge.g.dart';
 
-@JsonSerializable()
-class UnlockedBadge {
-  final String badgeId;
-  final DateTime unlockedAt;
-  final bool isShown;
-
-  const UnlockedBadge({
-    required this.badgeId,
-    required this.unlockedAt,
-    required this.isShown,
-  });
+@freezed
+abstract class UnlockedBadge with _$UnlockedBadge {
+  const factory UnlockedBadge({
+    required String badgeId,
+    required DateTime unlockedAt,
+    required bool isShown,
+  }) = _UnlockedBadge;
 
   factory UnlockedBadge.fromJson(Map<String, dynamic> json) =>
       _$UnlockedBadgeFromJson(json);
-
-  Map<String, dynamic> toJson() => _$UnlockedBadgeToJson(this);
 }

@@ -1,5 +1,5 @@
-import 'package:remembeer/drink/model/drink_list_data.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
+import 'package:remembeer/drink/type/drink_list_data.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -13,7 +13,7 @@ class DrinkListService {
     return Rx.combineLatest2(
       drinkService.drinksForSelectedDateStream,
       sessionService.mySessionsForSelectedDateStream,
-      (drinks, sessions) => DrinkListData(drinks: drinks, sessions: sessions),
+      (drinks, sessions) => (drinks: drinks, sessions: sessions),
     );
   }
 }

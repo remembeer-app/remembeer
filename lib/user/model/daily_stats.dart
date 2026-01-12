@@ -1,27 +1,23 @@
 import 'dart:math';
 
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+part 'daily_stats.freezed.dart';
 part 'daily_stats.g.dart';
 
-@JsonSerializable()
-class DailyStats {
-  final int day;
-  final double beersConsumed;
-  final double alcoholConsumedMl;
-  final double beersAfter6pm;
+@freezed
+abstract class DailyStats with _$DailyStats {
+  const DailyStats._();
 
-  const DailyStats({
-    required this.day,
-    this.beersConsumed = 0,
-    this.alcoholConsumedMl = 0,
-    this.beersAfter6pm = 0,
-  });
+  const factory DailyStats({
+    required int day,
+    @Default(0) double beersConsumed,
+    @Default(0) double alcoholConsumedMl,
+    @Default(0) double beersAfter6pm,
+  }) = _DailyStats;
 
   factory DailyStats.fromJson(Map<String, dynamic> json) =>
       _$DailyStatsFromJson(json);
-
-  Map<String, dynamic> toJson() => _$DailyStatsToJson(this);
 
   DailyStats addDrink({
     required double beersEquivalent,
@@ -44,19 +40,6 @@ class DailyStats {
       beersConsumed: max(0, beersConsumed - beersEquivalent),
       alcoholConsumedMl: max(0, alcoholConsumedMl - alcoholMl),
       beersAfter6pm: max(0, beersAfter6pm - (after6pm ? beersEquivalent : 0)),
-    );
-  }
-
-  DailyStats copyWith({
-    double? beersConsumed,
-    double? alcoholConsumedMl,
-    double? beersAfter6pm,
-  }) {
-    return DailyStats(
-      day: day,
-      beersConsumed: beersConsumed ?? this.beersConsumed,
-      alcoholConsumedMl: alcoholConsumedMl ?? this.alcoholConsumedMl,
-      beersAfter6pm: beersAfter6pm ?? this.beersAfter6pm,
     );
   }
 }

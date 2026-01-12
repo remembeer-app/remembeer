@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 
-enum DrinkCategory { beer, cider, cocktail, spirit, wine }
+enum DrinkCategory {
+  beer,
+  cider,
+  cocktail,
+  spirit,
+  wine;
 
-extension DrinkCategoryExtension on DrinkCategory {
   String get displayName {
     return switch (this) {
       DrinkCategory.beer => 'Beer',

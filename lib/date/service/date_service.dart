@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/date/model/date_state.dart';
+import 'package:remembeer/date/type/date_state.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:rxdart/rxdart.dart';

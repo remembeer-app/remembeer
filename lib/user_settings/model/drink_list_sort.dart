@@ -1,19 +1,20 @@
-enum DrinkListSort {
+enum DrinkListSortOrder {
   descending,
   ascending;
 
   String get displayName {
     return switch (this) {
-      DrinkListSort.descending => 'Newest first',
-      DrinkListSort.ascending => 'Oldest first',
+      DrinkListSortOrder.descending => 'Newest first',
+      DrinkListSortOrder.ascending => 'Oldest first',
     };
   }
 
   String get description {
     return switch (this) {
-      DrinkListSort.descending =>
+      DrinkListSortOrder.descending =>
         'Most recent drinks and sessions appear at the top',
-      DrinkListSort.ascending => 'Oldest drinks and sessions appear at the top',
+      DrinkListSortOrder.ascending =>
+        'Oldest drinks and sessions appear at the top',
     };
   }
 }
