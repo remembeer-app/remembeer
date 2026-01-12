@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/drink_type/model/drink_type.dart';
+import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker_sheet.dart';
 import 'package:remembeer/drink_type/widget/selected_drink_display.dart';
 
 class DrinkTypePicker extends StatelessWidget {
-  final DrinkType selectedDrinkType;
-  final void Function(DrinkType) onChanged;
+  final DrinkTypeCore selectedDrinkType;
+  final void Function(DrinkTypeCore) onChanged;
 
   const DrinkTypePicker({
     super.key,
@@ -14,16 +14,16 @@ class DrinkTypePicker extends StatelessWidget {
   });
 
   void _openPicker(BuildContext context) {
-    showModalBottomSheet<DrinkType>(
+    showModalBottomSheet<DrinkTypeCore>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
       builder: (context) =>
           DrinkTypePickerSheet(selectedDrinkType: selectedDrinkType),
-    ).then((selectedDrink) {
-      if (selectedDrink != null) {
-        onChanged(selectedDrink);
+    ).then((selectedDrinkType) {
+      if (selectedDrinkType != null) {
+        onChanged(selectedDrinkType);
       }
     });
   }

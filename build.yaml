@@ -4,3 +4,7 @@ targets:
       json_serializable:
         options:
           explicit_to_json: true
+      interface_generator:interface_builder:
+        options:
+          class_suffix: "Core"
+          interface_suffix: "Fields"

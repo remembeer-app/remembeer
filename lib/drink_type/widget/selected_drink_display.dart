@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink_type/model/drink_type.dart';
+import 'package:remembeer/drink_type/model/drink_type_core.dart';
 
 class SelectedDrinkDisplay extends StatelessWidget {
-  final DrinkType drinkType;
+  final DrinkTypeCore drinkType;
 
   const SelectedDrinkDisplay({super.key, required this.drinkType});
 

@@ -8,7 +8,7 @@ part of 'drink_create.dart';
 
 _DrinkCreate _$DrinkCreateFromJson(Map<String, dynamic> json) => _DrinkCreate(
   consumedAt: DateTime.parse(json['consumedAt'] as String),
-  drinkType: DrinkType.fromJson(json['drinkType'] as Map<String, dynamic>),
+  drinkType: DrinkTypeCore.fromJson(json['drinkType'] as Map<String, dynamic>),
   volumeInMilliliters: (json['volumeInMilliliters'] as num).toInt(),
   location: _$JsonConverterFromJson<GeoPoint, GeoPoint>(
     json['location'],

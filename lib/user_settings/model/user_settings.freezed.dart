@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserSettings {
 
- String get id; DrinkType get defaultDrinkType; int get defaultDrinkSize; DrinkListSortOrder get drinkListSortOrder; String? get notificationToken;
+ String get id; DrinkTypeCore get defaultDrinkType; int get defaultDrinkSize; DrinkListSortOrder get drinkListSortOrder; String? get notificationToken;
 /// Create a copy of UserSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +48,11 @@ abstract mixin class $UserSettingsCopyWith<$Res>  {
   factory $UserSettingsCopyWith(UserSettings value, $Res Function(UserSettings) _then) = _$UserSettingsCopyWithImpl;
 @useResult
 $Res call({
- String id, DrinkType defaultDrinkType, int defaultDrinkSize, DrinkListSortOrder drinkListSortOrder, String? notificationToken
+ String id, DrinkTypeCore defaultDrinkType, int defaultDrinkSize, DrinkListSortOrder drinkListSortOrder, String? notificationToken
 });
 
 
-$DrinkTypeCopyWith<$Res> get defaultDrinkType;
+$DrinkTypeCoreCopyWith<$Res> get defaultDrinkType;
 
 }
 /// @nodoc
@@ -69,7 +69,7 @@ class _$UserSettingsCopyWithImpl<$Res>
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,defaultDrinkType: null == defaultDrinkType ? _self.defaultDrinkType : defaultDrinkType // ignore: cast_nullable_to_non_nullable
-as DrinkType,defaultDrinkSize: null == defaultDrinkSize ? _self.defaultDrinkSize : defaultDrinkSize // ignore: cast_nullable_to_non_nullable
+as DrinkTypeCore,defaultDrinkSize: null == defaultDrinkSize ? _self.defaultDrinkSize : defaultDrinkSize // ignore: cast_nullable_to_non_nullable
 as int,drinkListSortOrder: null == drinkListSortOrder ? _self.drinkListSortOrder : drinkListSortOrder // ignore: cast_nullable_to_non_nullable
 as DrinkListSortOrder,notificationToken: freezed == notificationToken ? _self.notificationToken : notificationToken // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -79,9 +79,9 @@ as String?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$DrinkTypeCopyWith<$Res> get defaultDrinkType {
+$DrinkTypeCoreCopyWith<$Res> get defaultDrinkType {
   
-  return $DrinkTypeCopyWith<$Res>(_self.defaultDrinkType, (value) {
+  return $DrinkTypeCoreCopyWith<$Res>(_self.defaultDrinkType, (value) {
     return _then(_self.copyWith(defaultDrinkType: value));
   });
 }
@@ -166,7 +166,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DrinkTypeCore defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserSettings() when $default != null:
 return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder,_that.notificationToken);case _:
@@ -187,7 +187,7 @@ return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.dri
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DrinkTypeCore defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)  $default,) {final _that = this;
 switch (_that) {
 case _UserSettings():
 return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder,_that.notificationToken);case _:
@@ -207,7 +207,7 @@ return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.dri
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DrinkTypeCore defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)?  $default,) {final _that = this;
 switch (_that) {
 case _UserSettings() when $default != null:
 return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder,_that.notificationToken);case _:
@@ -226,7 +226,7 @@ class _UserSettings implements UserSettings {
   factory _UserSettings.fromJson(Map<String, dynamic> json) => _$UserSettingsFromJson(json);
 
 @override final  String id;
-@override final  DrinkType defaultDrinkType;
+@override final  DrinkTypeCore defaultDrinkType;
 @override final  int defaultDrinkSize;
 @override@JsonKey() final  DrinkListSortOrder drinkListSortOrder;
 @override final  String? notificationToken;
@@ -264,11 +264,11 @@ abstract mixin class _$UserSettingsCopyWith<$Res> implements $UserSettingsCopyWi
   factory _$UserSettingsCopyWith(_UserSettings value, $Res Function(_UserSettings) _then) = __$UserSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String id, DrinkType defaultDrinkType, int defaultDrinkSize, DrinkListSortOrder drinkListSortOrder, String? notificationToken
+ String id, DrinkTypeCore defaultDrinkType, int defaultDrinkSize, DrinkListSortOrder drinkListSortOrder, String? notificationToken
 });
 
 
-@override $DrinkTypeCopyWith<$Res> get defaultDrinkType;
+@override $DrinkTypeCoreCopyWith<$Res> get defaultDrinkType;
 
 }
 /// @nodoc
@@ -285,7 +285,7 @@ class __$UserSettingsCopyWithImpl<$Res>
   return _then(_UserSettings(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,defaultDrinkType: null == defaultDrinkType ? _self.defaultDrinkType : defaultDrinkType // ignore: cast_nullable_to_non_nullable
-as DrinkType,defaultDrinkSize: null == defaultDrinkSize ? _self.defaultDrinkSize : defaultDrinkSize // ignore: cast_nullable_to_non_nullable
+as DrinkTypeCore,defaultDrinkSize: null == defaultDrinkSize ? _self.defaultDrinkSize : defaultDrinkSize // ignore: cast_nullable_to_non_nullable
 as int,drinkListSortOrder: null == drinkListSortOrder ? _self.drinkListSortOrder : drinkListSortOrder // ignore: cast_nullable_to_non_nullable
 as DrinkListSortOrder,notificationToken: freezed == notificationToken ? _self.notificationToken : notificationToken // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -296,9 +296,9 @@ as String?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$DrinkTypeCopyWith<$Res> get defaultDrinkType {
+$DrinkTypeCoreCopyWith<$Res> get defaultDrinkType {
   
-  return $DrinkTypeCopyWith<$Res>(_self.defaultDrinkType, (value) {
+  return $DrinkTypeCoreCopyWith<$Res>(_self.defaultDrinkType, (value) {
     return _then(_self.copyWith(defaultDrinkType: value));
   });
 }

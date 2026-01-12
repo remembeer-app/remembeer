@@ -4,11 +4,11 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
-import 'package:remembeer/drink_type/model/drink_type.dart';
+import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 
 class DrinkTypePickerSheet extends StatefulWidget {
-  final DrinkType selectedDrinkType;
+  final DrinkTypeCore selectedDrinkType;
 
   const DrinkTypePickerSheet({super.key, required this.selectedDrinkType});
 
@@ -29,7 +29,7 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
     super.dispose();
   }
 
-  List<DrinkType> _filterDrinkTypes(List<DrinkType> drinkTypes) {
+  Iterable<DrinkTypeCore> _filterDrinkTypes(Set<DrinkTypeCore> drinkTypes) {
     return drinkTypes.where((drinkType) {
       if (_searchQuery.isNotEmpty) {
         final matchesSearch = drinkType.name.toLowerCase().contains(
@@ -47,7 +47,7 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
       }
 
       return true;
-    }).toList();
+    });
   }
 
   @override
@@ -237,13 +237,11 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
 
   Widget _buildDrinkTypeList(ScrollController scrollController) {
     return AsyncBuilder(
-      stream: _drinkTypeController.entitiesStreamForCurrentUser,
-      builder: (context, unmodifiableDrinkTypes) {
-        final drinkTypes = unmodifiableDrinkTypes.toList();
-
-        if (!drinkTypes.contains(widget.selectedDrinkType)) {
-          drinkTypes.insert(0, widget.selectedDrinkType);
-        }
+      stream: _drinkTypeController.entitiesStreamForCurrentUser.map(
+        (drinkTypes) => drinkTypes.map((e) => e.toEmbedded()).toSet(),
+      ),
+      builder: (context, drinkTypes) {
+        drinkTypes.add(widget.selectedDrinkType);
 
         final filteredDrinkTypes = _filterDrinkTypes(drinkTypes);
 
@@ -251,13 +249,15 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
           return _buildEmptyState();
         }
 
-        final groupedDrinks = <DrinkCategory, List<DrinkType>>{};
-        for (final drink in filteredDrinkTypes) {
-          groupedDrinks.putIfAbsent(drink.category, () => []).add(drink);
+        final groupedDrinkTypes = <DrinkCategory, List<DrinkTypeCore>>{};
+        for (final drinkType in filteredDrinkTypes) {
+          groupedDrinkTypes
+              .putIfAbsent(drinkType.category, () => [])
+              .add(drinkType);
         }
 
         final sortedCategories = DrinkCategory.values
-            .where(groupedDrinks.containsKey)
+            .where(groupedDrinkTypes.containsKey)
             .toList();
 
         return ListView.builder(
@@ -266,16 +266,19 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
           itemCount: sortedCategories.length,
           itemBuilder: (context, index) {
             final category = sortedCategories[index];
-            final drinks = groupedDrinks[category]!;
+            final drinkTypes = groupedDrinkTypes[category]!;
 
-            return _buildCategorySection(category, drinks);
+            return _buildCategorySection(category, drinkTypes);
           },
         );
       },
     );
   }
 
-  Widget _buildCategorySection(DrinkCategory category, List<DrinkType> drinks) {
+  Widget _buildCategorySection(
+    DrinkCategory category,
+    List<DrinkTypeCore> drinkTypes,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -295,7 +298,7 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
               ),
               hGap8,
               Text(
-                '(${drinks.length})',
+                '(${drinkTypes.length})',
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -304,12 +307,12 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
             ],
           ),
         ),
-        ...drinks.map(_buildDrinkTile),
+        ...drinkTypes.map(_buildDrinkTile),
       ],
     );
   }
 
-  Widget _buildDrinkTile(DrinkType drinkType) {
+  Widget _buildDrinkTile(DrinkTypeCore drinkType) {
     final isSelected = widget.selectedDrinkType == drinkType;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;

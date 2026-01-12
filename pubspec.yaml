@@ -55,6 +55,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^3.2.3
+  interface_generator:
+    path: packages/interface_generator
   json_serializable: ^6.11.1
   meta: ^1.16.0
 
