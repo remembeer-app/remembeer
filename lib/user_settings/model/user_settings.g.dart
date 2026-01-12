@@ -19,6 +19,7 @@ _UserSettings _$UserSettingsFromJson(Map<String, dynamic> json) =>
             json['drinkListSortOrder'],
           ) ??
           DrinkListSortOrder.descending,
+      notificationToken: json['notificationToken'] as String?,
     );
 
 Map<String, dynamic> _$UserSettingsToJson(_UserSettings instance) =>
@@ -28,6 +29,7 @@ Map<String, dynamic> _$UserSettingsToJson(_UserSettings instance) =>
       'defaultDrinkSize': instance.defaultDrinkSize,
       'drinkListSortOrder':
           _$DrinkListSortOrderEnumMap[instance.drinkListSortOrder]!,
+      'notificationToken': instance.notificationToken,
     };
 
 const _$DrinkListSortOrderEnumMap = {

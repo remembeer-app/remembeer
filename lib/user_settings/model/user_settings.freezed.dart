@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserSettings {
 
- String get id; DrinkType get defaultDrinkType; int get defaultDrinkSize; DrinkListSortOrder get drinkListSortOrder;
+ String get id; DrinkType get defaultDrinkType; int get defaultDrinkSize; DrinkListSortOrder get drinkListSortOrder; String? get notificationToken;
 /// Create a copy of UserSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UserSettingsCopyWith<UserSettings> get copyWith => _$UserSettingsCopyWithImpl<U
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserSettings&&(identical(other.id, id) || other.id == id)&&(identical(other.defaultDrinkType, defaultDrinkType) || other.defaultDrinkType == defaultDrinkType)&&(identical(other.defaultDrinkSize, defaultDrinkSize) || other.defaultDrinkSize == defaultDrinkSize)&&(identical(other.drinkListSortOrder, drinkListSortOrder) || other.drinkListSortOrder == drinkListSortOrder));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserSettings&&(identical(other.id, id) || other.id == id)&&(identical(other.defaultDrinkType, defaultDrinkType) || other.defaultDrinkType == defaultDrinkType)&&(identical(other.defaultDrinkSize, defaultDrinkSize) || other.defaultDrinkSize == defaultDrinkSize)&&(identical(other.drinkListSortOrder, drinkListSortOrder) || other.drinkListSortOrder == drinkListSortOrder)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,defaultDrinkType,defaultDrinkSize,drinkListSortOrder);
+int get hashCode => Object.hash(runtimeType,id,defaultDrinkType,defaultDrinkSize,drinkListSortOrder,notificationToken);
 
 @override
 String toString() {
-  return 'UserSettings(id: $id, defaultDrinkType: $defaultDrinkType, defaultDrinkSize: $defaultDrinkSize, drinkListSortOrder: $drinkListSortOrder)';
+  return 'UserSettings(id: $id, defaultDrinkType: $defaultDrinkType, defaultDrinkSize: $defaultDrinkSize, drinkListSortOrder: $drinkListSortOrder, notificationToken: $notificationToken)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UserSettingsCopyWith<$Res>  {
   factory $UserSettingsCopyWith(UserSettings value, $Res Function(UserSettings) _then) = _$UserSettingsCopyWithImpl;
 @useResult
 $Res call({
- String id, DrinkType defaultDrinkType, int defaultDrinkSize, DrinkListSortOrder drinkListSortOrder
+ String id, DrinkType defaultDrinkType, int defaultDrinkSize, DrinkListSortOrder drinkListSortOrder, String? notificationToken
 });
 
 
@@ -65,13 +65,14 @@ class _$UserSettingsCopyWithImpl<$Res>
 
 /// Create a copy of UserSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? defaultDrinkType = null,Object? defaultDrinkSize = null,Object? drinkListSortOrder = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? defaultDrinkType = null,Object? defaultDrinkSize = null,Object? drinkListSortOrder = null,Object? notificationToken = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,defaultDrinkType: null == defaultDrinkType ? _self.defaultDrinkType : defaultDrinkType // ignore: cast_nullable_to_non_nullable
 as DrinkType,defaultDrinkSize: null == defaultDrinkSize ? _self.defaultDrinkSize : defaultDrinkSize // ignore: cast_nullable_to_non_nullable
 as int,drinkListSortOrder: null == drinkListSortOrder ? _self.drinkListSortOrder : drinkListSortOrder // ignore: cast_nullable_to_non_nullable
-as DrinkListSortOrder,
+as DrinkListSortOrder,notificationToken: freezed == notificationToken ? _self.notificationToken : notificationToken // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of UserSettings
@@ -165,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserSettings() when $default != null:
-return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder);case _:
+return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder,_that.notificationToken);case _:
   return orElse();
 
 }
@@ -186,10 +187,10 @@ return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.dri
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)  $default,) {final _that = this;
 switch (_that) {
 case _UserSettings():
-return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder);case _:
+return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder,_that.notificationToken);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +207,10 @@ return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.dri
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DrinkType defaultDrinkType,  int defaultDrinkSize,  DrinkListSortOrder drinkListSortOrder,  String? notificationToken)?  $default,) {final _that = this;
 switch (_that) {
 case _UserSettings() when $default != null:
-return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder);case _:
+return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.drinkListSortOrder,_that.notificationToken);case _:
   return null;
 
 }
@@ -221,13 +222,14 @@ return $default(_that.id,_that.defaultDrinkType,_that.defaultDrinkSize,_that.dri
 @JsonSerializable()
 
 class _UserSettings implements UserSettings {
-  const _UserSettings({required this.id, required this.defaultDrinkType, required this.defaultDrinkSize, this.drinkListSortOrder = DrinkListSortOrder.descending});
+  const _UserSettings({required this.id, required this.defaultDrinkType, required this.defaultDrinkSize, this.drinkListSortOrder = DrinkListSortOrder.descending, this.notificationToken});
   factory _UserSettings.fromJson(Map<String, dynamic> json) => _$UserSettingsFromJson(json);
 
 @override final  String id;
 @override final  DrinkType defaultDrinkType;
 @override final  int defaultDrinkSize;
 @override@JsonKey() final  DrinkListSortOrder drinkListSortOrder;
+@override final  String? notificationToken;
 
 /// Create a copy of UserSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -242,16 +244,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserSettings&&(identical(other.id, id) || other.id == id)&&(identical(other.defaultDrinkType, defaultDrinkType) || other.defaultDrinkType == defaultDrinkType)&&(identical(other.defaultDrinkSize, defaultDrinkSize) || other.defaultDrinkSize == defaultDrinkSize)&&(identical(other.drinkListSortOrder, drinkListSortOrder) || other.drinkListSortOrder == drinkListSortOrder));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserSettings&&(identical(other.id, id) || other.id == id)&&(identical(other.defaultDrinkType, defaultDrinkType) || other.defaultDrinkType == defaultDrinkType)&&(identical(other.defaultDrinkSize, defaultDrinkSize) || other.defaultDrinkSize == defaultDrinkSize)&&(identical(other.drinkListSortOrder, drinkListSortOrder) || other.drinkListSortOrder == drinkListSortOrder)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,defaultDrinkType,defaultDrinkSize,drinkListSortOrder);
+int get hashCode => Object.hash(runtimeType,id,defaultDrinkType,defaultDrinkSize,drinkListSortOrder,notificationToken);
 
 @override
 String toString() {
-  return 'UserSettings(id: $id, defaultDrinkType: $defaultDrinkType, defaultDrinkSize: $defaultDrinkSize, drinkListSortOrder: $drinkListSortOrder)';
+  return 'UserSettings(id: $id, defaultDrinkType: $defaultDrinkType, defaultDrinkSize: $defaultDrinkSize, drinkListSortOrder: $drinkListSortOrder, notificationToken: $notificationToken)';
 }
 
 
@@ -262,7 +264,7 @@ abstract mixin class _$UserSettingsCopyWith<$Res> implements $UserSettingsCopyWi
   factory _$UserSettingsCopyWith(_UserSettings value, $Res Function(_UserSettings) _then) = __$UserSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String id, DrinkType defaultDrinkType, int defaultDrinkSize, DrinkListSortOrder drinkListSortOrder
+ String id, DrinkType defaultDrinkType, int defaultDrinkSize, DrinkListSortOrder drinkListSortOrder, String? notificationToken
 });
 
 
@@ -279,13 +281,14 @@ class __$UserSettingsCopyWithImpl<$Res>
 
 /// Create a copy of UserSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? defaultDrinkType = null,Object? defaultDrinkSize = null,Object? drinkListSortOrder = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? defaultDrinkType = null,Object? defaultDrinkSize = null,Object? drinkListSortOrder = null,Object? notificationToken = freezed,}) {
   return _then(_UserSettings(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,defaultDrinkType: null == defaultDrinkType ? _self.defaultDrinkType : defaultDrinkType // ignore: cast_nullable_to_non_nullable
 as DrinkType,defaultDrinkSize: null == defaultDrinkSize ? _self.defaultDrinkSize : defaultDrinkSize // ignore: cast_nullable_to_non_nullable
 as int,drinkListSortOrder: null == drinkListSortOrder ? _self.drinkListSortOrder : drinkListSortOrder // ignore: cast_nullable_to_non_nullable
-as DrinkListSortOrder,
+as DrinkListSortOrder,notificationToken: freezed == notificationToken ? _self.notificationToken : notificationToken // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

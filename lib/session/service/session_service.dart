@@ -1,6 +1,7 @@
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/date/service/date_service.dart';
+import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
@@ -16,6 +17,7 @@ class SessionService {
   final DateService dateService;
   final UserSettingsController userSettingsController;
   final UserService userService;
+  final NotificationService notificationService;
 
   SessionService({
     required this.authService,
@@ -23,6 +25,7 @@ class SessionService {
     required this.dateService,
     required this.userSettingsController,
     required this.userService,
+    required this.notificationService,
   });
 
   String get currentUserId => authService.authenticatedUser.uid;
@@ -137,9 +140,17 @@ class SessionService {
     required String sessionId,
     required String memberId,
   }) async {
+    final currentUser = await userService.currentUser;
     final session = await sessionController.streamById(sessionId).first;
+
     final updatedMemberIds = Set<String>.from(session.memberIds)..add(memberId);
     final updatedSession = session.copyWith(memberIds: updatedMemberIds);
+
     await sessionController.updateSingle(updatedSession);
+    await notificationService.notifyAddedToSession(
+      memberId,
+      currentUser.username,
+      session.name,
+    );
   }
 }
