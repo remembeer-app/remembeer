@@ -9,8 +9,7 @@ class DrinkTypeController extends CrudController<DrinkType, DrinkTypeCreate> {
   DrinkTypeController({required super.authService})
     : super(collectionPath: 'drink_types', fromJson: DrinkType.fromJson);
 
-  @override
-  Stream<List<DrinkType>> get entitiesStreamForCurrentUser => nonDeletedEntities
+  Stream<List<DrinkType>> get allAvailableDrinkTypesStream => nonDeletedEntities
       .where(
         userIdField,
         whereIn: [authService.authenticatedUser.uid, globalUserId],
