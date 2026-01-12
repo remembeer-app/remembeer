@@ -6,8 +6,8 @@ import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
 import 'package:remembeer/leaderboard/model/join_leaderboard_result.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_create.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_entry.dart';
 import 'package:remembeer/leaderboard/service/month_service.dart';
+import 'package:remembeer/leaderboard/type/leaderboard_entry.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -277,7 +277,7 @@ class LeaderboardService {
     return Rx.combineLatestList(userStreams).map((users) {
       final entries = users.map((user) {
         final stats = user.getMonthlyStats(year, month);
-        return LeaderboardEntry(
+        return (
           user: user,
           beersConsumed: stats.beersConsumed,
           alcoholConsumedMl: stats.alcoholConsumedMl,
@@ -305,7 +305,7 @@ class LeaderboardService {
 
     return entries
         .map(
-          (e) => LeaderboardEntry(
+          (e) => (
             user: e.user,
             beersConsumed: e.beersConsumed,
             alcoholConsumedMl: e.alcoholConsumedMl,

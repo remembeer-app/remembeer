@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
-import 'package:remembeer/badge/model/badge_definition.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
+import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/badge/widget/badge_icon.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';

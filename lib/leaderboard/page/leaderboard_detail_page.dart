@@ -7,12 +7,12 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_entry.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
 import 'package:remembeer/leaderboard/page/manage_leaderboard_page.dart';
 import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/service/month_service.dart';
+import 'package:remembeer/leaderboard/type/leaderboard_entry.dart';
 import 'package:remembeer/leaderboard/widget/month_selector.dart';
 import 'package:remembeer/leaderboard/widget/standing_card.dart';
 

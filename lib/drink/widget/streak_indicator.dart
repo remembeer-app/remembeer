@@ -3,8 +3,8 @@ import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
-import 'package:remembeer/user_stats/model/user_stats.dart';
-import 'package:remembeer/user_stats/service/user_stats_service.dart';
+import 'package:remembeer/user/service/user_stats_service.dart';
+import 'package:remembeer/user/type/user_stats.dart';
 
 class StreakIndicator extends StatelessWidget {
   StreakIndicator({super.key});
