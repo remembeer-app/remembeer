@@ -1,39 +1,22 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/model/document.dart';
 import 'package:remembeer/drink_type/model/drink_type.dart';
 import 'package:remembeer/user_settings/model/drink_list_sort.dart';
 
+part 'user_settings.freezed.dart';
 part 'user_settings.g.dart';
 
-@JsonSerializable(explicitToJson: true)
-class UserSettings extends Document {
-  final DrinkType defaultDrinkType;
-  final int defaultDrinkSize;
-  final DrinkListSort drinkListSort;
+@freezed
+abstract class UserSettings with _$UserSettings implements Document {
+  const factory UserSettings({
+    required String id,
 
-  const UserSettings({
-    required super.id,
-    required this.defaultDrinkType,
-    required this.defaultDrinkSize,
-    this.drinkListSort = DrinkListSort.descending,
-  });
+    required DrinkType defaultDrinkType,
+    required int defaultDrinkSize,
+    @Default(DrinkListSortOrder.descending)
+    DrinkListSortOrder drinkListSortOrder,
+  }) = _UserSettings;
 
   factory UserSettings.fromJson(Map<String, dynamic> json) =>
       _$UserSettingsFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$UserSettingsToJson(this);
-
-  UserSettings copyWith({
-    DrinkType? defaultDrinkType,
-    int? defaultDrinkSize,
-    DrinkListSort? drinkListSort,
-  }) {
-    return UserSettings(
-      id: id,
-      defaultDrinkType: defaultDrinkType ?? this.defaultDrinkType,
-      defaultDrinkSize: defaultDrinkSize ?? this.defaultDrinkSize,
-      drinkListSort: drinkListSort ?? this.drinkListSort,
-    );
-  }
 }

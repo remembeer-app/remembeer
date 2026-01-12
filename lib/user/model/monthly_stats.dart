@@ -1,30 +1,25 @@
 import 'dart:math';
 
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 
+part 'monthly_stats.freezed.dart';
 part 'monthly_stats.g.dart';
 
-@JsonSerializable(explicitToJson: true)
-class MonthlyStats {
-  final int year;
-  final int month;
-  final double beersConsumed;
-  final double alcoholConsumedMl;
-  final Map<int, DailyStats> dailyStats;
+@freezed
+abstract class MonthlyStats with _$MonthlyStats {
+  const MonthlyStats._();
 
-  const MonthlyStats({
-    required this.year,
-    required this.month,
-    required this.beersConsumed,
-    required this.alcoholConsumedMl,
-    this.dailyStats = const {},
-  });
+  const factory MonthlyStats({
+    required int year,
+    required int month,
+    required double beersConsumed,
+    required double alcoholConsumedMl,
+    @Default({}) Map<int, DailyStats> dailyStats,
+  }) = _MonthlyStats;
 
   factory MonthlyStats.fromJson(Map<String, dynamic> json) =>
       _$MonthlyStatsFromJson(json);
-
-  Map<String, dynamic> toJson() => _$MonthlyStatsToJson(this);
 
   String get key => '${year}_$month';
 
@@ -67,20 +62,6 @@ class MonthlyStats {
       beersConsumed: max(0, beersConsumed - beersEquivalent),
       alcoholConsumedMl: max(0, alcoholConsumedMl - alcoholMl),
       dailyStats: {...dailyStats, day: updatedDaily},
-    );
-  }
-
-  MonthlyStats copyWith({
-    double? beersConsumed,
-    double? alcoholConsumedMl,
-    Map<int, DailyStats>? dailyStats,
-  }) {
-    return MonthlyStats(
-      year: year,
-      month: month,
-      beersConsumed: beersConsumed ?? this.beersConsumed,
-      alcoholConsumedMl: alcoholConsumedMl ?? this.alcoholConsumedMl,
-      dailyStats: dailyStats ?? this.dailyStats,
     );
   }
 }

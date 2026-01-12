@@ -1,21 +1,18 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/model/value_object.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 
+part 'drink_type_create.freezed.dart';
 part 'drink_type_create.g.dart';
 
-@JsonSerializable(createFactory: false)
-class DrinkTypeCreate extends ValueObject {
-  final String name;
-  final DrinkCategory category;
-  final double alcoholPercentage;
+@freezed
+abstract class DrinkTypeCreate with _$DrinkTypeCreate implements ValueObject {
+  const factory DrinkTypeCreate({
+    required String name,
+    required DrinkCategory category,
+    required double alcoholPercentage,
+  }) = _DrinkTypeCreate;
 
-  DrinkTypeCreate({
-    required this.name,
-    required this.category,
-    required this.alcoholPercentage,
-  });
-
-  @override
-  Map<String, dynamic> toJson() => _$DrinkTypeCreateToJson(this);
+  factory DrinkTypeCreate.fromJson(Map<String, dynamic> json) =>
+      _$DrinkTypeCreateFromJson(json);
 }

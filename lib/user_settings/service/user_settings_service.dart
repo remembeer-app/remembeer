@@ -5,9 +5,12 @@ import 'package:remembeer/user_settings/controller/user_settings_controller.dart
 import 'package:remembeer/user_settings/model/drink_list_sort.dart';
 import 'package:remembeer/user_settings/model/user_settings.dart';
 
-const _defaultDrinkType = DrinkType(
+// TODO(ohtenkay): User settings should have only a limited version of drink type info
+final _defaultDrinkType = DrinkType(
   id: 'global-beer',
   userId: 'global',
+  createdAt: DateTime.utc(1970),
+  updatedAt: DateTime.utc(1970),
   name: 'Beer',
   category: DrinkCategory.beer,
   alcoholPercentage: 4.5,
@@ -73,15 +76,17 @@ class UserSettingsService {
     );
   }
 
-  Future<void> updateDrinkListSort(DrinkListSort drinkListSort) async {
+  Future<void> updateDrinkListSort(
+    DrinkListSortOrder drinkListSortOrder,
+  ) async {
     final currentUserSettings =
         await userSettingsController.currentUserSettings;
-    if (currentUserSettings.drinkListSort == drinkListSort) {
+    if (currentUserSettings.drinkListSortOrder == drinkListSortOrder) {
       return;
     }
 
     final updatedUserSettings = currentUserSettings.copyWith(
-      drinkListSort: drinkListSort,
+      drinkListSortOrder: drinkListSortOrder,
     );
 
     await userSettingsController.createOrUpdateUserSettings(

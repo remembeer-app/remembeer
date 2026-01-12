@@ -1,81 +1,36 @@
-import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
+import 'package:remembeer/common/converter/time_of_day_converter.dart';
 import 'package:remembeer/common/model/document.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
-import 'package:remembeer/user/model/time_of_day_converter.dart';
 
+part 'user_model.freezed.dart';
 part 'user_model.g.dart';
 
-@JsonSerializable(explicitToJson: true)
-class UserModel extends Document {
-  final String email;
-  final String username;
-  final String searchableUsername;
-  final String avatarName;
-  final Set<String> friends;
-  final Map<String, MonthlyStats> monthlyStats;
-  final Map<String, UnlockedBadge> unlockedBadges;
-  @TimeOfDayConverter()
-  final TimeOfDay endOfDayBoundary;
+@freezed
+abstract class UserModel with _$UserModel implements Document {
+  const UserModel._();
 
-  UserModel({
-    required super.id,
-    required this.email,
-    required this.username,
-    String? searchableUsername,
-    this.avatarName = 'jirka_kara.png',
-    this.friends = const {},
-    this.monthlyStats = const {},
-    this.unlockedBadges = const {},
-    this.endOfDayBoundary = defaultEndOfDayBoundary,
-  }) : searchableUsername = searchableUsername ?? toSearchable(username);
+  const factory UserModel({
+    required String id,
 
-  List<UnlockedBadge> get shownBadges {
-    return unlockedBadges.values.where((badge) => badge.isShown).toList()
-      ..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
-  }
-
-  List<UnlockedBadge> get allBadges {
-    return unlockedBadges.values.toList()
-      ..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
-  }
-
-  static String toSearchable(String input) {
-    return removeDiacritics(input).toLowerCase().replaceAll(' ', '');
-  }
+    required String email,
+    required String username,
+    required String searchableUsername,
+    @Default('jirka_kara.png') String avatarName,
+    @Default({}) Set<String> friends,
+    @Default({}) Map<String, MonthlyStats> monthlyStats,
+    @Default({}) Map<String, UnlockedBadge> unlockedBadges,
+    @TimeOfDayConverter()
+    @Default(defaultEndOfDayBoundary)
+    TimeOfDay endOfDayBoundary,
+  }) = _UserModel;
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$UserModelToJson(this);
-
-  UserModel copyWith({
-    String? username,
-    String? avatarName,
-    Set<String>? friends,
-    Map<String, MonthlyStats>? monthlyStats,
-    Map<String, UnlockedBadge>? unlockedBadges,
-    TimeOfDay? endOfDayBoundary,
-  }) {
-    return UserModel(
-      id: id,
-      email: email,
-      username: username ?? this.username,
-      searchableUsername: (username != null)
-          ? toSearchable(username)
-          : searchableUsername,
-      avatarName: avatarName ?? this.avatarName,
-      friends: friends ?? this.friends,
-      monthlyStats: monthlyStats ?? this.monthlyStats,
-      unlockedBadges: unlockedBadges ?? this.unlockedBadges,
-      endOfDayBoundary: endOfDayBoundary ?? this.endOfDayBoundary,
-    );
-  }
 
   UserModel addFriend(String friendId) {
     final updatedFriends = Set<String>.from(friends)..add(friendId);
@@ -109,6 +64,7 @@ class UserModel extends Document {
     return copyWith(monthlyStats: updatedStats);
   }
 
+  // TODO(ohtenkay): try to rewrite this using the deepcopy from freezed
   UserModel addDrink({
     required int year,
     required int month,
@@ -143,6 +99,16 @@ class UserModel extends Document {
       after6pm: after6pm,
     );
     return _updateMonthlyStats(updatedStats);
+  }
+
+  List<UnlockedBadge> get shownBadges {
+    return unlockedBadges.values.where((badge) => badge.isShown).toList()
+      ..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
+  }
+
+  List<UnlockedBadge> get allBadges {
+    return unlockedBadges.values.toList()
+      ..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
   }
 
   bool isBadgeUnlocked(String badgeId) {

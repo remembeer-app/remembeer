@@ -6,16 +6,14 @@ part of 'drink.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Drink _$DrinkFromJson(Map<String, dynamic> json) => Drink(
+_Drink _$DrinkFromJson(Map<String, dynamic> json) => _Drink(
   id: json['id'] as String,
   userId: json['userId'] as String,
-  createdAt: _$JsonConverterFromJson<Timestamp, DateTime>(
-    json['createdAt'],
-    const TimestampConverter().fromJson,
+  createdAt: const TimestampConverterOptimistic().fromJson(
+    json['createdAt'] as Timestamp?,
   ),
-  updatedAt: _$JsonConverterFromJson<Timestamp, DateTime>(
-    json['updatedAt'],
-    const TimestampConverter().fromJson,
+  updatedAt: const TimestampConverterOptimistic().fromJson(
+    json['updatedAt'] as Timestamp?,
   ),
   deletedAt: _$JsonConverterFromJson<Timestamp, DateTime>(
     json['deletedAt'],
@@ -31,17 +29,11 @@ Drink _$DrinkFromJson(Map<String, dynamic> json) => Drink(
   sessionId: json['sessionId'] as String?,
 );
 
-Map<String, dynamic> _$DrinkToJson(Drink instance) => <String, dynamic>{
+Map<String, dynamic> _$DrinkToJson(_Drink instance) => <String, dynamic>{
   'id': instance.id,
   'userId': instance.userId,
-  'createdAt': _$JsonConverterToJson<Timestamp, DateTime>(
-    instance.createdAt,
-    const TimestampConverter().toJson,
-  ),
-  'updatedAt': _$JsonConverterToJson<Timestamp, DateTime>(
-    instance.updatedAt,
-    const TimestampConverter().toJson,
-  ),
+  'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
+  'updatedAt': const TimestampConverterOptimistic().toJson(instance.updatedAt),
   'deletedAt': _$JsonConverterToJson<Timestamp, DateTime>(
     instance.deletedAt,
     const TimestampConverter().toJson,

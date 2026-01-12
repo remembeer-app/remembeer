@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/drink_type/model/drink_type.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
 import 'package:remembeer/ioc/ioc_container.dart';

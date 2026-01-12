@@ -4,8 +4,8 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drag_auto_scroller.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
 import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink/model/drink_list_data.dart';
 import 'package:remembeer/drink/service/drink_list_service.dart';
+import 'package:remembeer/drink/type/drink_list_data.dart';
 import 'package:remembeer/drink/widget/drink_group_section.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 

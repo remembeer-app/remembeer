@@ -6,7 +6,14 @@ part of 'drink_type_create.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Map<String, dynamic> _$DrinkTypeCreateToJson(DrinkTypeCreate instance) =>
+_DrinkTypeCreate _$DrinkTypeCreateFromJson(Map<String, dynamic> json) =>
+    _DrinkTypeCreate(
+      name: json['name'] as String,
+      category: $enumDecode(_$DrinkCategoryEnumMap, json['category']),
+      alcoholPercentage: (json['alcoholPercentage'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$DrinkTypeCreateToJson(_DrinkTypeCreate instance) =>
     <String, dynamic>{
       'name': instance.name,
       'category': _$DrinkCategoryEnumMap[instance.category]!,
