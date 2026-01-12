@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
@@ -16,21 +17,23 @@ import 'package:remembeer/user/widget/social_section.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
 
 class ProfilePage extends StatelessWidget {
-  final String? userId;
+  final String userId;
+  final bool showTitle;
 
-  ProfilePage({super.key, this.userId});
+  ProfilePage({super.key, required this.userId, this.showTitle = true});
 
   final _userService = get<UserService>();
+  final _authService = get<AuthService>();
 
   @override
   Widget build(BuildContext context) {
-    final isCurrentUser = userId == null;
-    final userStream = isCurrentUser
-        ? _userService.currentUserStream
-        : _userService.userStreamFor(userId!);
+    final currentUserId = _authService.authenticatedUser.uid;
+
+    final isCurrentUser = userId == currentUserId;
+    final userStream = _userService.userStreamFor(userId);
 
     return PageTemplate(
-      title: isCurrentUser ? null : const Text('Profile'),
+      title: showTitle ? const Text('Profile') : null,
       child: AsyncBuilder(
         stream: userStream,
         builder: (context, user) {
