@@ -1,0 +1,13 @@
+name: interface_generator
+description: Generates abstract interfaces from Freezed classes annotated with @GenerateInterface()
+
+environment:
+  sdk: ">=3.0.0"
+
+dependencies:
+  analyzer: ">=9.0.0"
+  build: ">=2.4.0"
+  source_gen: ">=2.0.0"
+
+dev_dependencies:
+  build_runner: ">=2.4.0"
