@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/common/converter/time_of_day_converter.dart';
-import 'package:remembeer/common/extension/searchable.dart';
 import 'package:remembeer/common/model/document.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
@@ -32,15 +31,6 @@ abstract class UserModel with _$UserModel implements Document {
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
-
-  /// Creates a copy of the current UserModel with an updated username
-  /// and its searchable version. Use instead of copyWith when changing username.
-  UserModel withUsername(String newUsername) {
-    return copyWith(
-      username: newUsername,
-      searchableUsername: newUsername.toSearchable(),
-    );
-  }
 
   UserModel addFriend(String friendId) {
     final updatedFriends = Set<String>.from(friends)..add(friendId);

@@ -85,7 +85,10 @@ class UserService {
       return;
     }
 
-    final updatedUser = currentUser.withUsername(trimmedUsername);
+    final updatedUser = currentUser.copyWith(
+      username: trimmedUsername,
+      searchableUsername: trimmedUsername.toSearchable(),
+    );
 
     await userController.createOrUpdateUser(updatedUser);
   }
