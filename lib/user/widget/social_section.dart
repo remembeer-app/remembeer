@@ -3,7 +3,7 @@ import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/page/friends_list_page.dart';
-import 'package:remembeer/user_stats/service/user_stats_service.dart';
+import 'package:remembeer/user/service/user_stats_service.dart';
 
 class SocialSection extends StatelessWidget {
   final UserModel user;

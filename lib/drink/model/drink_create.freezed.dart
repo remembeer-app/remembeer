@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DrinkCreate {
 
- DateTime get consumedAt; DrinkType get drinkType; int get volumeInMilliliters;@GeoPointConverter() GeoPoint? get location;
+ DateTime get consumedAt; DrinkTypeCore get drinkType; int get volumeInMilliliters;@GeoPointConverter() GeoPoint? get location;
 /// Create a copy of DrinkCreate
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,11 +48,11 @@ abstract mixin class $DrinkCreateCopyWith<$Res>  {
   factory $DrinkCreateCopyWith(DrinkCreate value, $Res Function(DrinkCreate) _then) = _$DrinkCreateCopyWithImpl;
 @useResult
 $Res call({
- DateTime consumedAt, DrinkType drinkType, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location
+ DateTime consumedAt, DrinkTypeCore drinkType, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location
 });
 
 
-$DrinkTypeCopyWith<$Res> get drinkType;
+$DrinkTypeCoreCopyWith<$Res> get drinkType;
 
 }
 /// @nodoc
@@ -69,7 +69,7 @@ class _$DrinkCreateCopyWithImpl<$Res>
   return _then(_self.copyWith(
 consumedAt: null == consumedAt ? _self.consumedAt : consumedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,drinkType: null == drinkType ? _self.drinkType : drinkType // ignore: cast_nullable_to_non_nullable
-as DrinkType,volumeInMilliliters: null == volumeInMilliliters ? _self.volumeInMilliliters : volumeInMilliliters // ignore: cast_nullable_to_non_nullable
+as DrinkTypeCore,volumeInMilliliters: null == volumeInMilliliters ? _self.volumeInMilliliters : volumeInMilliliters // ignore: cast_nullable_to_non_nullable
 as int,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as GeoPoint?,
   ));
@@ -78,9 +78,9 @@ as GeoPoint?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$DrinkTypeCopyWith<$Res> get drinkType {
+$DrinkTypeCoreCopyWith<$Res> get drinkType {
   
-  return $DrinkTypeCopyWith<$Res>(_self.drinkType, (value) {
+  return $DrinkTypeCoreCopyWith<$Res>(_self.drinkType, (value) {
     return _then(_self.copyWith(drinkType: value));
   });
 }
@@ -165,7 +165,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime consumedAt,  DrinkType drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DrinkCreate() when $default != null:
 return $default(_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location);case _:
@@ -186,7 +186,7 @@ return $default(_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime consumedAt,  DrinkType drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)  $default,) {final _that = this;
 switch (_that) {
 case _DrinkCreate():
 return $default(_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location);case _:
@@ -206,7 +206,7 @@ return $default(_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime consumedAt,  DrinkType drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)?  $default,) {final _that = this;
 switch (_that) {
 case _DrinkCreate() when $default != null:
 return $default(_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location);case _:
@@ -225,7 +225,7 @@ class _DrinkCreate implements DrinkCreate {
   factory _DrinkCreate.fromJson(Map<String, dynamic> json) => _$DrinkCreateFromJson(json);
 
 @override final  DateTime consumedAt;
-@override final  DrinkType drinkType;
+@override final  DrinkTypeCore drinkType;
 @override final  int volumeInMilliliters;
 @override@GeoPointConverter() final  GeoPoint? location;
 
@@ -262,11 +262,11 @@ abstract mixin class _$DrinkCreateCopyWith<$Res> implements $DrinkCreateCopyWith
   factory _$DrinkCreateCopyWith(_DrinkCreate value, $Res Function(_DrinkCreate) _then) = __$DrinkCreateCopyWithImpl;
 @override @useResult
 $Res call({
- DateTime consumedAt, DrinkType drinkType, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location
+ DateTime consumedAt, DrinkTypeCore drinkType, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location
 });
 
 
-@override $DrinkTypeCopyWith<$Res> get drinkType;
+@override $DrinkTypeCoreCopyWith<$Res> get drinkType;
 
 }
 /// @nodoc
@@ -283,7 +283,7 @@ class __$DrinkCreateCopyWithImpl<$Res>
   return _then(_DrinkCreate(
 consumedAt: null == consumedAt ? _self.consumedAt : consumedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,drinkType: null == drinkType ? _self.drinkType : drinkType // ignore: cast_nullable_to_non_nullable
-as DrinkType,volumeInMilliliters: null == volumeInMilliliters ? _self.volumeInMilliliters : volumeInMilliliters // ignore: cast_nullable_to_non_nullable
+as DrinkTypeCore,volumeInMilliliters: null == volumeInMilliliters ? _self.volumeInMilliliters : volumeInMilliliters // ignore: cast_nullable_to_non_nullable
 as int,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
 as GeoPoint?,
   ));
@@ -293,9 +293,9 @@ as GeoPoint?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$DrinkTypeCopyWith<$Res> get drinkType {
+$DrinkTypeCoreCopyWith<$Res> get drinkType {
   
-  return $DrinkTypeCopyWith<$Res>(_self.drinkType, (value) {
+  return $DrinkTypeCoreCopyWith<$Res>(_self.drinkType, (value) {
     return _then(_self.copyWith(drinkType: value));
   });
 }

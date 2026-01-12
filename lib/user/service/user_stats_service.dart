@@ -1,6 +1,6 @@
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user_stats/model/user_stats.dart';
+import 'package:remembeer/user/type/user_stats.dart';
 
 class UserStatsService {
   UserStatsService();
@@ -11,7 +11,7 @@ class UserStatsService {
 
     final (isStreakActive, streakDays) = _calculateStreak(user);
 
-    return UserStats(
+    return (
       totalBeersConsumed: totalBeers,
       totalAlcoholConsumed: totalAlcohol,
       beersConsumedLast30Days: beersLast30Days,

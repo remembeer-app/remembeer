@@ -9,9 +9,9 @@ import 'package:remembeer/drink/model/drink_create.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
+import 'package:remembeer/user/service/user_stats_service.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
 import 'package:remembeer/user_settings/model/drink_list_sort.dart';
-import 'package:remembeer/user_stats/service/user_stats_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DrinkService {

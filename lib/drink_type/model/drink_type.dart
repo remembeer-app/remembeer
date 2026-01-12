@@ -3,12 +3,13 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/converter/timestamp_converter.dart';
 import 'package:remembeer/common/model/entity.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink_type/model/drink_type_core.dart';
 
 part 'drink_type.freezed.dart';
 part 'drink_type.g.dart';
 
 @freezed
-abstract class DrinkType with _$DrinkType implements Entity {
+abstract class DrinkType with _$DrinkType implements Entity, DrinkTypeFields {
   const factory DrinkType({
     required String id,
     required String userId,

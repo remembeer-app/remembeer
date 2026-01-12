@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/badge/model/badge_definition.dart';
+import 'package:remembeer/badge/type/badge_definition.dart';
 
 class BadgeIcon extends StatelessWidget {
   final BadgeDefinition badgeDefinition;

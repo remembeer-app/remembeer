@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
-import 'package:remembeer/drink_type/model/drink_type.dart';
+import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/location/page/location_page.dart';
@@ -12,12 +12,12 @@ import 'package:remembeer/location/service/location_service.dart';
 const _defaultPosition = GeoPoint(49.2099, 16.5990);
 
 class DrinkForm extends StatefulWidget {
-  final DrinkType initialDrinkType;
+  final DrinkTypeCore initialDrinkType;
   final DateTime initialConsumedAt;
   final int initialVolume;
   final GeoPoint? initialLocation;
   final Future<void> Function(
-    DrinkType drinkType,
+    DrinkTypeCore drinkType,
     DateTime consumedAt,
     int volumeInMilliliters,
     GeoPoint? location,
@@ -40,7 +40,7 @@ class DrinkForm extends StatefulWidget {
 class _DrinkFormState extends State<DrinkForm> {
   final _locationService = get<LocationService>();
 
-  late DrinkType _selectedDrinkType = widget.initialDrinkType;
+  late DrinkTypeCore _selectedDrinkType = widget.initialDrinkType;
   late DateTime _selectedConsumedAt = widget.initialConsumedAt;
   final _volumeController = TextEditingController();
   final _consumedAtController = TextEditingController();

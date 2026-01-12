@@ -9,7 +9,7 @@ part of 'user_settings.dart';
 _UserSettings _$UserSettingsFromJson(Map<String, dynamic> json) =>
     _UserSettings(
       id: json['id'] as String,
-      defaultDrinkType: DrinkType.fromJson(
+      defaultDrinkType: DrinkTypeCore.fromJson(
         json['defaultDrinkType'] as Map<String, dynamic>,
       ),
       defaultDrinkSize: (json['defaultDrinkSize'] as num).toInt(),

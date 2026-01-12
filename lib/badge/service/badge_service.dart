@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/data/onetime_badge_id.dart';
 import 'package:remembeer/badge/model/badge_category.dart';
-import 'package:remembeer/badge/model/badge_definition.dart';
+import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user_stats/model/user_stats.dart';
+import 'package:remembeer/user/type/user_stats.dart';
 
 class BadgeService {
   final _badgeUnlockedController =
