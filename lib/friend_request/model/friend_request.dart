@@ -1,26 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/converter/timestamp_converter.dart';
+import 'package:remembeer/common/converter/timestamp_converter_optimistic.dart';
 import 'package:remembeer/common/model/entity.dart';
 
+part 'friend_request.freezed.dart';
 part 'friend_request.g.dart';
 
-@JsonSerializable()
-class FriendRequest extends Entity {
-  final String toUserId;
+@freezed
+abstract class FriendRequest with _$FriendRequest implements Entity {
+  const factory FriendRequest({
+    required String id,
+    required String userId,
+    @TimestampConverterOptimistic() required DateTime createdAt,
+    @TimestampConverterOptimistic() required DateTime updatedAt,
+    @TimestampConverter() DateTime? deletedAt,
 
-  const FriendRequest({
-    required super.id,
-    required super.userId,
-    super.createdAt,
-    super.updatedAt,
-    super.deletedAt,
-    required this.toUserId,
-  });
+    required String toUserId,
+  }) = _FriendRequest;
 
   factory FriendRequest.fromJson(Map<String, dynamic> json) =>
       _$FriendRequestFromJson(json);
-
-  @override
-  Map<String, dynamic> toJson() => _$FriendRequestToJson(this);
 }
