@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
@@ -159,13 +160,22 @@ class SessionManagementPage extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Leave session',
-                onPressed: () {
-                  // TODO(ohtenkay): Implement leave session
-                },
+                onPressed: () => _confirmLeaveSession(context, session),
               ),
           ],
         ),
       ),
+    );
+  }
+
+  void _confirmLeaveSession(BuildContext context, Session session) {
+    showConfirmationDialog(
+      context: context,
+      title: 'Leave Session',
+      text: 'Are you sure you want to leave "${session.name}"?',
+      submitButtonText: 'Leave',
+      isDestructive: true,
+      onPressed: () => _sessionService.leaveSession(session),
     );
   }
 }
