@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Leaderboard {
 
- String get id; String get userId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;@TimestampConverter() DateTime? get deletedAt; String get name; String get iconName; Set<String> get memberIds; Set<String> get bannedMemberIds; String get inviteCode;
+ String get id; String get userId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;@TimestampConverter() DateTime? get deletedAt; Set<String> get memberIds; Set<String> get bannedMemberIds; String get name; String get iconName; String get inviteCode;
 /// Create a copy of Leaderboard
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $LeaderboardCopyWith<Leaderboard> get copyWith => _$LeaderboardCopyWithImpl<Lead
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Leaderboard&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, bannedMemberIds)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Leaderboard&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,name,iconName,const DeepCollectionEquality().hash(memberIds),const DeepCollectionEquality().hash(bannedMemberIds),inviteCode);
+int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(memberIds),const DeepCollectionEquality().hash(bannedMemberIds),name,iconName,inviteCode);
 
 @override
 String toString() {
-  return 'Leaderboard(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, name: $name, iconName: $iconName, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, inviteCode: $inviteCode)';
+  return 'Leaderboard(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, name: $name, iconName: $iconName, inviteCode: $inviteCode)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $LeaderboardCopyWith<$Res>  {
   factory $LeaderboardCopyWith(Leaderboard value, $Res Function(Leaderboard) _then) = _$LeaderboardCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, String name, String iconName, Set<String> memberIds, Set<String> bannedMemberIds, String inviteCode
+ String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, Set<String> memberIds, Set<String> bannedMemberIds, String name, String iconName, String inviteCode
 });
 
 
@@ -65,18 +65,18 @@ class _$LeaderboardCopyWithImpl<$Res>
 
 /// Create a copy of Leaderboard
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? name = null,Object? iconName = null,Object? memberIds = null,Object? bannedMemberIds = null,Object? inviteCode = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? memberIds = null,Object? bannedMemberIds = null,Object? name = null,Object? iconName = null,Object? inviteCode = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,iconName: null == iconName ? _self.iconName : iconName // ignore: cast_nullable_to_non_nullable
-as String,memberIds: null == memberIds ? _self.memberIds : memberIds // ignore: cast_nullable_to_non_nullable
+as DateTime?,memberIds: null == memberIds ? _self.memberIds : memberIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,bannedMemberIds: null == bannedMemberIds ? _self.bannedMemberIds : bannedMemberIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,inviteCode: null == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
+as Set<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,iconName: null == iconName ? _self.iconName : iconName // ignore: cast_nullable_to_non_nullable
+as String,inviteCode: null == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -162,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name,  String iconName,  Set<String> memberIds,  Set<String> bannedMemberIds,  String inviteCode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> bannedMemberIds,  String name,  String iconName,  String inviteCode)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Leaderboard() when $default != null:
-return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.name,_that.iconName,_that.memberIds,_that.bannedMemberIds,_that.inviteCode);case _:
+return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.bannedMemberIds,_that.name,_that.iconName,_that.inviteCode);case _:
   return orElse();
 
 }
@@ -183,10 +183,10 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name,  String iconName,  Set<String> memberIds,  Set<String> bannedMemberIds,  String inviteCode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> bannedMemberIds,  String name,  String iconName,  String inviteCode)  $default,) {final _that = this;
 switch (_that) {
 case _Leaderboard():
-return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.name,_that.iconName,_that.memberIds,_that.bannedMemberIds,_that.inviteCode);case _:
+return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.bannedMemberIds,_that.name,_that.iconName,_that.inviteCode);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +203,10 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name,  String iconName,  Set<String> memberIds,  Set<String> bannedMemberIds,  String inviteCode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> bannedMemberIds,  String name,  String iconName,  String inviteCode)?  $default,) {final _that = this;
 switch (_that) {
 case _Leaderboard() when $default != null:
-return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.name,_that.iconName,_that.memberIds,_that.bannedMemberIds,_that.inviteCode);case _:
+return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.bannedMemberIds,_that.name,_that.iconName,_that.inviteCode);case _:
   return null;
 
 }
@@ -218,7 +218,7 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 @JsonSerializable()
 
 class _Leaderboard implements Leaderboard {
-  const _Leaderboard({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required this.name, required this.iconName, required final  Set<String> memberIds, required final  Set<String> bannedMemberIds, required this.inviteCode}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds;
+  const _Leaderboard({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required final  Set<String> memberIds, required final  Set<String> bannedMemberIds, required this.name, required this.iconName, required this.inviteCode}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds;
   factory _Leaderboard.fromJson(Map<String, dynamic> json) => _$LeaderboardFromJson(json);
 
 @override final  String id;
@@ -226,8 +226,6 @@ class _Leaderboard implements Leaderboard {
 @override@TimestampConverterOptimistic() final  DateTime createdAt;
 @override@TimestampConverterOptimistic() final  DateTime updatedAt;
 @override@TimestampConverter() final  DateTime? deletedAt;
-@override final  String name;
-@override final  String iconName;
  final  Set<String> _memberIds;
 @override Set<String> get memberIds {
   if (_memberIds is EqualUnmodifiableSetView) return _memberIds;
@@ -242,6 +240,8 @@ class _Leaderboard implements Leaderboard {
   return EqualUnmodifiableSetView(_bannedMemberIds);
 }
 
+@override final  String name;
+@override final  String iconName;
 @override final  String inviteCode;
 
 /// Create a copy of Leaderboard
@@ -257,16 +257,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Leaderboard&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&const DeepCollectionEquality().equals(other._bannedMemberIds, _bannedMemberIds)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Leaderboard&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&const DeepCollectionEquality().equals(other._bannedMemberIds, _bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,name,iconName,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_bannedMemberIds),inviteCode);
+int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_bannedMemberIds),name,iconName,inviteCode);
 
 @override
 String toString() {
-  return 'Leaderboard(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, name: $name, iconName: $iconName, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, inviteCode: $inviteCode)';
+  return 'Leaderboard(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, name: $name, iconName: $iconName, inviteCode: $inviteCode)';
 }
 
 
@@ -277,7 +277,7 @@ abstract mixin class _$LeaderboardCopyWith<$Res> implements $LeaderboardCopyWith
   factory _$LeaderboardCopyWith(_Leaderboard value, $Res Function(_Leaderboard) _then) = __$LeaderboardCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, String name, String iconName, Set<String> memberIds, Set<String> bannedMemberIds, String inviteCode
+ String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, Set<String> memberIds, Set<String> bannedMemberIds, String name, String iconName, String inviteCode
 });
 
 
@@ -294,18 +294,18 @@ class __$LeaderboardCopyWithImpl<$Res>
 
 /// Create a copy of Leaderboard
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? name = null,Object? iconName = null,Object? memberIds = null,Object? bannedMemberIds = null,Object? inviteCode = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? memberIds = null,Object? bannedMemberIds = null,Object? name = null,Object? iconName = null,Object? inviteCode = null,}) {
   return _then(_Leaderboard(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,iconName: null == iconName ? _self.iconName : iconName // ignore: cast_nullable_to_non_nullable
-as String,memberIds: null == memberIds ? _self._memberIds : memberIds // ignore: cast_nullable_to_non_nullable
+as DateTime?,memberIds: null == memberIds ? _self._memberIds : memberIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,bannedMemberIds: null == bannedMemberIds ? _self._bannedMemberIds : bannedMemberIds // ignore: cast_nullable_to_non_nullable
-as Set<String>,inviteCode: null == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
+as Set<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,iconName: null == iconName ? _self.iconName : iconName // ignore: cast_nullable_to_non_nullable
+as String,inviteCode: null == inviteCode ? _self.inviteCode : inviteCode // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

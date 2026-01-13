@@ -19,14 +19,14 @@ _Leaderboard _$LeaderboardFromJson(Map<String, dynamic> json) => _Leaderboard(
     json['deletedAt'],
     const TimestampConverter().fromJson,
   ),
-  name: json['name'] as String,
-  iconName: json['iconName'] as String,
   memberIds: (json['memberIds'] as List<dynamic>)
       .map((e) => e as String)
       .toSet(),
   bannedMemberIds: (json['bannedMemberIds'] as List<dynamic>)
       .map((e) => e as String)
       .toSet(),
+  name: json['name'] as String,
+  iconName: json['iconName'] as String,
   inviteCode: json['inviteCode'] as String,
 );
 
@@ -41,10 +41,10 @@ Map<String, dynamic> _$LeaderboardToJson(
     instance.deletedAt,
     const TimestampConverter().toJson,
   ),
-  'name': instance.name,
-  'iconName': instance.iconName,
   'memberIds': instance.memberIds.toList(),
   'bannedMemberIds': instance.bannedMemberIds.toList(),
+  'name': instance.name,
+  'iconName': instance.iconName,
   'inviteCode': instance.inviteCode,
 };
 
