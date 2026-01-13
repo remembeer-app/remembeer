@@ -27,6 +27,9 @@ _Session _$SessionFromJson(Map<String, dynamic> json) => _Session(
   memberIds: (json['memberIds'] as List<dynamic>)
       .map((e) => e as String)
       .toSet(),
+  bannedMemberIds: (json['bannedMemberIds'] as List<dynamic>)
+      .map((e) => e as String)
+      .toSet(),
 );
 
 Map<String, dynamic> _$SessionToJson(_Session instance) => <String, dynamic>{
@@ -42,6 +45,7 @@ Map<String, dynamic> _$SessionToJson(_Session instance) => <String, dynamic>{
   'startedAt': instance.startedAt.toIso8601String(),
   'endedAt': instance.endedAt?.toIso8601String(),
   'memberIds': instance.memberIds.toList(),
+  'bannedMemberIds': instance.bannedMemberIds.toList(),
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

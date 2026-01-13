@@ -19,6 +19,7 @@ abstract class Session with _$Session implements Entity {
     required DateTime startedAt,
     DateTime? endedAt,
     required Set<String> memberIds,
+    required Set<String> bannedMemberIds,
   }) = _Session;
 
   factory Session.fromJson(Map<String, dynamic> json) =>

@@ -16,6 +16,11 @@ _SessionCreate _$SessionCreateFromJson(Map<String, dynamic> json) =>
       memberIds: (json['memberIds'] as List<dynamic>)
           .map((e) => e as String)
           .toSet(),
+      bannedMemberIds:
+          (json['bannedMemberIds'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toSet() ??
+          const {},
     );
 
 Map<String, dynamic> _$SessionCreateToJson(_SessionCreate instance) =>
@@ -24,4 +29,5 @@ Map<String, dynamic> _$SessionCreateToJson(_SessionCreate instance) =>
       'startedAt': instance.startedAt.toIso8601String(),
       'endedAt': instance.endedAt?.toIso8601String(),
       'memberIds': instance.memberIds.toList(),
+      'bannedMemberIds': instance.bannedMemberIds.toList(),
     };

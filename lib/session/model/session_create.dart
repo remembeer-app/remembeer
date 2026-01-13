@@ -11,6 +11,7 @@ abstract class SessionCreate with _$SessionCreate implements ValueObject {
     required DateTime startedAt,
     DateTime? endedAt,
     required Set<String> memberIds,
+    @Default({}) Set<String> bannedMemberIds,
   }) = _SessionCreate;
 
   factory SessionCreate.fromJson(Map<String, dynamic> json) =>
