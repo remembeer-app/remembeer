@@ -119,14 +119,7 @@ class LeaderboardService {
       );
     }
 
-    final updatedMemberIds = Set<String>.from(leaderboard.memberIds)
-      ..remove(memberId);
-
-    final updatedLeaderboard = leaderboard.copyWith(
-      memberIds: updatedMemberIds,
-    );
-
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    await leaderboardController.removeMemberAtomic(leaderboardId, memberId);
   }
 
   Future<void> banMember({
@@ -144,17 +137,7 @@ class LeaderboardService {
       throw StateError('The owner cannot ban themselves from the leaderboard.');
     }
 
-    final updatedMemberIds = Set<String>.from(leaderboard.memberIds)
-      ..remove(memberId);
-    final updatedBannedMemberIds = Set<String>.from(leaderboard.bannedMemberIds)
-      ..add(memberId);
-
-    final updatedLeaderboard = leaderboard.copyWith(
-      memberIds: updatedMemberIds,
-      bannedMemberIds: updatedBannedMemberIds,
-    );
-
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    await leaderboardController.banMemberAtomic(leaderboardId, memberId);
   }
 
   Future<void> unbanMember({
@@ -170,14 +153,7 @@ class LeaderboardService {
       );
     }
 
-    final updatedBannedMemberIds = Set<String>.from(leaderboard.bannedMemberIds)
-      ..remove(memberId);
-
-    final updatedLeaderboard = leaderboard.copyWith(
-      bannedMemberIds: updatedBannedMemberIds,
-    );
-
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    await leaderboardController.unbanMemberAtomic(leaderboardId, memberId);
   }
 
   Future<void> leaveLeaderboard(String leaderboardId) async {
@@ -188,14 +164,10 @@ class LeaderboardService {
       throw StateError('The owner cannot leave their own leaderboard.');
     }
 
-    final updatedMemberIds = Set<String>.from(leaderboard.memberIds)
-      ..remove(currentUserId);
-
-    final updatedLeaderboard = leaderboard.copyWith(
-      memberIds: updatedMemberIds,
+    await leaderboardController.removeMemberAtomic(
+      leaderboardId,
+      currentUserId,
     );
-
-    await leaderboardController.updateSingle(updatedLeaderboard);
   }
 
   Future<JoinLeaderboardResult> joinLeaderboard(String leaderboardId) async {
@@ -214,11 +186,7 @@ class LeaderboardService {
       return JoinLeaderboardResult.full;
     }
 
-    final updatedLeaderboard = leaderboard.copyWith(
-      memberIds: {...leaderboard.memberIds, currentUserId},
-    );
-
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    await leaderboardController.addMemberAtomic(leaderboardId, currentUserId);
     return JoinLeaderboardResult.success;
   }
 
