@@ -6,6 +6,8 @@ const userIdField = 'userId';
 const createdAtField = 'createdAt';
 const updatedAtField = 'updatedAt';
 const deletedAtField = 'deletedAt';
+const memberIdsField = 'memberIds';
+const bannedMemberIdsField = 'bannedMemberIds';
 
 extension JsonFirestoreHelper on Map<String, dynamic> {
   Map<String, dynamic> withId(String id) {
