@@ -159,7 +159,7 @@ class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
     if (_foundLeaderboard == null) return;
 
     final result = await _leaderboardService.joinLeaderboard(
-      _foundLeaderboard!.id,
+      _foundLeaderboard!,
     );
 
     if (!mounted) return;

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/leaderboard/constants.dart';
 import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
 import 'package:remembeer/leaderboard/model/join_leaderboard_result.dart';
@@ -53,14 +54,13 @@ class LeaderboardService {
   }
 
   Future<void> updateLeaderboardName({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String newName,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
-
-    if (leaderboard.userId != authService.authenticatedUser.uid) {
-      throw StateError('Only the owner can update the leaderboard name.');
-    }
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can update the leaderboard name.',
+    );
 
     if (leaderboard.name == newName) {
       return;
@@ -72,14 +72,13 @@ class LeaderboardService {
   }
 
   Future<void> updateLeaderboardIcon({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String newIconName,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
-
-    if (leaderboard.userId != authService.authenticatedUser.uid) {
-      throw StateError('Only the owner can update the leaderboard icon.');
-    }
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can update the leaderboard icon.',
+    );
 
     if (leaderboard.iconName == newIconName) {
       return;
@@ -90,116 +89,80 @@ class LeaderboardService {
     await leaderboardController.updateSingle(updatedLeaderboard);
   }
 
-  Future<void> deleteLeaderboard(String leaderboardId) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
-
-    if (leaderboard.userId != authService.authenticatedUser.uid) {
-      throw StateError('Only the owner can delete the leaderboard.');
-    }
+  Future<void> deleteLeaderboard(Leaderboard leaderboard) async {
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can delete the leaderboard.',
+    );
 
     await leaderboardController.deleteSingle(leaderboard);
   }
 
   Future<void> removeMember({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String memberId,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
     final currentUserId = authService.authenticatedUser.uid;
 
-    if (leaderboard.userId != currentUserId) {
-      throw StateError(
-        'Only the owner can remove members from the leaderboard.',
-      );
-    }
-
-    if (memberId == currentUserId) {
-      throw StateError(
-        'The owner cannot remove themselves from the leaderboard.',
-      );
-    }
-
-    final updatedMemberIds = Set<String>.from(leaderboard.memberIds)
-      ..remove(memberId);
-
-    final updatedLeaderboard = leaderboard.copyWith(
-      memberIds: updatedMemberIds,
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can remove members from the leaderboard.',
     );
 
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    invariant(
+      memberId != currentUserId,
+      'The owner cannot remove themselves from the leaderboard.',
+    );
+
+    await leaderboardController.removeMemberAtomic(leaderboard.id, memberId);
   }
 
   Future<void> banMember({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String memberId,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
     final currentUserId = authService.authenticatedUser.uid;
 
-    if (leaderboard.userId != currentUserId) {
-      throw StateError('Only the owner can ban members from the leaderboard.');
-    }
-
-    if (memberId == currentUserId) {
-      throw StateError('The owner cannot ban themselves from the leaderboard.');
-    }
-
-    final updatedMemberIds = Set<String>.from(leaderboard.memberIds)
-      ..remove(memberId);
-    final updatedBannedMemberIds = Set<String>.from(leaderboard.bannedMemberIds)
-      ..add(memberId);
-
-    final updatedLeaderboard = leaderboard.copyWith(
-      memberIds: updatedMemberIds,
-      bannedMemberIds: updatedBannedMemberIds,
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can ban members from the leaderboard.',
     );
 
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    invariant(
+      memberId != currentUserId,
+      'The owner cannot ban themselves from the leaderboard.',
+    );
+
+    await leaderboardController.banMemberAtomic(leaderboard.id, memberId);
   }
 
   Future<void> unbanMember({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String memberId,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
-    final currentUserId = authService.authenticatedUser.uid;
-
-    if (leaderboard.userId != currentUserId) {
-      throw StateError(
-        'Only the owner can unban members from the leaderboard.',
-      );
-    }
-
-    final updatedBannedMemberIds = Set<String>.from(leaderboard.bannedMemberIds)
-      ..remove(memberId);
-
-    final updatedLeaderboard = leaderboard.copyWith(
-      bannedMemberIds: updatedBannedMemberIds,
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can unban members from the leaderboard.',
     );
 
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    await leaderboardController.unbanMemberAtomic(leaderboard.id, memberId);
   }
 
-  Future<void> leaveLeaderboard(String leaderboardId) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
+  Future<void> leaveLeaderboard(Leaderboard leaderboard) async {
     final currentUserId = authService.authenticatedUser.uid;
 
-    if (leaderboard.userId == currentUserId) {
-      throw StateError('The owner cannot leave their own leaderboard.');
-    }
-
-    final updatedMemberIds = Set<String>.from(leaderboard.memberIds)
-      ..remove(currentUserId);
-
-    final updatedLeaderboard = leaderboard.copyWith(
-      memberIds: updatedMemberIds,
+    invariant(
+      !isOwner(leaderboard),
+      'The owner cannot leave their own leaderboard.',
     );
 
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    await leaderboardController.removeMemberAtomic(
+      leaderboard.id,
+      currentUserId,
+    );
   }
 
-  Future<JoinLeaderboardResult> joinLeaderboard(String leaderboardId) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
+  Future<JoinLeaderboardResult> joinLeaderboard(Leaderboard leaderboard) async {
     final currentUserId = authService.authenticatedUser.uid;
 
     if (leaderboard.memberIds.contains(currentUserId)) {
@@ -214,11 +177,7 @@ class LeaderboardService {
       return JoinLeaderboardResult.full;
     }
 
-    final updatedLeaderboard = leaderboard.copyWith(
-      memberIds: {...leaderboard.memberIds, currentUserId},
-    );
-
-    await leaderboardController.updateSingle(updatedLeaderboard);
+    await leaderboardController.addMemberAtomic(leaderboard.id, currentUserId);
     return JoinLeaderboardResult.success;
   }
 

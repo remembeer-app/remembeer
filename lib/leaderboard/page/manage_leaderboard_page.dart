@@ -129,7 +129,7 @@ class ManageLeaderboardPage extends StatelessWidget {
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _leaderboardService.updateLeaderboardIcon(
-                  leaderboardId: leaderboard.id,
+                  leaderboard: leaderboard,
                   newIconName: selectedIcon.name,
                 );
               },
@@ -238,7 +238,7 @@ class ManageLeaderboardPage extends StatelessWidget {
           'Are you sure you want to remove "${user.username}" from the leaderboard?',
       submitButtonText: 'Remove',
       onPressed: () => _leaderboardService.removeMember(
-        leaderboardId: leaderboard.id,
+        leaderboard: leaderboard,
         memberId: user.id,
       ),
     );
@@ -252,7 +252,7 @@ class ManageLeaderboardPage extends StatelessWidget {
           'Are you sure you want to ban "${user.username}" from the leaderboard?',
       submitButtonText: 'Ban',
       onPressed: () => _leaderboardService.banMember(
-        leaderboardId: leaderboard.id,
+        leaderboard: leaderboard,
         memberId: user.id,
       ),
     );
@@ -266,7 +266,7 @@ class ManageLeaderboardPage extends StatelessWidget {
           'Are you sure you want to unban "${user.username}"? They will be able to rejoin the leaderboard.',
       submitButtonText: 'Unban',
       onPressed: () => _leaderboardService.unbanMember(
-        leaderboardId: leaderboard.id,
+        leaderboard: leaderboard,
         memberId: user.id,
       ),
     );
@@ -296,7 +296,7 @@ class ManageLeaderboardPage extends StatelessWidget {
       submitButtonText: 'Delete',
       isDestructive: true,
       onPressed: () async {
-        await _leaderboardService.deleteLeaderboard(leaderboard.id);
+        await _leaderboardService.deleteLeaderboard(leaderboard);
         if (context.mounted) {
           Navigator.of(context).popUntil((route) => route.isFirst);
         }

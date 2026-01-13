@@ -64,7 +64,7 @@ class LeaderboardsPage extends StatelessWidget {
 
   Widget _buildLeaderboardList() {
     return AsyncBuilder<List<Leaderboard>>(
-      stream: _leaderboardController.leaderboardsStreamWhereCurrentUserIsMember,
+      stream: _leaderboardController.entitiesStreamWhereCurrentUserIsMember,
       builder: (context, leaderboards) {
         if (leaderboards.isEmpty) {
           return _buildEmptyState(context);

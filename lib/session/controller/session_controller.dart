@@ -1,31 +1,15 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:remembeer/common/controller/crud_controller.dart';
-import 'package:remembeer/common/extension/json_firestore_helper.dart';
-import 'package:remembeer/common/extension/query_firestore_helper.dart';
+import 'package:remembeer/common/controller/members_crud_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
 
-class SessionController extends CrudController<Session, SessionCreate> {
+class SessionController extends MembersCrudController<Session, SessionCreate> {
   SessionController({required super.authService})
     : super(collectionPath: 'sessions', fromJson: Session.fromJson);
 
   Stream<List<Session>> get sessionsStreamWhereCurrentUserIsMember =>
-      nonDeletedEntities
-          .where('memberIds', arrayContains: authService.authenticatedUser.uid)
-          .orderBy('startedAt', descending: true)
-          .mapToStreamList();
-
-  Future<void> addMemberAtomic(String sessionId, String memberId) {
-    return writeCollection.doc(sessionId).update({
-      'memberIds': FieldValue.arrayUnion([memberId]),
-      updatedAtField: FieldValue.serverTimestamp(),
-    });
-  }
-
-  Future<void> removeMemberAtomic(String sessionId, String memberId) {
-    return writeCollection.doc(sessionId).update({
-      'memberIds': FieldValue.arrayRemove([memberId]),
-      updatedAtField: FieldValue.serverTimestamp(),
-    });
-  }
+      entitiesStreamWhereCurrentUserIsMember.map(
+        (sessions) =>
+            List<Session>.from(sessions)
+              ..sort((a, b) => b.startedAt.compareTo(a.startedAt)),
+      );
 }
