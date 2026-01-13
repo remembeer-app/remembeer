@@ -24,7 +24,7 @@ class UpdateLeaderboardNamePage extends StatelessWidget {
         isEditing: true,
         onSubmit: (name, _) async {
           await _leaderboardService.updateLeaderboardName(
-            leaderboardId: leaderboard.id,
+            leaderboard: leaderboard,
             newName: name,
           );
           if (context.mounted) {

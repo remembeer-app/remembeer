@@ -99,7 +99,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
       text: 'Are you sure you want to leave "${widget.leaderboard.name}"?',
       submitButtonText: 'Leave',
       onPressed: () async {
-        await _leaderboardService.leaveLeaderboard(widget.leaderboard.id);
+        await _leaderboardService.leaveLeaderboard(widget.leaderboard);
         if (context.mounted) {
           Navigator.of(context).popUntil((route) => route.isFirst);
         }

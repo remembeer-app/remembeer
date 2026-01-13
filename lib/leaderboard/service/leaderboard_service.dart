@@ -54,11 +54,9 @@ class LeaderboardService {
   }
 
   Future<void> updateLeaderboardName({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String newName,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
-
     invariant(
       isOwner(leaderboard),
       'Only the owner can update the leaderboard name.',
@@ -74,11 +72,9 @@ class LeaderboardService {
   }
 
   Future<void> updateLeaderboardIcon({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String newIconName,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
-
     invariant(
       isOwner(leaderboard),
       'Only the owner can update the leaderboard icon.',
@@ -93,9 +89,7 @@ class LeaderboardService {
     await leaderboardController.updateSingle(updatedLeaderboard);
   }
 
-  Future<void> deleteLeaderboard(String leaderboardId) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
-
+  Future<void> deleteLeaderboard(Leaderboard leaderboard) async {
     invariant(
       isOwner(leaderboard),
       'Only the owner can delete the leaderboard.',
@@ -105,10 +99,9 @@ class LeaderboardService {
   }
 
   Future<void> removeMember({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String memberId,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
     final currentUserId = authService.authenticatedUser.uid;
 
     invariant(
@@ -121,14 +114,13 @@ class LeaderboardService {
       'The owner cannot remove themselves from the leaderboard.',
     );
 
-    await leaderboardController.removeMemberAtomic(leaderboardId, memberId);
+    await leaderboardController.removeMemberAtomic(leaderboard.id, memberId);
   }
 
   Future<void> banMember({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String memberId,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
     final currentUserId = authService.authenticatedUser.uid;
 
     invariant(
@@ -141,25 +133,22 @@ class LeaderboardService {
       'The owner cannot ban themselves from the leaderboard.',
     );
 
-    await leaderboardController.banMemberAtomic(leaderboardId, memberId);
+    await leaderboardController.banMemberAtomic(leaderboard.id, memberId);
   }
 
   Future<void> unbanMember({
-    required String leaderboardId,
+    required Leaderboard leaderboard,
     required String memberId,
   }) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
-
     invariant(
       isOwner(leaderboard),
       'Only the owner can unban members from the leaderboard.',
     );
 
-    await leaderboardController.unbanMemberAtomic(leaderboardId, memberId);
+    await leaderboardController.unbanMemberAtomic(leaderboard.id, memberId);
   }
 
-  Future<void> leaveLeaderboard(String leaderboardId) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
+  Future<void> leaveLeaderboard(Leaderboard leaderboard) async {
     final currentUserId = authService.authenticatedUser.uid;
 
     invariant(
@@ -168,13 +157,12 @@ class LeaderboardService {
     );
 
     await leaderboardController.removeMemberAtomic(
-      leaderboardId,
+      leaderboard.id,
       currentUserId,
     );
   }
 
-  Future<JoinLeaderboardResult> joinLeaderboard(String leaderboardId) async {
-    final leaderboard = await leaderboardController.findById(leaderboardId);
+  Future<JoinLeaderboardResult> joinLeaderboard(Leaderboard leaderboard) async {
     final currentUserId = authService.authenticatedUser.uid;
 
     if (leaderboard.memberIds.contains(currentUserId)) {
@@ -189,7 +177,7 @@ class LeaderboardService {
       return JoinLeaderboardResult.full;
     }
 
-    await leaderboardController.addMemberAtomic(leaderboardId, currentUserId);
+    await leaderboardController.addMemberAtomic(leaderboard.id, currentUserId);
     return JoinLeaderboardResult.success;
   }
 
