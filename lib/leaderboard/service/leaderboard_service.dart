@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/leaderboard/constants.dart';
 import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
 import 'package:remembeer/leaderboard/model/join_leaderboard_result.dart';
@@ -58,9 +59,10 @@ class LeaderboardService {
   }) async {
     final leaderboard = await leaderboardController.findById(leaderboardId);
 
-    if (leaderboard.userId != authService.authenticatedUser.uid) {
-      throw StateError('Only the owner can update the leaderboard name.');
-    }
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can update the leaderboard name.',
+    );
 
     if (leaderboard.name == newName) {
       return;
@@ -77,9 +79,10 @@ class LeaderboardService {
   }) async {
     final leaderboard = await leaderboardController.findById(leaderboardId);
 
-    if (leaderboard.userId != authService.authenticatedUser.uid) {
-      throw StateError('Only the owner can update the leaderboard icon.');
-    }
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can update the leaderboard icon.',
+    );
 
     if (leaderboard.iconName == newIconName) {
       return;
@@ -93,9 +96,10 @@ class LeaderboardService {
   Future<void> deleteLeaderboard(String leaderboardId) async {
     final leaderboard = await leaderboardController.findById(leaderboardId);
 
-    if (leaderboard.userId != authService.authenticatedUser.uid) {
-      throw StateError('Only the owner can delete the leaderboard.');
-    }
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can delete the leaderboard.',
+    );
 
     await leaderboardController.deleteSingle(leaderboard);
   }
@@ -107,17 +111,15 @@ class LeaderboardService {
     final leaderboard = await leaderboardController.findById(leaderboardId);
     final currentUserId = authService.authenticatedUser.uid;
 
-    if (leaderboard.userId != currentUserId) {
-      throw StateError(
-        'Only the owner can remove members from the leaderboard.',
-      );
-    }
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can remove members from the leaderboard.',
+    );
 
-    if (memberId == currentUserId) {
-      throw StateError(
-        'The owner cannot remove themselves from the leaderboard.',
-      );
-    }
+    invariant(
+      memberId != currentUserId,
+      'The owner cannot remove themselves from the leaderboard.',
+    );
 
     await leaderboardController.removeMemberAtomic(leaderboardId, memberId);
   }
@@ -129,13 +131,15 @@ class LeaderboardService {
     final leaderboard = await leaderboardController.findById(leaderboardId);
     final currentUserId = authService.authenticatedUser.uid;
 
-    if (leaderboard.userId != currentUserId) {
-      throw StateError('Only the owner can ban members from the leaderboard.');
-    }
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can ban members from the leaderboard.',
+    );
 
-    if (memberId == currentUserId) {
-      throw StateError('The owner cannot ban themselves from the leaderboard.');
-    }
+    invariant(
+      memberId != currentUserId,
+      'The owner cannot ban themselves from the leaderboard.',
+    );
 
     await leaderboardController.banMemberAtomic(leaderboardId, memberId);
   }
@@ -145,13 +149,11 @@ class LeaderboardService {
     required String memberId,
   }) async {
     final leaderboard = await leaderboardController.findById(leaderboardId);
-    final currentUserId = authService.authenticatedUser.uid;
 
-    if (leaderboard.userId != currentUserId) {
-      throw StateError(
-        'Only the owner can unban members from the leaderboard.',
-      );
-    }
+    invariant(
+      isOwner(leaderboard),
+      'Only the owner can unban members from the leaderboard.',
+    );
 
     await leaderboardController.unbanMemberAtomic(leaderboardId, memberId);
   }
@@ -160,9 +162,10 @@ class LeaderboardService {
     final leaderboard = await leaderboardController.findById(leaderboardId);
     final currentUserId = authService.authenticatedUser.uid;
 
-    if (leaderboard.userId == currentUserId) {
-      throw StateError('The owner cannot leave their own leaderboard.');
-    }
+    invariant(
+      !isOwner(leaderboard),
+      'The owner cannot leave their own leaderboard.',
+    );
 
     await leaderboardController.removeMemberAtomic(
       leaderboardId,
