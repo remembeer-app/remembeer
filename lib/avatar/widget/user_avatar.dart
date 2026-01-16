@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:remembeer/avatar/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 class UserAvatar extends StatelessWidget {
@@ -9,9 +11,13 @@ class UserAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasAvatar = user.avatarUrl != null;
+
     return CircleAvatar(
       radius: size,
-      backgroundImage: AssetImage('assets/avatars/${user.avatarName}'),
+      backgroundImage: hasAvatar
+          ? CachedNetworkImageProvider(user.avatarUrl!)
+          : const AssetImage(defaultAvatarPath) as ImageProvider,
     );
   }
 }
