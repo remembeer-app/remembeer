@@ -1,0 +1,67 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/user/controller/user_controller.dart';
+
+class AvatarService {
+  final AuthService authService;
+  final UserController userController;
+
+  final FirebaseStorage _storage;
+  final ImagePicker _imagePicker;
+
+  AvatarService({required this.authService, required this.userController})
+    : _storage = FirebaseStorage.instance,
+      _imagePicker = ImagePicker();
+
+  String get _userId => authService.authenticatedUser.uid;
+
+  String get _avatarPath => 'avatars/$_userId.jpg';
+
+  Future<String?> changeAvatar({required BuildContext context}) async {
+    final pickedImage = await _pickImage();
+    if (pickedImage == null) {
+      return null;
+    }
+
+    final downloadUrl = await _uploadAvatar(pickedImage);
+
+    await _updateUserAvatar(downloadUrl);
+
+    return downloadUrl;
+  }
+
+  Future<File?> _pickImage() async {
+    final pickedFile = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+    );
+
+    if (pickedFile == null) {
+      return null;
+    }
+
+    return File(pickedFile.path);
+  }
+
+  Future<String> _uploadAvatar(File image) async {
+    final ref = _storage.ref().child(_avatarPath);
+
+    final snapshot = await ref.putFile(image);
+
+    final downloadUrl = await snapshot.ref.getDownloadURL();
+    return downloadUrl;
+  }
+
+  Future<void> _updateUserAvatar(String? avatarUrl) async {
+    final currentUser = await userController.currentUser;
+    if (currentUser.avatarUrl == avatarUrl) {
+      return;
+    }
+
+    final updatedUser = currentUser.copyWith(avatarUrl: avatarUrl);
+    await userController.createOrUpdateUser(updatedUser);
+  }
+}

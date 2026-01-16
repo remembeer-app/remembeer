@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/page/change_password_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink_type/page/custom_drink_types_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -125,6 +126,18 @@ class SettingsPage extends StatelessWidget {
           title: 'Change username',
           destinationPage: const UserNamePage(),
         ),
+        _divider,
+        _buildSettingsCard(
+          context: context,
+          title: 'Change avatar',
+          destinationPage: const ChangeAvatarPage(),
+        ),
+        _divider,
+        _buildSettingsCard(
+          context: context,
+          title: 'Badge visibility',
+          destinationPage: const BadgeVisibilityPage(),
+        ),
         if (hasPassword) ...[
           _divider,
           _buildSettingsCard(
@@ -133,12 +146,6 @@ class SettingsPage extends StatelessWidget {
             destinationPage: const ChangePasswordPage(),
           ),
         ],
-        _divider,
-        _buildSettingsCard(
-          context: context,
-          title: 'Badge visibility',
-          destinationPage: const BadgeVisibilityPage(),
-        ),
       ],
     );
   }
