@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/constants.dart';
@@ -72,26 +73,46 @@ class ProfilePage extends StatelessWidget {
   }) {
     return Column(
       children: [
-        UserAvatar(user: user, size: 60),
+        _buildAvatar(context, isCurrentUser, user),
         gap8,
-        InkWell(
-          onTap: isCurrentUser
-              ? () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => const UserNamePage(),
-                    ),
-                  );
-                }
-              : null,
-          child: _buildUsernameLabel(user),
-        ),
+        _buildUserName(isCurrentUser, context, user),
         gap12,
         if (isCurrentUser)
           _buildCurrentUserActions(context)
         else
           _buildOtherUserActions(context, user),
       ],
+    );
+  }
+
+  Widget _buildAvatar(
+    BuildContext context,
+    bool isCurrentUser,
+    UserModel user,
+  ) {
+    return InkWell(
+      onTap: isCurrentUser
+          ? () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => const ChangeAvatarPage(),
+              ),
+            )
+          : null,
+      child: Stack(
+        children: [
+          UserAvatar(user: user, size: 60),
+          if (isCurrentUser)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: CircleAvatar(
+                radius: 14,
+                backgroundColor: Theme.of(context).primaryColor,
+                child: const Icon(Icons.edit, size: 16, color: Colors.white),
+              ),
+            ),
+        ],
+      ),
     );
   }
 
@@ -192,10 +213,25 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildUsernameLabel(UserModel user) {
-    return Text(
-      user.username,
-      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+  Widget _buildUserName(
+    bool isCurrentUser,
+    BuildContext context,
+    UserModel user,
+  ) {
+    return InkWell(
+      onTap: isCurrentUser
+          ? () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (context) => const UserNamePage(),
+                ),
+              );
+            }
+          : null,
+      child: Text(
+        user.username,
+        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+      ),
     );
   }
 }
