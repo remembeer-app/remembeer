@@ -80,6 +80,14 @@ final _badgeDefinitions = <BadgeDefinition>[
     category: BadgeCategory.onetimeEvent,
     goal: null,
   ),
+  (
+    id: OnetimeBadgeId.caseClosed.id,
+    name: 'Case Closed',
+    description: 'The box is empty. 20 beers in one day.',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.onetimeEvent,
+    goal: null,
+  ),
 ];
 
 List<BadgeDefinition> getBadgesByCategory(BadgeCategory category) {

@@ -81,6 +81,7 @@ class BadgeService {
         OnetimeBadgeId.earlyRiser => _checkEarlyRiser(consumedAt),
         OnetimeBadgeId.nightAnimal => _checkNightAnimal(user, consumedAt),
         OnetimeBadgeId.youRemembeered => _checkYouRemembeered(consumedAt),
+        OnetimeBadgeId.caseClosed => _checkCaseClosed(user, consumedAt),
       };
 
       if (unlocked) {
@@ -108,6 +109,15 @@ class BadgeService {
     final now = DateTime.now();
     final difference = now.difference(consumedAt).inDays;
     return difference >= 5;
+  }
+
+  bool _checkCaseClosed(UserModel user, DateTime consumedAt) {
+    final dailyStats = user.getDailyStats(
+      consumedAt.year,
+      consumedAt.month,
+      consumedAt.day,
+    );
+    return dailyStats.beersConsumed >= 20;
   }
 
   UserModel _unlockIfNew(UserModel user, BadgeDefinition badgeDefinition) {
