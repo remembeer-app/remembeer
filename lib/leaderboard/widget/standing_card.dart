@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
@@ -52,11 +53,7 @@ class StandingCard extends StatelessWidget {
                 ),
               ),
               hGap8,
-              CircleAvatar(
-                backgroundImage: AssetImage(
-                  'assets/avatars/${entry.user.avatarName}',
-                ),
-              ),
+              UserAvatar(user: entry.user),
               hGap12,
               Expanded(
                 child: Text(

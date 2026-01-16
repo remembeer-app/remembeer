@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
@@ -71,10 +72,7 @@ class ProfilePage extends StatelessWidget {
   }) {
     return Column(
       children: [
-        CircleAvatar(
-          radius: 60,
-          backgroundImage: AssetImage('assets/avatars/${user.avatarName}'),
-        ),
+        UserAvatar(user: user, size: 60),
         gap8,
         InkWell(
           onTap: isCurrentUser

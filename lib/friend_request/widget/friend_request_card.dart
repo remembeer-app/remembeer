@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
@@ -42,11 +43,7 @@ class FriendRequestCard extends StatelessWidget {
                   ),
                 );
               },
-              leading: CircleAvatar(
-                backgroundImage: AssetImage(
-                  'assets/avatars/${sender.avatarName}',
-                ),
-              ),
+              leading: UserAvatar(user: sender),
               title: Text(
                 sender.username,
                 style: const TextStyle(fontWeight: FontWeight.bold),

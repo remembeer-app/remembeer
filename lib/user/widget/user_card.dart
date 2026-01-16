@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 
@@ -14,9 +15,7 @@ class UserCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(4.0),
         child: ListTile(
-          leading: CircleAvatar(
-            backgroundImage: AssetImage('assets/avatars/${user.avatarName}'),
-          ),
+          leading: UserAvatar(user: user),
           title: Text(
             user.username,
             style: const TextStyle(fontWeight: FontWeight.bold),
