@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
@@ -23,11 +24,16 @@ class AvatarService {
 
   Future<String?> changeAvatar({required BuildContext context}) async {
     final pickedImage = await _pickImage();
-    if (pickedImage == null) {
+    if (pickedImage == null || !context.mounted) {
       return null;
     }
 
-    final downloadUrl = await _uploadAvatar(pickedImage);
+    final croppedImage = await _cropImage(context, pickedImage);
+    if (croppedImage == null) {
+      return null;
+    }
+
+    final downloadUrl = await _uploadAvatar(croppedImage);
 
     await _updateUserAvatar(downloadUrl);
 
@@ -56,6 +62,34 @@ class AvatarService {
     }
 
     return File(pickedFile.path);
+  }
+
+  Future<File?> _cropImage(BuildContext context, File image) async {
+    final croppedFile = await ImageCropper().cropImage(
+      sourcePath: image.path,
+      aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      uiSettings: [
+        AndroidUiSettings(
+          toolbarTitle: 'Crop Avatar',
+          toolbarColor: Theme.of(context).primaryColor,
+          toolbarWidgetColor: Colors.white,
+          initAspectRatio: CropAspectRatioPreset.square,
+          lockAspectRatio: true,
+          cropStyle: CropStyle.circle,
+        ),
+        IOSUiSettings(
+          title: 'Crop Avatar',
+          aspectRatioLockEnabled: true,
+          cropStyle: CropStyle.circle,
+        ),
+      ],
+    );
+
+    if (croppedFile == null) {
+      return null;
+    }
+
+    return File(croppedFile.path);
   }
 
   Future<String> _uploadAvatar(File image) async {
