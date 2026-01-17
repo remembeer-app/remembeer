@@ -37,12 +37,15 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
           return Column(
             children: [
               _buildAvatarPreview(user),
-              gap24,
+              gap48,
               if (_errorMessage != null) ...[
                 _buildErrorMessage(context),
                 gap16,
               ],
-              _buildActionButtons(context, user),
+              _buildActionGrid(context, user),
+              const Spacer(),
+              if (user.avatarUrl != null) _buildRemoveButton(context),
+              gap24,
             ],
           );
         },
@@ -51,14 +54,31 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
   }
 
   Widget _buildAvatarPreview(UserModel user) {
+    final theme = Theme.of(context);
+
     return Stack(
       alignment: Alignment.center,
       children: [
-        UserAvatar(user: user, size: 80),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.shade300,
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: UserAvatar(user: user, size: 100),
+        ),
+
         if (_isLoading)
           const Positioned.fill(
             child: CircleAvatar(
-              radius: 80,
+              radius: 100,
               backgroundColor: Colors.black38,
               child: CircularProgressIndicator(color: Colors.white),
             ),
@@ -67,38 +87,84 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, UserModel user) {
-    final hasCustomAvatar = user.avatarUrl != null;
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        FilledButton.icon(
-          onPressed: _isLoading ? null : () => _pickAvatar(ImageSource.gallery),
-          icon: const Icon(Icons.photo_library_outlined),
-          label: const Text('Choose from Gallery'),
-        ),
-        FilledButton.icon(
-          onPressed: _isLoading ? null : () => _pickAvatar(ImageSource.camera),
-          icon: const Icon(Icons.camera_alt_outlined),
-          label: const Text('Take a Photo'),
-        ),
-        if (hasCustomAvatar) ...[
-          gap24,
-          OutlinedButton.icon(
-            onPressed: _isLoading ? null : _removeAvatar,
-            icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
-            label: Text(
-              'Remove Avatar',
-              style: TextStyle(color: theme.colorScheme.error),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: BorderSide(color: theme.colorScheme.error),
-            ),
+  Widget _buildActionGrid(BuildContext context, UserModel user) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Row(
+        children: [
+          _buildSelectionTile(
+            context,
+            icon: Icons.photo_library_rounded,
+            label: 'Gallery',
+            onTap: _isLoading ? null : () => _pickAvatar(ImageSource.gallery),
+          ),
+          hGap16,
+          _buildSelectionTile(
+            context,
+            icon: Icons.camera_alt_rounded,
+            label: 'Camera',
+            onTap: _isLoading ? null : () => _pickAvatar(ImageSource.camera),
           ),
         ],
-      ],
+      ),
+    );
+  }
+
+  Widget _buildSelectionTile(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required VoidCallback? onTap,
+  }) {
+    final theme = Theme.of(context);
+
+    return Expanded(
+      child: Material(
+        color: theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(20),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Container(
+            height: 120,
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon, size: 32, color: theme.colorScheme.primary),
+                gap12,
+                Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRemoveButton(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return OutlinedButton.icon(
+      onPressed: _isLoading ? null : _removeAvatar,
+      icon: Icon(
+        Icons.delete_forever,
+        color: theme.colorScheme.error,
+        size: 20,
+      ),
+      label: Text(
+        'Remove Avatar',
+        style: TextStyle(color: theme.colorScheme.error),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: theme.colorScheme.error),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+      ),
     );
   }
 
