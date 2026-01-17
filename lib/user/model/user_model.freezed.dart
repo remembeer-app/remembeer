@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserModel {
 
- String get id; String get email; String get username; String get searchableUsername; String get avatarName; Set<String> get friends; Map<String, MonthlyStats> get monthlyStats; Map<String, UnlockedBadge> get unlockedBadges;@TimeOfDayConverter() TimeOfDay get endOfDayBoundary;
+ String get id; String get email; String get username; String get searchableUsername; String? get avatarUrl; Set<String> get friends; Map<String, MonthlyStats> get monthlyStats; Map<String, UnlockedBadge> get unlockedBadges;@TimeOfDayConverter() TimeOfDay get endOfDayBoundary;
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $UserModelCopyWith<UserModel> get copyWith => _$UserModelCopyWithImpl<UserModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.avatarName, avatarName) || other.avatarName == avatarName)&&const DeepCollectionEquality().equals(other.friends, friends)&&const DeepCollectionEquality().equals(other.monthlyStats, monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other.friends, friends)&&const DeepCollectionEquality().equals(other.monthlyStats, monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,username,searchableUsername,avatarName,const DeepCollectionEquality().hash(friends),const DeepCollectionEquality().hash(monthlyStats),const DeepCollectionEquality().hash(unlockedBadges),endOfDayBoundary);
+int get hashCode => Object.hash(runtimeType,id,email,username,searchableUsername,avatarUrl,const DeepCollectionEquality().hash(friends),const DeepCollectionEquality().hash(monthlyStats),const DeepCollectionEquality().hash(unlockedBadges),endOfDayBoundary);
 
 @override
 String toString() {
-  return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, avatarName: $avatarName, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
+  return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, avatarUrl: $avatarUrl, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $UserModelCopyWith<$Res>  {
   factory $UserModelCopyWith(UserModel value, $Res Function(UserModel) _then) = _$UserModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String username, String searchableUsername, String avatarName, Set<String> friends, Map<String, MonthlyStats> monthlyStats, Map<String, UnlockedBadge> unlockedBadges,@TimeOfDayConverter() TimeOfDay endOfDayBoundary
+ String id, String email, String username, String searchableUsername, String? avatarUrl, Set<String> friends, Map<String, MonthlyStats> monthlyStats, Map<String, UnlockedBadge> unlockedBadges,@TimeOfDayConverter() TimeOfDay endOfDayBoundary
 });
 
 
@@ -65,14 +65,14 @@ class _$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? avatarName = null,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? avatarUrl = freezed,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
 as String,searchableUsername: null == searchableUsername ? _self.searchableUsername : searchableUsername // ignore: cast_nullable_to_non_nullable
-as String,avatarName: null == avatarName ? _self.avatarName : avatarName // ignore: cast_nullable_to_non_nullable
-as String,friends: null == friends ? _self.friends : friends // ignore: cast_nullable_to_non_nullable
+as String,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
+as String?,friends: null == friends ? _self.friends : friends // ignore: cast_nullable_to_non_nullable
 as Set<String>,monthlyStats: null == monthlyStats ? _self.monthlyStats : monthlyStats // ignore: cast_nullable_to_non_nullable
 as Map<String, MonthlyStats>,unlockedBadges: null == unlockedBadges ? _self.unlockedBadges : unlockedBadges // ignore: cast_nullable_to_non_nullable
 as Map<String, UnlockedBadge>,endOfDayBoundary: null == endOfDayBoundary ? _self.endOfDayBoundary : endOfDayBoundary // ignore: cast_nullable_to_non_nullable
@@ -161,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String searchableUsername,  String avatarName,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String searchableUsername,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.avatarName,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
+return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
   return orElse();
 
 }
@@ -182,10 +182,10 @@ return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String searchableUsername,  String avatarName,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String searchableUsername,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)  $default,) {final _that = this;
 switch (_that) {
 case _UserModel():
-return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.avatarName,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
+return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +202,10 @@ return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String username,  String searchableUsername,  String avatarName,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String username,  String searchableUsername,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)?  $default,) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.avatarName,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
+return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
   return null;
 
 }
@@ -217,14 +217,14 @@ return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_th
 @JsonSerializable()
 
 class _UserModel extends UserModel {
-  const _UserModel({required this.id, required this.email, required this.username, required this.searchableUsername, this.avatarName = 'jirka_kara.png', final  Set<String> friends = const {}, final  Map<String, MonthlyStats> monthlyStats = const {}, final  Map<String, UnlockedBadge> unlockedBadges = const {}, @TimeOfDayConverter() this.endOfDayBoundary = defaultEndOfDayBoundary}): _friends = friends,_monthlyStats = monthlyStats,_unlockedBadges = unlockedBadges,super._();
+  const _UserModel({required this.id, required this.email, required this.username, required this.searchableUsername, this.avatarUrl, final  Set<String> friends = const {}, final  Map<String, MonthlyStats> monthlyStats = const {}, final  Map<String, UnlockedBadge> unlockedBadges = const {}, @TimeOfDayConverter() this.endOfDayBoundary = defaultEndOfDayBoundary}): _friends = friends,_monthlyStats = monthlyStats,_unlockedBadges = unlockedBadges,super._();
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override final  String id;
 @override final  String email;
 @override final  String username;
 @override final  String searchableUsername;
-@override@JsonKey() final  String avatarName;
+@override final  String? avatarUrl;
  final  Set<String> _friends;
 @override@JsonKey() Set<String> get friends {
   if (_friends is EqualUnmodifiableSetView) return _friends;
@@ -261,16 +261,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.avatarName, avatarName) || other.avatarName == avatarName)&&const DeepCollectionEquality().equals(other._friends, _friends)&&const DeepCollectionEquality().equals(other._monthlyStats, _monthlyStats)&&const DeepCollectionEquality().equals(other._unlockedBadges, _unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other._friends, _friends)&&const DeepCollectionEquality().equals(other._monthlyStats, _monthlyStats)&&const DeepCollectionEquality().equals(other._unlockedBadges, _unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,username,searchableUsername,avatarName,const DeepCollectionEquality().hash(_friends),const DeepCollectionEquality().hash(_monthlyStats),const DeepCollectionEquality().hash(_unlockedBadges),endOfDayBoundary);
+int get hashCode => Object.hash(runtimeType,id,email,username,searchableUsername,avatarUrl,const DeepCollectionEquality().hash(_friends),const DeepCollectionEquality().hash(_monthlyStats),const DeepCollectionEquality().hash(_unlockedBadges),endOfDayBoundary);
 
 @override
 String toString() {
-  return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, avatarName: $avatarName, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
+  return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, avatarUrl: $avatarUrl, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
 }
 
 
@@ -281,7 +281,7 @@ abstract mixin class _$UserModelCopyWith<$Res> implements $UserModelCopyWith<$Re
   factory _$UserModelCopyWith(_UserModel value, $Res Function(_UserModel) _then) = __$UserModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String username, String searchableUsername, String avatarName, Set<String> friends, Map<String, MonthlyStats> monthlyStats, Map<String, UnlockedBadge> unlockedBadges,@TimeOfDayConverter() TimeOfDay endOfDayBoundary
+ String id, String email, String username, String searchableUsername, String? avatarUrl, Set<String> friends, Map<String, MonthlyStats> monthlyStats, Map<String, UnlockedBadge> unlockedBadges,@TimeOfDayConverter() TimeOfDay endOfDayBoundary
 });
 
 
@@ -298,14 +298,14 @@ class __$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? avatarName = null,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? avatarUrl = freezed,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
   return _then(_UserModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
 as String,searchableUsername: null == searchableUsername ? _self.searchableUsername : searchableUsername // ignore: cast_nullable_to_non_nullable
-as String,avatarName: null == avatarName ? _self.avatarName : avatarName // ignore: cast_nullable_to_non_nullable
-as String,friends: null == friends ? _self._friends : friends // ignore: cast_nullable_to_non_nullable
+as String,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
+as String?,friends: null == friends ? _self._friends : friends // ignore: cast_nullable_to_non_nullable
 as Set<String>,monthlyStats: null == monthlyStats ? _self._monthlyStats : monthlyStats // ignore: cast_nullable_to_non_nullable
 as Map<String, MonthlyStats>,unlockedBadges: null == unlockedBadges ? _self._unlockedBadges : unlockedBadges // ignore: cast_nullable_to_non_nullable
 as Map<String, UnlockedBadge>,endOfDayBoundary: null == endOfDayBoundary ? _self.endOfDayBoundary : endOfDayBoundary // ignore: cast_nullable_to_non_nullable

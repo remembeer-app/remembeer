@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 class BannedMemberCard extends StatelessWidget {
@@ -17,9 +18,7 @@ class BannedMemberCard extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundImage: AssetImage('assets/avatars/${user.avatarName}'),
-        ),
+        leading: UserAvatar(user: user),
         title: Text(
           user.username,
           style: const TextStyle(fontWeight: FontWeight.bold),

@@ -20,7 +20,7 @@ abstract class UserModel with _$UserModel implements Document {
     required String email,
     required String username,
     required String searchableUsername,
-    @Default('jirka_kara.png') String avatarName,
+    String? avatarUrl,
     @Default({}) Set<String> friends,
     @Default({}) Map<String, MonthlyStats> monthlyStats,
     @Default({}) Map<String, UnlockedBadge> unlockedBadges,
