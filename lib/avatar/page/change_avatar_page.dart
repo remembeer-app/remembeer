@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
@@ -27,7 +28,9 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
   Widget build(BuildContext context) {
     return SettingsPageTemplate(
       title: const Text('Change Avatar'),
-      hint: 'Choose a photo from your gallery.',
+      hint:
+          'Choose a photo from your gallery or take a new one to set as your avatar. '
+          'You can also remove your current avatar to revert to the default one.',
       child: AsyncBuilder(
         stream: _userService.currentUserStream,
         builder: (context, user) {
@@ -72,9 +75,14 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         FilledButton.icon(
-          onPressed: _isLoading ? null : _pickAvatar,
+          onPressed: _isLoading ? null : () => _pickAvatar(ImageSource.gallery),
           icon: const Icon(Icons.photo_library_outlined),
           label: const Text('Choose from Gallery'),
+        ),
+        FilledButton.icon(
+          onPressed: _isLoading ? null : () => _pickAvatar(ImageSource.camera),
+          icon: const Icon(Icons.camera_alt_outlined),
+          label: const Text('Take a Photo'),
         ),
         if (hasCustomAvatar) ...[
           gap24,
@@ -94,14 +102,14 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
     );
   }
 
-  Future<void> _pickAvatar() async {
+  Future<void> _pickAvatar(ImageSource source) async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final result = await _avatarService.changeAvatar(context: context);
+      final result = await _avatarService.changeAvatar(context, source);
 
       if (result != null && mounted) {
         Navigator.of(context).pop();

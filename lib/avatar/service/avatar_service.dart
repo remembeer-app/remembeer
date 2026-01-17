@@ -23,8 +23,8 @@ class AvatarService {
 
   String get _avatarPath => 'avatars/$_userId.jpg';
 
-  Future<String?> changeAvatar({required BuildContext context}) async {
-    final pickedImage = await _pickImage();
+  Future<String?> changeAvatar(BuildContext context, ImageSource source) async {
+    final pickedImage = await _pickImage(source);
     if (pickedImage == null || !context.mounted) {
       return null;
     }
@@ -53,10 +53,8 @@ class AvatarService {
     await _updateUserAvatar(null);
   }
 
-  Future<File?> _pickImage() async {
-    final pickedFile = await _imagePicker.pickImage(
-      source: ImageSource.gallery,
-    );
+  Future<File?> _pickImage(ImageSource source) async {
+    final pickedFile = await _imagePicker.pickImage(source: source);
 
     if (pickedFile == null) {
       return null;
