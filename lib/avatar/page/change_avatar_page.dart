@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
+import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -64,6 +65,9 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
   }
 
   Widget _buildActionButtons(BuildContext context, UserModel user) {
+    final hasCustomAvatar = user.avatarUrl != null;
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -72,7 +76,20 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
           icon: const Icon(Icons.photo_library_outlined),
           label: const Text('Choose from Gallery'),
         ),
-        gap12,
+        if (hasCustomAvatar) ...[
+          gap24,
+          OutlinedButton.icon(
+            onPressed: _isLoading ? null : _removeAvatar,
+            icon: Icon(Icons.delete_outline, color: theme.colorScheme.error),
+            label: Text(
+              'Remove Avatar',
+              style: TextStyle(color: theme.colorScheme.error),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: theme.colorScheme.error),
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -122,6 +139,35 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
           ),
         ],
       ),
+    );
+  }
+
+  void _removeAvatar() {
+    showConfirmationDialog(
+      context: context,
+      title: 'Remove Avatar',
+      text: 'Are you sure you want to remove your custom avatar?',
+      isDestructive: true,
+      submitButtonText: 'Remove',
+      onPressed: () async {
+        setState(() {
+          _isLoading = true;
+          _errorMessage = null;
+        });
+
+        try {
+          await _avatarService.deleteAvatar();
+          if (mounted) {
+            Navigator.of(context).pop();
+          }
+        } on Exception catch (_) {
+          setState(() => _errorMessage = 'Failed to remove avatar');
+        } finally {
+          if (mounted) {
+            setState(() => _isLoading = false);
+          }
+        }
+      },
     );
   }
 }

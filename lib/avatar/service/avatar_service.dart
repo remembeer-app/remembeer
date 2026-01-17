@@ -34,6 +34,18 @@ class AvatarService {
     return downloadUrl;
   }
 
+  Future<void> deleteAvatar() async {
+    try {
+      await _storage.ref().child(_avatarPath).delete();
+    } on FirebaseException catch (e) {
+      if (e.code != 'object-not-found') {
+        rethrow;
+      }
+    }
+
+    await _updateUserAvatar(null);
+  }
+
   Future<File?> _pickImage() async {
     final pickedFile = await _imagePicker.pickImage(
       source: ImageSource.gallery,
