@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/avatar/constants.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 
 class AvatarService {
@@ -68,6 +69,9 @@ class AvatarService {
     final croppedFile = await ImageCropper().cropImage(
       sourcePath: image.path,
       aspectRatio: const CropAspectRatio(ratioX: 1, ratioY: 1),
+      maxHeight: avatarMaxSize,
+      maxWidth: avatarMaxSize,
+      compressQuality: avatarCompressQuality,
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'Crop Avatar',
