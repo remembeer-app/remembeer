@@ -75,7 +75,15 @@ final _badgeDefinitions = <BadgeDefinition>[
   (
     id: OnetimeBadgeId.earlyRiser.id,
     name: 'Early Riser',
-    description: 'Have a beer between 6 AM and 8 AM.',
+    description: 'Have a drink between 6 AM and 8 AM.',
+    iconPath: 'assets/badges/badge.png',
+    category: BadgeCategory.onetimeEvent,
+    goal: null,
+  ),
+  (
+    id: OnetimeBadgeId.caseClosed.id,
+    name: 'Case Closed',
+    description: 'The box is empty. 20 beers in one day.',
     iconPath: 'assets/badges/badge.png',
     category: BadgeCategory.onetimeEvent,
     goal: null,
