@@ -33,7 +33,7 @@ dependencies:
   cloud_functions: ^6.0.5
   cupertino_icons: ^1.0.8
   diacritic: ^0.1.6
-  firebase_auth: ^6.1.3
+  firebase_auth: ^6.1.4
   firebase_core: ^4.2.0
   firebase_messaging: ^16.1.0
   firebase_storage: ^13.0.5
