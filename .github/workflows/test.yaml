@@ -1,0 +1,22 @@
+name: Test Environment Secrets
+
+on:
+  pull_request:
+  workflow_call:
+
+jobs:
+  test-env-secret:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Check secret availability
+        env:
+          TEST_SECRET: ${{ secrets.TEST_ENV_SECRET }}
+        run: |
+          if [ -n "$TEST_SECRET" ]; then
+            echo "✅ TEST_ENV_SECRET is available (length: ${#TEST_SECRET})"
+          else
+            echo "❌ TEST_ENV_SECRET is NOT available or empty"
+            exit 1
+          fi
