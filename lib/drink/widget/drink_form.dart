@@ -54,6 +54,7 @@ class _DrinkFormState extends State<DrinkForm> {
     super.initState();
     _consumedAtController.text = _formatDateTime(_selectedConsumedAt);
     _volumeController.text = widget.initialVolume.toString();
+    _volumeController.addListener(() => setState(() {}));
     _location = widget.initialLocation;
     _updateLocationText();
   }
@@ -254,18 +255,25 @@ class _DrinkFormState extends State<DrinkForm> {
   }
 
   Widget _buildVolumeButton({required String name, required int volume}) {
+    final currentVolume = int.tryParse(_volumeController.text);
+    final isSelected = currentVolume == volume;
+
     return Expanded(
-      child: OutlinedButton(
-        onPressed: () => _volumeController.text = volume.toString(),
-        child: Text(name),
-      ),
+      child: isSelected
+          ? FilledButton(
+              onPressed: () => _volumeController.text = volume.toString(),
+              child: Text(name),
+            )
+          : OutlinedButton(
+              onPressed: () => _volumeController.text = volume.toString(),
+              child: Text(name),
+            ),
     );
   }
 
   Widget _buildPredefinedVolumesRow() {
     final volumes = _selectedDrinkType.category.predefinedVolumes;
     final buttons = <Widget>[];
-    // TODO(metju-ac): improve this logic when doing UI, consider Wrap component
     volumes.forEach((name, volume) {
       buttons
         ..add(_buildVolumeButton(name: name, volume: volume))
