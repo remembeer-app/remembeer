@@ -46,4 +46,14 @@ enum DrinkCategory {
       DrinkCategory.wine => {'Glass': 200, 'Bottle': 750},
     };
   }
+
+  int get defaultVolume {
+    return switch (this) {
+      DrinkCategory.beer => 500,
+      DrinkCategory.cider => 500,
+      DrinkCategory.cocktail => 250,
+      DrinkCategory.spirit => 40,
+      DrinkCategory.wine => 200,
+    };
+  }
 }

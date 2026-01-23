@@ -226,6 +226,9 @@ class _DrinkFormState extends State<DrinkForm> {
       selectedDrinkType: _selectedDrinkType,
       onChanged: (newValue) {
         setState(() {
+          if (newValue.category != _selectedDrinkType.category) {
+            _volumeController.text = newValue.category.defaultVolume.toString();
+          }
           _selectedDrinkType = newValue;
         });
       },
