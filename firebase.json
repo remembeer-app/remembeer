@@ -34,5 +34,11 @@
       ],
       "runtime": "python313"
     }
-  ]
+  ],
+  "firestore": {
+    "database": "(default)",
+    "location": "europe-west4",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
 }
