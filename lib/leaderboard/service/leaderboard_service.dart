@@ -134,6 +134,7 @@ class LeaderboardService {
     );
 
     await leaderboardController.banMemberAtomic(leaderboard.id, memberId);
+    await leaderboardController.removeMemberAtomic(leaderboard.id, memberId);
   }
 
   Future<void> unbanMember({
