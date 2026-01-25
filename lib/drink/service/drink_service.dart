@@ -8,6 +8,7 @@ import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/model/drink_create.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/location/service/location_service.dart';
+import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/service/user_stats_service.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
@@ -18,6 +19,7 @@ class DrinkService {
   final UserSettingsController userSettingsController;
   final DrinkController drinkController;
   final UserController userController;
+  final SessionController sessionController;
   final DateService dateService;
   final LocationService locationService;
   final UserStatsService userStatsService;
@@ -27,6 +29,7 @@ class DrinkService {
     required this.userSettingsController,
     required this.drinkController,
     required this.userController,
+    required this.sessionController,
     required this.dateService,
     required this.locationService,
     required this.userStatsService,
@@ -66,20 +69,31 @@ class DrinkService {
   }
 
   Future<void> createDrink(DrinkCreate drinkCreate) async {
-    final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
+    var drinkToCreate = drinkCreate;
+
+    final effectiveDate = await _effectiveDate(drinkToCreate.consumedAt);
     final after6pm = _calculateIsAfter6pm(
-      drinkCreate.consumedAt,
+      drinkToCreate.consumedAt,
       effectiveDate,
     );
 
     final beers = _beersEquivalent(
-      category: drinkCreate.drinkType.category,
-      volumeInMilliliters: drinkCreate.volumeInMilliliters,
+      category: drinkToCreate.drinkType.category,
+      volumeInMilliliters: drinkToCreate.volumeInMilliliters,
     );
     final alcohol = _alcoholMl(
-      volumeInMilliliters: drinkCreate.volumeInMilliliters,
-      alcoholPercentage: drinkCreate.drinkType.alcoholPercentage,
+      volumeInMilliliters: drinkToCreate.volumeInMilliliters,
+      alcoholPercentage: drinkToCreate.drinkType.alcoholPercentage,
     );
+
+    final activeSessions = await sessionController
+        .sessionsActiveAtStream(drinkToCreate.consumedAt)
+        .first;
+    if (activeSessions.length == 1) {
+      drinkToCreate = drinkToCreate.copyWith(
+        sessionId: activeSessions.single.id,
+      );
+    }
 
     var user = await userController.currentUser;
     user = user.addDrink(
@@ -95,7 +109,7 @@ class DrinkService {
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
     final batch = drinkController.batch;
-    drinkController.createSingleInBatch(drinkCreate, batch);
+    drinkController.createSingleInBatch(drinkToCreate, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
     await batch.commit();
   }
@@ -155,6 +169,21 @@ class DrinkService {
 
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, newEffectiveDate);
+
+    if (newDrink.sessionId != null) {
+      final session = await sessionController.findById(newDrink.sessionId!);
+
+      final consumedAt = newDrink.consumedAt;
+      final sessionStart = session.startedAt;
+      final sessionEnd = session.endedAt;
+
+      final isBeforeStart = consumedAt.isBefore(sessionStart);
+      final isAfterEnd = sessionEnd != null && consumedAt.isAfter(sessionEnd);
+
+      if (isBeforeStart || isAfterEnd) {
+        newDrink = newDrink.copyWith(sessionId: null);
+      }
+    }
 
     final batch = drinkController.batch;
     drinkController.updateSingleInBatch(newDrink, batch);

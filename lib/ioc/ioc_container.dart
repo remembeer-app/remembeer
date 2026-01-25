@@ -68,6 +68,7 @@ class IoCContainer {
           drinkController: get<DrinkController>(),
           userController: get<UserController>(),
           userSettingsController: get<UserSettingsController>(),
+          sessionController: get<SessionController>(),
           dateService: get<DateService>(),
           locationService: get<LocationService>(),
           userStatsService: get<UserStatsService>(),

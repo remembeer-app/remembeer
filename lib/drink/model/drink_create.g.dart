@@ -14,6 +14,7 @@ _DrinkCreate _$DrinkCreateFromJson(Map<String, dynamic> json) => _DrinkCreate(
     json['location'],
     const GeoPointConverter().fromJson,
   ),
+  sessionId: json['sessionId'] as String?,
 );
 
 Map<String, dynamic> _$DrinkCreateToJson(_DrinkCreate instance) =>
@@ -25,6 +26,7 @@ Map<String, dynamic> _$DrinkCreateToJson(_DrinkCreate instance) =>
         instance.location,
         const GeoPointConverter().toJson,
       ),
+      'sessionId': instance.sessionId,
     };
 
 Value? _$JsonConverterFromJson<Json, Value>(
