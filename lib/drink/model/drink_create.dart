@@ -14,6 +14,7 @@ abstract class DrinkCreate with _$DrinkCreate implements ValueObject {
     required DrinkTypeCore drinkType,
     required int volumeInMilliliters,
     @GeoPointConverter() GeoPoint? location,
+    String? sessionId,
   }) = _DrinkCreate;
 
   factory DrinkCreate.fromJson(Map<String, dynamic> json) =>

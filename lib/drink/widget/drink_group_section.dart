@@ -107,11 +107,19 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
   }
 
   bool _shouldAcceptDrink(Drink drink) {
-    if (_isSessionMode) {
-      return drink.sessionId != widget.session!.id;
-    } else {
+    final session = widget.session;
+    if (session == null) {
       return drink.sessionId != null;
     }
+
+    final sessionEnd = session.endedAt;
+
+    final isDifferentSession = drink.sessionId != session.id;
+    final isAfterStart = drink.consumedAt.isAfter(session.startedAt);
+    final isBeforeEnd =
+        sessionEnd == null || drink.consumedAt.isBefore(sessionEnd);
+
+    return isDifferentSession && isAfterStart && isBeforeEnd;
   }
 
   Color get _backgroundColor {

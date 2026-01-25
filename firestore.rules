@@ -1,0 +1,169 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /* =========================
+       DEFAULT: deny everything
+       ========================= */
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    /* =========================
+       AUTH HELPERS
+       ========================= */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function uid() {
+      return request.auth.uid;
+    }
+
+    /* =========================
+       OWNERSHIP HELPERS
+       ========================= */
+    function isOwner(resourceData) {
+      return isSignedIn() && resourceData.userId == uid();
+    }
+
+    function isOwnerCreate() {
+      return isSignedIn() && request.resource.data.userId == uid();
+    }
+
+    /* =========================
+       UPDATE SAFETY HELPERS
+       ========================= */
+    function ownershipUnchanged() {
+      return request.resource.data.userId == resource.data.userId;
+    }
+
+    function onlyUpdatingFields(allowedFields) {
+      return request.resource.data.diff(resource.data)
+        .changedKeys()
+        .hasOnly(allowedFields);
+    }
+
+    /* =========================
+       MEMBERSHIP HELPERS
+       ========================= */
+    function isMember() {
+      return uid() in resource.data.memberIds;
+    }
+
+    function notBanned() {
+      return !('bannedMemberIds' in resource.data)
+        || !(uid() in resource.data.bannedMemberIds);
+    }
+
+    /* =========================
+       SELF-ARRAY HELPERS
+       ========================= */
+    function arrayBefore(field) {
+      return resource.data[field];
+    }
+
+    function arrayAfter(field) {
+    return request.resource.data[field];
+    }
+
+    function selfAddedTo(field) {
+      return !(uid() in arrayBefore(field))
+        && (uid() in arrayAfter(field))
+        && arrayAfter(field).size() == arrayBefore(field).size() + 1;
+    }
+
+    function selfRemovedFrom(field) {
+      return (uid() in arrayBefore(field))
+        && !(uid() in arrayAfter(field))
+        && arrayAfter(field).size() == arrayBefore(field).size() - 1;
+    }
+
+    function onlySelfArrayChange(field) {
+      return selfAddedTo(field) || selfRemovedFrom(field);
+    }
+
+    /* =========================
+       COLLECTION RULES
+       ========================= */
+    match /drink_types/{id} {
+      allow read: if isSignedIn()
+        && (isOwner(resource.data) || resource.data.userId == "global");
+
+      allow create: if isOwnerCreate();
+
+      allow update: if isOwner(resource.data)
+        && ownershipUnchanged();
+    }
+
+    match /drinks/{id} {
+      allow read: if isSignedIn();
+
+      allow create: if isOwnerCreate();
+
+      allow update: if isOwner(resource.data)
+        && ownershipUnchanged();
+    }
+
+    match /friend_requests/{id} {
+      allow read: if isSignedIn()
+        && (resource.data.userId == uid() || resource.data.toUserId == uid());
+
+      allow create: if isOwnerCreate();
+
+      allow update: if isSignedIn()
+        && (resource.data.userId == uid() || resource.data.toUserId == uid())
+        && resource.data.userId == request.resource.data.userId
+        && resource.data.toUserId == request.resource.data.toUserId;
+    }
+
+    match /leaderboards/{id} {
+      allow read: if isSignedIn();
+
+      allow create: if isOwnerCreate();
+
+      allow update: if ownershipUnchanged()
+        && (
+          isOwner(resource.data)
+
+          || (
+            isSignedIn()
+            && notBanned()
+            && onlyUpdatingFields(["memberIds", "updatedAt"])
+            && onlySelfArrayChange("memberIds")
+          )
+        );
+    }
+
+    match /sessions/{id} {
+      allow read: if isSignedIn();
+
+      allow create: if true;
+
+      allow update: if ownershipUnchanged()
+        && (
+          isOwner(resource.data)
+          || (isSignedIn() && isMember() && notBanned()
+              && onlyUpdatingFields(["memberIds", "updatedAt"]))
+        );
+    }
+
+    match /user_settings/{userId} {
+      allow read, write: if isSignedIn() && userId == uid();
+    }
+
+    match /users/{userId} {
+      allow read: if isSignedIn();
+
+      allow create: if true;
+
+      allow update: if isSignedIn() && userId == uid();
+
+      allow update: if isSignedIn()
+        && userId != uid()
+        && onlyUpdatingFields(["friends"])
+        && onlySelfArrayChange("friends");
+    }
+  }
+}
