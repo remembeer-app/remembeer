@@ -69,20 +69,31 @@ class DrinkService {
   }
 
   Future<void> createDrink(DrinkCreate drinkCreate) async {
-    final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
+    var drinkToCreate = drinkCreate;
+
+    final effectiveDate = await _effectiveDate(drinkToCreate.consumedAt);
     final after6pm = _calculateIsAfter6pm(
-      drinkCreate.consumedAt,
+      drinkToCreate.consumedAt,
       effectiveDate,
     );
 
     final beers = _beersEquivalent(
-      category: drinkCreate.drinkType.category,
-      volumeInMilliliters: drinkCreate.volumeInMilliliters,
+      category: drinkToCreate.drinkType.category,
+      volumeInMilliliters: drinkToCreate.volumeInMilliliters,
     );
     final alcohol = _alcoholMl(
-      volumeInMilliliters: drinkCreate.volumeInMilliliters,
-      alcoholPercentage: drinkCreate.drinkType.alcoholPercentage,
+      volumeInMilliliters: drinkToCreate.volumeInMilliliters,
+      alcoholPercentage: drinkToCreate.drinkType.alcoholPercentage,
     );
+
+    final activeSessions = await sessionController
+        .sessionsActiveAtStream(drinkToCreate.consumedAt)
+        .first;
+    if (activeSessions.length == 1) {
+      drinkToCreate = drinkToCreate.copyWith(
+        sessionId: activeSessions.single.id,
+      );
+    }
 
     var user = await userController.currentUser;
     user = user.addDrink(
@@ -98,7 +109,7 @@ class DrinkService {
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
     final batch = drinkController.batch;
-    drinkController.createSingleInBatch(drinkCreate, batch);
+    drinkController.createSingleInBatch(drinkToCreate, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
     await batch.commit();
   }
