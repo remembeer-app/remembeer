@@ -45,6 +45,7 @@ dependencies:
   freezed_annotation: ^3.1.0
   geolocator: ^14.0.2
   get_it: ^9.2.0
+  go_router: ^17.0.1
   google_sign_in: ^7.2.0
   image_cropper: ^11.0.0
   image_picker: ^1.2.1
@@ -59,6 +60,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   freezed: ^3.2.3
+  go_router_builder: ^4.1.3
   interface_generator:
     path: packages/interface_generator
   json_serializable: ^6.11.4
