@@ -4,16 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/constants.dart';
-import 'package:remembeer/common/widget/drink_icon.dart';
+import 'package:remembeer/common/widget/app_navigation_bar.dart';
 import 'package:remembeer/drink/page/drink_page.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/page/leaderboards_page.dart';
 import 'package:remembeer/page_navigation_service.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user_settings/page/settings_page.dart';
-
-const _activeIconSize = 36.0;
 
 class PageSwitcher extends StatefulWidget {
   const PageSwitcher({super.key});
@@ -60,57 +57,13 @@ class PageSwitcherState extends State<PageSwitcher> {
             Expanded(
               child: IndexedStack(index: _selectedPageIndex, children: _pages),
             ),
-            _buildNavigationBar(context),
+            AppNavigationBar(
+              currentIndex: _selectedPageIndex,
+              onTap: _pageNavigationService.setPageIndex,
+            ),
           ],
         ),
       ),
-    );
-  }
-
-  BottomNavigationBar _buildNavigationBar(BuildContext context) {
-    return BottomNavigationBar(
-      type: BottomNavigationBarType.fixed,
-      currentIndex: _selectedPageIndex,
-      selectedItemColor: Theme.of(context).colorScheme.primary,
-      unselectedItemColor: Colors.grey,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      onTap: _pageNavigationService.setPageIndex,
-      items: [
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.person),
-          activeIcon: Icon(Icons.person, size: _activeIconSize),
-          label: 'Profile',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.emoji_events),
-          activeIcon: Icon(Icons.emoji_events, size: _activeIconSize),
-          label: 'Leaderboards',
-        ),
-        BottomNavigationBarItem(
-          icon: const DrinkIcon(
-            category: DrinkCategory.beer,
-            color: Colors.grey,
-            size: 28,
-          ),
-          activeIcon: DrinkIcon(
-            category: DrinkCategory.beer,
-            color: Theme.of(context).colorScheme.primary,
-            size: _activeIconSize,
-          ),
-          label: 'Drink',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.group),
-          activeIcon: Icon(Icons.group, size: _activeIconSize),
-          label: 'Activity',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
-          activeIcon: Icon(Icons.settings, size: _activeIconSize),
-          label: 'Settings',
-        ),
-      ],
     );
   }
 }
