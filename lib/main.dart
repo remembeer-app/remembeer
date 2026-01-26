@@ -22,5 +22,5 @@ Future<void> main() async {
 
   await get<NotificationService>().initialize();
 
-  runApp(App());
+  runApp(const App());
 }
