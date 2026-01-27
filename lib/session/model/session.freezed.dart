@@ -217,8 +217,8 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 /// @nodoc
 @JsonSerializable()
 
-class _Session implements Session {
-  const _Session({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required final  Set<String> memberIds, required final  Set<String> bannedMemberIds, required this.name, required this.startedAt, this.endedAt}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds;
+class _Session extends Session {
+  const _Session({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required final  Set<String> memberIds, required final  Set<String> bannedMemberIds, required this.name, required this.startedAt, this.endedAt}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds,super._();
   factory _Session.fromJson(Map<String, dynamic> json) => _$SessionFromJson(json);
 
 @override final  String id;
