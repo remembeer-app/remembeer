@@ -23,9 +23,10 @@ final router = GoRouter(
   initialLocation: '/drink',
   redirect: (context, state) {
     final isOnLogin = state.matchedLocation == '/login';
-    return switch (_authService.isAuthenticated) {
-      true => isOnLogin ? '/drink' : null,
-      false => isOnLogin ? null : '/login',
+    return switch ((_authService.isAuthenticated, isOnLogin)) {
+      (true, true) => '/drink',
+      (false, false) => '/login',
+      _ => null,
     };
   },
   routes: $appRoutes,

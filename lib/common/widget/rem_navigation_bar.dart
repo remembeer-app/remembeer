@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -18,6 +19,7 @@ class RemNavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
+      // TODO(ohtenkay): currently does not work, statcally set, will be fixed when using the navbar package
       currentIndex: currentIndex,
       selectedItemColor: Theme.of(context).colorScheme.primary,
       unselectedItemColor: Colors.grey,
@@ -30,7 +32,8 @@ class RemNavigationBar extends StatelessWidget {
         1 => const LeaderboardsRoute().go(context),
         2 => const DrinkRoute().go(context),
         3 => const ActivityRoute().go(context),
-        _ => const SettingsRoute().go(context),
+        4 => const SettingsRoute().go(context),
+        _ => never('Invalid navigation index: $index'),
       },
       items: [
         const BottomNavigationBarItem(
