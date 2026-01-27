@@ -6,16 +6,18 @@ import 'package:flutter/services.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/constants.dart';
+// import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/friend_request/page/friend_requests_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/notification/model/notification_type.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
-import 'package:remembeer/page_navigation_service.dart';
-import 'package:remembeer/page_switcher.dart';
+// import 'package:remembeer/page_navigation_service.dart';
+// import 'package:remembeer/page_switcher.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 
+// TODO(ohtenkay): this widget is useless, these things should be initialized somewhere else,
+// page navigation should be done with go router
 class AuthenticatedContext extends StatefulWidget {
   const AuthenticatedContext({super.key});
 
@@ -24,7 +26,7 @@ class AuthenticatedContext extends StatefulWidget {
 }
 
 class _AuthenticatedContextState extends State<AuthenticatedContext> {
-  final _pageNavigationService = get<PageNavigationService>();
+  // final _pageNavigationService = get<PageNavigationService>();
   final _drinkService = get<DrinkService>();
   final _badgeService = get<BadgeService>();
   final _notificationService = get<NotificationService>();
@@ -67,7 +69,7 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
       await _drinkService.addDefaultDrink();
       if (!mounted) return;
 
-      _pageNavigationService.setPageIndex(drinkPageIndex);
+      // _pageNavigationService.setPageIndex(drinkPageIndex);
       showNotification(context, 'Default drink added!');
     }
   }
@@ -90,7 +92,7 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
         );
       case NotificationType.addedToSession:
         Navigator.of(context).popUntil((route) => route.isFirst);
-        _pageNavigationService.setPageIndex(drinkPageIndex);
+      // _pageNavigationService.setPageIndex(drinkPageIndex);
       case null:
         // TODO(metju-ac): Handle this when we add logging.
         debugPrint('Unknown notification type: ${message.data['type']}');
@@ -117,6 +119,6 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
 
   @override
   Widget build(BuildContext context) {
-    return const PageSwitcher();
+    return const Placeholder();
   }
 }
