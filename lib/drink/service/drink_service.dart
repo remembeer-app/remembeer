@@ -86,9 +86,9 @@ class DrinkService {
       alcoholPercentage: drinkToCreate.drinkType.alcoholPercentage,
     );
 
-    final activeSessions = await sessionController
-        .sessionsActiveAtStream(drinkToCreate.consumedAt)
-        .first;
+    final activeSessions = await sessionController.sessionsActiveAt(
+      drinkToCreate.consumedAt,
+    );
     if (activeSessions.length == 1) {
       drinkToCreate = drinkToCreate.copyWith(
         sessionId: activeSessions.single.id,
