@@ -9,13 +9,8 @@ const _activeIconSize = 36.0;
 
 class RemNavigationBar extends StatelessWidget {
   final int currentIndex;
-  final ValueChanged<int> onTap;
 
-  RemNavigationBar({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
+  RemNavigationBar({super.key, required this.currentIndex});
 
   final _authService = get<AuthService>();
 
@@ -28,22 +23,14 @@ class RemNavigationBar extends StatelessWidget {
       unselectedItemColor: Colors.grey,
       showSelectedLabels: false,
       showUnselectedLabels: false,
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            ProfileRoute(
-              userId: _authService.authenticatedUser.uid,
-            ).go(context);
-          case 1:
-            const LeaderboardsRoute().go(context);
-          case 2:
-            const DrinkRoute().go(context);
-          case 3:
-            const ActivityRoute().go(context);
-          case 4:
-            const SettingsRoute().go(context);
-        }
-        onTap(index);
+      onTap: (index) => switch (index) {
+        0 => ProfileRoute(
+          userId: _authService.authenticatedUser.uid,
+        ).go(context),
+        1 => const LeaderboardsRoute().go(context),
+        2 => const DrinkRoute().go(context),
+        3 => const ActivityRoute().go(context),
+        _ => const SettingsRoute().go(context),
       },
       items: [
         const BottomNavigationBarItem(

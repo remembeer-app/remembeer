@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
-import 'package:remembeer/common/widget/app_navigation_bar.dart';
+import 'package:remembeer/auth/page/login_page.dart';
+import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/widget/rem_navigation_bar.dart';
 import 'package:remembeer/drink/page/drink_page.dart';
+import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/page/leaderboards_page.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user_settings/page/settings_page.dart';
@@ -12,7 +17,29 @@ part 'routes.g.dart';
 final shellNavigatorKey = GlobalKey<NavigatorState>();
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
-final router = GoRouter(initialLocation: '/drink', routes: $appRoutes);
+final _authService = get<AuthService>();
+
+final router = GoRouter(
+  initialLocation: '/drink',
+  redirect: (context, state) {
+    final isOnLogin = state.matchedLocation == '/login';
+    return switch (_authService.isAuthenticated) {
+      true => isOnLogin ? '/drink' : null,
+      false => isOnLogin ? null : '/login',
+    };
+  },
+  routes: $appRoutes,
+);
+
+@TypedGoRoute<LoginRoute>(path: '/login')
+class LoginRoute extends GoRouteData with $LoginRoute {
+  const LoginRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const LoginPage();
+  }
+}
 
 @TypedShellRoute<NavbarShellRouteData>(
   routes: [
@@ -32,7 +59,7 @@ class NavbarShellRouteData extends ShellRouteData {
   Widget builder(BuildContext context, GoRouterState state, Widget navigator) {
     return Scaffold(
       body: navigator,
-      bottomNavigationBar: RemNavigationBar(currentIndex: 2, onTap: (_) {}),
+      bottomNavigationBar: RemNavigationBar(currentIndex: 2),
     );
   }
 }

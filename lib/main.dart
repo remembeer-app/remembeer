@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -6,6 +7,7 @@ import 'package:remembeer/app.dart';
 import 'package:remembeer/firebase_options.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
+import 'package:remembeer/routes.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,11 @@ Future<void> main() async {
   IoCContainer.initialize();
 
   await get<NotificationService>().initialize();
+
+  // Listen for Auth changes and .refresh the GoRouter [router]
+  FirebaseAuth.instance.authStateChanges().listen((user) {
+    router.refresh();
+  });
 
   runApp(const App());
 }

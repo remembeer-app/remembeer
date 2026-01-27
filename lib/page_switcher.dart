@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/constants.dart';
-import 'package:remembeer/common/widget/app_navigation_bar.dart';
+import 'package:remembeer/common/widget/rem_navigation_bar.dart';
 import 'package:remembeer/drink/page/drink_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/page/leaderboards_page.dart';
@@ -57,10 +57,7 @@ class PageSwitcherState extends State<PageSwitcher> {
             Expanded(
               child: IndexedStack(index: _selectedPageIndex, children: _pages),
             ),
-            AppNavigationBar(
-              currentIndex: _selectedPageIndex,
-              onTap: _pageNavigationService.setPageIndex,
-            ),
+            RemNavigationBar(currentIndex: _selectedPageIndex),
           ],
         ),
       ),
