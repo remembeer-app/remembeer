@@ -53,6 +53,7 @@ dependencies:
   json_annotation: ^4.9.0
   latlong2: ^0.9.1
   rxdart: ^0.28.0
+  toastification: ^3.0.3
 
 dev_dependencies:
   build_runner: ^2.10.5
