@@ -21,6 +21,7 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
+      title: const Text('Settings'),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

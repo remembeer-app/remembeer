@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
@@ -42,12 +40,7 @@ class LoginRoute extends GoRouteData with $LoginRoute {
 @TypedStatefulShellRoute<NavbarShellRouteData>(
   branches: [
     TypedStatefulShellBranch<ProfileBranch>(
-      routes: [
-        TypedGoRoute<ProfileRedirectRoute>(
-          path: '/profile',
-          routes: [TypedGoRoute<ProfileRoute>(path: ':userId')],
-        ),
-      ],
+      routes: [TypedGoRoute<ProfileRoute>(path: '/profile')],
     ),
     TypedStatefulShellBranch<LeaderboardsBranch>(
       routes: [TypedGoRoute<LeaderboardsRoute>(path: '/leaderboards')],
@@ -97,22 +90,11 @@ class SettingsBranch extends StatefulShellBranchData {
 }
 
 class ProfileRoute extends GoRouteData with $ProfileRoute {
-  final String userId;
-
-  const ProfileRoute({required this.userId});
+  const ProfileRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ProfilePage(userId: userId);
-  }
-}
-
-class ProfileRedirectRoute extends GoRouteData with $ProfileRedirectRoute {
-  const ProfileRedirectRoute();
-
-  @override
-  FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
-    return '/profile/${_authService.authenticatedUser.uid}';
+    return ProfilePage(userId: _authService.authenticatedUser.uid);
   }
 }
 

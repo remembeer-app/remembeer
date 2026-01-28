@@ -36,16 +36,7 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
   branches: [
     StatefulShellBranchData.$branch(
       routes: [
-        GoRouteData.$route(
-          path: '/profile',
-          factory: $ProfileRedirectRoute._fromState,
-          routes: [
-            GoRouteData.$route(
-              path: ':userId',
-              factory: $ProfileRoute._fromState,
-            ),
-          ],
-        ),
+        GoRouteData.$route(path: '/profile', factory: $ProfileRoute._fromState),
       ],
     ),
     StatefulShellBranchData.$branch(
@@ -85,36 +76,11 @@ extension $NavbarShellRouteDataExtension on NavbarShellRouteData {
       const NavbarShellRouteData();
 }
 
-mixin $ProfileRedirectRoute on GoRouteData {
-  static ProfileRedirectRoute _fromState(GoRouterState state) =>
-      const ProfileRedirectRoute();
+mixin $ProfileRoute on GoRouteData {
+  static ProfileRoute _fromState(GoRouterState state) => const ProfileRoute();
 
   @override
   String get location => GoRouteData.$location('/profile');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $ProfileRoute on GoRouteData {
-  static ProfileRoute _fromState(GoRouterState state) =>
-      ProfileRoute(userId: state.pathParameters['userId']!);
-
-  ProfileRoute get _self => this as ProfileRoute;
-
-  @override
-  String get location =>
-      GoRouteData.$location('/profile/${Uri.encodeComponent(_self.userId)}');
 
   @override
   void go(BuildContext context) => context.go(location);
