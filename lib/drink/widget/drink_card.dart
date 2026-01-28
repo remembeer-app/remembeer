@@ -89,9 +89,7 @@ class DrinkCard extends StatelessWidget {
       isDestructive: true,
       onPressed: () async {
         await _drinkService.deleteDrink(drink);
-
-        if (!context.mounted) return;
-        showNotification(context, 'Drink deleted!');
+        showSuccessNotification('Drink deleted!');
       },
     );
   }

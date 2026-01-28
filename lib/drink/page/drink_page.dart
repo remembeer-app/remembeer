@@ -26,9 +26,7 @@ class DrinkPage extends StatelessWidget {
         onLongPress: () async {
           // TODO(ohtenkay): Maybe make this react to the current date selection, add to the selected date, not now.
           await _drinkService.addDefaultDrink();
-          if (context.mounted) {
-            showNotification(context, 'Default drink added!');
-          }
+          showSuccessNotification('Default drink added!');
         },
         child: FloatingActionButton(
           heroTag: 'add_drink_fab',
