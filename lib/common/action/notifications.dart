@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/widget/animated_top_snack_bar.dart';
+import 'package:toastification/toastification.dart';
 
-void showNotification(BuildContext context, String message) {
-  final overlay = Overlay.of(context);
-  late OverlayEntry overlayEntry;
-
-  overlayEntry = OverlayEntry(
-    builder: (context) => AnimatedTopSnackBar(
-      message: message,
-      onDismissed: () => overlayEntry.remove(),
-    ),
+void showNotification(
+  String message, {
+  ToastificationType type = ToastificationType.info,
+}) {
+  toastification.show(
+    title: Text(message),
+    type: type,
+    autoCloseDuration: const Duration(seconds: 2),
   );
+}
 
-  overlay.insert(overlayEntry);
+void showSuccessNotification(String message) {
+  showNotification(message, type: ToastificationType.success);
+}
+
+void showInfoNotification(String message) {
+  showNotification(message, type: ToastificationType.info);
 }
