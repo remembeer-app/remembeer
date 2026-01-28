@@ -8,14 +8,10 @@ void showNotification(
   toastification.show(
     title: Text(message),
     type: type,
-    autoCloseDuration: const Duration(seconds: 2),
+    autoCloseDuration: const Duration(seconds: 4),
   );
 }
 
 void showSuccessNotification(String message) {
   showNotification(message, type: ToastificationType.success);
-}
-
-void showInfoNotification(String message) {
-  showNotification(message, type: ToastificationType.info);
 }

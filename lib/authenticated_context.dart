@@ -100,11 +100,11 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
 
     switch (type) {
       case NotificationType.friendRequestReceived:
-        showInfoNotification('You have a new friend request!');
+        showNotification('You have a new friend request!');
       case NotificationType.friendRequestAccepted:
-        showInfoNotification('Your friend request was accepted!');
+        showNotification('Your friend request was accepted!');
       case NotificationType.addedToSession:
-        showInfoNotification('You were added to a session!');
+        showNotification('You were added to a session!');
       case null:
         // TODO(metju-ac): Handle this when we add logging.
         debugPrint('Unknown notification type: ${message.data['type']}');
