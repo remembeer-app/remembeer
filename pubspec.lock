@@ -1087,6 +1087,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.0+3"
+  persistent_bottom_nav_bar_v2:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "4e2c97b9cc91a9aa5e50740e5fa860a10197bcb6"
+      url: "https://github.com/jb3rndt/PersistentBottomNavBarV2.git"
+    source: git
+    version: "6.2.0"
   petitparser:
     dependency: transitive
     description:
