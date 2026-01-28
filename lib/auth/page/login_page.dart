@@ -248,8 +248,7 @@ class _LoginPageState extends State<LoginPage> {
 
                 _authService.resetPassword(email: email);
                 Navigator.of(context).pop();
-                showNotification(
-                  context,
+                showInfoNotification(
                   'Password reset email sent! Check your inbox (including spam).',
                 );
               },
