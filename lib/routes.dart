@@ -74,15 +74,25 @@ class NavbarShellRouteData extends StatefulShellRouteData {
     GoRouterState state,
     StatefulNavigationShell navigationShell,
   ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return PersistentTabView.router(
       tabs: [
         PersistentRouterTabConfig(
-          item: ItemConfig(icon: const Icon(Icons.person), title: 'Profile'),
+          item: ItemConfig(
+            icon: const Icon(Icons.person),
+            title: 'Profile',
+            activeForegroundColor: colorScheme.primary,
+            inactiveForegroundColor: colorScheme.onSurfaceVariant,
+          ),
         ),
         PersistentRouterTabConfig(
           item: ItemConfig(
             icon: const Icon(Icons.emoji_events),
             title: 'Leaderboards',
+            activeForegroundColor: colorScheme.primary,
+            inactiveForegroundColor: colorScheme.onSurfaceVariant,
           ),
         ),
         PersistentRouterTabConfig(
@@ -93,17 +103,37 @@ class NavbarShellRouteData extends StatefulShellRouteData {
               size: 24,
             ),
             title: 'Drink',
+            activeForegroundColor: colorScheme.primary,
+            inactiveForegroundColor: colorScheme.onSurfaceVariant,
           ),
         ),
         PersistentRouterTabConfig(
-          item: ItemConfig(icon: const Icon(Icons.group), title: 'Activity'),
+          item: ItemConfig(
+            icon: const Icon(Icons.group),
+            title: 'Activity',
+            activeForegroundColor: colorScheme.primary,
+            inactiveForegroundColor: colorScheme.onSurfaceVariant,
+          ),
         ),
         PersistentRouterTabConfig(
-          item: ItemConfig(icon: const Icon(Icons.settings), title: 'Settings'),
+          item: ItemConfig(
+            icon: const Icon(Icons.settings),
+            title: 'Settings',
+            activeForegroundColor: colorScheme.primary,
+            inactiveForegroundColor: colorScheme.onSurfaceVariant,
+          ),
         ),
       ],
-      navBarBuilder: (navBarConfig) =>
-          Style2BottomNavBar(navBarConfig: navBarConfig),
+      navBarBuilder: (navBarConfig) => Style2BottomNavBar(
+        navBarConfig: navBarConfig,
+        navBarDecoration: NavBarDecoration(
+          color: colorScheme.surface,
+          border: Border(
+            top: BorderSide(color: colorScheme.outlineVariant, width: 0.5),
+          ),
+        ),
+        height: 70,
+      ),
       navigationShell: navigationShell,
     );
   }
