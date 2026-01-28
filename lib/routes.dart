@@ -1,21 +1,18 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:persistent_bottom_nav_bar_v2/persistent_bottom_nav_bar_v2.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
 import 'package:remembeer/auth/page/login_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/common/widget/rem_navigation_bar.dart';
+import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink/page/drink_page.dart';
+import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/page/leaderboards_page.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user_settings/page/settings_page.dart';
 
 part 'routes.g.dart';
-
-final shellNavigatorKey = GlobalKey<NavigatorState>();
-final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final _authService = get<AuthService>();
 
@@ -42,27 +39,87 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   }
 }
 
-@TypedShellRoute<NavbarShellRouteData>(
-  routes: [
-    TypedGoRoute<ProfileRoute>(path: '/profile/:userId'),
-    TypedGoRoute<LeaderboardsRoute>(path: '/leaderboards'),
-    TypedGoRoute<DrinkRoute>(path: '/drink'),
-    TypedGoRoute<ActivityRoute>(path: '/activity'),
-    TypedGoRoute<SettingsRoute>(path: '/settings'),
+@TypedStatefulShellRoute<NavbarShellRouteData>(
+  branches: [
+    TypedStatefulShellBranch<ProfileBranch>(
+      routes: [TypedGoRoute<ProfileRoute>(path: '/profile/:userId')],
+    ),
+    TypedStatefulShellBranch<LeaderboardsBranch>(
+      routes: [TypedGoRoute<LeaderboardsRoute>(path: '/leaderboards')],
+    ),
+    TypedStatefulShellBranch<DrinkBranch>(
+      routes: [TypedGoRoute<DrinkRoute>(path: '/drink')],
+    ),
+    TypedStatefulShellBranch<ActivityBranch>(
+      routes: [TypedGoRoute<ActivityRoute>(path: '/activity')],
+    ),
+    TypedStatefulShellBranch<SettingsBranch>(
+      routes: [TypedGoRoute<SettingsRoute>(path: '/settings')],
+    ),
   ],
 )
-class NavbarShellRouteData extends ShellRouteData {
+class NavbarShellRouteData extends StatefulShellRouteData {
   const NavbarShellRouteData();
 
-  static final GlobalKey<NavigatorState> navigatorKey = shellNavigatorKey;
-
   @override
-  Widget builder(BuildContext context, GoRouterState state, Widget navigator) {
-    return Scaffold(
-      body: navigator,
-      bottomNavigationBar: RemNavigationBar(currentIndex: 2),
+  Widget builder(
+    BuildContext context,
+    GoRouterState state,
+    StatefulNavigationShell navigationShell,
+  ) {
+    return PersistentTabView.router(
+      tabs: [
+        PersistentRouterTabConfig(
+          item: ItemConfig(icon: const Icon(Icons.person), title: 'Profile'),
+        ),
+        PersistentRouterTabConfig(
+          item: ItemConfig(
+            icon: const Icon(Icons.emoji_events),
+            title: 'Leaderboards',
+          ),
+        ),
+        PersistentRouterTabConfig(
+          item: ItemConfig(
+            icon: const DrinkIcon(
+              category: DrinkCategory.beer,
+              color: Colors.grey,
+              size: 24,
+            ),
+            title: 'Drink',
+          ),
+        ),
+        PersistentRouterTabConfig(
+          item: ItemConfig(icon: const Icon(Icons.group), title: 'Activity'),
+        ),
+        PersistentRouterTabConfig(
+          item: ItemConfig(icon: const Icon(Icons.settings), title: 'Settings'),
+        ),
+      ],
+      navBarBuilder: (navBarConfig) =>
+          Style2BottomNavBar(navBarConfig: navBarConfig),
+      navigationShell: navigationShell,
     );
   }
+}
+
+class ProfileBranch extends StatefulShellBranchData {
+  const ProfileBranch();
+}
+
+class LeaderboardsBranch extends StatefulShellBranchData {
+  const LeaderboardsBranch();
+}
+
+class DrinkBranch extends StatefulShellBranchData {
+  const DrinkBranch();
+}
+
+class ActivityBranch extends StatefulShellBranchData {
+  const ActivityBranch();
+}
+
+class SettingsBranch extends StatefulShellBranchData {
+  const SettingsBranch();
 }
 
 class ProfileRoute extends GoRouteData with $ProfileRoute {

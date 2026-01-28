@@ -31,20 +31,46 @@ mixin $LoginRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $navbarShellRouteData => ShellRouteData.$route(
+RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
   factory: $NavbarShellRouteDataExtension._fromState,
-  routes: [
-    GoRouteData.$route(
-      path: '/profile/:userId',
-      factory: $ProfileRoute._fromState,
+  branches: [
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/profile/:userId',
+          factory: $ProfileRoute._fromState,
+        ),
+      ],
     ),
-    GoRouteData.$route(
-      path: '/leaderboards',
-      factory: $LeaderboardsRoute._fromState,
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/leaderboards',
+          factory: $LeaderboardsRoute._fromState,
+        ),
+      ],
     ),
-    GoRouteData.$route(path: '/drink', factory: $DrinkRoute._fromState),
-    GoRouteData.$route(path: '/activity', factory: $ActivityRoute._fromState),
-    GoRouteData.$route(path: '/settings', factory: $SettingsRoute._fromState),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(path: '/drink', factory: $DrinkRoute._fromState),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/activity',
+          factory: $ActivityRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/settings',
+          factory: $SettingsRoute._fromState,
+        ),
+      ],
+    ),
   ],
 );
 
