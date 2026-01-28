@@ -4,10 +4,13 @@ import 'package:remembeer/common/converter/timestamp_converter.dart';
 import 'package:remembeer/common/model/entity_with_members.dart';
 
 part 'session.freezed.dart';
+
 part 'session.g.dart';
 
 @freezed
 abstract class Session with _$Session implements EntityWithMembers {
+  const Session._();
+
   const factory Session({
     required String id,
     required String userId,
@@ -24,4 +27,10 @@ abstract class Session with _$Session implements EntityWithMembers {
 
   factory Session.fromJson(Map<String, dynamic> json) =>
       _$SessionFromJson(json);
+
+  bool isActiveAt(DateTime at) {
+    final hasStarted = startedAt.isBefore(at);
+    final stillRunning = endedAt == null || endedAt!.isAfter(at);
+    return hasStarted && stillRunning;
+  }
 }

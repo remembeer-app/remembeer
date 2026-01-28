@@ -13,15 +13,8 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
               ..sort((a, b) => b.startedAt.compareTo(a.startedAt)),
       );
 
-  Stream<List<Session>> sessionsActiveAtStream(DateTime at) =>
-      sessionsStreamWhereCurrentUserIsMember.map((sessions) {
-        bool isActive(Session session) {
-          final hasStarted = session.startedAt.isBefore(at);
-          final stillRunning =
-              session.endedAt == null || session.endedAt!.isAfter(at);
-          return hasStarted && stillRunning;
-        }
-
-        return sessions.where(isActive).toList();
+  Future<List<Session>> sessionsActiveAt(DateTime at) =>
+      sessionsStreamWhereCurrentUserIsMember.first.then((sessions) {
+        return sessions.where((session) => session.isActiveAt(at)).toList();
       });
 }
