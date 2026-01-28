@@ -13,7 +13,7 @@ import 'package:remembeer/session/page/summary_card.dart';
 class SummaryPage extends StatelessWidget {
   SummaryPage({super.key});
 
-  final DrinkListService _drinkListService = get<DrinkListService>();
+  final _drinkListService = get<DrinkListService>();
 
   @override
   Widget build(BuildContext context) {

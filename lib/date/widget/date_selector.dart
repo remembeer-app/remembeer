@@ -10,7 +10,7 @@ import 'package:remembeer/ioc/ioc_container.dart';
 class DateSelector extends StatelessWidget {
   DateSelector({super.key});
 
-  final DateService _dateService = get<DateService>();
+  final _dateService = get<DateService>();
 
   @override
   Widget build(BuildContext context) {
