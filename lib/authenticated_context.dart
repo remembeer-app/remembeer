@@ -43,9 +43,7 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
     _platform.setMethodCallHandler(_handleQuickAddAction);
 
     _badgeSubscription = _badgeService.badgeUnlockedStream.listen((badge) {
-      if (mounted) {
-        showNotification(context, '${badge.name} badge unlocked!');
-      }
+      showSuccessNotification('${badge.name} badge unlocked!');
     });
 
     _notificationTapSubscription = _notificationService.notificationTapStream
@@ -67,10 +65,8 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
   Future<void> _handleQuickAddAction(MethodCall call) async {
     if (call.method == 'quickAddPressed') {
       await _drinkService.addDefaultDrink();
-      if (!mounted) return;
-
       // _pageNavigationService.setPageIndex(drinkPageIndex);
-      showNotification(context, 'Default drink added!');
+      showSuccessNotification('Default drink added!');
     }
   }
 
@@ -100,17 +96,15 @@ class _AuthenticatedContextState extends State<AuthenticatedContext> {
   }
 
   void _handleForegroundNotification(RemoteMessage message) {
-    if (!mounted) return;
-
     final type = NotificationType.fromString(message.data['type'] as String?);
 
     switch (type) {
       case NotificationType.friendRequestReceived:
-        showNotification(context, 'You have a new friend request!');
+        showInfoNotification('You have a new friend request!');
       case NotificationType.friendRequestAccepted:
-        showNotification(context, 'Your friend request was accepted!');
+        showInfoNotification('Your friend request was accepted!');
       case NotificationType.addedToSession:
-        showNotification(context, 'You were added to a session!');
+        showInfoNotification('You were added to a session!');
       case null:
         // TODO(metju-ac): Handle this when we add logging.
         debugPrint('Unknown notification type: ${message.data['type']}');
