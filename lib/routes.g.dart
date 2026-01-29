@@ -8,9 +8,8 @@ part of 'routes.dart';
 
 List<RouteBase> get $appRoutes => [
   $loginRoute,
-  $friendRequestsRoute,
-  $userProfileRoute,
   $navbarShellRouteData,
+  $userProfileRoute,
 ];
 
 RouteBase get $loginRoute =>
@@ -36,67 +35,21 @@ mixin $LoginRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $friendRequestsRoute => GoRouteData.$route(
-  path: '/friend-requests',
-  factory: $FriendRequestsRoute._fromState,
-);
-
-mixin $FriendRequestsRoute on GoRouteData {
-  static FriendRequestsRoute _fromState(GoRouterState state) =>
-      const FriendRequestsRoute();
-
-  @override
-  String get location => GoRouteData.$location('/friend-requests');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $userProfileRoute => GoRouteData.$route(
-  path: '/user/:userId',
-  factory: $UserProfileRoute._fromState,
-);
-
-mixin $UserProfileRoute on GoRouteData {
-  static UserProfileRoute _fromState(GoRouterState state) =>
-      UserProfileRoute(userId: state.pathParameters['userId']!);
-
-  UserProfileRoute get _self => this as UserProfileRoute;
-
-  @override
-  String get location =>
-      GoRouteData.$location('/user/${Uri.encodeComponent(_self.userId)}');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
 RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
   factory: $NavbarShellRouteDataExtension._fromState,
   branches: [
     StatefulShellBranchData.$branch(
       routes: [
-        GoRouteData.$route(path: '/profile', factory: $ProfileRoute._fromState),
+        GoRouteData.$route(
+          path: '/profile',
+          factory: $ProfileRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'friend_requests',
+              factory: $FriendRequestsRoute._fromState,
+            ),
+          ],
+        ),
       ],
     ),
     StatefulShellBranchData.$branch(
@@ -141,6 +94,27 @@ mixin $ProfileRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/profile');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $FriendRequestsRoute on GoRouteData {
+  static FriendRequestsRoute _fromState(GoRouterState state) =>
+      const FriendRequestsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/profile/friend_requests');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -222,6 +196,35 @@ mixin $SettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $userProfileRoute => GoRouteData.$route(
+  path: '/user/:userId',
+  factory: $UserProfileRoute._fromState,
+);
+
+mixin $UserProfileRoute on GoRouteData {
+  static UserProfileRoute _fromState(GoRouterState state) =>
+      UserProfileRoute(userId: state.pathParameters['userId']!);
+
+  UserProfileRoute get _self => this as UserProfileRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/user/${Uri.encodeComponent(_self.userId)}');
 
   @override
   void go(BuildContext context) => context.go(location);
