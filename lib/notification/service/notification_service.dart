@@ -1,13 +1,21 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:flutter/foundation.dart';
+import 'package:go_router/go_router.dart';
+import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/notification/model/notification_type.dart';
+import 'package:remembeer/routes.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
 }
 
 class NotificationService {
+  NotificationService({required GoRouter router}) : _router = router;
+
+  final GoRouter _router;
+
   final _firebaseFunctions = FirebaseFunctions.instanceFor(
     region: 'europe-west4',
   );
@@ -16,31 +24,49 @@ class NotificationService {
 
   Stream<String> get onTokenRefresh => _firebaseMessaging.onTokenRefresh;
 
-  final _messageStreamController = BehaviorSubject<RemoteMessage>();
-
-  Stream<RemoteMessage> get messageStream => _messageStreamController.stream;
-
-  final _notificationTapController = BehaviorSubject<RemoteMessage>();
-
-  Stream<RemoteMessage> get notificationTapStream =>
-      _notificationTapController.stream;
-
   Future<void> initialize() async {
     await _firebaseMessaging.requestPermission();
 
-    FirebaseMessaging.onMessage.listen((message) {
-      _messageStreamController.sink.add(message);
-    });
+    FirebaseMessaging.onMessage.listen(_handleForegroundNotification);
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    FirebaseMessaging.onMessageOpenedApp.listen((message) {
-      _notificationTapController.sink.add(message);
-    });
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
 
     final initialMessage = await _firebaseMessaging.getInitialMessage();
     if (initialMessage != null) {
-      _notificationTapController.sink.add(initialMessage);
+      _handleNotificationTap(initialMessage);
+    }
+  }
+
+  void _handleNotificationTap(RemoteMessage message) {
+    final type = NotificationType.fromString(message.data['type'] as String?);
+
+    switch (type) {
+      case NotificationType.friendRequestReceived:
+        _router.go(const FriendRequestsRoute().location);
+      case NotificationType.friendRequestAccepted:
+        final fromUserId = message.data['fromUserId'] as String;
+        _router.go(UserProfileRoute(userId: fromUserId).location);
+      case NotificationType.addedToSession:
+        _router.go(const DrinkRoute().location);
+      case null:
+        debugPrint('Unknown notification type: ${message.data['type']}');
+    }
+  }
+
+  void _handleForegroundNotification(RemoteMessage message) {
+    final type = NotificationType.fromString(message.data['type'] as String?);
+
+    switch (type) {
+      case NotificationType.friendRequestReceived:
+        showNotification('You have a new friend request!');
+      case NotificationType.friendRequestAccepted:
+        showNotification('Your friend request was accepted!');
+      case NotificationType.addedToSession:
+        showNotification('You were added to a session!');
+      case null:
+        debugPrint('Unknown notification type: ${message.data['type']}');
     }
   }
 
@@ -74,10 +100,5 @@ class NotificationService {
           'fromUserName': fromUserName,
           'sessionName': sessionName,
         });
-  }
-
-  void dispose() {
-    _messageStreamController.close();
-    _notificationTapController.close();
   }
 }

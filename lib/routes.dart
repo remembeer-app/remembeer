@@ -5,6 +5,7 @@ import 'package:remembeer/auth/page/login_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/widget/nav_bar.dart';
 import 'package:remembeer/drink/page/drink_page.dart';
+import 'package:remembeer/friend_request/page/friend_requests_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/page/leaderboards_page.dart';
 import 'package:remembeer/user/page/profile_page.dart';
@@ -40,7 +41,12 @@ class LoginRoute extends GoRouteData with $LoginRoute {
 @TypedStatefulShellRoute<NavbarShellRouteData>(
   branches: [
     TypedStatefulShellBranch<ProfileBranch>(
-      routes: [TypedGoRoute<ProfileRoute>(path: '/profile')],
+      routes: [
+        TypedGoRoute<ProfileRoute>(
+          path: '/profile',
+          routes: [TypedGoRoute<FriendRequestsRoute>(path: 'friend_requests')],
+        ),
+      ],
     ),
     TypedStatefulShellBranch<LeaderboardsBranch>(
       routes: [TypedGoRoute<LeaderboardsRoute>(path: '/leaderboards')],
@@ -131,5 +137,26 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return SettingsPage();
+  }
+}
+
+class FriendRequestsRoute extends GoRouteData with $FriendRequestsRoute {
+  const FriendRequestsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return FriendRequestsPage();
+  }
+}
+
+@TypedGoRoute<UserProfileRoute>(path: '/user/:userId')
+class UserProfileRoute extends GoRouteData with $UserProfileRoute {
+  final String userId;
+
+  const UserProfileRoute({required this.userId});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ProfilePage(userId: userId);
   }
 }

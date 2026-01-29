@@ -1,21 +1,13 @@
-import 'dart:async';
-
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/data/onetime_badge_id.dart';
 import 'package:remembeer/badge/model/badge_category.dart';
 import 'package:remembeer/badge/type/badge_definition.dart';
+import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/type/user_stats.dart';
 
 class BadgeService {
-  final _badgeUnlockedController =
-      StreamController<BadgeDefinition>.broadcast();
-
   BadgeService();
-
-  /// Stream that emits a [BadgeDefinition] whenever a new badge is unlocked.
-  Stream<BadgeDefinition> get badgeUnlockedStream =>
-      _badgeUnlockedController.stream;
 
   /// Evaluates and unlocks badges based on the user's stats and the current drink.
   ///
@@ -122,11 +114,7 @@ class BadgeService {
 
   UserModel _unlockIfNew(UserModel user, BadgeDefinition badgeDefinition) {
     if (user.isBadgeUnlocked(badgeDefinition.id)) return user;
-    _badgeUnlockedController.add(badgeDefinition);
+    showSuccessNotification('${badgeDefinition.name} badge unlocked!');
     return user.unlockBadge(badgeDefinition.id);
-  }
-
-  void dispose() {
-    _badgeUnlockedController.close();
   }
 }

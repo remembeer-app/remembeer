@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/routes.dart';
 import 'package:toastification/toastification.dart';
 
-final navigatorKey = GlobalKey<NavigatorState>();
-
 class App extends StatelessWidget {
   const App({super.key});
 

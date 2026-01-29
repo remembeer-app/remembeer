@@ -6,7 +6,12 @@ part of 'routes.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$loginRoute, $navbarShellRouteData];
+List<RouteBase> get $appRoutes => [
+  $loginRoute,
+  $friendRequestsRoute,
+  $userProfileRoute,
+  $navbarShellRouteData,
+];
 
 RouteBase get $loginRoute =>
     GoRouteData.$route(path: '/login', factory: $LoginRoute._fromState);
@@ -16,6 +21,61 @@ mixin $LoginRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/login');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $friendRequestsRoute => GoRouteData.$route(
+  path: '/friend-requests',
+  factory: $FriendRequestsRoute._fromState,
+);
+
+mixin $FriendRequestsRoute on GoRouteData {
+  static FriendRequestsRoute _fromState(GoRouterState state) =>
+      const FriendRequestsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/friend-requests');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $userProfileRoute => GoRouteData.$route(
+  path: '/user/:userId',
+  factory: $UserProfileRoute._fromState,
+);
+
+mixin $UserProfileRoute on GoRouteData {
+  static UserProfileRoute _fromState(GoRouterState state) =>
+      UserProfileRoute(userId: state.pathParameters['userId']!);
+
+  UserProfileRoute get _self => this as UserProfileRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/user/${Uri.encodeComponent(_self.userId)}');
 
   @override
   void go(BuildContext context) => context.go(location);
