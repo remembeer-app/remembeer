@@ -40,7 +40,7 @@ class NotificationService {
     switch (type) {
       case NotificationType.friendRequestReceived:
         // TODO(ohtenkay): this does not allow the user to navigate back properly,
-        // but first we will habe to do deep linking properly
+        // but first we will have to do deep linking properly
         router.go(const FriendRequestsRoute().location);
       case NotificationType.friendRequestAccepted:
         final fromUserId = message.data['fromUserId'] as String;

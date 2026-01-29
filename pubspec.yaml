@@ -52,6 +52,7 @@ dependencies:
   intl: ^0.20.2
   json_annotation: ^4.9.0
   latlong2: ^0.9.1
+  # TODO(ohtenkay): watch this dependency for upgrades, master is needed now to work with go_router_18
   persistent_bottom_nav_bar_v2:
     git:
       url: https://github.com/jb3rndt/PersistentBottomNavBarV2.git

@@ -100,7 +100,10 @@ class ProfileRoute extends GoRouteData with $ProfileRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ProfilePage(userId: _authService.authenticatedUser.uid);
+    return ProfilePage(
+      userId: _authService.authenticatedUser.uid,
+      showTitle: false,
+    );
   }
 }
 
