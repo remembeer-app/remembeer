@@ -4,8 +4,8 @@ import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user/service/user_service.dart';
 
 class FriendRequestCard extends StatelessWidget {
@@ -37,11 +37,7 @@ class FriendRequestCard extends StatelessWidget {
             padding: const EdgeInsets.all(4),
             child: ListTile(
               onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) => ProfilePage(userId: sender.id),
-                  ),
-                );
+                UserProfileRoute(userId: sender.id).go(context);
               },
               leading: UserAvatar(user: sender),
               title: Text(

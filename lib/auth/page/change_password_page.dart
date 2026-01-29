@@ -133,7 +133,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
 
     if (context.mounted) {
-      showNotification(context, 'Password changed successfully.');
+      showSuccessNotification('Password changed successfully.');
       Navigator.of(context).pop();
     }
   }

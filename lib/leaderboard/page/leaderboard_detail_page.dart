@@ -149,7 +149,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
               await Clipboard.setData(ClipboardData(text: inviteCode));
               if (context.mounted) {
                 Navigator.of(context).pop();
-                showNotification(context, 'Invitation code copied!');
+                showSuccessNotification('Invitation code copied!');
               }
             },
             icon: const Icon(Icons.copy),

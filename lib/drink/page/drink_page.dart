@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/date/widget/date_selector.dart';
 import 'package:remembeer/drink/page/add_drink_page.dart';
@@ -10,12 +9,12 @@ import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/widget/session_menu_button.dart';
 
 class DrinkPage extends StatelessWidget {
-  const DrinkPage({super.key});
+  DrinkPage({super.key});
+
+  final _drinkService = get<DrinkService>();
 
   @override
   Widget build(BuildContext context) {
-    final drinkService = get<DrinkService>();
-
     return PageTemplate(
       title: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -25,10 +24,7 @@ class DrinkPage extends StatelessWidget {
       floatingActionButton: GestureDetector(
         onLongPress: () async {
           // TODO(ohtenkay): Maybe make this react to the current date selection, add to the selected date, not now.
-          await drinkService.addDefaultDrink();
-          if (context.mounted) {
-            showNotification(context, 'Default drink added!');
-          }
+          await _drinkService.addDefaultDrink();
         },
         child: FloatingActionButton(
           heroTag: 'add_drink_fab',

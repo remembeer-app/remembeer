@@ -1,16 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/widget/animated_top_snack_bar.dart';
+import 'package:toastification/toastification.dart';
 
-void showNotification(BuildContext context, String message) {
-  final overlay = Overlay.of(context);
-  late OverlayEntry overlayEntry;
-
-  overlayEntry = OverlayEntry(
-    builder: (context) => AnimatedTopSnackBar(
-      message: message,
-      onDismissed: () => overlayEntry.remove(),
-    ),
+void showNotification(
+  String message, {
+  ToastificationType type = ToastificationType.info,
+}) {
+  toastification.show(
+    title: Text(message),
+    type: type,
+    autoCloseDuration: const Duration(seconds: 4),
+    // TODO(ohtenkay): adapt colors based on theme, currently requires passing in context, which is annoying,
+    // there is a global way to configure toastification notifications, but it has to wrap a widget at the top
+    // of the widget tree, which could be something like a page template
+    backgroundColor: const Color(0xFFFFF8F2),
+    foregroundColor: const Color(0xFF1F1B13),
   );
+}
 
-  overlay.insert(overlayEntry);
+void showSuccessNotification(String message) {
+  showNotification(message, type: ToastificationType.success);
 }

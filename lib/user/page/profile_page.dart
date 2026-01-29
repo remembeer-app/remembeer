@@ -8,8 +8,8 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/friend_request/model/friendship_status.dart';
-import 'package:remembeer/friend_request/page/friend_requests_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/page/search_user_page.dart';
 import 'package:remembeer/user/service/user_service.dart';
@@ -130,11 +130,7 @@ class ProfilePage extends StatelessWidget {
               padding: const EdgeInsets.only(bottom: 8.0),
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (context) => FriendRequestsPage(),
-                    ),
-                  );
+                  const FriendRequestsRoute().go(context);
                 },
                 icon: const Icon(Icons.person_add_alt_1),
                 label: Text('View ${requests.length} friend request(s)'),

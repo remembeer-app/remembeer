@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
+import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/drink/constants.dart';
@@ -238,6 +239,7 @@ class DrinkService {
         location: location,
       ),
     );
+    showSuccessNotification('Default drink added!');
   }
 
   Future<void> updateDrinkSession(Drink drink, String? sessionId) async {
