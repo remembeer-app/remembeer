@@ -31,7 +31,7 @@ Future<void> main() async {
 
   await get<NotificationService>().initialize();
 
-  // For the  Android home screen widget.
+  // For the Android home screen widget.
   _quickAddChannel.setMethodCallHandler((call) async {
     if (call.method == 'quickAddPressed') {
       await get<DrinkService>().addDefaultDrink();

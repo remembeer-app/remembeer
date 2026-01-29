@@ -16,12 +16,12 @@ part 'routes.g.dart';
 final _authService = get<AuthService>();
 
 final router = GoRouter(
-  initialLocation: '/drink',
+  initialLocation: const DrinkRoute().location,
   redirect: (context, state) {
-    final isOnLogin = state.matchedLocation == '/login';
+    final isOnLogin = state.matchedLocation == const LoginRoute().location;
     return switch ((_authService.isAuthenticated, isOnLogin)) {
-      (true, true) => '/drink',
-      (false, false) => '/login',
+      (true, true) => const DrinkRoute().location,
+      (false, false) => const LoginRoute().location,
       _ => null,
     };
   },
