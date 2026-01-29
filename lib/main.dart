@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:remembeer/app.dart';
-import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/firebase_options.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -36,7 +35,6 @@ Future<void> main() async {
   _quickAddChannel.setMethodCallHandler((call) async {
     if (call.method == 'quickAddPressed') {
       await get<DrinkService>().addDefaultDrink();
-      showSuccessNotification('Default drink added!');
     }
   });
 

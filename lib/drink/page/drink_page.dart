@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/date/widget/date_selector.dart';
 import 'package:remembeer/drink/page/add_drink_page.dart';
@@ -26,7 +25,6 @@ class DrinkPage extends StatelessWidget {
         onLongPress: () async {
           // TODO(ohtenkay): Maybe make this react to the current date selection, add to the selected date, not now.
           await _drinkService.addDefaultDrink();
-          showSuccessNotification('Default drink added!');
         },
         child: FloatingActionButton(
           heroTag: 'add_drink_fab',
