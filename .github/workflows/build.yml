@@ -99,8 +99,26 @@ jobs:
         run: |
           echo "$JSON_DATA" > android/app/google-services.json
 
-      - name: Build Android (appbundle)
-        run: flutter build appbundle --release
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+
+      - name: Create key.properties
+        run: |
+          echo "storePassword=${{ secrets.STORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=upload-keystore.jks" >> android/key.properties
+
+      - name: Build Android (apk)
+        run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: 'Android APK'
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
 
   ios_build:
     name: Build iOS
