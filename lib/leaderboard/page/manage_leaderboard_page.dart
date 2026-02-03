@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -32,9 +32,9 @@ class ManageLeaderboardPage extends StatelessWidget {
           return Column(
             children: [
               _buildHeader(context, currentLeaderboard),
-              gap24,
+              const Gap(24),
               _buildMembersSection(context, currentLeaderboard),
-              gap16,
+              const Gap(16),
               _buildDeleteButton(context),
             ],
           );
@@ -49,7 +49,7 @@ class ManageLeaderboardPage extends StatelessWidget {
 
     return Column(
       children: [
-        gap16,
+        const Gap(16),
         InkWell(
           onTap: () => _showIconPickerDialog(context, currentLeaderboard),
           child: Stack(
@@ -79,7 +79,7 @@ class ManageLeaderboardPage extends StatelessWidget {
             ],
           ),
         ),
-        gap16,
+        const Gap(16),
         InkWell(
           onTap: () => _navigateToUpdateName(context),
           child: Row(
@@ -89,7 +89,7 @@ class ManageLeaderboardPage extends StatelessWidget {
                 currentLeaderboard.name,
                 style: theme.textTheme.headlineSmall,
               ),
-              gap8,
+              const Gap(8),
               Icon(
                 Icons.edit,
                 size: 20,
@@ -154,7 +154,7 @@ class ManageLeaderboardPage extends StatelessWidget {
           ),
           _buildMembersList(currentLeaderboard),
           if (currentLeaderboard.bannedMemberIds.isNotEmpty) ...[
-            gap24,
+            const Gap(24),
             _buildSectionHeader(
               context,
               'Banned (${currentLeaderboard.bannedMemberIds.length})',

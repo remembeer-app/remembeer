@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
@@ -42,7 +42,7 @@ class EditSessionPage extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: _buildDeleteButton(context)),
-        gap16,
+        const Gap(16),
         Expanded(child: _buildEndTimeButton(context)),
       ],
     );
@@ -115,7 +115,7 @@ class EditSessionPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text('When did the session end?'),
-                  gap16,
+                  const Gap(16),
                   InkWell(
                     onTap: () async {
                       final newTime = await _selectDateTime(
@@ -140,7 +140,7 @@ class EditSessionPage extends StatelessWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.access_time),
-                          gap12,
+                          const Gap(12),
                           Text(timeFormat.format(selectedEndTime)),
                           const Spacer(),
                           const Icon(Icons.edit_outlined, size: 18),

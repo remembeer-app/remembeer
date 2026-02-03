@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
@@ -52,11 +52,11 @@ class ProfilePage extends StatelessWidget {
                   user: user,
                   isCurrentUser: isCurrentUser,
                 ),
-                gap16,
+                const Gap(16),
                 SocialSection(user: user, isCurrentUser: isCurrentUser),
-                gap12,
+                const Gap(12),
                 BadgesSection(user: user),
-                gap12,
+                const Gap(12),
                 ConsumptionSection(user: user),
               ],
             ),
@@ -74,9 +74,9 @@ class ProfilePage extends StatelessWidget {
     return Column(
       children: [
         _buildAvatar(context, isCurrentUser, user),
-        gap8,
+        const Gap(8),
         _buildUserName(isCurrentUser, context, user),
-        gap12,
+        const Gap(12),
         if (isCurrentUser)
           _buildCurrentUserActions(context)
         else

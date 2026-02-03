@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 
 class ErrorMessageBox extends StatelessWidget {
   final String message;
@@ -19,7 +19,7 @@ class ErrorMessageBox extends StatelessWidget {
       child: Row(
         children: [
           Icon(Icons.error_outline, color: theme.colorScheme.error),
-          gap12,
+          const Gap(12),
           Expanded(
             child: Text(
               message,

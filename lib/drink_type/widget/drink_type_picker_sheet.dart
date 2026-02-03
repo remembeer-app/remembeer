@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
@@ -287,7 +287,7 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
           child: Row(
             children: [
               DrinkIcon(category: category, size: 20),
-              gap8,
+              const Gap(8),
               Text(
                 category.displayName,
                 style: TextStyle(
@@ -296,7 +296,7 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
                   color: category.defaultColor,
                 ),
               ),
-              gap8,
+              const Gap(8),
               Text(
                 '(${drinkTypes.length})',
                 style: TextStyle(
@@ -363,14 +363,14 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
               size: 64,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
-            gap16,
+            const Gap(16),
             Text(
               'No drinks found',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            gap8,
+            const Gap(8),
             Text(
               'Try adjusting your search or filters',
               style: theme.textTheme.bodyMedium?.copyWith(

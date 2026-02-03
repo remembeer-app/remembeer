@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/badge/widget/badge_icon.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
@@ -63,7 +63,7 @@ class BadgesSection extends StatelessWidget {
             size: 48,
             color: Colors.grey.shade300,
           ),
-          gap12,
+          const Gap(12),
           Text(
             'No badges yet',
             style: TextStyle(
@@ -72,7 +72,7 @@ class BadgesSection extends StatelessWidget {
               color: Colors.grey.shade600,
             ),
           ),
-          gap4,
+          const Gap(4),
           Text(
             "Let's drink to unlock them!",
             style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
@@ -107,7 +107,7 @@ class BadgesSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           BadgeIcon(badgeDefinition: definition, size: 56, padding: 8),
-          gap8,
+          const Gap(8),
           Text(
             definition.name,
             textAlign: TextAlign.center,
@@ -139,7 +139,7 @@ class BadgesSection extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 BadgeIcon(badgeDefinition: definition, size: 100, padding: 12),
-                gap16,
+                const Gap(16),
 
                 Text(
                   definition.name,
@@ -148,7 +148,7 @@ class BadgesSection extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                gap12,
+                const Gap(12),
 
                 Text(
                   definition.description,
@@ -159,7 +159,7 @@ class BadgesSection extends StatelessWidget {
                   ),
                 ),
 
-                gap16,
+                const Gap(16),
 
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -179,7 +179,7 @@ class BadgesSection extends StatelessWidget {
                   ),
                 ),
 
-                gap24,
+                const Gap(24),
 
                 SizedBox(
                   width: double.infinity,

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
@@ -29,7 +29,7 @@ class StreakIndicator extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(Icons.local_fire_department, color: color, size: 32),
-        gap8,
+        const Gap(8),
         Text(
           '${userStats.streakDays}',
           style: TextStyle(

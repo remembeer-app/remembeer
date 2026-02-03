@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
@@ -76,13 +76,13 @@ class _DrinkFormState extends State<DrinkForm> {
             child: ListView(
               children: [
                 _buildDrinkTypeDropdown(),
-                gap16,
+                const Gap(16),
                 _buildVolumeInput(form),
-                gap8,
+                const Gap(8),
                 _buildPredefinedVolumesRow(),
-                gap16,
+                const Gap(16),
                 _buildConsumedAtInput(form),
-                gap16,
+                const Gap(16),
                 _buildLocationInput(form),
               ],
             ),
@@ -122,7 +122,7 @@ class _DrinkFormState extends State<DrinkForm> {
                 : null,
           ),
         ),
-        gap8,
+        const Gap(8),
         Row(
           children: [
             Expanded(
@@ -138,7 +138,7 @@ class _DrinkFormState extends State<DrinkForm> {
                 label: const Text('Current location'),
               ),
             ),
-            gap8,
+            const Gap(8),
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: isDisabled ? null : _openLocationPicker,
@@ -277,7 +277,7 @@ class _DrinkFormState extends State<DrinkForm> {
     volumes.forEach((name, volume) {
       buttons
         ..add(_buildVolumeButton(name: name, volume: volume))
-        ..add(gap8);
+        ..add(const Gap(8));
     });
 
     if (buttons.isNotEmpty) {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 
@@ -57,9 +57,9 @@ class _DrinkTypeFormState extends State<DrinkTypeForm> {
             child: ListView(
               children: [
                 _buildNameInput(form),
-                gap16,
+                const Gap(16),
                 _buildAlcoholPercentageInput(form),
-                gap16,
+                const Gap(16),
                 _buildDrinkCategoryDropdown(form),
               ],
             ),

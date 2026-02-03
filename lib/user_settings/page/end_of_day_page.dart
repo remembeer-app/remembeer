@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/constants.dart';
@@ -34,7 +34,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
           return Column(
             children: [
               _buildTimeCard(context),
-              gap24,
+              const Gap(24),
               _buildResetButton(context),
             ],
           );
@@ -64,7 +64,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
-              gap20,
+              const Gap(20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -75,7 +75,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
                         color: Theme.of(context).colorScheme.outline,
                       ),
                     ),
-                    gap4,
+                    const Gap(4),
                     Text(
                       _selectedEndOfDayBoundary!.format(context),
                       style: Theme.of(context).textTheme.headlineMedium

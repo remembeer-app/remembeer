@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 
 const _fabBottomOffset = 40.0;
@@ -45,7 +45,7 @@ class SettingsPageTemplate extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (hint != null) _buildHintBox(context),
-          gap8,
+          const Gap(8),
           Expanded(child: child),
         ],
       ),
@@ -66,7 +66,7 @@ class SettingsPageTemplate extends StatelessWidget {
             Icons.info_outline,
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
-          gap12,
+          const Gap(12),
           Expanded(
             child: Text(
               hint!,

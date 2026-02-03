@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -65,7 +65,7 @@ class _SearchUserPageState extends State<SearchUserPage> {
               prefixIcon: Icon(Icons.search),
             ),
           ),
-          gap16,
+          const Gap(16),
           Expanded(child: _buildSearchResults()),
         ],
       ),

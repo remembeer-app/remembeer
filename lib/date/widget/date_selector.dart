@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/enum/swipe_direction.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/date/service/date_service.dart';
@@ -72,7 +72,7 @@ class DateSelector extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.calendar_today, size: 16),
-              gap8,
+              const Gap(8),
               Text(
                 _formatDate(dateState),
                 style: Theme.of(
@@ -81,7 +81,7 @@ class DateSelector extends StatelessWidget {
               ),
             ],
           ),
-          if (!isToday) ...[gap4, _buildReturnToToday(context)],
+          if (!isToday) ...[const Gap(4), _buildReturnToToday(context)],
         ],
       ),
     );
