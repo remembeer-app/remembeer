@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user/widget/user_card.dart';
@@ -20,6 +23,8 @@ class _SearchUserPageState extends State<SearchUserPage> {
 
   Future<List<UserModel>>? _searchResults;
 
+  Timer? _debounce;
+
   @override
   void initState() {
     super.initState();
@@ -27,15 +32,20 @@ class _SearchUserPageState extends State<SearchUserPage> {
   }
 
   void _onSearchChanged() {
-    setState(() {
-      _searchResults = _userService.searchUsersByUsernameOrEmail(
-        _searchController.text,
-      );
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(searchDebounceDuration, () {
+      final query = _searchController.text;
+
+      setState(() {
+        _searchResults = _userService.searchUsersByUsernameOrEmail(query);
+      });
     });
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
