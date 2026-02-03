@@ -156,7 +156,7 @@ class SummaryPage extends StatelessWidget {
 
     final title = drinks.length == 1
         ? 'No Session ($startTime)'
-        : 'No Session ($startTime - $endTime)';
+        : 'No Session ($startTime – $endTime)';
 
     return SummaryCard(title: title, drinkCount: drinks.length, drinks: drinks);
   }

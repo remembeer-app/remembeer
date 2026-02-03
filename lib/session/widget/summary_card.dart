@@ -163,7 +163,7 @@ class SummaryCard extends StatelessWidget {
       ..sort((a, b) => b.compareTo(a));
     final volumeStrings = sortedVolumes.map((volume) {
       final count = volumeCounts[volume]!;
-      return '${count}x ${volume}ml';
+      return '$count× ${volume}ml';
     }).toList();
 
     return Padding(
