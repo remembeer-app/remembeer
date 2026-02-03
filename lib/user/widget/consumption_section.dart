@@ -91,7 +91,7 @@ class ConsumptionSection extends StatelessWidget {
       child: Row(
         children: [
           icon,
-          const SizedBox(width: 12),
+          gap12,
           Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
           Text(
             value,

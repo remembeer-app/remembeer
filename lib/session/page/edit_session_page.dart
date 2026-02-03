@@ -42,7 +42,7 @@ class EditSessionPage extends StatelessWidget {
     return Row(
       children: [
         Expanded(child: _buildDeleteButton(context)),
-        const SizedBox(width: 16),
+        gap16,
         Expanded(child: _buildEndTimeButton(context)),
       ],
     );

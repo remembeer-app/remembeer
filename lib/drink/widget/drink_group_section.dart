@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -148,7 +149,7 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
       children: [
         ..._buildDrinkItems(),
         // The floating add drink button overlaps last drink without this space.
-        const SizedBox(height: _noSessionMinHeight),
+        const Gap(_noSessionMinHeight),
       ],
     );
   }

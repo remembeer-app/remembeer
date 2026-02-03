@@ -63,7 +63,7 @@ class BadgesSection extends StatelessWidget {
             size: 48,
             color: Colors.grey.shade300,
           ),
-          const SizedBox(height: 12),
+          gap12,
           Text(
             'No badges yet',
             style: TextStyle(
@@ -72,7 +72,7 @@ class BadgesSection extends StatelessWidget {
               color: Colors.grey.shade600,
             ),
           ),
-          const SizedBox(height: 4),
+          gap4,
           Text(
             "Let's drink to unlock them!",
             style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
