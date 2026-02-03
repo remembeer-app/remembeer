@@ -8,7 +8,7 @@ import 'package:remembeer/drink/service/drink_list_service.dart';
 import 'package:remembeer/drink/type/drink_list_data.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
-import 'package:remembeer/session/page/summary_card.dart';
+import 'package:remembeer/session/widget/summary_card.dart';
 
 class SummaryPage extends StatelessWidget {
   SummaryPage({super.key});
