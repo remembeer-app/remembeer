@@ -140,7 +140,7 @@ class EditSessionPage extends StatelessWidget {
                       child: Row(
                         children: [
                           const Icon(Icons.access_time),
-                          hGap12,
+                          gap12,
                           Text(timeFormat.format(selectedEndTime)),
                           const Spacer(),
                           const Icon(Icons.edit_outlined, size: 18),

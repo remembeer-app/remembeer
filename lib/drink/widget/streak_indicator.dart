@@ -29,7 +29,7 @@ class StreakIndicator extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(Icons.local_fire_department, color: color, size: 32),
-        hGap8,
+        gap8,
         Text(
           '${userStats.streakDays}',
           style: TextStyle(

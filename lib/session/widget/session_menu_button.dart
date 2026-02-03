@@ -74,7 +74,7 @@ class SessionMenuButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('Sessions', style: TextStyle(fontSize: 18, color: color)),
-          hGap4,
+          gap4,
           Icon(Icons.table_bar, size: 28, color: color),
         ],
       ),

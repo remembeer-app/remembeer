@@ -47,7 +47,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon.icon, size: 24),
-          hGap8,
+          gap8,
           Text(widget.leaderboard.name),
         ],
       ),

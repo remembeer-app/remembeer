@@ -98,7 +98,7 @@ class DrinkCard extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 14, color: Colors.grey[700]),
-        hGap4,
+        gap4,
         Text(text, style: TextStyle(color: Colors.grey[700])),
       ],
     );

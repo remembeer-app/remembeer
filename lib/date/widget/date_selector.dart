@@ -72,7 +72,7 @@ class DateSelector extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Icon(Icons.calendar_today, size: 16),
-              hGap8,
+              gap8,
               Text(
                 _formatDate(dateState),
                 style: Theme.of(

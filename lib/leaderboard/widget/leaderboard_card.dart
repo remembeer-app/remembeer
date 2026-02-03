@@ -65,13 +65,13 @@ class LeaderboardCard extends StatelessWidget {
               Icons.sports_bar,
               leaderboardEntry.rankByBeers,
             ),
-            hGap4,
+            gap4,
             _buildRankChip(
               theme,
               Icons.local_bar,
               leaderboardEntry.rankByAlcohol,
             ),
-            hGap4,
+            gap4,
             const Icon(Icons.chevron_right),
           ],
         );
@@ -96,7 +96,7 @@ class LeaderboardCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: foregroundColor),
-          hGap2,
+          gap2,
           Text(
             '#$rank',
             style: theme.textTheme.labelSmall?.copyWith(

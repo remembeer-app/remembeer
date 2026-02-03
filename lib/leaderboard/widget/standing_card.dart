@@ -52,9 +52,9 @@ class StandingCard extends StatelessWidget {
                   ),
                 ),
               ),
-              hGap8,
+              gap8,
               UserAvatar(user: entry.user),
-              hGap12,
+              gap12,
               Expanded(
                 child: Text(
                   entry.user.username,

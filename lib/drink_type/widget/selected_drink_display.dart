@@ -13,7 +13,7 @@ class SelectedDrinkDisplay extends StatelessWidget {
     return Row(
       children: [
         DrinkIcon(category: drinkType.category, size: 24),
-        hGap12,
+        gap12,
         Expanded(
           child: Text(
             drinkType.name,

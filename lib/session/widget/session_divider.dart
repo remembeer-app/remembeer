@@ -33,7 +33,7 @@ class SessionDivider extends StatelessWidget {
             size: 16,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          hGap6,
+          gap6,
           Text(
             session.name,
             style: theme.textTheme.bodyMedium?.copyWith(

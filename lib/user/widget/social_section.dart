@@ -28,7 +28,7 @@ class SocialSection extends StatelessWidget {
           value: userStats.streakDays.toString(),
           label: 'Day Streak',
         ),
-        hGap12,
+        gap12,
         _buildStatCard(
           icon: Icons.people_alt,
           color: Colors.blue.shade700,

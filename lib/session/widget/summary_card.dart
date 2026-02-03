@@ -120,7 +120,7 @@ class SummaryCard extends StatelessWidget {
         Row(
           children: [
             DrinkIcon(category: category, size: 24),
-            hGap8,
+            gap8,
             Text(
               category.displayName,
               style: theme.textTheme.titleSmall?.copyWith(

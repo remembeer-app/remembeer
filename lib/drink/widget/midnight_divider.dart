@@ -34,7 +34,7 @@ class MidnightDivider extends StatelessWidget {
                   size: 16,
                   color: theme.colorScheme.outline,
                 ),
-                hGap6,
+                gap6,
                 Text(
                   '${dateFormat.format(lowerDate)} → ${dateFormat.format(higherDate)}',
                   style: theme.textTheme.bodySmall?.copyWith(

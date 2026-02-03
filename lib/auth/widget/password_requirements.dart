@@ -65,7 +65,7 @@ class _RequirementRow extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 16, color: color),
-        hGap8,
+        gap8,
         Text(text, style: theme.textTheme.bodySmall?.copyWith(color: color)),
       ],
     );

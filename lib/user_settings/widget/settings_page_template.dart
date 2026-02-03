@@ -66,7 +66,7 @@ class SettingsPageTemplate extends StatelessWidget {
             Icons.info_outline,
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
-          hGap12,
+          gap12,
           Expanded(
             child: Text(
               hint!,

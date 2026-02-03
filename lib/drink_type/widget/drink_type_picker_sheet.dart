@@ -287,7 +287,7 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
           child: Row(
             children: [
               DrinkIcon(category: category, size: 20),
-              hGap8,
+              gap8,
               Text(
                 category.displayName,
                 style: TextStyle(
@@ -296,7 +296,7 @@ class _DrinkTypePickerSheetState extends State<DrinkTypePickerSheet> {
                   color: category.defaultColor,
                 ),
               ),
-              hGap8,
+              gap8,
               Text(
                 '(${drinkTypes.length})',
                 style: TextStyle(

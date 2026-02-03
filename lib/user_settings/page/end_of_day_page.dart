@@ -64,7 +64,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
               ),
-              hGap20,
+              gap20,
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

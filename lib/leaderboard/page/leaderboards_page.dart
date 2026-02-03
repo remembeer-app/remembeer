@@ -44,7 +44,7 @@ class LeaderboardsPage extends StatelessWidget {
             label: const Text('Join'),
           ),
         ),
-        hGap12,
+        gap12,
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () => {

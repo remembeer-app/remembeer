@@ -98,7 +98,7 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
             label: 'Gallery',
             onTap: _isLoading ? null : () => _pickAvatar(ImageSource.gallery),
           ),
-          hGap16,
+          gap16,
           _buildSelectionTile(
             context,
             icon: Icons.camera_alt_rounded,
@@ -202,7 +202,7 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
             Icons.error_outline,
             color: Theme.of(context).colorScheme.onErrorContainer,
           ),
-          hGap12,
+          gap12,
           Expanded(
             child: Text(
               _errorMessage!,

@@ -89,7 +89,7 @@ class ManageLeaderboardPage extends StatelessWidget {
                 currentLeaderboard.name,
                 style: theme.textTheme.headlineSmall,
               ),
-              hGap8,
+              gap8,
               Icon(
                 Icons.edit,
                 size: 20,

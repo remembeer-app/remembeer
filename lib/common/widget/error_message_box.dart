@@ -19,7 +19,7 @@ class ErrorMessageBox extends StatelessWidget {
       child: Row(
         children: [
           Icon(Icons.error_outline, color: theme.colorScheme.error),
-          hGap12,
+          gap12,
           Expanded(
             child: Text(
               message,

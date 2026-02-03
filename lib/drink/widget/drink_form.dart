@@ -138,7 +138,7 @@ class _DrinkFormState extends State<DrinkForm> {
                 label: const Text('Current location'),
               ),
             ),
-            hGap8,
+            gap8,
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: isDisabled ? null : _openLocationPicker,
@@ -277,7 +277,7 @@ class _DrinkFormState extends State<DrinkForm> {
     volumes.forEach((name, volume) {
       buttons
         ..add(_buildVolumeButton(name: name, volume: volume))
-        ..add(hGap8);
+        ..add(gap8);
     });
 
     if (buttons.isNotEmpty) {
