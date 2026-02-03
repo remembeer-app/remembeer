@@ -26,7 +26,10 @@ class PageTemplate extends StatelessWidget {
               title: title,
             )
           : null,
-      body: Padding(padding: padding, child: child),
+      body: SafeArea(
+        top: title == null,
+        child: Padding(padding: padding, child: child),
+      ),
       floatingActionButton: floatingActionButton,
     );
   }
