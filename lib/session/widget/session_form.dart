@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 
 const _maxNameLength = 30;
@@ -54,14 +54,14 @@ class _SessionFormState extends State<SessionForm> {
             child: ListView(
               children: [
                 _buildNameInput(form),
-                gap16,
+                const Gap(16),
                 _buildStartedAtInput(form),
               ],
             ),
           ),
           if (widget.additionalActions != null) ...[
             widget.additionalActions!,
-            gap16,
+            const Gap(16),
           ],
           _buildSubmitButton(form),
         ],

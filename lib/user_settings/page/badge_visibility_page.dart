@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/badge/widget/badge_icon.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/constants.dart';
@@ -121,7 +121,7 @@ class _BadgeVisibilityPageState extends State<BadgeVisibilityPage> {
             size: 64,
             color: Colors.grey.shade400,
           ),
-          gap16,
+          const Gap(16),
           Text(
             'No badges unlocked yet',
             style: TextStyle(fontSize: 16, color: Colors.grey.shade600),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -39,7 +39,7 @@ class ConsumptionSection extends StatelessWidget {
                   beersConsumed: userStats.beersConsumedLast30Days,
                   alcoholConsumed: userStats.alcoholConsumedLast30Days,
                 ),
-                gap16,
+                const Gap(16),
                 _buildStatSection(
                   title: 'Total Lifetime',
                   beersConsumed: userStats.totalBeersConsumed,
@@ -91,7 +91,7 @@ class ConsumptionSection extends StatelessWidget {
       child: Row(
         children: [
           icon,
-          const SizedBox(width: 12),
+          const Gap(12),
           Expanded(child: Text(label, style: const TextStyle(fontSize: 16))),
           Text(
             value,

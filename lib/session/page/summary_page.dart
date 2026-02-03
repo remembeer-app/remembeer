@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -51,14 +51,14 @@ class SummaryPage extends StatelessWidget {
               size: 64,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
-            gap16,
+            const Gap(16),
             Text(
               'No drinks to summarize',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            gap8,
+            const Gap(8),
             Text(
               'Log some drinks first',
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -83,7 +83,7 @@ class SummaryPage extends StatelessWidget {
       if (sessionDrinks.isNotEmpty) {
         sections
           ..add(_buildSessionSection(session, sessionDrinks))
-          ..add(gap16);
+          ..add(const Gap(16));
       }
     }
 
@@ -93,7 +93,7 @@ class SummaryPage extends StatelessWidget {
       for (final group in noSessionGroups) {
         sections
           ..add(_buildNoSessionSection(group))
-          ..add(gap16);
+          ..add(const Gap(16));
       }
     }
 

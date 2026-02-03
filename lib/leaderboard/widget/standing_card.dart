@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
 import 'package:remembeer/leaderboard/type/leaderboard_entry.dart';
@@ -52,9 +52,9 @@ class StandingCard extends StatelessWidget {
                   ),
                 ),
               ),
-              hGap8,
+              const Gap(8),
               UserAvatar(user: entry.user),
-              hGap12,
+              const Gap(12),
               Expanded(
                 child: Text(
                   entry.user.username,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -33,7 +33,7 @@ class SessionDivider extends StatelessWidget {
             size: 16,
             color: theme.colorScheme.onSurfaceVariant,
           ),
-          hGap6,
+          const Gap(6),
           Text(
             session.name,
             style: theme.textTheme.bodyMedium?.copyWith(

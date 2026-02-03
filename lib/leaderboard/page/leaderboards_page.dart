@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -21,7 +21,7 @@ class LeaderboardsPage extends StatelessWidget {
       child: Column(
         children: [
           _buildActionButtons(context),
-          gap16,
+          const Gap(16),
           Expanded(child: _buildLeaderboardList()),
         ],
       ),
@@ -44,7 +44,7 @@ class LeaderboardsPage extends StatelessWidget {
             label: const Text('Join'),
           ),
         ),
-        hGap12,
+        const Gap(12),
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () => {
@@ -95,14 +95,14 @@ class LeaderboardsPage extends StatelessWidget {
               size: 64,
               color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
-            gap16,
+            const Gap(16),
             Text(
               'No leaderboards yet',
               style: theme.textTheme.titleMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
               ),
             ),
-            gap8,
+            const Gap(8),
             Text(
               'Create a new leaderboard or join one with an invite code',
               textAlign: TextAlign.center,

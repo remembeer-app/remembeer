@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/model/user_model.dart';
@@ -37,15 +37,15 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
           return Column(
             children: [
               _buildAvatarPreview(user),
-              gap48,
+              const Gap(48),
               if (_errorMessage != null) ...[
                 _buildErrorMessage(context),
-                gap16,
+                const Gap(16),
               ],
               _buildActionGrid(context, user),
               const Spacer(),
               if (user.avatarUrl != null) _buildRemoveButton(context),
-              gap24,
+              const Gap(24),
             ],
           );
         },
@@ -98,7 +98,7 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
             label: 'Gallery',
             onTap: _isLoading ? null : () => _pickAvatar(ImageSource.gallery),
           ),
-          hGap16,
+          const Gap(16),
           _buildSelectionTile(
             context,
             icon: Icons.camera_alt_rounded,
@@ -132,7 +132,7 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, size: 32, color: theme.colorScheme.primary),
-                gap12,
+                const Gap(12),
                 Text(
                   label,
                   style: theme.textTheme.labelLarge?.copyWith(
@@ -202,7 +202,7 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
             Icons.error_outline,
             color: Theme.of(context).colorScheme.onErrorContainer,
           ),
-          hGap12,
+          const Gap(12),
           Expanded(
             child: Text(
               _errorMessage!,

@@ -1,11 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/auth/constants.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -48,14 +48,14 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _buildCurrentPasswordField(form),
-            gap16,
+            const Gap(16),
             _buildNewPasswordField(form),
-            gap8,
+            const Gap(8),
             PasswordRequirements(password: _newPasswordController.text),
-            gap16,
+            const Gap(16),
             _buildConfirmPasswordField(form),
             form.buildErrorMessage(),
-            gap24,
+            const Gap(24),
             form.buildSubmitButton(
               text: 'Change Password',
               onSubmit: () => _changePassword(context),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -72,7 +72,7 @@ class SessionManagementPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.event_busy, size: 64, color: theme.colorScheme.outline),
-          gap16,
+          const Gap(16),
           Text(
             "You're not part of any sessions yet",
             style: theme.textTheme.titleMedium?.copyWith(

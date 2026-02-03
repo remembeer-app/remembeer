@@ -1,7 +1,7 @@
 import 'package:diacritic/diacritic.dart';
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/auth/constants.dart';
-import 'package:remembeer/common/constants.dart';
 
 class PasswordRequirements extends StatelessWidget {
   final String password;
@@ -33,16 +33,16 @@ class PasswordRequirements extends StatelessWidget {
               color: theme.colorScheme.onSurfaceVariant,
             ),
           ),
-          gap8,
+          const Gap(8),
           _RequirementRow(
             text: 'At least $minPasswordLength characters',
             isMet: hasMinLength,
           ),
-          gap2,
+          const Gap(2),
           _RequirementRow(text: 'One uppercase letter', isMet: hasUppercase),
-          gap2,
+          const Gap(2),
           _RequirementRow(text: 'One lowercase letter', isMet: hasLowercase),
-          gap2,
+          const Gap(2),
           _RequirementRow(text: 'One number', isMet: hasNumber),
         ],
       ),
@@ -65,7 +65,7 @@ class _RequirementRow extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 16, color: color),
-        hGap8,
+        const Gap(8),
         Text(text, style: theme.textTheme.bodySmall?.copyWith(color: color)),
       ],
     );

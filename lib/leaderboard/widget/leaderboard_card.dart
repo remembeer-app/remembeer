@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
@@ -65,13 +65,13 @@ class LeaderboardCard extends StatelessWidget {
               Icons.sports_bar,
               leaderboardEntry.rankByBeers,
             ),
-            hGap4,
+            const Gap(4),
             _buildRankChip(
               theme,
               Icons.local_bar,
               leaderboardEntry.rankByAlcohol,
             ),
-            hGap4,
+            const Gap(4),
             const Icon(Icons.chevron_right),
           ],
         );
@@ -96,7 +96,7 @@ class LeaderboardCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 14, color: foregroundColor),
-          hGap2,
+          const Gap(2),
           Text(
             '#$rank',
             style: theme.textTheme.labelSmall?.copyWith(

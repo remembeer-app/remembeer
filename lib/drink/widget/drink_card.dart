@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -56,12 +56,12 @@ class DrinkCard extends StatelessWidget {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            gap4,
+            const Gap(4),
             _buildInfoRow(
               Icons.access_time,
               DateFormat('H:mm').format(drink.consumedAt),
             ),
-            gap2,
+            const Gap(2),
             _buildInfoRow(Icons.local_drink, '${drink.volumeInMilliliters} ml'),
           ],
         ),
@@ -98,7 +98,7 @@ class DrinkCard extends StatelessWidget {
     return Row(
       children: [
         Icon(icon, size: 14, color: Colors.grey[700]),
-        hGap4,
+        const Gap(4),
         Text(text, style: TextStyle(color: Colors.grey[700])),
       ],
     );

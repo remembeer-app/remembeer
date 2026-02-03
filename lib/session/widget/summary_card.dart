@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/constants.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
@@ -34,9 +34,9 @@ class SummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildHeader(context),
-            gap12,
+            const Gap(12),
             Divider(height: 1, color: theme.colorScheme.outlineVariant),
-            gap12,
+            const Gap(12),
             ..._buildCategorySections(context, drinksByCategory),
           ],
         ),
@@ -96,7 +96,7 @@ class SummaryCard extends StatelessWidget {
       final categoryDrinks = drinksByCategory[category]!;
       widgets
         ..add(_buildCategorySection(context, category, categoryDrinks))
-        ..add(gap8);
+        ..add(const Gap(8));
     }
 
     if (widgets.isNotEmpty) {
@@ -120,7 +120,7 @@ class SummaryCard extends StatelessWidget {
         Row(
           children: [
             DrinkIcon(category: category, size: 24),
-            hGap8,
+            const Gap(8),
             Text(
               category.displayName,
               style: theme.textTheme.titleSmall?.copyWith(
@@ -130,7 +130,7 @@ class SummaryCard extends StatelessWidget {
             ),
           ],
         ),
-        gap4,
+        const Gap(4),
         ...aggregated.entries.map(
           (entry) => _buildDrinkTypeEntry(context, entry.key, entry.value),
         ),

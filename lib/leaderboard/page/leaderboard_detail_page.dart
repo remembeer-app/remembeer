@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/constants.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -47,7 +47,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon.icon, size: 24),
-          hGap8,
+          const Gap(8),
           Text(widget.leaderboard.name),
         ],
       ),
@@ -55,9 +55,9 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
         children: [
           _buildActionButtons(context, isOwner),
           MonthSelector(),
-          gap8,
+          const Gap(8),
           _buildSortToggle(),
-          gap16,
+          const Gap(16),
           Expanded(child: _buildStandingsList()),
         ],
       ),
@@ -122,7 +122,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
               'Share this code with friends to invite them:',
               style: theme.textTheme.bodyMedium,
             ),
-            gap16,
+            const Gap(16),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               decoration: BoxDecoration(
