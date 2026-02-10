@@ -21,6 +21,7 @@ abstract class Drink with _$Drink implements Entity {
     required DrinkTypeCore drinkType,
     required int volumeInMilliliters,
     @GeoPointConverter() GeoPoint? location,
+    // TODO(metju-ac): remove sessionId
     String? sessionId,
   }) = _Drink;
 

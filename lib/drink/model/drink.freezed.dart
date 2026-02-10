@@ -15,7 +15,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Drink {
 
- String get id; String get userId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;@TimestampConverter() DateTime? get deletedAt; DateTime get consumedAt; DrinkTypeCore get drinkType; int get volumeInMilliliters;@GeoPointConverter() GeoPoint? get location; String? get sessionId;
+ String get id; String get userId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;@TimestampConverter() DateTime? get deletedAt; DateTime get consumedAt; DrinkTypeCore get drinkType; int get volumeInMilliliters;@GeoPointConverter() GeoPoint? get location;// TODO(metju-ac): remove sessionId
+ String? get sessionId;
 /// Create a copy of Drink
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -239,6 +240,7 @@ class _Drink implements Drink {
 @override final  DrinkTypeCore drinkType;
 @override final  int volumeInMilliliters;
 @override@GeoPointConverter() final  GeoPoint? location;
+// TODO(metju-ac): remove sessionId
 @override final  String? sessionId;
 
 /// Create a copy of Drink

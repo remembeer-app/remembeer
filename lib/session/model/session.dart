@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/converter/timestamp_converter.dart';
 import 'package:remembeer/common/model/entity_with_members.dart';
+import 'package:remembeer/drink/model/drink.dart';
 
 part 'session.freezed.dart';
 
@@ -23,6 +24,8 @@ abstract class Session with _$Session implements EntityWithMembers {
     required String name,
     required DateTime startedAt,
     DateTime? endedAt,
+    @Default([]) List<Drink> drinks,
+    @Default(true) bool isSoloSession,
   }) = _Session;
 
   factory Session.fromJson(Map<String, dynamic> json) =>
