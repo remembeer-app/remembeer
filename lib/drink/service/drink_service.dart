@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/date/service/date_service.dart';
@@ -17,6 +18,7 @@ import 'package:remembeer/user_settings/model/drink_list_sort.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DrinkService {
+  final AuthService authService;
   final UserSettingsController userSettingsController;
   final DrinkController drinkController;
   final UserController userController;
@@ -27,6 +29,7 @@ class DrinkService {
   final BadgeService badgeService;
 
   DrinkService({
+    required this.authService,
     required this.userSettingsController,
     required this.drinkController,
     required this.userController,
@@ -69,32 +72,46 @@ class DrinkService {
     );
   }
 
+  /// Creates a new drink.
+  ///
+  /// If exactly one session is active at the drink's consumedAt time,
+  /// the drink is added to that session. Otherwise, a new solo session
+  /// is created for the drink.
   Future<void> createDrink(DrinkCreate drinkCreate) async {
-    var drinkToCreate = drinkCreate;
-
-    final effectiveDate = await _effectiveDate(drinkToCreate.consumedAt);
+    final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
     final after6pm = _calculateIsAfter6pm(
-      drinkToCreate.consumedAt,
+      drinkCreate.consumedAt,
       effectiveDate,
     );
 
     final beers = _beersEquivalent(
-      category: drinkToCreate.drinkType.category,
-      volumeInMilliliters: drinkToCreate.volumeInMilliliters,
+      category: drinkCreate.drinkType.category,
+      volumeInMilliliters: drinkCreate.volumeInMilliliters,
     );
     final alcohol = _alcoholMl(
-      volumeInMilliliters: drinkToCreate.volumeInMilliliters,
-      alcoholPercentage: drinkToCreate.drinkType.alcoholPercentage,
+      volumeInMilliliters: drinkCreate.volumeInMilliliters,
+      alcoholPercentage: drinkCreate.drinkType.alcoholPercentage,
+    );
+
+    final drinkId = sessionController.generateId();
+    final userId = authService.authenticatedUser.uid;
+    final now = DateTime.now();
+
+    // TODO(metju-ac): Refactor to use server timestamps
+    final drink = Drink(
+      id: drinkId,
+      userId: userId,
+      createdAt: now,
+      updatedAt: now,
+      consumedAt: drinkCreate.consumedAt,
+      drinkType: drinkCreate.drinkType,
+      volumeInMilliliters: drinkCreate.volumeInMilliliters,
+      location: drinkCreate.location,
     );
 
     final activeSessions = await sessionController.sessionsActiveAt(
-      drinkToCreate.consumedAt,
+      drinkCreate.consumedAt,
     );
-    if (activeSessions.length == 1) {
-      drinkToCreate = drinkToCreate.copyWith(
-        sessionId: activeSessions.single.id,
-      );
-    }
 
     var user = await userController.currentUser;
     user = user.addDrink(
@@ -109,9 +126,16 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
-    final batch = drinkController.batch;
-    drinkController.createSingleInBatch(drinkToCreate, batch);
+    final batch = sessionController.batch;
+
+    if (activeSessions.length == 1) {
+      sessionController.addDrinkInBatch(activeSessions.single.id, drink, batch);
+    } else {
+      sessionController.createSoloSessionWithDrinkInBatch(drink, batch);
+    }
+
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
+
     await batch.commit();
   }
 
