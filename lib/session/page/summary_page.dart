@@ -5,7 +5,6 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/service/drink_list_service.dart';
-import 'package:remembeer/drink/type/drink_list_data.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/widget/summary_card.dart';
@@ -19,17 +18,18 @@ class SummaryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Summary'),
-      child: AsyncBuilder<DrinkListData>(
+      child: AsyncBuilder<List<Session>>(
         stream: _drinkListService.drinkListDataStream,
-        builder: (context, data) {
-          if (data.drinks.isEmpty) {
+        builder: (context, sessions) {
+          final allDrinks = sessions.expand((s) => s.drinks).toList();
+          if (allDrinks.isEmpty) {
             return _buildEmptyState(context);
           }
 
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: _buildSections(data),
+              children: _buildSections(sessions),
             ),
           );
         },
@@ -73,23 +73,34 @@ class SummaryPage extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildSections(DrinkListData data) {
+  List<Widget> _buildSections(List<Session> sessions) {
     final sections = <Widget>[];
 
-    final drinksBySessionId = _groupDrinksBySessionId(data.drinks);
+    // Separate shared sessions from solo sessions
+    final sharedSessions = <Session>[];
+    final soloDrinks = <Drink>[];
 
-    for (final session in data.sessions) {
-      final sessionDrinks = drinksBySessionId[session.id] ?? [];
-      if (sessionDrinks.isNotEmpty) {
+    for (final session in sessions) {
+      if (session.isSoloSession) {
+        // Solo sessions contain exactly one drink
+        soloDrinks.addAll(session.drinks);
+      } else {
+        sharedSessions.add(session);
+      }
+    }
+
+    // Build sections for shared sessions
+    for (final session in sharedSessions) {
+      if (session.drinks.isNotEmpty) {
         sections
-          ..add(_buildSessionSection(session, sessionDrinks))
+          ..add(_buildSessionSection(session, session.drinks))
           ..add(const Gap(16));
       }
     }
 
-    final drinksWithoutSession = drinksBySessionId[null] ?? [];
-    if (drinksWithoutSession.isNotEmpty) {
-      final noSessionGroups = _splitByTimeGap(drinksWithoutSession);
+    // Build sections for solo drinks (grouped by time gap)
+    if (soloDrinks.isNotEmpty) {
+      final noSessionGroups = _splitByTimeGap(soloDrinks);
       for (final group in noSessionGroups) {
         sections
           ..add(_buildNoSessionSection(group))
@@ -102,14 +113,6 @@ class SummaryPage extends StatelessWidget {
     }
 
     return sections;
-  }
-
-  Map<String?, List<Drink>> _groupDrinksBySessionId(List<Drink> drinks) {
-    final map = <String?, List<Drink>>{};
-    for (final drink in drinks) {
-      map.putIfAbsent(drink.sessionId, () => []).add(drink);
-    }
-    return map;
   }
 
   List<List<Drink>> _splitByTimeGap(List<Drink> drinks) {

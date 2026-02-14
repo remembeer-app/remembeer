@@ -20,7 +20,11 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
 
   Future<List<Session>> sessionsActiveAt(DateTime at) =>
       sessionsStreamWhereCurrentUserIsMember.first.then((sessions) {
-        return sessions.where((session) => session.isActiveAt(at)).toList();
+        return sessions
+            .where(
+              (session) => !session.isSoloSession && session.isActiveAt(at),
+            )
+            .toList();
       });
 
   void addDrinkInBatch(String sessionId, Drink drink, WriteBatch batch) {

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
-import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
+import 'package:remembeer/drink/type/drink_with_session_id.dart';
 import 'package:remembeer/drink/widget/drink_card.dart';
 import 'package:remembeer/drink/widget/midnight_divider.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -17,22 +19,29 @@ const _borderRadius = 12.0;
 
 /// A unified widget that displays a group of drinks.
 ///
-/// When [session] is provided, displays drinks within that session with a
-/// background and a [SessionDivider] at the bottom.
+/// When [isSharedSession] is true, displays drinks within a single shared
+/// session with a background and a [SessionDivider] at the bottom. The
+/// [sessions] list must contain exactly one session.
 ///
-/// When [session] is null, displays drinks without a session with a
-/// transparent background and a minimum height for easy drag-and-drop.
+/// When [isSharedSession] is false, displays solo drinks (each in its own
+/// session container) with a transparent background and a minimum height
+/// for easy drag-and-drop.
 class DrinkGroupSection extends StatefulWidget {
-  final Session? session;
-  final List<Drink> drinks;
+  final bool isSharedSession;
+  final List<Session> sessions;
   final double? minHeight;
 
-  const DrinkGroupSection({
+  DrinkGroupSection({
     super.key,
-    required this.session,
-    required this.drinks,
+    required this.isSharedSession,
+    required this.sessions,
     this.minHeight,
-  });
+  }) {
+    invariant(
+      !isSharedSession || sessions.length == 1,
+      'Shared session mode requires exactly one session',
+    );
+  }
 
   @override
   State<DrinkGroupSection> createState() => _DrinkGroupSectionState();
@@ -40,9 +49,21 @@ class DrinkGroupSection extends StatefulWidget {
 
 class _DrinkGroupSectionState extends State<DrinkGroupSection> {
   final _drinkService = get<DrinkService>();
+  final _authService = get<AuthService>();
   var _isDragOver = false;
 
-  bool get _isSessionMode => widget.session != null;
+  /// Returns all drinks from all sessions, filtered to current user only.
+  List<DrinkWithSessionId> get _currentUserDrinks {
+    final drinks = <DrinkWithSessionId>[];
+    for (final session in widget.sessions) {
+      for (final drink in session.drinks) {
+        if (drink.userId == _authService.authenticatedUser.uid) {
+          drinks.add((originalSessionId: session.id, drink: drink));
+        }
+      }
+    }
+    return drinks;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +71,7 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: DragTarget<Drink>(
+      child: DragTarget<DrinkWithSessionId>(
         onWillAcceptWithDetails: (details) {
           final willAccept = _shouldAcceptDrink(details.data);
           if (willAccept && !_isDragOver) {
@@ -61,17 +82,21 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
         onLeave: (_) => setState(() => _isDragOver = false),
         onAcceptWithDetails: (details) async {
           setState(() => _isDragOver = false);
-          await _drinkService.updateDrinkSession(
-            details.data,
-            widget.session?.id,
+
+          await _drinkService.moveDrinkBetweenSessions(
+            drink: details.data.drink,
+            fromSessionId: details.data.originalSessionId,
+            toSessionId: widget.isSharedSession
+                ? widget.sessions.first.id
+                : null,
           );
         },
         builder: (context, candidateData, rejectedData) {
-          final content = _isSessionMode
-              ? _buildSessionContent()
-              : _buildNoSessionContent();
+          final content = widget.isSharedSession
+              ? _buildSharedSessionContent()
+              : _buildSoloSessionsContent();
 
-          final decoration = _isSessionMode
+          final decoration = widget.isSharedSession
               ? BoxDecoration(
                   color: _backgroundColor,
                   borderRadius: BorderRadius.circular(_borderRadius),
@@ -82,7 +107,7 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
                   borderRadius: BorderRadius.circular(_borderRadius),
                 );
 
-          if (_isSessionMode) {
+          if (widget.isSharedSession) {
             return Container(
               width: double.infinity,
               decoration: decoration,
@@ -106,24 +131,33 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
     );
   }
 
-  bool _shouldAcceptDrink(Drink drink) {
-    final session = widget.session;
-    if (session == null) {
-      return drink.sessionId != null;
+  bool _shouldAcceptDrink(DrinkWithSessionId dragData) {
+    // Don't accept if the drink is already in one of our sessions
+    for (final session in widget.sessions) {
+      if (dragData.originalSessionId == session.id) {
+        return false;
+      }
     }
 
-    final sessionEnd = session.endedAt;
+    // For solo sessions area, accept any drink not already here
+    if (!widget.isSharedSession) {
+      return true;
+    }
 
-    final isDifferentSession = drink.sessionId != session.id;
+    // For shared session, check if drink time fits within session bounds
+    final session = widget.sessions.first;
+    final drink = dragData.drink;
+
     final isAfterStart = drink.consumedAt.isAfter(session.startedAt);
+    final sessionEnd = session.endedAt;
     final isBeforeEnd =
         sessionEnd == null || drink.consumedAt.isBefore(sessionEnd);
 
-    return isDifferentSession && isAfterStart && isBeforeEnd;
+    return isAfterStart && isBeforeEnd;
   }
 
   Color get _backgroundColor {
-    if (_isSessionMode) {
+    if (widget.isSharedSession) {
       return _isDragOver ? _sessionDragOverColor : _sessionBackgroundColor;
     } else {
       return _isDragOver
@@ -132,45 +166,47 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
     }
   }
 
-  Widget _buildSessionContent() {
+  Widget _buildSharedSessionContent() {
+    final drinks = _currentUserDrinks;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (widget.drinks.isEmpty) const Gap(32) else ..._buildDrinkItems(),
-        SessionDivider(session: widget.session!),
+        if (drinks.isEmpty) const Gap(32) else ..._buildDrinkItems(drinks),
+        SessionDivider(session: widget.sessions.first),
       ],
     );
   }
 
-  Widget _buildNoSessionContent() {
+  Widget _buildSoloSessionsContent() {
+    final drinks = _currentUserDrinks;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        ..._buildDrinkItems(),
+        ..._buildDrinkItems(drinks),
         // The floating add drink button overlaps last drink without this space.
         const Gap(_noSessionMinHeight),
       ],
     );
   }
 
-  List<Widget> _buildDrinkItems() {
-    if (widget.drinks.isEmpty) {
+  List<Widget> _buildDrinkItems(List<DrinkWithSessionId> drinks) {
+    if (drinks.isEmpty) {
       return const [];
     }
 
     final items = <Widget>[];
 
-    for (var i = 0; i < widget.drinks.length; i++) {
-      final drink = widget.drinks[i];
-      items.add(DrinkCard(drink: drink));
+    for (var i = 0; i < drinks.length; i++) {
+      final dragData = drinks[i];
+      items.add(DrinkCard(drinkWithSessionId: dragData));
 
-      if (i < widget.drinks.length - 1) {
-        final nextDrink = widget.drinks[i + 1];
-        if (_crossesMidnight(drink.consumedAt, nextDrink.consumedAt)) {
+      if (i < drinks.length - 1) {
+        final nextDrink = drinks[i + 1].drink;
+        if (_crossesMidnight(dragData.drink.consumedAt, nextDrink.consumedAt)) {
           items.add(
             MidnightDivider(
               fromDate: nextDrink.consumedAt,
-              toDate: drink.consumedAt,
+              toDate: dragData.drink.consumedAt,
             ),
           );
         }

@@ -270,10 +270,13 @@ class DrinkService {
     showSuccessNotification('Default drink added!');
   }
 
-  Future<void> updateDrinkSession(Drink drink, String? sessionId) async {
-    if (drink.sessionId == sessionId) return;
-    final updatedDrink = drink.copyWith(sessionId: sessionId);
-    await drinkController.updateSingle(updatedDrink);
+  Future<void> moveDrinkBetweenSessions({
+    required Drink drink,
+    required String fromSessionId,
+    String? toSessionId,
+  }) {
+    // TODO(metju-ac): implement
+    return Future.value();
   }
 
   double _beersEquivalent({
