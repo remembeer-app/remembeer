@@ -4,22 +4,22 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink/service/drink_list_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
+import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/session/widget/summary_card.dart';
 
 class SummaryPage extends StatelessWidget {
   SummaryPage({super.key});
 
-  final _drinkListService = get<DrinkListService>();
+  final _sessionService = get<SessionService>();
 
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Summary'),
       child: AsyncBuilder<List<Session>>(
-        stream: _drinkListService.drinkListDataStream,
+        stream: _sessionService.mySessionsForSelectedDateStream,
         builder: (context, sessions) {
           final allDrinks = sessions.expand((s) => s.drinks).toList();
           if (allDrinks.isEmpty) {

@@ -3,10 +3,10 @@ import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drag_auto_scroller.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
-import 'package:remembeer/drink/service/drink_list_service.dart';
 import 'package:remembeer/drink/widget/drink_group_section.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
+import 'package:remembeer/session/service/session_service.dart';
 
 class DrinkGroupList extends StatefulWidget {
   const DrinkGroupList({super.key});
@@ -16,7 +16,7 @@ class DrinkGroupList extends StatefulWidget {
 }
 
 class _DrinkGroupListState extends State<DrinkGroupList> {
-  final _drinkListService = get<DrinkListService>();
+  final _sessionService = get<SessionService>();
   final _scrollController = ScrollController();
 
   @override
@@ -28,7 +28,7 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
   @override
   Widget build(BuildContext context) {
     return AsyncBuilder(
-      stream: _drinkListService.drinkListDataStream,
+      stream: _sessionService.mySessionsForSelectedDateStream,
       builder: (context, sessions) {
         final hasContent = sessions.any((s) => s.drinks.isNotEmpty);
         if (!hasContent) {
