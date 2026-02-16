@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/util/invariant.dart';
+import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink/type/drink_with_session_id.dart';
@@ -49,21 +49,7 @@ class DrinkGroupSection extends StatefulWidget {
 
 class _DrinkGroupSectionState extends State<DrinkGroupSection> {
   final _drinkService = get<DrinkService>();
-  final _authService = get<AuthService>();
   var _isDragOver = false;
-
-  /// Returns all drinks from all sessions, filtered to current user only.
-  List<DrinkWithSessionId> get _currentUserDrinks {
-    final drinks = <DrinkWithSessionId>[];
-    for (final session in widget.sessions) {
-      for (final drink in session.drinks) {
-        if (drink.userId == _authService.authenticatedUser.uid) {
-          drinks.add((originalSessionId: session.id, drink: drink));
-        }
-      }
-    }
-    return drinks;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -167,25 +153,33 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
   }
 
   Widget _buildSharedSessionContent() {
-    final drinks = _currentUserDrinks;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (drinks.isEmpty) const Gap(32) else ..._buildDrinkItems(drinks),
-        SessionDivider(session: widget.sessions.first),
-      ],
+    return AsyncBuilder(
+      stream: _drinkService.drinksWithIdToShowFromSessions(widget.sessions),
+      builder: (context, drinks) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (drinks.isEmpty) const Gap(32) else ..._buildDrinkItems(drinks),
+            SessionDivider(session: widget.sessions.first),
+          ],
+        );
+      },
     );
   }
 
   Widget _buildSoloSessionsContent() {
-    final drinks = _currentUserDrinks;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ..._buildDrinkItems(drinks),
-        // The floating add drink button overlaps last drink without this space.
-        const Gap(_noSessionMinHeight),
-      ],
+    return AsyncBuilder(
+      stream: _drinkService.drinksWithIdToShowFromSessions(widget.sessions),
+      builder: (context, drinks) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ..._buildDrinkItems(drinks),
+            // The floating add drink button overlaps last drink without this space.
+            const Gap(_noSessionMinHeight),
+          ],
+        );
+      },
     );
   }
 

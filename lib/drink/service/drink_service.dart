@@ -8,9 +8,11 @@ import 'package:remembeer/drink/constants.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/model/drink_create.dart';
+import 'package:remembeer/drink/type/drink_with_session_id.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
+import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/service/user_stats_service.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
@@ -70,6 +72,47 @@ class DrinkService {
         return filtered;
       },
     );
+  }
+
+  Stream<List<DrinkWithSessionId>> _drinksToShowFromSession(Session session) {
+    return Rx.combineLatest2(
+      dateService.selectedDateStateStream,
+      userController.currentUserStream,
+      (_, user) {
+        final (startTime, endTime) = dateService.selectedDateBoundaries(
+          user.endOfDayBoundary,
+        );
+
+        return session.drinks
+            .where((drink) => drink.userId == authService.authenticatedUser.uid)
+            .where((drink) => drink.consumedAt.isAfter(startTime))
+            .where((drink) => !drink.consumedAt.isAfter(endTime))
+            .map((drink) => (originalSessionId: session.id, drink: drink))
+            .toList();
+      },
+    );
+  }
+
+  /// Returns current users' drinks consumed on currently selected day
+  /// with respect to custom end of day boundary
+  Stream<List<DrinkWithSessionId>> drinksWithIdToShowFromSessions(
+    List<Session> sessions,
+  ) {
+    if (sessions.isEmpty) {
+      return Stream.value([]);
+    }
+    return Rx.combineLatest(
+      sessions.map(_drinksToShowFromSession),
+      (drinksInSessions) => drinksInSessions.expand((i) => i).toList(),
+    );
+  }
+
+  /// Returns current users' drinks consumed on currently selected day
+  /// with respect to custom end of day boundary
+  Stream<List<Drink>> drinksToShowFromSessions(Session session) {
+    return _drinksToShowFromSession(
+      session,
+    ).map((items) => items.map((item) => item.drink).toList());
   }
 
   /// Creates a new drink.
