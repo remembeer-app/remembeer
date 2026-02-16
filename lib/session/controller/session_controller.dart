@@ -54,4 +54,11 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
       ),
     );
   }
+
+  void removeDrinkInBatch(String sessionId, Drink drink, WriteBatch batch) {
+    batch.update(writeCollection.doc(sessionId), {
+      'drinks': FieldValue.arrayRemove([drink.toJson()]),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
 }

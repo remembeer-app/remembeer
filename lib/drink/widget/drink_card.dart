@@ -95,7 +95,10 @@ class DrinkCard extends StatelessWidget {
       submitButtonText: 'Delete',
       isDestructive: true,
       onPressed: () async {
-        await _drinkService.deleteDrink(_drink);
+        await _drinkService.deleteDrink(
+          drinkWithSessionId.originalSessionId,
+          _drink,
+        );
         showSuccessNotification('Drink deleted!');
       },
     );

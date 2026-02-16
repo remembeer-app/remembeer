@@ -220,7 +220,7 @@ class DrinkService {
     await batch.commit();
   }
 
-  Future<void> deleteDrink(Drink drink) async {
+  Future<void> deleteDrink(String sessionId, Drink drink) async {
     final effectiveDate = await _effectiveDate(drink.consumedAt);
     final after6pm = _calculateIsAfter6pm(drink.consumedAt, effectiveDate);
 
@@ -247,7 +247,7 @@ class DrinkService {
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
     final batch = drinkController.batch;
-    drinkController.deleteSingleInBatch(drink, batch);
+    sessionController.removeDrinkInBatch(sessionId, drink, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
     await batch.commit();
   }
