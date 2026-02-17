@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/drink/constants.dart';
@@ -289,9 +290,12 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
+    final session = await sessionController.findById(sessionId);
     final batch = drinkController.batch;
+
     sessionController.removeDrinkInBatch(sessionId, drink, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
+    _deleteEmptySoloSessionInBatch(session, batch);
     await batch.commit();
   }
 
@@ -352,5 +356,15 @@ class DrinkService {
     final endOfDayBoundary = user.endOfDayBoundary;
 
     return effectiveDate(consumedAt, endOfDayBoundary);
+  }
+
+  void _deleteEmptySoloSessionInBatch(Session session, WriteBatch batch) {
+    if (!session.isSoloSession) return;
+    invariant(
+      session.drinks.length == 1,
+      'solo session must contain only single drink',
+    );
+
+    sessionController.deleteSingleInBatch(session, batch);
   }
 }
