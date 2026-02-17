@@ -17,7 +17,6 @@ import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/service/user_stats_service.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
-import 'package:remembeer/user_settings/model/drink_list_sort.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DrinkService {
@@ -42,38 +41,6 @@ class DrinkService {
     required this.userStatsService,
     required this.badgeService,
   });
-
-  Stream<List<Drink>> get drinksForSelectedDateStream {
-    return Rx.combineLatest4(
-      drinkController.entitiesStreamForCurrentUser,
-      dateService.selectedDateStateStream,
-      userSettingsController.currentUserSettingsStream,
-      userController.currentUserStream,
-      (drinks, _, userSettings, user) {
-        final drinkListSort = userSettings.drinkListSortOrder;
-        final (startTime, endTime) = dateService.selectedDateBoundaries(
-          user.endOfDayBoundary,
-        );
-
-        final filtered = drinks
-            .where(
-              (drink) =>
-                  drink.consumedAt.isAfter(startTime) &&
-                  drink.consumedAt.isBefore(endTime),
-            )
-            .toList();
-
-        switch (drinkListSort) {
-          case DrinkListSortOrder.descending:
-            filtered.sort((a, b) => b.consumedAt.compareTo(a.consumedAt));
-          case DrinkListSortOrder.ascending:
-            filtered.sort((a, b) => a.consumedAt.compareTo(b.consumedAt));
-        }
-
-        return filtered;
-      },
-    );
-  }
 
   Stream<List<DrinkWithSessionId>> _drinksToShowFromSession(Session session) {
     return Rx.combineLatest2(
