@@ -21,8 +21,6 @@ abstract class Drink with _$Drink implements Entity {
     required DrinkTypeCore drinkType,
     required int volumeInMilliliters,
     @GeoPointConverter() GeoPoint? location,
-    // TODO(metju-ac): remove sessionId
-    String? sessionId,
   }) = _Drink;
 
   factory Drink.fromJson(Map<String, dynamic> json) => _$DrinkFromJson(json);
