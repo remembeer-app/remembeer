@@ -293,9 +293,9 @@ class DrinkService {
     final session = await sessionController.findById(sessionId);
     final batch = drinkController.batch;
 
-    sessionController.removeDrinkInBatch(sessionId, drink, batch);
+    _removeDrinkFromSessionInBatch(session, drink, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
-    _deleteEmptySoloSessionInBatch(session, batch);
+
     await batch.commit();
   }
 
@@ -321,9 +321,18 @@ class DrinkService {
     required Drink drink,
     required String fromSessionId,
     String? toSessionId,
-  }) {
-    // TODO(metju-ac): implement
-    return Future.value();
+  }) async {
+    final fromSession = await sessionController.findById(fromSessionId);
+    final batch = sessionController.batch;
+
+    _removeDrinkFromSessionInBatch(fromSession, drink, batch);
+    if (toSessionId != null) {
+      sessionController.addDrinkInBatch(toSessionId, drink, batch);
+    } else {
+      sessionController.createSoloSessionWithDrinkInBatch(drink, batch);
+    }
+
+    await batch.commit();
   }
 
   double _beersEquivalent({
@@ -358,13 +367,19 @@ class DrinkService {
     return effectiveDate(consumedAt, endOfDayBoundary);
   }
 
-  void _deleteEmptySoloSessionInBatch(Session session, WriteBatch batch) {
-    if (!session.isSoloSession) return;
-    invariant(
-      session.drinks.length == 1,
-      'solo session must contain only single drink',
-    );
-
-    sessionController.deleteSingleInBatch(session, batch);
+  void _removeDrinkFromSessionInBatch(
+    Session session,
+    Drink drink,
+    WriteBatch batch,
+  ) {
+    if (session.isSoloSession) {
+      invariant(
+        session.drinks.length == 1,
+        'solo session must contain only single drink',
+      );
+      sessionController.deleteSingleInBatch(session, batch);
+    } else {
+      sessionController.removeDrinkInBatch(session.id, drink, batch);
+    }
   }
 }
