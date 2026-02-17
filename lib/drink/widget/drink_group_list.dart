@@ -30,10 +30,7 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
     return AsyncBuilder(
       stream: _sessionService.mySessionsForSelectedDateStream,
       builder: (context, sessions) {
-        final hasContent = sessions.any((s) => s.drinks.isNotEmpty);
-        if (!hasContent) {
-          return Expanded(child: _buildEmptyState(context));
-        }
+        final drinkConsumedToday = sessions.any((s) => s.drinks.isNotEmpty);
 
         return Expanded(
           child: LayoutBuilder(
@@ -43,11 +40,17 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
                   scrollController: _scrollController,
                   child: SingleChildScrollView(
                     controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 4,
                     ),
-                    child: _buildContent(sessions, constraints.maxHeight),
+                    child: Column(
+                      children: [
+                        _buildContent(sessions, constraints.maxHeight),
+                        if (!drinkConsumedToday) _buildEmptyState(context),
+                      ],
+                    ),
                   ),
                 ),
               );
