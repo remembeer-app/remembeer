@@ -6,7 +6,6 @@ import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/drink/constants.dart';
-import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/model/drink_create.dart';
 import 'package:remembeer/drink/type/drink_with_session_id.dart';
@@ -22,7 +21,6 @@ import 'package:rxdart/rxdart.dart';
 class DrinkService {
   final AuthService authService;
   final UserSettingsController userSettingsController;
-  final DrinkController drinkController;
   final UserController userController;
   final SessionController sessionController;
   final DateService dateService;
@@ -33,7 +31,6 @@ class DrinkService {
   DrinkService({
     required this.authService,
     required this.userSettingsController,
-    required this.drinkController,
     required this.userController,
     required this.sessionController,
     required this.dateService,
@@ -249,7 +246,7 @@ class DrinkService {
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
     final session = await sessionController.findById(sessionId);
-    final batch = drinkController.batch;
+    final batch = sessionController.batch;
 
     _removeDrinkFromSessionInBatch(session, drink, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
