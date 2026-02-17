@@ -33,6 +33,7 @@ class UpdateDrinkPage extends StatelessWidget {
               volumeInMilliliters: volumeInMilliliters,
               location: location,
             ),
+            sessionId: drinkWithSessionId.originalSessionId,
           );
           if (context.mounted) {
             Navigator.of(context).pop();

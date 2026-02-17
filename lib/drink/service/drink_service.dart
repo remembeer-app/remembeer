@@ -153,18 +153,17 @@ class DrinkService {
   Future<void> updateDrink({
     required Drink oldDrink,
     required Drink newDrink,
+    required String sessionId,
   }) async {
-    var drinkToUpdate = newDrink;
-
     final oldEffectiveDate = await _effectiveDate(oldDrink.consumedAt);
     final oldAfter6pm = _calculateIsAfter6pm(
       oldDrink.consumedAt,
       oldEffectiveDate,
     );
 
-    final newEffectiveDate = await _effectiveDate(drinkToUpdate.consumedAt);
+    final newEffectiveDate = await _effectiveDate(newDrink.consumedAt);
     final newAfter6pm = _calculateIsAfter6pm(
-      drinkToUpdate.consumedAt,
+      newDrink.consumedAt,
       newEffectiveDate,
     );
 
@@ -177,12 +176,12 @@ class DrinkService {
       alcoholPercentage: oldDrink.drinkType.alcoholPercentage,
     );
     final newBeers = _beersEquivalent(
-      category: drinkToUpdate.drinkType.category,
-      volumeInMilliliters: drinkToUpdate.volumeInMilliliters,
+      category: newDrink.drinkType.category,
+      volumeInMilliliters: newDrink.volumeInMilliliters,
     );
     final newAlcohol = _alcoholMl(
-      volumeInMilliliters: drinkToUpdate.volumeInMilliliters,
-      alcoholPercentage: drinkToUpdate.drinkType.alcoholPercentage,
+      volumeInMilliliters: newDrink.volumeInMilliliters,
+      alcoholPercentage: newDrink.drinkType.alcoholPercentage,
     );
 
     var user = await userController.currentUser;
@@ -208,25 +207,17 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, newEffectiveDate);
 
-    if (drinkToUpdate.sessionId != null) {
-      final session = await sessionController.findById(
-        drinkToUpdate.sessionId!,
-      );
+    final session = await sessionController.findById(sessionId);
+    final batch = sessionController.batch;
 
-      final consumedAt = drinkToUpdate.consumedAt;
-      final sessionStart = session.startedAt;
-      final sessionEnd = session.endedAt;
-
-      final isBeforeStart = consumedAt.isBefore(sessionStart);
-      final isAfterEnd = sessionEnd != null && consumedAt.isAfter(sessionEnd);
-
-      if (isBeforeStart || isAfterEnd) {
-        drinkToUpdate = drinkToUpdate.copyWith(sessionId: null);
-      }
+    // We need to use the arrayRemove and arrayUnion operations, as there is nothing like arrayUpdate
+    _removeDrinkFromSessionInBatch(session, oldDrink, batch);
+    if (session.isSoloSession || !session.isActiveAt(newDrink.consumedAt)) {
+      sessionController.createSoloSessionWithDrinkInBatch(newDrink, batch);
+    } else {
+      sessionController.addDrinkInBatch(sessionId, newDrink, batch);
     }
 
-    final batch = drinkController.batch;
-    drinkController.updateSingleInBatch(drinkToUpdate, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
     await batch.commit();
   }
