@@ -49,7 +49,10 @@ class DrinkService {
         );
 
         return session.drinks
-            .where((drink) => drink.userId == authService.authenticatedUser.uid)
+            .where(
+              (drink) =>
+                  drink.consumedByUserId == authService.authenticatedUser.uid,
+            )
             .where((drink) => drink.consumedAt.isAfter(startTime))
             .where((drink) => !drink.consumedAt.isAfter(endTime))
             .map((drink) => (originalSessionId: session.id, drink: drink))
@@ -103,14 +106,10 @@ class DrinkService {
 
     final drinkId = sessionController.generateId();
     final userId = authService.authenticatedUser.uid;
-    final now = DateTime.now();
 
-    // TODO(metju-ac): Refactor to use server timestamps
     final drink = Drink(
       id: drinkId,
-      userId: userId,
-      createdAt: now,
-      updatedAt: now,
+      consumedByUserId: userId,
       consumedAt: drinkCreate.consumedAt,
       drinkType: drinkCreate.drinkType,
       volumeInMilliliters: drinkCreate.volumeInMilliliters,
