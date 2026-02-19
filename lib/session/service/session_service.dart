@@ -83,12 +83,33 @@ class SessionService {
     DateTime? startedAt,
     DateTime? endedAt,
   }) async {
-    final updatedSession = session.copyWith(
-      name: name ?? session.name,
-      startedAt: startedAt ?? session.startedAt,
-      endedAt: endedAt ?? session.endedAt,
+    final newName = name ?? session.name;
+    final newStartedAt = startedAt ?? session.startedAt;
+    final newEndedAt = endedAt ?? session.endedAt;
+
+    final displacedDrinks = session.drinks.where((drink) {
+      final beforeStart = !drink.consumedAt.isAfter(newStartedAt);
+      final afterEnd =
+          newEndedAt != null && !drink.consumedAt.isBefore(newEndedAt);
+      return beforeStart || afterEnd;
+    }).toList();
+
+    final batch = sessionController.batch;
+
+    sessionController.updateSessionFieldsInBatch(
+      batch: batch,
+      sessionId: session.id,
+      name: newName,
+      startedAt: newStartedAt,
+      endedAt: newEndedAt,
+      drinksToRemove: displacedDrinks,
     );
-    await sessionController.updateSingle(updatedSession);
+
+    for (final drink in displacedDrinks) {
+      sessionController.createSoloSessionWithDrinkInBatch(drink, batch);
+    }
+
+    await batch.commit();
   }
 
   Future<void> markSessionAsDone({

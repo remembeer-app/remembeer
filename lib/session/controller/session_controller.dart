@@ -61,4 +61,23 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
+
+  void updateSessionFieldsInBatch({
+    required WriteBatch batch,
+    required String sessionId,
+    required String name,
+    required DateTime startedAt,
+    required List<Drink> drinksToRemove,
+    DateTime? endedAt,
+  }) {
+    final displacedJson = drinksToRemove.map((d) => d.toJson()).toList();
+
+    batch.update(writeCollection.doc(sessionId), {
+      'name': name,
+      'startedAt': startedAt.toIso8601String(),
+      'endedAt': endedAt?.toIso8601String(),
+      'drinks': FieldValue.arrayRemove(displacedJson),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
 }
