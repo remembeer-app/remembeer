@@ -51,7 +51,7 @@ dependencies:
   image_cropper: ^11.0.0
   image_picker: ^1.2.1
   intl: ^0.20.2
-  json_annotation: ^4.10.0
+  json_annotation: ^4.11.0
   latlong2: ^0.9.1
   # TODO(ohtenkay): watch this dependency for upgrades, master is needed now to work with go_router_18
   persistent_bottom_nav_bar_v2:
