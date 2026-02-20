@@ -4,32 +4,55 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink/service/drink_list_service.dart';
-import 'package:remembeer/drink/type/drink_list_data.dart';
+import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
+import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/session/widget/summary_card.dart';
+import 'package:rxdart/rxdart.dart';
+
+typedef _SessionWithDrinks = ({Session session, List<Drink> drinks});
 
 class SummaryPage extends StatelessWidget {
   SummaryPage({super.key});
 
-  final _drinkListService = get<DrinkListService>();
+  final _sessionService = get<SessionService>();
+  final _drinkService = get<DrinkService>();
+
+  Stream<List<_SessionWithDrinks>> get _sessionsWithFilteredDrinksStream {
+    return _sessionService.mySessionsForSelectedDateStream.switchMap((
+      sessions,
+    ) {
+      if (sessions.isEmpty) {
+        return Stream.value(<_SessionWithDrinks>[]);
+      }
+
+      final streams = sessions.map(
+        (session) => _drinkService
+            .drinksToShowFromSessions(session)
+            .map((drinks) => (session: session, drinks: drinks)),
+      );
+
+      return Rx.combineLatestList(streams);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Summary'),
-      child: AsyncBuilder<DrinkListData>(
-        stream: _drinkListService.drinkListDataStream,
-        builder: (context, data) {
-          if (data.drinks.isEmpty) {
+      child: AsyncBuilder<List<_SessionWithDrinks>>(
+        stream: _sessionsWithFilteredDrinksStream,
+        builder: (context, sessionsWithDrinks) {
+          final allDrinks = sessionsWithDrinks.expand((s) => s.drinks).toList();
+          if (allDrinks.isEmpty) {
             return _buildEmptyState(context);
           }
 
           return SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: _buildSections(data),
+              children: _buildSections(sessionsWithDrinks),
             ),
           );
         },
@@ -73,23 +96,33 @@ class SummaryPage extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildSections(DrinkListData data) {
+  List<Widget> _buildSections(List<_SessionWithDrinks> sessionsWithDrinks) {
     final sections = <Widget>[];
 
-    final drinksBySessionId = _groupDrinksBySessionId(data.drinks);
+    // Separate shared sessions from solo sessions
+    final sharedSessions = <_SessionWithDrinks>[];
+    final soloDrinks = <Drink>[];
 
-    for (final session in data.sessions) {
-      final sessionDrinks = drinksBySessionId[session.id] ?? [];
-      if (sessionDrinks.isNotEmpty) {
+    for (final entry in sessionsWithDrinks) {
+      if (entry.session.isSoloSession) {
+        soloDrinks.addAll(entry.drinks);
+      } else {
+        sharedSessions.add(entry);
+      }
+    }
+
+    // Build sections for shared sessions
+    for (final entry in sharedSessions) {
+      if (entry.drinks.isNotEmpty) {
         sections
-          ..add(_buildSessionSection(session, sessionDrinks))
+          ..add(_buildSessionSection(entry.session, entry.drinks))
           ..add(const Gap(16));
       }
     }
 
-    final drinksWithoutSession = drinksBySessionId[null] ?? [];
-    if (drinksWithoutSession.isNotEmpty) {
-      final noSessionGroups = _splitByTimeGap(drinksWithoutSession);
+    // Build sections for solo drinks (grouped by time gap)
+    if (soloDrinks.isNotEmpty) {
+      final noSessionGroups = _splitByTimeGap(soloDrinks);
       for (final group in noSessionGroups) {
         sections
           ..add(_buildNoSessionSection(group))
@@ -102,14 +135,6 @@ class SummaryPage extends StatelessWidget {
     }
 
     return sections;
-  }
-
-  Map<String?, List<Drink>> _groupDrinksBySessionId(List<Drink> drinks) {
-    final map = <String?, List<Drink>>{};
-    for (final drink in drinks) {
-      map.putIfAbsent(drink.sessionId, () => []).add(drink);
-    }
-    return map;
   }
 
   List<List<Drink>> _splitByTimeGap(List<Drink> drinks) {
