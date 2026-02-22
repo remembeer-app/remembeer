@@ -131,7 +131,13 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
     }
 
     // For shared session, check if drink time fits within session bounds
+    // and that the session is not full
     final session = widget.sessions.first;
+
+    if (!session.hasFreeSpace) {
+      return false;
+    }
+
     final drink = dragData.drink;
 
     final isAfterStart = drink.consumedAt.isAfter(session.startedAt);

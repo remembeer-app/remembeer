@@ -135,10 +135,19 @@ class DrinkService {
 
     final batch = sessionController.batch;
 
-    if (activeSessions.length == 1) {
+    final canAddToExisting =
+        activeSessions.length == 1 && activeSessions.single.hasFreeSpace;
+
+    if (canAddToExisting) {
       sessionController.addDrinkInBatch(activeSessions.single.id, drink, batch);
     } else {
       sessionController.createSoloSessionWithDrinkInBatch(drink, batch);
+
+      if (activeSessions.length == 1) {
+        showNotification(
+          'Session "${activeSessions.single.name}" is full. Drink was added outside of session.',
+        );
+      }
     }
 
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
@@ -328,7 +337,7 @@ class DrinkService {
   ) {
     if (session.isSoloSession) {
       invariant(
-        session.drinks.length == 1,
+        session.drinksCount == 1,
         'solo session must contain only single drink',
       );
       sessionController.deleteSingleInBatch(session, batch);

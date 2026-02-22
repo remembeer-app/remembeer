@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/converter/timestamp_converter.dart';
 import 'package:remembeer/common/model/entity_with_members.dart';
 import 'package:remembeer/drink/model/drink.dart';
+import 'package:remembeer/session/constants.dart';
 
 part 'session.freezed.dart';
 
@@ -30,6 +31,10 @@ abstract class Session with _$Session implements EntityWithMembers {
 
   factory Session.fromJson(Map<String, dynamic> json) =>
       _$SessionFromJson(json);
+
+  int get drinksCount => drinks.length;
+
+  bool get hasFreeSpace => drinksCount < maxSessionDrinks;
 
   bool isActiveAt(DateTime at) {
     final hasStarted = startedAt.isBefore(at);
