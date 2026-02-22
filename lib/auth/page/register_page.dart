@@ -49,27 +49,29 @@ class _RegisterPageState extends State<RegisterPage> {
         errorMapper: (e) => e is FirebaseAuthException
             ? mapFirebaseAuthError(e.code)
             : e.toString(),
-        builder: (form) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _buildEmailField(form),
-            const Gap(16),
-            _buildUsernameField(form),
-            const Gap(16),
-            _buildPasswordField(form),
-            const Gap(8),
-            PasswordRequirements(password: _passwordController.text),
-            const Gap(16),
-            _buildConfirmPasswordField(form),
-            form.buildErrorMessage(),
-            const Gap(24),
-            form.buildSubmitButton(
-              text: 'Create Account',
-              onSubmit: () => _register(context),
-            ),
-            const Gap(16),
-            _buildLoginLink(context, form),
-          ],
+        builder: (form) => SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildEmailField(form),
+              const Gap(16),
+              _buildUsernameField(form),
+              const Gap(16),
+              _buildPasswordField(form),
+              const Gap(8),
+              PasswordRequirements(password: _passwordController.text),
+              const Gap(16),
+              _buildConfirmPasswordField(form),
+              form.buildErrorMessage(),
+              const Gap(24),
+              form.buildSubmitButton(
+                text: 'Create Account',
+                onSubmit: () => _register(context),
+              ),
+              const Gap(16),
+              _buildLoginLink(context, form),
+            ],
+          ),
         ),
       ),
     );
