@@ -1100,10 +1100,10 @@ packages:
     description:
       path: "."
       ref: master
-      resolved-ref: "4e2c97b9cc91a9aa5e50740e5fa860a10197bcb6"
+      resolved-ref: "92d1e253a15333c519bb012fbad27c43ccb3537b"
       url: "https://github.com/jb3rndt/PersistentBottomNavBarV2.git"
     source: git
-    version: "6.2.0"
+    version: "6.3.0"
   petitparser:
     dependency: transitive
     description:
