@@ -3,11 +3,10 @@ import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drag_auto_scroller.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
-import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink/service/drink_list_service.dart';
-import 'package:remembeer/drink/type/drink_list_data.dart';
 import 'package:remembeer/drink/widget/drink_group_section.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/session/model/session.dart';
+import 'package:remembeer/session/service/session_service.dart';
 
 class DrinkGroupList extends StatefulWidget {
   const DrinkGroupList({super.key});
@@ -17,7 +16,7 @@ class DrinkGroupList extends StatefulWidget {
 }
 
 class _DrinkGroupListState extends State<DrinkGroupList> {
-  final _drinkListService = get<DrinkListService>();
+  final _sessionService = get<SessionService>();
   final _scrollController = ScrollController();
 
   @override
@@ -29,11 +28,9 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
   @override
   Widget build(BuildContext context) {
     return AsyncBuilder(
-      stream: _drinkListService.drinkListDataStream,
-      builder: (context, data) {
-        if (data.drinks.isEmpty && data.sessions.isEmpty) {
-          return Expanded(child: _buildEmptyState(context));
-        }
+      stream: _sessionService.mySessionsForSelectedDateStream,
+      builder: (context, sessions) {
+        final drinkConsumedToday = sessions.any((s) => s.drinks.isNotEmpty);
 
         return Expanded(
           child: LayoutBuilder(
@@ -43,11 +40,17 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
                   scrollController: _scrollController,
                   child: SingleChildScrollView(
                     controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
                       vertical: 4,
                     ),
-                    child: _buildContent(data, constraints.maxHeight),
+                    child: Column(
+                      children: [
+                        _buildContent(sessions, constraints.maxHeight),
+                        if (!drinkConsumedToday) _buildEmptyState(context),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -58,29 +61,32 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
     );
   }
 
-  Widget _buildContent(DrinkListData data, double viewportHeight) {
-    final drinksBySessionId = <String?, List<Drink>>{};
-    for (final drink in data.drinks) {
-      drinksBySessionId.putIfAbsent(drink.sessionId, () => []).add(drink);
+  Widget _buildContent(List<Session> sessions, double viewportHeight) {
+    final sharedSessions = <Session>[];
+    final soloSessions = <Session>[];
+
+    for (final session in sessions) {
+      if (session.isSoloSession) {
+        soloSessions.add(session);
+      } else {
+        sharedSessions.add(session);
+      }
     }
 
     final sessionSections = <Widget>[];
-    for (final session in data.sessions) {
-      final sessionDrinks = drinksBySessionId[session.id] ?? [];
+    for (final session in sharedSessions) {
       sessionSections.add(
-        DrinkGroupSection(session: session, drinks: sessionDrinks),
+        DrinkGroupSection(isSharedSession: true, sessions: [session]),
       );
     }
-
-    final drinksWithoutSession = drinksBySessionId[null] ?? [];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ...sessionSections,
         DrinkGroupSection(
-          session: null,
-          drinks: drinksWithoutSession,
+          isSharedSession: false,
+          sessions: soloSessions,
           minHeight: viewportHeight / 2,
         ),
       ],

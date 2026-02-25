@@ -73,6 +73,7 @@ class SessionService {
         name: name,
         startedAt: startedAt,
         memberIds: {currentUserId},
+        isSoloSession: false,
       ),
     );
   }

@@ -97,15 +97,6 @@ service cloud.firestore {
         && ownershipUnchanged();
     }
 
-    match /drinks/{id} {
-      allow read: if isSignedIn();
-
-      allow create: if isOwnerCreate();
-
-      allow update: if isOwner(resource.data)
-        && ownershipUnchanged();
-    }
-
     match /friend_requests/{id} {
       allow read: if isSignedIn()
         && (resource.data.userId == uid() || resource.data.toUserId == uid());
@@ -139,13 +130,13 @@ service cloud.firestore {
     match /sessions/{id} {
       allow read: if isSignedIn();
 
-      allow create: if true;
+      allow create: if isOwnerCreate();
 
       allow update: if ownershipUnchanged()
         && (
           isOwner(resource.data)
           || (isSignedIn() && isMember() && notBanned()
-              && onlyUpdatingFields(["memberIds", "updatedAt"]))
+              && onlyUpdatingFields(["memberIds", "drinks", "updatedAt"]))
         );
     }
 

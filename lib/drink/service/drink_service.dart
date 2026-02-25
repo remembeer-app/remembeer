@@ -1,24 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/drink/constants.dart';
-import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/model/drink_create.dart';
+import 'package:remembeer/drink/type/drink_with_session_id.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
+import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/service/user_stats_service.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
-import 'package:remembeer/user_settings/model/drink_list_sort.dart';
 import 'package:rxdart/rxdart.dart';
 
 class DrinkService {
+  final AuthService authService;
   final UserSettingsController userSettingsController;
-  final DrinkController drinkController;
   final UserController userController;
   final SessionController sessionController;
   final DateService dateService;
@@ -27,8 +29,8 @@ class DrinkService {
   final BadgeService badgeService;
 
   DrinkService({
+    required this.authService,
     required this.userSettingsController,
-    required this.drinkController,
     required this.userController,
     required this.sessionController,
     required this.dateService,
@@ -37,64 +39,86 @@ class DrinkService {
     required this.badgeService,
   });
 
-  Stream<List<Drink>> get drinksForSelectedDateStream {
-    return Rx.combineLatest4(
-      drinkController.entitiesStreamForCurrentUser,
+  Stream<List<DrinkWithSessionId>> _drinksToShowFromSession(Session session) {
+    return Rx.combineLatest2(
       dateService.selectedDateStateStream,
-      userSettingsController.currentUserSettingsStream,
       userController.currentUserStream,
-      (drinks, _, userSettings, user) {
-        final drinkListSort = userSettings.drinkListSortOrder;
+      (_, user) {
         final (startTime, endTime) = dateService.selectedDateBoundaries(
           user.endOfDayBoundary,
         );
 
-        final filtered = drinks
+        return session.drinks
             .where(
               (drink) =>
-                  drink.consumedAt.isAfter(startTime) &&
-                  drink.consumedAt.isBefore(endTime),
+                  drink.consumedByUserId == authService.authenticatedUser.uid,
             )
+            .where((drink) => drink.consumedAt.isAfter(startTime))
+            .where((drink) => !drink.consumedAt.isAfter(endTime))
+            .map((drink) => (originalSessionId: session.id, drink: drink))
             .toList();
-
-        switch (drinkListSort) {
-          case DrinkListSortOrder.descending:
-            filtered.sort((a, b) => b.consumedAt.compareTo(a.consumedAt));
-          case DrinkListSortOrder.ascending:
-            filtered.sort((a, b) => a.consumedAt.compareTo(b.consumedAt));
-        }
-
-        return filtered;
       },
     );
   }
 
-  Future<void> createDrink(DrinkCreate drinkCreate) async {
-    var drinkToCreate = drinkCreate;
+  /// Returns current users' drinks consumed on currently selected day
+  /// with respect to custom end of day boundary
+  Stream<List<DrinkWithSessionId>> drinksWithIdToShowFromSessions(
+    List<Session> sessions,
+  ) {
+    if (sessions.isEmpty) {
+      return Stream.value([]);
+    }
+    return Rx.combineLatest(
+      sessions.map(_drinksToShowFromSession),
+      (drinksInSessions) => drinksInSessions.expand((i) => i).toList(),
+    );
+  }
 
-    final effectiveDate = await _effectiveDate(drinkToCreate.consumedAt);
+  /// Returns current users' drinks consumed on currently selected day
+  /// with respect to custom end of day boundary
+  Stream<List<Drink>> drinksToShowFromSessions(Session session) {
+    return _drinksToShowFromSession(
+      session,
+    ).map((items) => items.map((item) => item.drink).toList());
+  }
+
+  /// Creates a new drink.
+  ///
+  /// If exactly one session is active at the drink's consumedAt time,
+  /// the drink is added to that session. Otherwise, a new solo session
+  /// is created for the drink.
+  Future<void> createDrink(DrinkCreate drinkCreate) async {
+    final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
     final after6pm = _calculateIsAfter6pm(
-      drinkToCreate.consumedAt,
+      drinkCreate.consumedAt,
       effectiveDate,
     );
 
     final beers = _beersEquivalent(
-      category: drinkToCreate.drinkType.category,
-      volumeInMilliliters: drinkToCreate.volumeInMilliliters,
+      category: drinkCreate.drinkType.category,
+      volumeInMilliliters: drinkCreate.volumeInMilliliters,
     );
     final alcohol = _alcoholMl(
-      volumeInMilliliters: drinkToCreate.volumeInMilliliters,
-      alcoholPercentage: drinkToCreate.drinkType.alcoholPercentage,
+      volumeInMilliliters: drinkCreate.volumeInMilliliters,
+      alcoholPercentage: drinkCreate.drinkType.alcoholPercentage,
+    );
+
+    final drinkId = sessionController.generateId();
+    final userId = authService.authenticatedUser.uid;
+
+    final drink = Drink(
+      id: drinkId,
+      consumedByUserId: userId,
+      consumedAt: drinkCreate.consumedAt,
+      drinkType: drinkCreate.drinkType,
+      volumeInMilliliters: drinkCreate.volumeInMilliliters,
+      location: drinkCreate.location,
     );
 
     final activeSessions = await sessionController.sessionsActiveAt(
-      drinkToCreate.consumedAt,
+      drinkCreate.consumedAt,
     );
-    if (activeSessions.length == 1) {
-      drinkToCreate = drinkToCreate.copyWith(
-        sessionId: activeSessions.single.id,
-      );
-    }
 
     var user = await userController.currentUser;
     user = user.addDrink(
@@ -109,27 +133,33 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
-    final batch = drinkController.batch;
-    drinkController.createSingleInBatch(drinkToCreate, batch);
+    final batch = sessionController.batch;
+
+    if (activeSessions.length == 1) {
+      sessionController.addDrinkInBatch(activeSessions.single.id, drink, batch);
+    } else {
+      sessionController.createSoloSessionWithDrinkInBatch(drink, batch);
+    }
+
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
+
     await batch.commit();
   }
 
   Future<void> updateDrink({
     required Drink oldDrink,
     required Drink newDrink,
+    required String sessionId,
   }) async {
-    var drinkToUpdate = newDrink;
-
     final oldEffectiveDate = await _effectiveDate(oldDrink.consumedAt);
     final oldAfter6pm = _calculateIsAfter6pm(
       oldDrink.consumedAt,
       oldEffectiveDate,
     );
 
-    final newEffectiveDate = await _effectiveDate(drinkToUpdate.consumedAt);
+    final newEffectiveDate = await _effectiveDate(newDrink.consumedAt);
     final newAfter6pm = _calculateIsAfter6pm(
-      drinkToUpdate.consumedAt,
+      newDrink.consumedAt,
       newEffectiveDate,
     );
 
@@ -142,12 +172,12 @@ class DrinkService {
       alcoholPercentage: oldDrink.drinkType.alcoholPercentage,
     );
     final newBeers = _beersEquivalent(
-      category: drinkToUpdate.drinkType.category,
-      volumeInMilliliters: drinkToUpdate.volumeInMilliliters,
+      category: newDrink.drinkType.category,
+      volumeInMilliliters: newDrink.volumeInMilliliters,
     );
     final newAlcohol = _alcoholMl(
-      volumeInMilliliters: drinkToUpdate.volumeInMilliliters,
-      alcoholPercentage: drinkToUpdate.drinkType.alcoholPercentage,
+      volumeInMilliliters: newDrink.volumeInMilliliters,
+      alcoholPercentage: newDrink.drinkType.alcoholPercentage,
     );
 
     var user = await userController.currentUser;
@@ -173,30 +203,22 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, newEffectiveDate);
 
-    if (drinkToUpdate.sessionId != null) {
-      final session = await sessionController.findById(
-        drinkToUpdate.sessionId!,
-      );
+    final session = await sessionController.findById(sessionId);
+    final batch = sessionController.batch;
 
-      final consumedAt = drinkToUpdate.consumedAt;
-      final sessionStart = session.startedAt;
-      final sessionEnd = session.endedAt;
-
-      final isBeforeStart = consumedAt.isBefore(sessionStart);
-      final isAfterEnd = sessionEnd != null && consumedAt.isAfter(sessionEnd);
-
-      if (isBeforeStart || isAfterEnd) {
-        drinkToUpdate = drinkToUpdate.copyWith(sessionId: null);
-      }
+    // We need to use the arrayRemove and arrayUnion operations, as there is nothing like arrayUpdate
+    _removeDrinkFromSessionInBatch(session, oldDrink, batch);
+    if (session.isSoloSession || !session.isActiveAt(newDrink.consumedAt)) {
+      sessionController.createSoloSessionWithDrinkInBatch(newDrink, batch);
+    } else {
+      sessionController.addDrinkInBatch(sessionId, newDrink, batch);
     }
 
-    final batch = drinkController.batch;
-    drinkController.updateSingleInBatch(drinkToUpdate, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
     await batch.commit();
   }
 
-  Future<void> deleteDrink(Drink drink) async {
+  Future<void> deleteDrink(String sessionId, Drink drink) async {
     final effectiveDate = await _effectiveDate(drink.consumedAt);
     final after6pm = _calculateIsAfter6pm(drink.consumedAt, effectiveDate);
 
@@ -222,9 +244,12 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
-    final batch = drinkController.batch;
-    drinkController.deleteSingleInBatch(drink, batch);
+    final session = await sessionController.findById(sessionId);
+    final batch = sessionController.batch;
+
+    _removeDrinkFromSessionInBatch(session, drink, batch);
     userController.createOrUpdateUserInBatch(user: user, batch: batch);
+
     await batch.commit();
   }
 
@@ -246,10 +271,22 @@ class DrinkService {
     showSuccessNotification('Default drink added!');
   }
 
-  Future<void> updateDrinkSession(Drink drink, String? sessionId) async {
-    if (drink.sessionId == sessionId) return;
-    final updatedDrink = drink.copyWith(sessionId: sessionId);
-    await drinkController.updateSingle(updatedDrink);
+  Future<void> moveDrinkBetweenSessions({
+    required Drink drink,
+    required String fromSessionId,
+    String? toSessionId,
+  }) async {
+    final fromSession = await sessionController.findById(fromSessionId);
+    final batch = sessionController.batch;
+
+    _removeDrinkFromSessionInBatch(fromSession, drink, batch);
+    if (toSessionId != null) {
+      sessionController.addDrinkInBatch(toSessionId, drink, batch);
+    } else {
+      sessionController.createSoloSessionWithDrinkInBatch(drink, batch);
+    }
+
+    await batch.commit();
   }
 
   double _beersEquivalent({
@@ -282,5 +319,21 @@ class DrinkService {
     final endOfDayBoundary = user.endOfDayBoundary;
 
     return effectiveDate(consumedAt, endOfDayBoundary);
+  }
+
+  void _removeDrinkFromSessionInBatch(
+    Session session,
+    Drink drink,
+    WriteBatch batch,
+  ) {
+    if (session.isSoloSession) {
+      invariant(
+        session.drinks.length == 1,
+        'solo session must contain only single drink',
+      );
+      sessionController.deleteSingleInBatch(session, batch);
+    } else {
+      sessionController.removeDrinkInBatch(session.id, drink, batch);
+    }
   }
 }
