@@ -21,7 +21,7 @@ _SessionCreate _$SessionCreateFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toSet() ??
           const {},
-      isSoloSession: json['isSoloSession'] as bool? ?? false,
+      isSoloSession: json['isSoloSession'] as bool? ?? true,
       drinks:
           (json['drinks'] as List<dynamic>?)
               ?.map((e) => Drink.fromJson(e as Map<String, dynamic>))

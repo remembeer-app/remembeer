@@ -42,7 +42,6 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
       startedAt: drink.consumedAt,
       endedAt: drink.consumedAt,
       memberIds: {userId},
-      isSoloSession: true,
       drinks: [drink],
     );
 

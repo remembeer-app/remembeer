@@ -215,7 +215,7 @@ return $default(_that.name,_that.startedAt,_that.endedAt,_that.memberIds,_that.b
 @JsonSerializable()
 
 class _SessionCreate implements SessionCreate {
-  const _SessionCreate({required this.name, required this.startedAt, this.endedAt, required final  Set<String> memberIds, final  Set<String> bannedMemberIds = const {}, this.isSoloSession = false, final  List<Drink> drinks = const []}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds,_drinks = drinks;
+  const _SessionCreate({required this.name, required this.startedAt, this.endedAt, required final  Set<String> memberIds, final  Set<String> bannedMemberIds = const {}, this.isSoloSession = true, final  List<Drink> drinks = const []}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds,_drinks = drinks;
   factory _SessionCreate.fromJson(Map<String, dynamic> json) => _$SessionCreateFromJson(json);
 
 @override final  String name;
