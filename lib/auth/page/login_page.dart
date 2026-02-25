@@ -48,19 +48,21 @@ class _LoginPageState extends State<LoginPage> {
         errorMapper: (e) => e is FirebaseAuthException
             ? mapFirebaseAuthError(e.code)
             : e.toString(),
-        builder: (form) => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildHeader(theme),
-            const Gap(48),
-            _buildFormContent(context, form),
-            const Gap(24),
-            _buildDivider(theme),
-            const Gap(24),
-            _buildGoogleSignIn(form),
-            const Gap(16),
-            _buildRegisterLink(context, form),
-          ],
+        builder: (form) => SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildHeader(theme),
+              const Gap(48),
+              _buildFormContent(context, form),
+              const Gap(24),
+              _buildDivider(theme),
+              const Gap(24),
+              _buildGoogleSignIn(form),
+              const Gap(16),
+              _buildRegisterLink(context, form),
+            ],
+          ),
         ),
       ),
     );
