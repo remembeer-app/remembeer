@@ -8,10 +8,9 @@ import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_service.dart';
+import 'package:remembeer/session/type/session_with_drink.dart';
 import 'package:remembeer/session/widget/summary_card.dart';
 import 'package:rxdart/rxdart.dart';
-
-typedef _SessionWithDrinks = ({Session session, List<Drink> drinks});
 
 class SummaryPage extends StatelessWidget {
   SummaryPage({super.key});
@@ -19,12 +18,12 @@ class SummaryPage extends StatelessWidget {
   final _sessionService = get<SessionService>();
   final _drinkService = get<DrinkService>();
 
-  Stream<List<_SessionWithDrinks>> get _sessionsWithFilteredDrinksStream {
+  Stream<List<SessionWithDrinks>> get _sessionsWithFilteredDrinksStream {
     return _sessionService.mySessionsForSelectedDateStream.switchMap((
       sessions,
     ) {
       if (sessions.isEmpty) {
-        return Stream.value(<_SessionWithDrinks>[]);
+        return Stream.value(<SessionWithDrinks>[]);
       }
 
       final streams = sessions.map(
@@ -41,7 +40,7 @@ class SummaryPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Summary'),
-      child: AsyncBuilder<List<_SessionWithDrinks>>(
+      child: AsyncBuilder<List<SessionWithDrinks>>(
         stream: _sessionsWithFilteredDrinksStream,
         builder: (context, sessionsWithDrinks) {
           final allDrinks = sessionsWithDrinks.expand((s) => s.drinks).toList();
@@ -96,11 +95,11 @@ class SummaryPage extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildSections(List<_SessionWithDrinks> sessionsWithDrinks) {
+  List<Widget> _buildSections(List<SessionWithDrinks> sessionsWithDrinks) {
     final sections = <Widget>[];
 
     // Separate shared sessions from solo sessions
-    final sharedSessions = <_SessionWithDrinks>[];
+    final sharedSessions = <SessionWithDrinks>[];
     final soloDrinks = <Drink>[];
 
     for (final entry in sessionsWithDrinks) {
