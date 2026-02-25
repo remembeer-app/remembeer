@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/session/constants.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/page/add_friends_to_session_page.dart';
 import 'package:remembeer/session/page/edit_session_page.dart';
@@ -39,6 +40,15 @@ class SessionDivider extends StatelessWidget {
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
               fontWeight: FontWeight.w500,
+            ),
+          ),
+          const Gap(6),
+          Text(
+            '${session.drinksCount} / $maxSessionDrinks',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: session.drinksCount >= maxSessionDrinks
+                  ? theme.colorScheme.error
+                  : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
           ),
           IconButton(
