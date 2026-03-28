@@ -58,7 +58,7 @@ dependencies:
     git:
       url: https://github.com/jb3rndt/PersistentBottomNavBarV2.git
       ref: master
-    version: 6.3.0
+    version: 6.3.2
   rxdart: ^0.28.0
   toastification: ^3.0.3
 
