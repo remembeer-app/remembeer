@@ -1,0 +1,31 @@
+lib/session/controller/session_controller.dart
+  f09b57298712d3d1 58-114
+lib/activity/constants.dart
+  f09b57298712d3d1 2-7
+lib/activity/page/activity_page.dart
+  f09b57298712d3d1 3,38,41-45,58-74
+lib/activity/service/activity_service.dart
+  f09b57298712d3d1 1,15,21-59,65,86-88
+firestore.indexes.json
+  f09b57298712d3d1 117-143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "2e7dedaaca25e264eec5c49fcd97a18c68d0bbda",
+  "prompts": {
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 159,
+      "overriden_lines": 0
+    }
+  }
+}
