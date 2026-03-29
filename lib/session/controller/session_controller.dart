@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/controller/members_crud_controller.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/drink/model/drink.dart';
+import 'package:remembeer/session/constants.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
+import 'package:rxdart/rxdart.dart';
 
 class SessionController extends MembersCrudController<Session, SessionCreate> {
   SessionController({required super.authService})
@@ -17,6 +19,41 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
             List<Session>.from(sessions)
               ..sort((a, b) => b.startedAt.compareTo(a.startedAt)),
       );
+
+  Stream<List<Session>> sessionsForMemberIdsStream(Set<String> memberIds) {
+    if (memberIds.isEmpty) {
+      return Stream.value([]);
+    }
+
+    final idList = memberIds.toList();
+    const batchSize = arrayContainsFirebaseLimit;
+    final batchStreams = <Stream<List<Session>>>[];
+
+    for (var i = 0; i < idList.length; i += batchSize) {
+      final batch = idList.sublist(i, (i + batchSize).clamp(0, idList.length));
+      batchStreams.add(
+        nonDeletedEntities
+            .where('isSoloSession', isEqualTo: false)
+            .where(memberIdsField, arrayContainsAny: batch)
+            .snapshots()
+            .map(
+              (qs) => List<Session>.unmodifiable(
+                qs.docs.map((d) => d.data()).toList(),
+              ),
+            ),
+      );
+    }
+
+    return Rx.combineLatestList(batchStreams).map((batchResults) {
+      final allSessions = batchResults.expand((list) => list);
+      final uniqueSessions = <String, Session>{};
+
+      for (final s in allSessions) {
+        uniqueSessions[s.id] = s;
+      }
+      return uniqueSessions.values.toList();
+    });
+  }
 
   Future<List<Session>> sessionsActiveAt(DateTime at) =>
       sessionsStreamWhereCurrentUserIsMember.first.then((sessions) {
