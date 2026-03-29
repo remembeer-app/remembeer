@@ -1,0 +1,23 @@
+lib/session/controller/session_controller.dart
+  14cad9110f0d5b2a 8,23-28,30-32,34-47,55-57
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "4112775c2fad69c35edd8dce35c0217bb29e0129",
+  "prompts": {
+    "14cad9110f0d5b2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44032416-e45e-4275-8086-09e20081aa40",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 96,
+      "total_deletions": 1,
+      "accepted_lines": 86,
+      "overriden_lines": 8
+    }
+  }
+}
