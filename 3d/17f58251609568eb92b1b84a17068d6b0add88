@@ -1,0 +1,67 @@
+lib/ioc/ioc_container.dart
+  f09b57298712d3d1 65,79,93,110,118
+lib/activity/page/activity_page.dart
+  f09b57298712d3d1 2,4,8,11,13,34-73
+lib/session/model/session.dart
+  f09b57298712d3d1 7,9,11,15,24,31,34,36-39,41
+AGENTS.md
+  32797e8ec7ef70ee 2,4,6,8,10,14,17,20,24,26,28,30,32,39,41,43,45,47,49,55,57-58,63-78,80,82,84,86,88,90,94,96,111,113,115,117,119,121,127,129,131,133,135,137,141,143-144,150,152
+lib/activity/widget/session_card.dart
+  f09b57298712d3d1 42-43,45,59-60,66,72-73,75,105,107,126-129,147-148,153-156,160-161,163
+lib/drink/service/drink_service.dart
+  f09b57298712d3d1 115,177,182,230
+lib/session/widget/session_divider.dart
+  f09b57298712d3d1 87,89-90
+lib/activity/service/activity_service.dart
+  f09b57298712d3d1 5-6,9,14-15,20,22,38,42-45,47-54,56-58
+lib/drink/model/drink.dart
+  f09b57298712d3d1 6,9,12-13,16,23,25-27
+lib/activity/page/session_detail_page.dart
+  f09b57298712d3d1 1-3,5,7-13,15,17-19,21-50,52-53,68,73,79-80,82,93,99-101,105-109,111-168,170-227,229-334,336,338-340,342-406,427-428
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "3d17f58251609568eb92b1b84a17068d6b0add88",
+  "prompts": {
+    "14cad9110f0d5b2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44032416-e45e-4275-8086-09e20081aa40",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "32797e8ec7ef70ee": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1ce2f4c9-47ee-4395-a4b3-2c024b49c82a",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 17,
+      "total_deletions": 0,
+      "accepted_lines": 63,
+      "overriden_lines": 0
+    },
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 588,
+      "overriden_lines": 0
+    }
+  }
+}
