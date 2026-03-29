@@ -1,0 +1,25 @@
+lib/activity/widget/session_card.dart
+  f09b57298712d3d1 46-47,49,63-64,70,76-77,79,109,111,127-130,134-135,148-149,154-157,161
+lib/session/model/session.dart
+  f09b57298712d3d1 37-39
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "b758bae66fa84fab6664cd1105e7b55ea02f624e",
+  "prompts": {
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 423,
+      "overriden_lines": 0
+    }
+  }
+}
