@@ -1,0 +1,23 @@
+lib/activity/page/activity_page.dart
+  f09b57298712d3d1 2,4,9,13,22-25,27-33,37,40,48-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "211fbdb55787734cf4fb7847c130485b7731c9dd",
+  "prompts": {
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 409,
+      "overriden_lines": 0
+    }
+  }
+}
