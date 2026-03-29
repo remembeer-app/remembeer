@@ -1,0 +1,23 @@
+CLAUDE.md
+  32797e8ec7ef70ee 1-144
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "0ebb1b816bf32f23c9039a4491f8819f2b383214",
+  "prompts": {
+    "32797e8ec7ef70ee": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1ce2f4c9-47ee-4395-a4b3-2c024b49c82a",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 151,
+      "total_deletions": 0,
+      "accepted_lines": 144,
+      "overriden_lines": 0
+    }
+  }
+}
