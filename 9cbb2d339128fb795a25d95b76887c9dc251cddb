@@ -1,0 +1,27 @@
+lib/activity/constants.dart
+  f09b57298712d3d1 5-7
+lib/activity/page/activity_page.dart
+  f09b57298712d3d1 3,38,41-45,58-74
+lib/activity/service/activity_service.dart
+  f09b57298712d3d1 15,21-38,45,50-55,58,86-88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "9cbb2d339128fb795a25d95b76887c9dc251cddb",
+  "prompts": {
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 64,
+      "total_deletions": 11,
+      "accepted_lines": 62,
+      "overriden_lines": 0
+    }
+  }
+}
