@@ -114,7 +114,6 @@ class IoCContainer {
         ActivityService(
           authService: get<AuthService>(),
           sessionController: get<SessionController>(),
-          userService: get<UserService>(),
           userController: get<UserController>(),
         ),
       );

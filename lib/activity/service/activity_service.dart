@@ -4,24 +4,21 @@ import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/service/user_service.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ActivityService {
   final AuthService authService;
   final SessionController sessionController;
-  final UserService userService;
   final UserController userController;
 
   const ActivityService({
     required this.authService,
     required this.sessionController,
-    required this.userService,
     required this.userController,
   });
 
   Stream<List<Session>> get _friendsSessionsStream {
-    return userService.currentUserStream.switchMap((currentUser) {
+    return userController.currentUserStream.switchMap((currentUser) {
       final allIds = {
         ...currentUser.friends,
         authService.authenticatedUser.uid,
