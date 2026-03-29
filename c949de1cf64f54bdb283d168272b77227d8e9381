@@ -1,0 +1,36 @@
+AGENTS.md
+  32797e8ec7ef70ee 63-77
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "c949de1cf64f54bdb283d168272b77227d8e9381",
+  "prompts": {
+    "32797e8ec7ef70ee": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1ce2f4c9-47ee-4395-a4b3-2c024b49c82a",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 15,
+      "total_deletions": 0,
+      "accepted_lines": 15,
+      "overriden_lines": 0
+    },
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 478,
+      "overriden_lines": 0
+    }
+  }
+}
