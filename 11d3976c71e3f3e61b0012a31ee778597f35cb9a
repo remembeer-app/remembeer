@@ -1,0 +1,23 @@
+lib/activity/page/session_detail_page.dart
+  f09b57298712d3d1 1-3,5,8-10,12-13,15-16,18,20,22-24,26-55,57-58,73,79,86-87,99,115-117,121-125,127-184,186-243,245-350,352,354-356,358-422,424
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "11d3976c71e3f3e61b0012a31ee778597f35cb9a",
+  "prompts": {
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 353,
+      "overriden_lines": 0
+    }
+  }
+}
