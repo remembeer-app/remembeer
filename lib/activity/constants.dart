@@ -1,0 +1,1 @@
+const avatarsOnSessionPreview = 5;

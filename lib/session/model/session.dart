@@ -34,6 +34,9 @@ abstract class Session with _$Session implements EntityWithMembers {
 
   int get drinksCount => drinks.length;
 
+  double get totalAlcoholMl =>
+      drinks.fold<double>(0, (total, drink) => total + drink.alcoholMl);
+
   bool get hasFreeSpace => drinksCount < maxSessionDrinks;
 
   bool isActiveAt(DateTime at) {
