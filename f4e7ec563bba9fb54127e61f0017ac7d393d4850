@@ -1,0 +1,56 @@
+firestore.indexes.json
+  14cad9110f0d5b2a 103-106
+  f09b57298712d3d1 116-121
+lib/session/controller/session_controller.dart
+  652a492a9047082b 25,43,61-64
+  f09b57298712d3d1 24,26,42,60
+lib/activity/service/activity_service.dart
+  652a492a9047082b 28,30
+  f09b57298712d3d1 1
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.22",
+  "base_commit_sha": "f4e7ec563bba9fb54127e61f0017ac7d393d4850",
+  "prompts": {
+    "14cad9110f0d5b2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44032416-e45e-4275-8086-09e20081aa40",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 36,
+      "overriden_lines": 0
+    },
+    "652a492a9047082b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5291b286-c400-4d1f-bc4c-2b6f070ed599",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 10,
+      "overriden_lines": 4
+    },
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 46,
+      "overriden_lines": 0
+    }
+  }
+}
