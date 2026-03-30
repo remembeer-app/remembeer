@@ -20,7 +20,10 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
               ..sort((a, b) => b.startedAt.compareTo(a.startedAt)),
       );
 
-  Stream<List<Session>> sessionsForMemberIdsStream(Set<String> memberIds) {
+  Stream<List<Session>> sessionsForMemberIdsStream(
+    Set<String> memberIds, {
+    required int limit,
+  }) {
     if (memberIds.isEmpty) {
       return Stream.value([]);
     }
@@ -35,6 +38,9 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
         nonDeletedEntities
             .where('isSoloSession', isEqualTo: false)
             .where(memberIdsField, arrayContainsAny: batch)
+            .where('endedAt', isNull: false)
+            .orderBy('endedAt', descending: true)
+            .limit(limit)
             .snapshots()
             .map(
               (qs) => List<Session>.unmodifiable(
@@ -45,13 +51,11 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
     }
 
     return Rx.combineLatestList(batchStreams).map((batchResults) {
-      final allSessions = batchResults.expand((list) => list);
-      final uniqueSessions = <String, Session>{};
-
-      for (final s in allSessions) {
-        uniqueSessions[s.id] = s;
-      }
-      return uniqueSessions.values.toList();
+      return ({
+            for (final s in batchResults.expand((list) => list)) s.id: s,
+          }.values.toList()..sort((a, b) => b.endedAt!.compareTo(a.endedAt!)))
+          .take(limit)
+          .toList();
     });
   }
 

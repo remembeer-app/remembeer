@@ -101,6 +101,10 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "memberIds",
+          "arrayConfig": "CONTAINS"
+        },
+        {
           "fieldPath": "deletedAt",
           "order": "ASCENDING"
         },
@@ -109,8 +113,12 @@
           "order": "ASCENDING"
         },
         {
-          "fieldPath": "memberIds",
-          "arrayConfig": "CONTAINS"
+          "fieldPath": "endedAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
         }
       ],
       "density": "SPARSE_ALL"

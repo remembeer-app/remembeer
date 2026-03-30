@@ -1,3 +1,4 @@
+import 'package:remembeer/activity/constants.dart';
 import 'package:remembeer/activity/type/session_with_members.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
@@ -23,13 +24,10 @@ class ActivityService {
         ...currentUser.friends,
         authService.authenticatedUser.uid,
       };
-      return sessionController
-          .sessionsForMemberIdsStream(allIds)
-          .map(
-            (sessions) =>
-                sessions.where((s) => s.endedAt != null).toList()
-                  ..sort((a, b) => b.endedAt!.compareTo(a.endedAt!)),
-          );
+      return sessionController.sessionsForMemberIdsStream(
+        allIds,
+        limit: sessionsFetchLimit,
+      );
     });
   }
 
