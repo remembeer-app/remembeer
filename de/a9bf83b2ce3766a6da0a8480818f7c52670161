@@ -1,0 +1,98 @@
+lib/session/controller/session_controller.dart
+  f09b57298712d3d1 24,26
+  652a492a9047082b 25,43,57-58
+  63c33f91ca0be734 42
+lib/activity/page/activity_page.dart
+  f09b57298712d3d1 2,4,6,9,11,13,18,22-25,27-33,37,40,48-86
+lib/activity/widget/session_card.dart
+  f09b57298712d3d1 46-47,49,63-64,70,76-77,79,109,111,127-130,134-135,148-149,154-157
+AGENTS.md
+  32797e8ec7ef70ee 2,4,6,8,10,14,17,20,24,26,28,30,32,39,41,43,45,47,49,55,57-58,63-78,80,82,84,86,88,90,94,96,111,113,115,117,119,121,127,129,131,133,135,137,141,143-144,150,152
+firestore.indexes.json
+  14cad9110f0d5b2a 103-106
+  f09b57298712d3d1 116-121
+lib/drink/model/drink.dart
+  f09b57298712d3d1 6,9,12-15,18,25-28
+lib/session/model/session.dart
+  f09b57298712d3d1 7,9,11,15,24,31,34,36-42,44
+lib/activity/service/activity_service.dart
+  f09b57298712d3d1 6-9,12-13,17-18,23,25,33,37-40,42-49,51-53
+lib/session/widget/session_divider.dart
+  f09b57298712d3d1 86-87,89-90
+lib/ioc/ioc_container.dart
+  f09b57298712d3d1 65,79,93,110,117-118
+lib/drink/service/drink_service.dart
+  f09b57298712d3d1 111,115,175,177,182,222,230
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.1.23",
+  "base_commit_sha": "dea9bf83b2ce3766a6da0a8480818f7c52670161",
+  "prompts": {
+    "14cad9110f0d5b2a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "44032416-e45e-4275-8086-09e20081aa40",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "32797e8ec7ef70ee": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1ce2f4c9-47ee-4395-a4b3-2c024b49c82a",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 17,
+      "total_deletions": 0,
+      "accepted_lines": 63,
+      "overriden_lines": 0
+    },
+    "63c33f91ca0be734": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c248a427ffezaSEeu7z5BOLvz",
+        "model": "github-copilot/claude-sonnet-4.5"
+      },
+      "human_author": null,
+      "messages": [],
+      "total_additions": 40,
+      "total_deletions": 14,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "652a492a9047082b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5291b286-c400-4d1f-bc4c-2b6f070ed599",
+        "model": "claude-opus-4-6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 4,
+      "overriden_lines": 0
+    },
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 576,
+      "overriden_lines": 0
+    }
+  }
+}
