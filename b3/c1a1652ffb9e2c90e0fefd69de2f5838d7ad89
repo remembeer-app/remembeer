@@ -1,0 +1,21 @@
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "b3c1a1652ffb9e2c90e0fefd69de2f5838d7ad89",
+  "prompts": {
+    "77268c942fa20fd4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2b278cba4ffefCH77K6pmmNgab",
+        "model": "github-copilot/claude-sonnet-4.5"
+      },
+      "human_author": "Matej Klima",
+      "messages": [],
+      "total_additions": 484,
+      "total_deletions": 390,
+      "accepted_lines": 365,
+      "overriden_lines": 0
+    }
+  }
+}
