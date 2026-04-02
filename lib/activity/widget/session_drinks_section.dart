@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/activity/type/session_with_members.dart';
+import 'package:remembeer/activity/model/session_with_members.dart';
 import 'package:remembeer/activity/widget/session_user_drinks_card.dart';
 
 class SessionDrinksSection extends StatelessWidget {

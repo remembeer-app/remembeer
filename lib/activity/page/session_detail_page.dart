@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/activity/type/session_with_members.dart';
+import 'package:remembeer/activity/model/session_with_members.dart';
 import 'package:remembeer/activity/widget/session_drinks_section.dart';
 import 'package:remembeer/activity/widget/session_header_card.dart';
 import 'package:remembeer/activity/widget/session_participants_section.dart';

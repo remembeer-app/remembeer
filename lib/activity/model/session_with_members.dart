@@ -4,7 +4,7 @@ import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
-part '../type/session_with_members.freezed.dart';
+part 'session_with_members.freezed.dart';
 
 @freezed
 abstract class SessionWithMembers with _$SessionWithMembers {

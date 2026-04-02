@@ -1,5 +1,5 @@
 import 'package:remembeer/activity/constants.dart';
-import 'package:remembeer/activity/type/session_with_members.dart';
+import 'package:remembeer/activity/model/session_with_members.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
