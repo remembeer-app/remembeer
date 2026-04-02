@@ -27,12 +27,19 @@ class SessionParticipantsSection extends StatelessWidget {
           ),
         ),
         const Gap(8),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: members.map((member) {
-            return _buildMemberCard(context, member);
-          }).toList(),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 300,
+            mainAxisExtent: 48,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: members.length,
+          itemBuilder: (context, index) {
+            return _buildMemberCard(context, members[index]);
+          },
         ),
       ],
     );
@@ -40,6 +47,8 @@ class SessionParticipantsSection extends StatelessWidget {
 
   Widget _buildMemberCard(BuildContext context, UserModel member) {
     return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute<void>(
@@ -47,17 +56,20 @@ class SessionParticipantsSection extends StatelessWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               UserAvatar(user: member, size: 16),
               const Gap(8),
-              Text(
-                member.username,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+              Expanded(
+                child: Text(
+                  member.username,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
+                ),
               ),
             ],
           ),
