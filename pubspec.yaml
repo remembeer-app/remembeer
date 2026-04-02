@@ -71,7 +71,7 @@ dev_dependencies:
   go_router_builder: ^4.2.0
   interface_generator:
     path: packages/interface_generator
-  json_serializable: ^6.13.0
+  json_serializable: ^6.13.1
   meta: ^1.16.0
 
 # For information on the generic Dart part of this file, see the
