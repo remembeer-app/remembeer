@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/activity/constants.dart';
+import 'package:remembeer/activity/page/session_detail_page.dart';
 import 'package:remembeer/activity/type/session_with_members.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
@@ -25,7 +26,12 @@ class SessionCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => {},
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (context) =>
+                SessionDetailPage(sessionWithMembers: sessionWithMembers),
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
