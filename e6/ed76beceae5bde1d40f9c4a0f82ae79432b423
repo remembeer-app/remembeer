@@ -1,0 +1,25 @@
+lib/activity/type/session_with_members.dart
+  77268c942fa20fd4 3,26,28-40,42-44,46-49
+lib/activity/widget/session_drinks_section.dart
+  77268c942fa20fd4 34,36-37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "e6ed76beceae5bde1d40f9c4a0f82ae79432b423",
+  "prompts": {
+    "77268c942fa20fd4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2b278cba4ffefCH77K6pmmNgab",
+        "model": "github-copilot/claude-sonnet-4.5"
+      },
+      "human_author": "Matej Klima",
+      "messages": [],
+      "total_additions": 45,
+      "total_deletions": 30,
+      "accepted_lines": 27,
+      "overriden_lines": 3
+    }
+  }
+}
