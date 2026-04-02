@@ -1,0 +1,48 @@
+lib/activity/widget/session_drinks_section.dart
+  77268c942fa20fd4 1-18,20-56,62-72
+lib/activity/page/session_detail_page.dart
+  77268c942fa20fd4 4-7,13,33,35,37,39
+lib/activity/widget/session_statistics_card.dart
+  77268c942fa20fd4 1-37,42-43,48-49,54-55,57-58,85-88
+lib/activity/widget/session_header_card.dart
+  77268c942fa20fd4 1-85
+lib/activity/widget/session_drink_item.dart
+  77268c942fa20fd4 1-9,11-34,36-53
+lib/activity/widget/session_participants_section.dart
+  77268c942fa20fd4 1-2,4,6-33,35-37,66-68
+lib/activity/widget/session_user_drinks_card.dart
+  77268c942fa20fd4 1-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.5",
+  "base_commit_sha": "4b6100cca029e3c708cd9c74d25b391e143c532c",
+  "prompts": {
+    "77268c942fa20fd4": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2b278cba4ffefCH77K6pmmNgab",
+        "model": "github-copilot/claude-sonnet-4.5"
+      },
+      "human_author": "Matej Klima",
+      "messages": [],
+      "total_additions": 484,
+      "total_deletions": 390,
+      "accepted_lines": 365,
+      "overriden_lines": 0
+    },
+    "f09b57298712d3d1": {
+      "agent_id": {
+        "tool": "opencode",
+        "id": "ses_2c6fe7b61ffeTIGa3tOMtcX7Lb",
+        "model": "github-copilot/claude-sonnet-4.6"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    }
+  }
+}
