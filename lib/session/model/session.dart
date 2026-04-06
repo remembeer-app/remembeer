@@ -34,7 +34,19 @@ abstract class Session with _$Session implements EntityWithMembers {
 
   int get drinksCount => drinks.length;
 
+  double get totalAlcoholMl =>
+      drinks.fold<double>(0, (total, drink) => total + drink.alcoholMl);
+
   bool get hasFreeSpace => drinksCount < maxSessionDrinks;
+
+  bool get isMultipleDaySession {
+    final startDate = startedAt;
+    final endDate = endedAt ?? DateTime.now();
+
+    return startDate.year != endDate.year ||
+        startDate.month != endDate.month ||
+        startDate.day != endDate.day;
+  }
 
   bool isActiveAt(DateTime at) {
     final hasStarted = startedAt.isBefore(at);

@@ -9,6 +9,8 @@ part 'drink.g.dart';
 
 @freezed
 abstract class Drink with _$Drink implements Document {
+  const Drink._();
+
   const factory Drink({
     required String id,
 
@@ -20,4 +22,7 @@ abstract class Drink with _$Drink implements Document {
   }) = _Drink;
 
   factory Drink.fromJson(Map<String, dynamic> json) => _$DrinkFromJson(json);
+
+  double get alcoholMl =>
+      volumeInMilliliters * drinkType.alcoholPercentage / 100;
 }

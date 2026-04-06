@@ -75,6 +75,7 @@ class ConsumptionSection extends StatelessWidget {
           // Removed specific unit from label since it is now dynamic in the value
           label: 'Alcohol Consumed',
           value: _formatVolume(alcoholConsumed),
+          // TODO(metju-ac): Better icon for alcohol volume
           icon: const DrinkIcon(category: DrinkCategory.wine, size: _iconSize),
         ),
       ],

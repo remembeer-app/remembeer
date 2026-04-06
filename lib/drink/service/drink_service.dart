@@ -99,10 +99,6 @@ class DrinkService {
       category: drinkCreate.drinkType.category,
       volumeInMilliliters: drinkCreate.volumeInMilliliters,
     );
-    final alcohol = _alcoholMl(
-      volumeInMilliliters: drinkCreate.volumeInMilliliters,
-      alcoholPercentage: drinkCreate.drinkType.alcoholPercentage,
-    );
 
     final drinkId = sessionController.generateId();
     final userId = authService.authenticatedUser.uid;
@@ -115,6 +111,8 @@ class DrinkService {
       volumeInMilliliters: drinkCreate.volumeInMilliliters,
       location: drinkCreate.location,
     );
+
+    final alcohol = drink.alcoholMl;
 
     final activeSessions = await sessionController.sessionsActiveAt(
       drinkCreate.consumedAt,
@@ -176,18 +174,12 @@ class DrinkService {
       category: oldDrink.drinkType.category,
       volumeInMilliliters: oldDrink.volumeInMilliliters,
     );
-    final oldAlcohol = _alcoholMl(
-      volumeInMilliliters: oldDrink.volumeInMilliliters,
-      alcoholPercentage: oldDrink.drinkType.alcoholPercentage,
-    );
+    final oldAlcohol = oldDrink.alcoholMl;
     final newBeers = _beersEquivalent(
       category: newDrink.drinkType.category,
       volumeInMilliliters: newDrink.volumeInMilliliters,
     );
-    final newAlcohol = _alcoholMl(
-      volumeInMilliliters: newDrink.volumeInMilliliters,
-      alcoholPercentage: newDrink.drinkType.alcoholPercentage,
-    );
+    final newAlcohol = newDrink.alcoholMl;
 
     var user = await userController.currentUser;
 
@@ -235,10 +227,7 @@ class DrinkService {
       category: drink.drinkType.category,
       volumeInMilliliters: drink.volumeInMilliliters,
     );
-    final alcohol = _alcoholMl(
-      volumeInMilliliters: drink.volumeInMilliliters,
-      alcoholPercentage: drink.drinkType.alcoholPercentage,
-    );
+    final alcohol = drink.alcoholMl;
 
     var user = await userController.currentUser;
     user = user.removeDrink(
@@ -304,13 +293,6 @@ class DrinkService {
   }) {
     if (category != DrinkCategory.beer) return 0;
     return volumeInMilliliters / beerVolumeMl;
-  }
-
-  double _alcoholMl({
-    required int volumeInMilliliters,
-    required double alcoholPercentage,
-  }) {
-    return volumeInMilliliters * alcoholPercentage / 100;
   }
 
   bool _calculateIsAfter6pm(DateTime consumedAt, DateTime effectiveDate) {

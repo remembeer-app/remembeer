@@ -222,8 +222,8 @@ return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType
 /// @nodoc
 @JsonSerializable()
 
-class _Drink implements Drink {
-  const _Drink({required this.id, required this.consumedByUserId, required this.consumedAt, required this.drinkType, required this.volumeInMilliliters, @GeoPointConverter() this.location});
+class _Drink extends Drink {
+  const _Drink({required this.id, required this.consumedByUserId, required this.consumedAt, required this.drinkType, required this.volumeInMilliliters, @GeoPointConverter() this.location}): super._();
   factory _Drink.fromJson(Map<String, dynamic> json) => _$DrinkFromJson(json);
 
 @override final  String id;
