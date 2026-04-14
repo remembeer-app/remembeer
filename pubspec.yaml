@@ -40,7 +40,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^6.0.0
-  flutter_map: ^8.2.2
+  flutter_map: ^8.3.0
   flutter_svg: ^2.2.4
   freezed_annotation: ^3.1.0
   gap: ^3.0.1
