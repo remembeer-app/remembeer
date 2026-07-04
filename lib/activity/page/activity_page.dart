@@ -8,11 +8,43 @@ import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:rxdart/rxdart.dart';
 
-class ActivityPage extends StatelessWidget {
-  ActivityPage({super.key});
+class ActivityPage extends StatefulWidget {
+  const ActivityPage({super.key});
 
+  @override
+  State<ActivityPage> createState() => _ActivityPageState();
+}
+
+class _ActivityPageState extends State<ActivityPage> {
   final _activityService = get<ActivityService>();
   final _userService = get<UserService>();
+  final _scrollController = ScrollController();
+  var _hasMore = false;
+  var _isLoadingMore = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  bool get _isNearBottom {
+    final position = _scrollController.position;
+    return position.pixels >= position.maxScrollExtent - 200;
+  }
+
+  void _onScroll() {
+    if (_hasMore && !_isLoadingMore && _isNearBottom) {
+      _isLoadingMore = true;
+      _activityService.loadMore();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,28 +53,48 @@ class ActivityPage extends StatelessWidget {
         stream: Rx.combineLatest2(
           _activityService.activityFeedStream,
           _userService.currentUserStream,
-          (sessions, user) =>
-              (sessions: sessions, endOfDayBoundary: user.endOfDayBoundary),
+          (feed, user) => (
+            sessions: feed.sessions,
+            hasMore: feed.hasMore,
+            endOfDayBoundary: user.endOfDayBoundary,
+          ),
         ),
         builder: (context, data) {
           final sessions = data.sessions;
           final endOfDayBoundary = data.endOfDayBoundary;
+          _hasMore = data.hasMore;
+          _isLoadingMore = false;
 
           if (sessions.isEmpty) {
             return _buildEmptyState(context);
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: sessions.length,
-            separatorBuilder: (context, index) => const Gap(8),
-            itemBuilder: (context, index) {
-              final sessionWithMembers = sessions[index];
-              return SessionCard(
-                sessionWithMembers: sessionWithMembers,
-                endOfDayBoundary: endOfDayBoundary,
-              );
+          return RefreshIndicator(
+            onRefresh: () async {
+              _activityService.resetLimit();
             },
+            child: ListView.separated(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: sessions.length + (_hasMore ? 1 : 0),
+              separatorBuilder: (context, index) => const Gap(8),
+              itemBuilder: (context, index) {
+                if (index == sessions.length) {
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 16),
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                final sessionWithMembers = sessions[index];
+                return SessionCard(
+                  sessionWithMembers: sessionWithMembers,
+                  endOfDayBoundary: endOfDayBoundary,
+                );
+              },
+            ),
           );
         },
       ),

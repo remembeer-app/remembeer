@@ -12,30 +12,52 @@ class ActivityService {
   final SessionController sessionController;
   final UserController userController;
 
-  const ActivityService({
+  final _limitSubject = BehaviorSubject<int>.seeded(sessionsFetchLimit);
+
+  ActivityService({
     required this.authService,
     required this.sessionController,
     required this.userController,
   });
 
+  void loadMore() {
+    _limitSubject.add(_limitSubject.value + sessionsFetchLimit);
+  }
+
+  void resetLimit() {
+    _limitSubject.add(sessionsFetchLimit);
+  }
+
   Stream<List<Session>> get _friendsSessionsStream {
-    return userController.currentUserStream.switchMap((currentUser) {
+    return Rx.combineLatest2(
+      userController.currentUserStream,
+      _limitSubject,
+      (currentUser, limit) => (currentUser: currentUser, limit: limit),
+    ).switchMap((data) {
+      final currentUser = data.currentUser;
+      final limit = data.limit;
+
       final allIds = {
         ...currentUser.friends,
         authService.authenticatedUser.uid,
       };
-      return sessionController.sessionsForMemberIdsStream(
-        allIds,
-        limit: sessionsFetchLimit,
-      );
+      return sessionController.sessionsForMemberIdsStream(allIds, limit: limit);
     });
   }
 
   // TODO(metju-ac): Add other activity types (e.g. friend requests, badges earned, etc.)
-  Stream<List<SessionWithMembers>> get activityFeedStream {
-    return _friendsSessionsStream.switchMap((sessions) {
+  Stream<({List<SessionWithMembers> sessions, bool hasMore})>
+  get activityFeedStream {
+    return Rx.combineLatest2(
+      _friendsSessionsStream,
+      _limitSubject,
+      (sessions, limit) => (sessions: sessions, limit: limit),
+    ).switchMap((data) {
+      final sessions = data.sessions;
+      final limit = data.limit;
+
       if (sessions.isEmpty) {
-        return Stream.value([]);
+        return Stream.value((sessions: <SessionWithMembers>[], hasMore: false));
       }
 
       final sessionsWithMembers = sessions.map((session) {
@@ -51,7 +73,9 @@ class ActivityService {
         });
       }).toList();
 
-      return Rx.combineLatestList(sessionsWithMembers);
+      return Rx.combineLatestList(
+        sessionsWithMembers,
+      ).map((list) => (sessions: list, hasMore: list.length >= limit));
     });
   }
 }
