@@ -27,7 +27,7 @@ jobs:
       - name: Check build_runner generated files are up to date
         run: |
           dart run build_runner build --delete-conflicting-outputs
-          if [ -n "$(git status --porcelain)" ]; then
+          if [ -n "$(git status --porcelain -- . ':!pubspec.lock')" ]; then
             echo "::error::build_runner generated files are out of date. Please run 'dart run build_runner build' and commit the changes."
             git status
             git diff
@@ -148,6 +148,12 @@ jobs:
           echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env
+
+      - name: Pod install
+        run: |
+          flutter pub get
+          cd ios
+          pod install
 
       - name: Build iOS
         run: flutter build ios --release --no-codesign
