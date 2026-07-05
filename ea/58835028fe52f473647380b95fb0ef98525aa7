@@ -1,0 +1,28 @@
+ios/Runner.xcworkspace/contents.xcworkspacedata
+  s_f8fc1b9b2aa001::t_406252443d47f7 7-9
+ios/Runner.xcodeproj/project.pbxproj
+  s_f8fc1b9b2aa001::t_01d5efbe36a44a 253-274
+  s_f8fc1b9b2aa001::t_5b4fd381f2b962 111-112
+  s_f8fc1b9b2aa001::t_fe667f2c4a353b 175
+  s_f8fc1b9b2aa001::t_0131a92a54c2ac 17
+  s_f8fc1b9b2aa001::t_411d14539a697e 140-150
+  s_f8fc1b9b2aa001::t_7f350e0757ca62 49-50,53
+  s_f8fc1b9b2aa001::t_bfcfac019e12b5 62
+  s_f8fc1b9b2aa001::t_ea16eba3d2d04c 70,77-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "ea58835028fe52f473647380b95fb0ef98525aa7",
+  "prompts": {},
+  "sessions": {
+    "s_f8fc1b9b2aa001": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "798e9b74-171f-4f70-b9a5-e31218dfc68f",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
