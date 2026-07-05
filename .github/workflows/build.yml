@@ -149,6 +149,12 @@ jobs:
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env
 
+      - name: Pod install
+        run: |
+          flutter pub get
+          cd ios
+          pod install
+
       - name: Build iOS
         run: flutter build ios --release --no-codesign
 
