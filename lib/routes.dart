@@ -130,7 +130,7 @@ class ActivityRoute extends GoRouteData with $ActivityRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ActivityPage();
+    return const ActivityPage();
   }
 }
 

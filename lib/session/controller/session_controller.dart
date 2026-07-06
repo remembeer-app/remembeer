@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/controller/members_crud_controller.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
@@ -33,7 +34,7 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
     final batchStreams = <Stream<List<Session>>>[];
 
     for (var i = 0; i < idList.length; i += batchSize) {
-      final batch = idList.sublist(i, (i + batchSize).clamp(0, idList.length));
+      final batch = idList.sublist(i, min(i + batchSize, idList.length));
       batchStreams.add(
         nonDeletedEntities
             .where('isSoloSession', isEqualTo: false)
