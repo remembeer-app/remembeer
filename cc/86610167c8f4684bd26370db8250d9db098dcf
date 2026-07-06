@@ -1,0 +1,19 @@
+lib/session/model/session_create.dart
+  s_5f704dbb175506::t_90501cfe0fb936 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "74aabee4612ff4fe6af0c4e76c8820087013d4ee",
+  "prompts": {},
+  "sessions": {
+    "s_5f704dbb175506": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c46dd605-726f-47ba-af7d-15d98f2132d0",
+        "model": "unknown"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
