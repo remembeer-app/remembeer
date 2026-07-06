@@ -66,6 +66,7 @@ class SessionService {
 
   Future<void> createSession({
     required String name,
+    required String description,
     required DateTime startedAt,
   }) async {
     await sessionController.createSingle(
@@ -74,6 +75,7 @@ class SessionService {
         startedAt: startedAt,
         memberIds: {currentUserId},
         isSoloSession: false,
+        description: description,
       ),
     );
   }
@@ -81,10 +83,12 @@ class SessionService {
   Future<void> updateSession({
     required Session session,
     String? name,
+    String? description,
     DateTime? startedAt,
     DateTime? endedAt,
   }) async {
     final newName = name ?? session.name;
+    final newDescription = description ?? session.description;
     final newStartedAt = startedAt ?? session.startedAt;
     final newEndedAt = endedAt ?? session.endedAt;
 
@@ -101,6 +105,7 @@ class SessionService {
       batch: batch,
       sessionId: session.id,
       name: newName,
+      description: newDescription,
       startedAt: newStartedAt,
       endedAt: newEndedAt,
       drinksToRemove: displacedDrinks,

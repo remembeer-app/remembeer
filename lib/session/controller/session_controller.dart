@@ -107,6 +107,7 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
     required WriteBatch batch,
     required String sessionId,
     required String name,
+    required String description,
     required DateTime startedAt,
     required List<Drink> drinksToRemove,
     DateTime? endedAt,
@@ -115,6 +116,7 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
 
     batch.update(writeCollection.doc(sessionId), {
       'name': name,
+      'description': description,
       'startedAt': startedAt.toIso8601String(),
       'endedAt': endedAt?.toIso8601String(),
       'drinks': FieldValue.arrayRemove(displacedJson),

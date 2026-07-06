@@ -2,19 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
+import 'package:remembeer/session/constants.dart';
 
 const _maxNameLength = 30;
 
 class SessionForm extends StatefulWidget {
   final String initialName;
+  final String initialDescription;
   final DateTime initialStartedAt;
   final String submitButtonText;
-  final Future<void> Function(String name, DateTime startedAt) onSubmit;
+  final Future<void> Function(
+    String name,
+    String description,
+    DateTime startedAt,
+  )
+  onSubmit;
   final Widget? additionalActions;
 
   const SessionForm({
     super.key,
     required this.initialName,
+    required this.initialDescription,
     required this.initialStartedAt,
     required this.submitButtonText,
     required this.onSubmit,
@@ -27,6 +35,7 @@ class SessionForm extends StatefulWidget {
 
 class _SessionFormState extends State<SessionForm> {
   final _nameController = TextEditingController();
+  final _descriptionController = TextEditingController();
   final _startedAtController = TextEditingController();
 
   late DateTime _selectedStartedAt = widget.initialStartedAt;
@@ -35,12 +44,14 @@ class _SessionFormState extends State<SessionForm> {
   void initState() {
     super.initState();
     _nameController.text = widget.initialName;
+    _descriptionController.text = widget.initialDescription;
     _startedAtController.text = _formatDateTime(_selectedStartedAt);
   }
 
   @override
   void dispose() {
     _nameController.dispose();
+    _descriptionController.dispose();
     _startedAtController.dispose();
     super.dispose();
   }
@@ -54,6 +65,8 @@ class _SessionFormState extends State<SessionForm> {
             child: ListView(
               children: [
                 _buildNameInput(form),
+                const Gap(16),
+                _buildDescriptionInput(form),
                 const Gap(16),
                 _buildStartedAtInput(form),
               ],
@@ -126,6 +139,16 @@ class _SessionFormState extends State<SessionForm> {
     );
   }
 
+  Widget _buildDescriptionInput(LoadingFormState form) {
+    return form.buildTextField(
+      controller: _descriptionController,
+      label: 'Description',
+      maxLength: maxSessionDescriptionLength,
+      minLines: 3,
+      maxLines: 7,
+    );
+  }
+
   Widget _buildStartedAtInput(LoadingFormState form) {
     return TextFormField(
       controller: _startedAtController,
@@ -150,8 +173,11 @@ class _SessionFormState extends State<SessionForm> {
     return form.buildSubmitButton(
       text: widget.submitButtonText,
       margin: const EdgeInsets.only(bottom: 16),
-      onSubmit: () =>
-          widget.onSubmit(_nameController.text.trim(), _selectedStartedAt),
+      onSubmit: () => widget.onSubmit(
+        _nameController.text.trim(),
+        _descriptionController.text.trim(),
+        _selectedStartedAt,
+      ),
     );
   }
 }

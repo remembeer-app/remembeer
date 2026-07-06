@@ -21,12 +21,14 @@ class EditSessionPage extends StatelessWidget {
       title: const Text('Edit Session'),
       child: SessionForm(
         initialName: session.name,
+        initialDescription: session.description,
         initialStartedAt: session.startedAt,
         submitButtonText: 'Save Changes',
-        onSubmit: (name, startedAt) async {
+        onSubmit: (name, description, startedAt) async {
           await _sessionService.updateSession(
             session: session,
             name: name,
+            description: description,
             startedAt: startedAt,
           );
           if (context.mounted) {

@@ -15,10 +15,15 @@ class CreateSessionPage extends StatelessWidget {
       title: const Text('Create Session'),
       child: SessionForm(
         initialName: '',
+        initialDescription: '',
         initialStartedAt: DateTime.now(),
         submitButtonText: 'Create Session',
-        onSubmit: (name, startedAt) async {
-          await _sessionService.createSession(name: name, startedAt: startedAt);
+        onSubmit: (name, description, startedAt) async {
+          await _sessionService.createSession(
+            name: name,
+            description: description,
+            startedAt: startedAt,
+          );
           if (context.mounted) {
             Navigator.of(context).pop();
           }
