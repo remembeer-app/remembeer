@@ -4,7 +4,7 @@ lib/session/model/session_create.dart
 {
   "schema_version": "authorship/3.0.0",
   "git_ai_version": "1.6.10",
-  "base_commit_sha": "74aabee4612ff4fe6af0c4e76c8820087013d4ee",
+  "base_commit_sha": "cc86610167c8f4684bd26370db8250d9db098dcf",
   "prompts": {},
   "sessions": {
     "s_5f704dbb175506": {
