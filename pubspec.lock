@@ -736,14 +736,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
-  iconsax_flutter:
-    dependency: transitive
-    description:
-      name: iconsax_flutter
-      sha256: d14b4cec8586025ac15276bdd40f6eea308cb85748135965bb6255f14beb2564
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   image_cropper:
     dependency: "direct main"
     description:
@@ -1305,10 +1297,10 @@ packages:
     dependency: "direct main"
     description:
       name: toastification
-      sha256: d3b14d3b9af78c21306eeb87b74cc4670564deb4b438e3c241b5af00f86c8674
+      sha256: "66c96678e3dece8ba24de3ea31634bd65a80aaecb8105f9bafe946e5f0d7590a"
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.0"
+    version: "3.2.0"
   typed_data:
     dependency: transitive
     description:
