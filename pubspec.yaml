@@ -50,7 +50,7 @@ dependencies:
   google_sign_in: ^7.2.0
   image_cropper: ^12.2.1
   image_picker: ^1.2.1
-  intl: ^0.20.2
+  intl: ^0.20.3
   json_annotation: ^4.11.0
   latlong2: ^0.9.1
   # TODO(ohtenkay): watch this dependency for upgrades, master is needed now to work with go_router_18
