@@ -1,0 +1,22 @@
+firestore.rules
+  s_362d9f11339968::t_cfb4938be995b8 87-95,102-103
+  s_362d9f11339968::t_9da98f863a9a1a 96-101
+  s_362d9f11339968::t_a95c9dd8b3989e 158
+  s_362d9f11339968::t_9b85b51d85370f 159
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "673b2f7546eda70c3dfef752c3d8f5f4fee943fd",
+  "prompts": {},
+  "sessions": {
+    "s_362d9f11339968": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bb3be0f7-97b3-425b-b873-ec1a848a8a70",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
