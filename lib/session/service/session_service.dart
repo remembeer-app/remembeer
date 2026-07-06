@@ -74,6 +74,7 @@ class SessionService {
         name: name,
         startedAt: startedAt,
         memberIds: {currentUserId},
+        adminIds: {currentUserId},
         isSoloSession: false,
         description: description,
       ),
@@ -184,6 +185,41 @@ class SessionService {
       'Session owner cannot leave. Delete the session instead.',
     );
 
-    await sessionController.removeMemberAtomic(session.id, currentUserId);
+    await sessionController.removeMemberAndAdminAtomic(
+      session.id,
+      currentUserId,
+    );
+  }
+
+  Future<void> addAdminToSession({
+    required Session session,
+    required String userId,
+  }) async {
+    invariant(
+      isSessionOwner(session),
+      'Only the session owner can manage admins.',
+    );
+    invariant(
+      session.memberIds.contains(userId),
+      'Only session members can be made admins.',
+    );
+
+    await sessionController.addAdminAtomic(session.id, userId);
+  }
+
+  Future<void> removeAdminFromSession({
+    required Session session,
+    required String userId,
+  }) async {
+    invariant(
+      isSessionOwner(session),
+      'Only the session owner can manage admins.',
+    );
+    invariant(
+      userId != session.userId,
+      'The session owner cannot be removed as an admin.',
+    );
+
+    await sessionController.removeAdminAtomic(session.id, userId);
   }
 }

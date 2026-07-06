@@ -22,6 +22,7 @@ _Session _$SessionFromJson(Map<String, dynamic> json) => _Session(
   memberIds: (json['memberIds'] as List<dynamic>)
       .map((e) => e as String)
       .toSet(),
+  adminIds: (json['adminIds'] as List<dynamic>).map((e) => e as String).toSet(),
   bannedMemberIds: (json['bannedMemberIds'] as List<dynamic>)
       .map((e) => e as String)
       .toSet(),
@@ -49,6 +50,7 @@ Map<String, dynamic> _$SessionToJson(_Session instance) => <String, dynamic>{
     const TimestampConverter().toJson,
   ),
   'memberIds': instance.memberIds.toList(),
+  'adminIds': instance.adminIds.toList(),
   'bannedMemberIds': instance.bannedMemberIds.toList(),
   'name': instance.name,
   'startedAt': instance.startedAt.toIso8601String(),

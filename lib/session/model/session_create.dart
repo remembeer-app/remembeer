@@ -13,6 +13,7 @@ abstract class SessionCreate with _$SessionCreate implements ValueObject {
     required DateTime startedAt,
     DateTime? endedAt,
     required Set<String> memberIds,
+    required Set<String> adminIds,
     @Default({}) Set<String> bannedMemberIds,
     @Default(true) bool isSoloSession,
     @Default([]) List<Drink> drinks,

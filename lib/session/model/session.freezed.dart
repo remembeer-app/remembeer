@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Session {
 
- String get id; String get userId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;@TimestampConverter() DateTime? get deletedAt; Set<String> get memberIds; Set<String> get bannedMemberIds; String get name; DateTime get startedAt; DateTime? get endedAt; List<Drink> get drinks; bool get isSoloSession; String get description;
+ String get id; String get userId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;@TimestampConverter() DateTime? get deletedAt; Set<String> get memberIds; Set<String> get adminIds; Set<String> get bannedMemberIds; String get name; DateTime get startedAt; DateTime? get endedAt; List<Drink> get drinks; bool get isSoloSession; String get description;
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $SessionCopyWith<Session> get copyWith => _$SessionCopyWithImpl<Session>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Session&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&const DeepCollectionEquality().equals(other.drinks, drinks)&&(identical(other.isSoloSession, isSoloSession) || other.isSoloSession == isSoloSession)&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Session&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&const DeepCollectionEquality().equals(other.adminIds, adminIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&const DeepCollectionEquality().equals(other.drinks, drinks)&&(identical(other.isSoloSession, isSoloSession) || other.isSoloSession == isSoloSession)&&(identical(other.description, description) || other.description == description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(memberIds),const DeepCollectionEquality().hash(bannedMemberIds),name,startedAt,endedAt,const DeepCollectionEquality().hash(drinks),isSoloSession,description);
+int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(memberIds),const DeepCollectionEquality().hash(adminIds),const DeepCollectionEquality().hash(bannedMemberIds),name,startedAt,endedAt,const DeepCollectionEquality().hash(drinks),isSoloSession,description);
 
 @override
 String toString() {
-  return 'Session(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, name: $name, startedAt: $startedAt, endedAt: $endedAt, drinks: $drinks, isSoloSession: $isSoloSession, description: $description)';
+  return 'Session(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, adminIds: $adminIds, bannedMemberIds: $bannedMemberIds, name: $name, startedAt: $startedAt, endedAt: $endedAt, drinks: $drinks, isSoloSession: $isSoloSession, description: $description)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $SessionCopyWith<$Res>  {
   factory $SessionCopyWith(Session value, $Res Function(Session) _then) = _$SessionCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, Set<String> memberIds, Set<String> bannedMemberIds, String name, DateTime startedAt, DateTime? endedAt, List<Drink> drinks, bool isSoloSession, String description
+ String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, Set<String> memberIds, Set<String> adminIds, Set<String> bannedMemberIds, String name, DateTime startedAt, DateTime? endedAt, List<Drink> drinks, bool isSoloSession, String description
 });
 
 
@@ -65,7 +65,7 @@ class _$SessionCopyWithImpl<$Res>
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? memberIds = null,Object? bannedMemberIds = null,Object? name = null,Object? startedAt = null,Object? endedAt = freezed,Object? drinks = null,Object? isSoloSession = null,Object? description = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? memberIds = null,Object? adminIds = null,Object? bannedMemberIds = null,Object? name = null,Object? startedAt = null,Object? endedAt = freezed,Object? drinks = null,Object? isSoloSession = null,Object? description = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -73,6 +73,7 @@ as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: 
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,memberIds: null == memberIds ? _self.memberIds : memberIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,adminIds: null == adminIds ? _self.adminIds : adminIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,bannedMemberIds: null == bannedMemberIds ? _self.bannedMemberIds : bannedMemberIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
@@ -165,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> bannedMemberIds,  String name,  DateTime startedAt,  DateTime? endedAt,  List<Drink> drinks,  bool isSoloSession,  String description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> adminIds,  Set<String> bannedMemberIds,  String name,  DateTime startedAt,  DateTime? endedAt,  List<Drink> drinks,  bool isSoloSession,  String description)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Session() when $default != null:
-return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.bannedMemberIds,_that.name,_that.startedAt,_that.endedAt,_that.drinks,_that.isSoloSession,_that.description);case _:
+return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.adminIds,_that.bannedMemberIds,_that.name,_that.startedAt,_that.endedAt,_that.drinks,_that.isSoloSession,_that.description);case _:
   return orElse();
 
 }
@@ -186,10 +187,10 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> bannedMemberIds,  String name,  DateTime startedAt,  DateTime? endedAt,  List<Drink> drinks,  bool isSoloSession,  String description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> adminIds,  Set<String> bannedMemberIds,  String name,  DateTime startedAt,  DateTime? endedAt,  List<Drink> drinks,  bool isSoloSession,  String description)  $default,) {final _that = this;
 switch (_that) {
 case _Session():
-return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.bannedMemberIds,_that.name,_that.startedAt,_that.endedAt,_that.drinks,_that.isSoloSession,_that.description);case _:
+return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.adminIds,_that.bannedMemberIds,_that.name,_that.startedAt,_that.endedAt,_that.drinks,_that.isSoloSession,_that.description);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +207,10 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> bannedMemberIds,  String name,  DateTime startedAt,  DateTime? endedAt,  List<Drink> drinks,  bool isSoloSession,  String description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  Set<String> memberIds,  Set<String> adminIds,  Set<String> bannedMemberIds,  String name,  DateTime startedAt,  DateTime? endedAt,  List<Drink> drinks,  bool isSoloSession,  String description)?  $default,) {final _that = this;
 switch (_that) {
 case _Session() when $default != null:
-return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.bannedMemberIds,_that.name,_that.startedAt,_that.endedAt,_that.drinks,_that.isSoloSession,_that.description);case _:
+return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.memberIds,_that.adminIds,_that.bannedMemberIds,_that.name,_that.startedAt,_that.endedAt,_that.drinks,_that.isSoloSession,_that.description);case _:
   return null;
 
 }
@@ -221,7 +222,7 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 @JsonSerializable()
 
 class _Session extends Session {
-  const _Session({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required final  Set<String> memberIds, required final  Set<String> bannedMemberIds, required this.name, required this.startedAt, this.endedAt, final  List<Drink> drinks = const [], this.isSoloSession = true, this.description = ''}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds,_drinks = drinks,super._();
+  const _Session({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required final  Set<String> memberIds, required final  Set<String> adminIds, required final  Set<String> bannedMemberIds, required this.name, required this.startedAt, this.endedAt, final  List<Drink> drinks = const [], this.isSoloSession = true, this.description = ''}): _memberIds = memberIds,_adminIds = adminIds,_bannedMemberIds = bannedMemberIds,_drinks = drinks,super._();
   factory _Session.fromJson(Map<String, dynamic> json) => _$SessionFromJson(json);
 
 @override final  String id;
@@ -234,6 +235,13 @@ class _Session extends Session {
   if (_memberIds is EqualUnmodifiableSetView) return _memberIds;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableSetView(_memberIds);
+}
+
+ final  Set<String> _adminIds;
+@override Set<String> get adminIds {
+  if (_adminIds is EqualUnmodifiableSetView) return _adminIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableSetView(_adminIds);
 }
 
  final  Set<String> _bannedMemberIds;
@@ -269,16 +277,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Session&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&const DeepCollectionEquality().equals(other._bannedMemberIds, _bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&const DeepCollectionEquality().equals(other._drinks, _drinks)&&(identical(other.isSoloSession, isSoloSession) || other.isSoloSession == isSoloSession)&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Session&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&const DeepCollectionEquality().equals(other._adminIds, _adminIds)&&const DeepCollectionEquality().equals(other._bannedMemberIds, _bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&const DeepCollectionEquality().equals(other._drinks, _drinks)&&(identical(other.isSoloSession, isSoloSession) || other.isSoloSession == isSoloSession)&&(identical(other.description, description) || other.description == description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_bannedMemberIds),name,startedAt,endedAt,const DeepCollectionEquality().hash(_drinks),isSoloSession,description);
+int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_adminIds),const DeepCollectionEquality().hash(_bannedMemberIds),name,startedAt,endedAt,const DeepCollectionEquality().hash(_drinks),isSoloSession,description);
 
 @override
 String toString() {
-  return 'Session(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, name: $name, startedAt: $startedAt, endedAt: $endedAt, drinks: $drinks, isSoloSession: $isSoloSession, description: $description)';
+  return 'Session(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, adminIds: $adminIds, bannedMemberIds: $bannedMemberIds, name: $name, startedAt: $startedAt, endedAt: $endedAt, drinks: $drinks, isSoloSession: $isSoloSession, description: $description)';
 }
 
 
@@ -289,7 +297,7 @@ abstract mixin class _$SessionCopyWith<$Res> implements $SessionCopyWith<$Res> {
   factory _$SessionCopyWith(_Session value, $Res Function(_Session) _then) = __$SessionCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, Set<String> memberIds, Set<String> bannedMemberIds, String name, DateTime startedAt, DateTime? endedAt, List<Drink> drinks, bool isSoloSession, String description
+ String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, Set<String> memberIds, Set<String> adminIds, Set<String> bannedMemberIds, String name, DateTime startedAt, DateTime? endedAt, List<Drink> drinks, bool isSoloSession, String description
 });
 
 
@@ -306,7 +314,7 @@ class __$SessionCopyWithImpl<$Res>
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? memberIds = null,Object? bannedMemberIds = null,Object? name = null,Object? startedAt = null,Object? endedAt = freezed,Object? drinks = null,Object? isSoloSession = null,Object? description = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? memberIds = null,Object? adminIds = null,Object? bannedMemberIds = null,Object? name = null,Object? startedAt = null,Object? endedAt = freezed,Object? drinks = null,Object? isSoloSession = null,Object? description = null,}) {
   return _then(_Session(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
@@ -314,6 +322,7 @@ as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: 
 as DateTime,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,memberIds: null == memberIds ? _self._memberIds : memberIds // ignore: cast_nullable_to_non_nullable
+as Set<String>,adminIds: null == adminIds ? _self._adminIds : adminIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,bannedMemberIds: null == bannedMemberIds ? _self._bannedMemberIds : bannedMemberIds // ignore: cast_nullable_to_non_nullable
 as Set<String>,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
