@@ -5,6 +5,7 @@ import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
+import 'package:remembeer/session/page/manage_admins_page.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/session/widget/session_form.dart';
 
@@ -41,12 +42,34 @@ class EditSessionPage extends StatelessWidget {
   }
 
   Widget _buildAdditionalActions(BuildContext context) {
-    return Row(
+    return Column(
       children: [
-        Expanded(child: _buildDeleteButton(context)),
+        _buildManageAdminsButton(context),
         const Gap(16),
-        Expanded(child: _buildEndTimeButton(context)),
+        Row(
+          children: [
+            Expanded(child: _buildDeleteButton(context)),
+            const Gap(16),
+            Expanded(child: _buildEndTimeButton(context)),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _buildManageAdminsButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (context) => ManageAdminsPage(session: session),
+          ),
+        ),
+        style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
+        icon: const Icon(Icons.admin_panel_settings),
+        label: const Text('Manage Admins'),
+      ),
     );
   }
 

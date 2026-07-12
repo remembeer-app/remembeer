@@ -64,6 +64,9 @@ class SessionService {
     );
   }
 
+  Stream<Session> sessionStream(String sessionId) =>
+      sessionController.streamById(sessionId);
+
   Future<void> createSession({
     required String name,
     required String description,
@@ -221,5 +224,37 @@ class SessionService {
     );
 
     await sessionController.removeAdminAtomic(session.id, userId);
+  }
+
+  Future<void> makeAllMembersAdmins(Session session) async {
+    invariant(
+      isSessionOwner(session),
+      'Only the session owner can manage admins.',
+    );
+
+    final toPromote = session.memberIds
+        .where((userId) => !session.adminIds.contains(userId))
+        .toList();
+    if (toPromote.isEmpty) {
+      return;
+    }
+
+    await sessionController.addAdminsAtomic(session.id, toPromote);
+  }
+
+  Future<void> clearAdmins(Session session) async {
+    invariant(
+      isSessionOwner(session),
+      'Only the session owner can manage admins.',
+    );
+
+    final toDemote = session.adminIds
+        .where((userId) => userId != session.userId)
+        .toList();
+    if (toDemote.isEmpty) {
+      return;
+    }
+
+    await sessionController.removeAdminsAtomic(session.id, toDemote);
   }
 }

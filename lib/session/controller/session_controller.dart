@@ -146,4 +146,18 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
       updatedAtField: FieldValue.serverTimestamp(),
     });
   }
+
+  Future<void> addAdminsAtomic(String sessionId, List<String> userIds) {
+    return writeCollection.doc(sessionId).update({
+      adminIdsField: FieldValue.arrayUnion(userIds),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> removeAdminsAtomic(String sessionId, List<String> userIds) {
+    return writeCollection.doc(sessionId).update({
+      adminIdsField: FieldValue.arrayRemove(userIds),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
 }
