@@ -1,0 +1,39 @@
+lib/session/controller/session_controller.dart
+  s_362d9f11339968::t_c7a39ae217f3b9 149-162
+lib/session/page/manage_admins_page.dart
+  s_a9ddaa644f4694::t_c048fbcd0937a7 60
+  s_362d9f11339968::t_9c4c7fab57a08e 1-26,31-32,36-45,47-50,54,62-96,98-106,108-113,122-124,128-129
+  s_362d9f11339968::t_01898d3f98eaa2 53,125-127
+  s_362d9f11339968::t_0969483dc146cb 97,107
+  s_a9ddaa644f4694::t_1c9c438a81e5f5 114-121
+  s_a9ddaa644f4694::t_7361ba477c4cda 27-30,33-35,46,51-52,55-57,59,61
+  s_a9ddaa644f4694::t_8b2d2c0888a0ea 58
+lib/session/page/edit_session_page.dart
+  s_362d9f11339968::t_072ad8a7bd7e5a 8
+  s_362d9f11339968::t_d96185fc697ec3 45,47,49-55,60-72
+  s_362d9f11339968::t_fad396c25430f4 73-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "16f61f4210d47e4453b1eeca1dc18a040b202dec",
+  "prompts": {},
+  "sessions": {
+    "s_362d9f11339968": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bb3be0f7-97b3-425b-b873-ec1a848a8a70",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    },
+    "s_a9ddaa644f4694": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7cf47f95-1ea3-4818-bd08-f2323486c803",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
