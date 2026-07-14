@@ -34,7 +34,7 @@ dependencies:
   cupertino_icons: ^1.0.9
   diacritic: ^0.1.6
   firebase_auth: ^6.4.0
-  firebase_core: ^4.7.0
+  firebase_core: ^4.12.0
   firebase_messaging: ^16.4.1
   firebase_storage: ^13.3.0
   flutter:
