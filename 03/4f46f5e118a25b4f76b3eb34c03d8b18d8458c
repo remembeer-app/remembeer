@@ -8,7 +8,7 @@ linux/flutter/generated_plugins.cmake
 {
   "schema_version": "authorship/3.0.0",
   "git_ai_version": "1.6.14",
-  "base_commit_sha": "9f9265ba9b52b3d73f57fded04a9bb814916f42b",
+  "base_commit_sha": "034f46f5e118a25b4f76b3eb34c03d8b18d8458c",
   "prompts": {},
   "sessions": {
     "s_81f6f076c538a2": {
