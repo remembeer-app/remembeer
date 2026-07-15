@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink/model/drink.dart';
 
@@ -17,9 +17,9 @@ class SessionDrinkItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final timeFormat = showDate
-        ? DateFormat('dd.MM. HH:mm')
-        : DateFormat('HH:mm');
+    final consumedAtText = showDate
+        ? formatDayMonthTime(drink.consumedAt)
+        : formatTime(drink.consumedAt);
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
@@ -47,7 +47,7 @@ class SessionDrinkItem extends StatelessWidget {
             ),
           ),
           Text(
-            timeFormat.format(drink.consumedAt),
+            consumedAtText,
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

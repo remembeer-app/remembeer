@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
@@ -52,7 +52,7 @@ class _DrinkFormState extends State<DrinkForm> {
   @override
   void initState() {
     super.initState();
-    _consumedAtController.text = _formatDateTime(_selectedConsumedAt);
+    _consumedAtController.text = formatFullDateTime(_selectedConsumedAt);
     _volumeController.text = widget.initialVolume.toString();
     _volumeController.addListener(() => setState(() {}));
     _location = widget.initialLocation;
@@ -183,10 +183,6 @@ class _DrinkFormState extends State<DrinkForm> {
     }
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return DateFormat('dd MMM. yyyy, H:mm').format(dateTime);
-  }
-
   Future<void> _selectConsumedAt() async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -219,7 +215,7 @@ class _DrinkFormState extends State<DrinkForm> {
         pickedTime.minute,
       );
     });
-    _consumedAtController.text = _formatDateTime(_selectedConsumedAt);
+    _consumedAtController.text = formatFullDateTime(_selectedConsumedAt);
   }
 
   Widget _buildDrinkTypeDropdown() {

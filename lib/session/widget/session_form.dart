@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/session/constants.dart';
 
@@ -45,7 +45,7 @@ class _SessionFormState extends State<SessionForm> {
     super.initState();
     _nameController.text = widget.initialName;
     _descriptionController.text = widget.initialDescription;
-    _startedAtController.text = _formatDateTime(_selectedStartedAt);
+    _startedAtController.text = formatFullDateTime(_selectedStartedAt);
   }
 
   @override
@@ -82,10 +82,6 @@ class _SessionFormState extends State<SessionForm> {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return DateFormat('dd MMM. yyyy, H:mm').format(dateTime);
-  }
-
   Future<void> _selectStartedAt() async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -118,7 +114,7 @@ class _SessionFormState extends State<SessionForm> {
         pickedTime.minute,
       );
     });
-    _startedAtController.text = _formatDateTime(_selectedStartedAt);
+    _startedAtController.text = formatFullDateTime(_selectedStartedAt);
   }
 
   Widget _buildNameInput(LoadingFormState form) {
