@@ -1,0 +1,19 @@
+lib/common/formatter/time_formatter.dart
+  s_933166850980e2::t_2f6db6200e916a 84-86
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "5e832247c1649dad3e5ba3d798112c8b58eafb6a",
+  "prompts": {},
+  "sessions": {
+    "s_933166850980e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b202a5cd-6f9b-4022-82a7-c2132d3fac91",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
