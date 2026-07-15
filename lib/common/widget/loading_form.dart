@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/error_message_box.dart';
 
 class LoadingForm extends StatefulWidget {
@@ -89,6 +90,57 @@ class LoadingFormState extends State<LoadingForm> {
           icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
           onPressed: onToggleVisibility,
         ),
+      ),
+      validator: validator,
+    );
+  }
+
+  Widget buildDateTimeField({
+    required TextEditingController controller,
+    required String label,
+    required DateTime selectedDateTime,
+    required ValueChanged<DateTime> onChanged,
+    DateTime? firstDate,
+    required DateTime lastDate,
+    String? Function(String?)? validator,
+  }) {
+    Future<void> selectDateTime() async {
+      final pickedDate = await showDatePicker(
+        context: context,
+        initialDate: selectedDateTime,
+        firstDate: firstDate ?? DateTime(2000),
+        lastDate: lastDate,
+      );
+      if (pickedDate == null) return;
+      if (!mounted) return;
+
+      final pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(selectedDateTime),
+      );
+      if (pickedTime == null) return;
+
+      final newDateTime = DateTime(
+        pickedDate.year,
+        pickedDate.month,
+        pickedDate.day,
+        pickedTime.hour,
+        pickedTime.minute,
+      );
+
+      controller.text = formatFullDateTime(newDateTime);
+      onChanged(newDateTime);
+    }
+
+    return TextFormField(
+      controller: controller,
+      readOnly: true,
+      enabled: !_isLoading,
+      onTap: selectDateTime,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        suffixIcon: const Icon(Icons.calendar_today),
       ),
       validator: validator,
     );

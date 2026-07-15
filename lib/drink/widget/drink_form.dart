@@ -183,41 +183,6 @@ class _DrinkFormState extends State<DrinkForm> {
     }
   }
 
-  Future<void> _selectConsumedAt() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedConsumedAt,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (pickedDate == null) {
-      return;
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedConsumedAt),
-    );
-    if (pickedTime == null) {
-      return;
-    }
-
-    setState(() {
-      _selectedConsumedAt = DateTime(
-        pickedDate.year,
-        pickedDate.month,
-        pickedDate.day,
-        pickedTime.hour,
-        pickedTime.minute,
-      );
-    });
-    _consumedAtController.text = formatFullDateTime(_selectedConsumedAt);
-  }
-
   Widget _buildDrinkTypeDropdown() {
     return DrinkTypePicker(
       selectedDrinkType: _selectedDrinkType,
@@ -284,16 +249,13 @@ class _DrinkFormState extends State<DrinkForm> {
   }
 
   Widget _buildConsumedAtInput(LoadingFormState form) {
-    return TextFormField(
+    return form.buildDateTimeField(
       controller: _consumedAtController,
-      readOnly: true,
-      enabled: !form.isLoading,
-      onTap: _selectConsumedAt,
-      decoration: const InputDecoration(
-        labelText: 'Consumed at',
-        border: OutlineInputBorder(),
-        suffixIcon: Icon(Icons.calendar_today),
-      ),
+      label: 'Consumed at',
+      selectedDateTime: _selectedConsumedAt,
+      onChanged: (newDateTime) =>
+          setState(() => _selectedConsumedAt = newDateTime),
+      lastDate: DateTime.now(),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please select when you consumed the drink.';
