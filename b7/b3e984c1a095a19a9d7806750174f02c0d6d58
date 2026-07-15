@@ -1,0 +1,51 @@
+lib/drink/widget/drink_form.dart
+  s_933166850980e2::t_64c0fa3db7cb79 4
+  s_933166850980e2::t_089e24868a234c 55,218
+lib/drink/widget/midnight_divider.dart
+  s_933166850980e2::t_5c10deeec45277 3
+  s_933166850980e2::t_6695a626745c2f 38
+lib/session/page/summary_page.dart
+  s_933166850980e2::t_217770bdd1d5e1 177-178
+  s_933166850980e2::t_254e7040823b13 3
+lib/leaderboard/model/selected_month.dart
+  s_933166850980e2::t_440fd8f2ed0864 1-2,9
+lib/activity/widget/session_drink_item.dart
+  s_933166850980e2::t_a5ec44fd0594cc 20-22
+  s_933166850980e2::t_d7fea52ec769b7 50
+  s_933166850980e2::t_6582f60564c5aa 3
+lib/session/page/edit_session_page.dart
+  s_933166850980e2::t_0ba13c8aab7368 79,86
+  s_933166850980e2::t_eeb31bf9781ba6 167
+  s_933166850980e2::t_9b965deeb9a2a4 4
+lib/session/widget/session_form.dart
+  s_933166850980e2::t_089e24868a234c 48,117
+  s_933166850980e2::t_582e2059493620 3
+lib/common/formatter/time_formatter.dart
+  s_933166850980e2::t_063968e7d3240a 76-78,81,84,86,88
+  s_933166850980e2::t_3d1633fe23945d 5-12
+  s_933166850980e2::t_8f3c19705bc5fb 119,121,124,127
+  s_933166850980e2::t_f30778466315f1 13-49
+  s_933166850980e2::t_2a7c4f8077cb3b 104-105
+lib/drink/widget/drink_card.dart
+  s_933166850980e2::t_2184219b9015f2 5
+  s_933166850980e2::t_681e4f28ef0a25 63
+lib/date/widget/date_selector.dart
+  s_933166850980e2::t_50ea8fdf7e6d43 4
+  s_933166850980e2::t_aba509c3c5a3b6 143
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "f9d07368699531e64a52cfa6e5d5f25adc9380c9",
+  "prompts": {},
+  "sessions": {
+    "s_933166850980e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b202a5cd-6f9b-4022-82a7-c2132d3fac91",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
