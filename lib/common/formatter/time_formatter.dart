@@ -81,7 +81,9 @@ String formatSessionTimeRange(
     return '$startPart – still going';
   }
 
-  final isEndToday = DateUtils.isSameDay(end, now);
+  final effectiveSessionEnd = effectiveDate(end, endOfDayBoundary);
+
+  final isEndToday = DateUtils.isSameDay(effectiveSessionEnd, effectiveToday);
 
   final endPart = isEndToday ? formatTime(end) : formatDayMonthTime(end);
 
