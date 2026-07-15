@@ -1,0 +1,25 @@
+lib/common/widget/loading_form.dart
+  s_933166850980e2::t_ead3114d2dc08f 3
+  s_933166850980e2::t_2dd37d758b5d0f 98-102,104-110,112-148
+  s_933166850980e2::t_eb6cdf281b73e9 103,111
+lib/drink/widget/drink_form.dart
+  s_933166850980e2::t_ad34be861d8b6a 252,254-258
+lib/session/widget/session_form.dart
+  s_933166850980e2::t_95a2b55bf1d72d 114,116-120
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "192205ba835fb7739ace2387e9a78dc939409c75",
+  "prompts": {},
+  "sessions": {
+    "s_933166850980e2": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "b202a5cd-6f9b-4022-82a7-c2132d3fac91",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
