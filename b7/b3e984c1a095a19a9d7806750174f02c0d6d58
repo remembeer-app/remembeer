@@ -17,6 +17,9 @@ lib/session/page/edit_session_page.dart
   s_933166850980e2::t_0ba13c8aab7368 79,86
   s_933166850980e2::t_eeb31bf9781ba6 167
   s_933166850980e2::t_9b965deeb9a2a4 4
+  s_362d9f11339968::t_d96185fc697ec3 45,47,49-55,60-72
+  s_362d9f11339968::t_072ad8a7bd7e5a 8
+  s_362d9f11339968::t_fad396c25430f4 73-75
 lib/session/widget/session_form.dart
   s_933166850980e2::t_089e24868a234c 48,117
   s_933166850980e2::t_582e2059493620 3
@@ -32,6 +35,28 @@ lib/drink/widget/drink_card.dart
 lib/date/widget/date_selector.dart
   s_933166850980e2::t_50ea8fdf7e6d43 4
   s_933166850980e2::t_aba509c3c5a3b6 143
+lib/activity/widget/session_header_card.dart
+  s_5f704dbb175506::t_8096d6c179a01b 78-81
+lib/session/model/session_create.dart
+  s_5f704dbb175506::t_90501cfe0fb936 16
+firestore.rules
+  s_362d9f11339968::t_cfb4938be995b8 87-95,102-103
+  s_362d9f11339968::t_9da98f863a9a1a 96-101
+  s_362d9f11339968::t_a95c9dd8b3989e 158
+  s_362d9f11339968::t_9b85b51d85370f 159
+lib/session/page/manage_admins_page.dart
+  s_a9ddaa644f4694::t_0a4df4559236c7 101-102
+  s_362d9f11339968::t_01898d3f98eaa2 94
+  s_a9ddaa644f4694::t_bc77f9ee176755 115-123
+  s_a9ddaa644f4694::t_6e33827ad5ab6a 50-86
+  s_a9ddaa644f4694::t_7361ba477c4cda 28-31,39,87,92-93,96-98,100
+  s_a9ddaa644f4694::t_238166d9f4dd39 32-35,38
+  s_a9ddaa644f4694::t_747251d6fe72c5 49
+  s_362d9f11339968::t_9c4c7fab57a08e 1,3-27,36-37,40-48,88-91,95,103-114,124-127
+  s_a9ddaa644f4694::t_b7775ec6ed15f2 2
+  s_a9ddaa644f4694::t_8b2d2c0888a0ea 99
+lib/session/controller/session_controller.dart
+  s_362d9f11339968::t_c7a39ae217f3b9 149-162
 ---
 {
   "schema_version": "authorship/3.0.0",
@@ -39,6 +64,22 @@ lib/date/widget/date_selector.dart
   "base_commit_sha": "f9d07368699531e64a52cfa6e5d5f25adc9380c9",
   "prompts": {},
   "sessions": {
+    "s_362d9f11339968": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "bb3be0f7-97b3-425b-b873-ec1a848a8a70",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    },
+    "s_5f704dbb175506": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c46dd605-726f-47ba-af7d-15d98f2132d0",
+        "model": "claude-sonnet-5"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    },
     "s_933166850980e2": {
       "agent_id": {
         "tool": "claude",
@@ -46,6 +87,14 @@ lib/date/widget/date_selector.dart
         "model": "claude-fable-5"
       },
       "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    },
+    "s_a9ddaa644f4694": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "7cf47f95-1ea3-4818-bd08-f2323486c803",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": null
     }
   }
 }
