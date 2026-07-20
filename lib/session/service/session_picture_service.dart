@@ -45,8 +45,23 @@ class SessionPictureService {
       return;
     }
 
+    final exceedsLimit = pickedPictures.length > remaining;
+    final picturesToUpload = exceedsLimit
+        ? pickedPictures.take(remaining).toList()
+        : pickedPictures;
+
+    if (exceedsLimit) {
+      showNotification(
+        remaining == 1
+            ? 'You can only add 1 more picture. Using the first selected one.'
+            : 'You can only add $remaining more pictures. Using the first $remaining.',
+      );
+    }
+
     final urls = await Future.wait(
-      pickedPictures.map((picture) => _upload(session.id, File(picture.path))),
+      picturesToUpload.map(
+        (picture) => _upload(session.id, File(picture.path)),
+      ),
     );
 
     await sessionController.addPicturesAtomic(session.id, urls);
