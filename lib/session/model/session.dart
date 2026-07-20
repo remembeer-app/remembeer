@@ -51,6 +51,8 @@ abstract class Session with _$Session implements EntityWithMembers {
         startDate.day != endDate.day;
   }
 
+  int get picturesRemaining => maxSessionPictures - pictureUrls.length;
+
   bool isActiveAt(DateTime at) {
     final hasStarted = startedAt.isBefore(at);
     final stillRunning = endedAt == null || endedAt!.isAfter(at);

@@ -20,3 +20,7 @@ void showNotification(
 void showSuccessNotification(String message) {
   showNotification(message, type: ToastificationType.success);
 }
+
+void showErrorNotification(String message) {
+  showNotification(message, type: ToastificationType.error);
+}

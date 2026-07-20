@@ -14,6 +14,7 @@ import 'package:remembeer/leaderboard/service/month_service.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
+import 'package:remembeer/session/service/session_picture_service.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/service/user_service.dart';
@@ -115,6 +116,12 @@ class IoCContainer {
           authService: get<AuthService>(),
           sessionController: get<SessionController>(),
           userController: get<UserController>(),
+        ),
+      )
+      ..registerSingleton(
+        SessionPictureService(
+          authService: get<AuthService>(),
+          sessionController: get<SessionController>(),
         ),
       );
   }
