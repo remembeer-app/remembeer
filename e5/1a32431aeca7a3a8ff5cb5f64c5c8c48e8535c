@@ -1,0 +1,33 @@
+lib/activity/widget/session_card.dart
+  s_a0041f48479c13::t_0d92f9044c9ec0 1
+  s_a0041f48479c13::t_f764806b291135 119-166,169-170
+  s_a0041f48479c13::t_ca18aed9562552 44-47
+  s_a0041f48479c13::t_8ef26dff0b5ac5 167-168
+  s_a0041f48479c13::t_5d6d98b1ecdd15 171-173
+lib/activity/widget/session_photos_section.dart
+  s_a0041f48479c13::t_62a4fb94a4e804 204-207,211
+  s_a0041f48479c13::t_1c3442bce78e26 1-115,118-203,208-210,212-224
+  s_a0041f48479c13::t_4f5acc10f6fc68 116
+  s_a0041f48479c13::t_3cf5c052b37951 117
+lib/activity/widget/session_photo_viewer.dart
+  s_a0041f48479c13::t_658b84c1c762ac 1-74
+lib/activity/page/session_detail_page.dart
+  s_a0041f48479c13::t_9b8e75751035b2 7
+  s_a0041f48479c13::t_0259fa1c22daf9 36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "e51a32431aeca7a3a8ff5cb5f64c5c8c48e8535c",
+  "prompts": {},
+  "sessions": {
+    "s_a0041f48479c13": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9be26e8d-04b5-41ee-926d-33266ff80788",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
