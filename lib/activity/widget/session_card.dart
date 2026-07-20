@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/activity/constants.dart';
@@ -40,6 +41,10 @@ class SessionCard extends StatelessWidget {
               _buildHeader(theme, session.name, session.endedAt!),
               const Gap(12),
               _buildMembersRow(theme),
+              if (session.hasPictures) ...[
+                const Gap(12),
+                _buildPhotosRow(theme),
+              ],
               const Gap(12),
               _buildStatsRow(theme),
             ],
@@ -102,6 +107,63 @@ class SessionCard extends StatelessWidget {
             child: Text(
               '+${members.length - avatarsOnSessionPreview}',
               style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPhotosRow(ThemeData theme) {
+    final pictureUrls = sessionWithMembers.session.pictureUrls;
+    final overflow = pictureUrls.length - thumbnailsOnSessionPreview;
+
+    return Row(
+      children: [
+        ...pictureUrls.take(thumbnailsOnSessionPreview).map((url) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: url,
+                width: 44,
+                height: 44,
+                fit: BoxFit.cover,
+                placeholder: (context, _) => Container(
+                  width: 44,
+                  height: 44,
+                  color: theme.colorScheme.surfaceContainerHighest,
+                ),
+                errorWidget: (context, _, _) => Container(
+                  width: 44,
+                  height: 44,
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.broken_image,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+
+        if (overflow > 0)
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '+$overflow',
+              style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.bold,
               ),
