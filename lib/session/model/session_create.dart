@@ -3,6 +3,7 @@ import 'package:remembeer/common/model/value_object.dart';
 import 'package:remembeer/drink/model/drink.dart';
 
 part 'session_create.freezed.dart';
+
 part 'session_create.g.dart';
 
 @freezed
@@ -12,9 +13,11 @@ abstract class SessionCreate with _$SessionCreate implements ValueObject {
     required DateTime startedAt,
     DateTime? endedAt,
     required Set<String> memberIds,
+    required Set<String> adminIds,
     @Default({}) Set<String> bannedMemberIds,
     @Default(true) bool isSoloSession,
     @Default([]) List<Drink> drinks,
+    @Default('') String description,
   }) = _SessionCreate;
 
   factory SessionCreate.fromJson(Map<String, dynamic> json) =>

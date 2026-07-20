@@ -36,6 +36,8 @@ class LoadingFormState extends State<LoadingForm> {
     TextInputType? keyboardType,
     bool isLastField = false,
     String? Function(String?)? validator,
+    int? minLines,
+    int? maxLines,
   }) {
     return TextFormField(
       controller: controller,
@@ -53,6 +55,8 @@ class LoadingFormState extends State<LoadingForm> {
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
         helperText: helperText,
       ),
+      minLines: minLines,
+      maxLines: maxLines ?? minLines ?? 1,
     );
   }
 

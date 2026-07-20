@@ -20,6 +20,7 @@ abstract class Session with _$Session implements EntityWithMembers {
     @TimestampConverterOptimistic() required DateTime updatedAt,
     @TimestampConverter() DateTime? deletedAt,
     required Set<String> memberIds,
+    required Set<String> adminIds,
     required Set<String> bannedMemberIds,
 
     required String name,
@@ -27,6 +28,7 @@ abstract class Session with _$Session implements EntityWithMembers {
     DateTime? endedAt,
     @Default([]) List<Drink> drinks,
     @Default(true) bool isSoloSession,
+    @Default('') String description,
   }) = _Session;
 
   factory Session.fromJson(Map<String, dynamic> json) =>
@@ -52,5 +54,9 @@ abstract class Session with _$Session implements EntityWithMembers {
     final hasStarted = startedAt.isBefore(at);
     final stillRunning = endedAt == null || endedAt!.isAfter(at);
     return hasStarted && stillRunning;
+  }
+
+  bool isAdmin(String userId) {
+    return adminIds.contains(userId);
   }
 }

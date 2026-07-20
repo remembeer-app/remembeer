@@ -84,6 +84,23 @@ service cloud.firestore {
       return selfAddedTo(field) || selfRemovedFrom(field);
     }
 
+    function isUnchanged(field) {
+      return !(field in request.resource.data.diff(resource.data).changedKeys());
+    }
+
+    /* =========================
+       ADMIN HELPERS
+       ========================= */
+    function isAdmin() {
+      return isSignedIn()
+        && 'adminIds' in resource.data
+        && uid() in resource.data.adminIds;
+    }
+
+    function adminIdsSelfRemovalOnly() {
+      return isUnchanged('adminIds') || selfRemovedFrom('adminIds');
+    }
+
     /* =========================
        COLLECTION RULES
        ========================= */
@@ -135,8 +152,11 @@ service cloud.firestore {
       allow update: if ownershipUnchanged()
         && (
           isOwner(resource.data)
+          || (isAdmin()
+              && onlyUpdatingFields(["name", "description", "startedAt", "endedAt", "drinks", "updatedAt"]))
           || (isSignedIn() && isMember() && notBanned()
-              && onlyUpdatingFields(["memberIds", "drinks", "updatedAt"]))
+              && onlyUpdatingFields(["memberIds", "adminIds", "drinks", "updatedAt"])
+              && adminIdsSelfRemovalOnly())
         );
     }
 

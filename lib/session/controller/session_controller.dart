@@ -84,6 +84,7 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
       startedAt: drink.consumedAt,
       endedAt: drink.consumedAt,
       memberIds: {userId},
+      adminIds: {userId},
       drinks: [drink],
     );
 
@@ -107,6 +108,7 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
     required WriteBatch batch,
     required String sessionId,
     required String name,
+    required String description,
     required DateTime startedAt,
     required List<Drink> drinksToRemove,
     DateTime? endedAt,
@@ -115,10 +117,47 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
 
     batch.update(writeCollection.doc(sessionId), {
       'name': name,
+      'description': description,
       'startedAt': startedAt.toIso8601String(),
       'endedAt': endedAt?.toIso8601String(),
       'drinks': FieldValue.arrayRemove(displacedJson),
       'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> addAdminAtomic(String sessionId, String userId) {
+    return writeCollection.doc(sessionId).update({
+      adminIdsField: FieldValue.arrayUnion([userId]),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> removeAdminAtomic(String sessionId, String userId) {
+    return writeCollection.doc(sessionId).update({
+      adminIdsField: FieldValue.arrayRemove([userId]),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> removeMemberAndAdminAtomic(String sessionId, String userId) {
+    return writeCollection.doc(sessionId).update({
+      memberIdsField: FieldValue.arrayRemove([userId]),
+      adminIdsField: FieldValue.arrayRemove([userId]),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> addAdminsAtomic(String sessionId, List<String> userIds) {
+    return writeCollection.doc(sessionId).update({
+      adminIdsField: FieldValue.arrayUnion(userIds),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> removeAdminsAtomic(String sessionId, List<String> userIds) {
+    return writeCollection.doc(sessionId).update({
+      adminIdsField: FieldValue.arrayRemove(userIds),
+      updatedAtField: FieldValue.serverTimestamp(),
     });
   }
 }

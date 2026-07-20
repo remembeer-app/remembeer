@@ -75,6 +75,10 @@ class SessionHeaderCard extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (session.description.isNotEmpty) ...[
+                  const Divider(),
+                  Text(session.description, style: theme.textTheme.bodyMedium),
+                ],
               ],
             ),
           ),
