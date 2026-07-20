@@ -160,4 +160,18 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
       updatedAtField: FieldValue.serverTimestamp(),
     });
   }
+
+  Future<void> addPicturesAtomic(String sessionId, List<String> pictureUrls) {
+    return writeCollection.doc(sessionId).update({
+      pictureUrlsFields: FieldValue.arrayUnion(pictureUrls),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> removePictureAtomic(String sessionId, String pictureUrl) {
+    return writeCollection.doc(sessionId).update({
+      pictureUrlsFields: FieldValue.arrayRemove([pictureUrl]),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
 }

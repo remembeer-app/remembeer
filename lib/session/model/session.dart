@@ -29,6 +29,7 @@ abstract class Session with _$Session implements EntityWithMembers {
     @Default([]) List<Drink> drinks,
     @Default(true) bool isSoloSession,
     @Default('') String description,
+    @Default([]) List<String> pictureUrls,
   }) = _Session;
 
   factory Session.fromJson(Map<String, dynamic> json) =>
