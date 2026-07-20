@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
@@ -52,7 +52,7 @@ class _DrinkFormState extends State<DrinkForm> {
   @override
   void initState() {
     super.initState();
-    _consumedAtController.text = _formatDateTime(_selectedConsumedAt);
+    _consumedAtController.text = formatFullDateTime(_selectedConsumedAt);
     _volumeController.text = widget.initialVolume.toString();
     _volumeController.addListener(() => setState(() {}));
     _location = widget.initialLocation;
@@ -183,45 +183,6 @@ class _DrinkFormState extends State<DrinkForm> {
     }
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return DateFormat('dd MMM. yyyy, H:mm').format(dateTime);
-  }
-
-  Future<void> _selectConsumedAt() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedConsumedAt,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-    );
-    if (pickedDate == null) {
-      return;
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedConsumedAt),
-    );
-    if (pickedTime == null) {
-      return;
-    }
-
-    setState(() {
-      _selectedConsumedAt = DateTime(
-        pickedDate.year,
-        pickedDate.month,
-        pickedDate.day,
-        pickedTime.hour,
-        pickedTime.minute,
-      );
-    });
-    _consumedAtController.text = _formatDateTime(_selectedConsumedAt);
-  }
-
   Widget _buildDrinkTypeDropdown() {
     return DrinkTypePicker(
       selectedDrinkType: _selectedDrinkType,
@@ -288,16 +249,13 @@ class _DrinkFormState extends State<DrinkForm> {
   }
 
   Widget _buildConsumedAtInput(LoadingFormState form) {
-    return TextFormField(
+    return form.buildDateTimeField(
       controller: _consumedAtController,
-      readOnly: true,
-      enabled: !form.isLoading,
-      onTap: _selectConsumedAt,
-      decoration: const InputDecoration(
-        labelText: 'Consumed at',
-        border: OutlineInputBorder(),
-        suffixIcon: Icon(Icons.calendar_today),
-      ),
+      label: 'Consumed at',
+      selectedDateTime: _selectedConsumedAt,
+      onChanged: (newDateTime) =>
+          setState(() => _selectedConsumedAt = newDateTime),
+      lastDate: DateTime.now(),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please select when you consumed the drink.';

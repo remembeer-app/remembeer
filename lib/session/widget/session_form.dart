@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/session/constants.dart';
 
@@ -45,7 +45,7 @@ class _SessionFormState extends State<SessionForm> {
     super.initState();
     _nameController.text = widget.initialName;
     _descriptionController.text = widget.initialDescription;
-    _startedAtController.text = _formatDateTime(_selectedStartedAt);
+    _startedAtController.text = formatFullDateTime(_selectedStartedAt);
   }
 
   @override
@@ -82,45 +82,6 @@ class _SessionFormState extends State<SessionForm> {
     );
   }
 
-  String _formatDateTime(DateTime dateTime) {
-    return DateFormat('dd MMM. yyyy, H:mm').format(dateTime);
-  }
-
-  Future<void> _selectStartedAt() async {
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: _selectedStartedAt,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now().add(const Duration(days: 1)),
-    );
-    if (pickedDate == null) {
-      return;
-    }
-
-    if (!mounted) {
-      return;
-    }
-
-    final pickedTime = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.fromDateTime(_selectedStartedAt),
-    );
-    if (pickedTime == null) {
-      return;
-    }
-
-    setState(() {
-      _selectedStartedAt = DateTime(
-        pickedDate.year,
-        pickedDate.month,
-        pickedDate.day,
-        pickedTime.hour,
-        pickedTime.minute,
-      );
-    });
-    _startedAtController.text = _formatDateTime(_selectedStartedAt);
-  }
-
   Widget _buildNameInput(LoadingFormState form) {
     return form.buildTextField(
       controller: _nameController,
@@ -150,16 +111,13 @@ class _SessionFormState extends State<SessionForm> {
   }
 
   Widget _buildStartedAtInput(LoadingFormState form) {
-    return TextFormField(
+    return form.buildDateTimeField(
       controller: _startedAtController,
-      readOnly: true,
-      enabled: !form.isLoading,
-      onTap: _selectStartedAt,
-      decoration: const InputDecoration(
-        labelText: 'Start Time',
-        border: OutlineInputBorder(),
-        suffixIcon: Icon(Icons.calendar_today),
-      ),
+      label: 'Start Time',
+      selectedDateTime: _selectedStartedAt,
+      onChanged: (newDateTime) =>
+          setState(() => _selectedStartedAt = newDateTime),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please select when the session starts.';

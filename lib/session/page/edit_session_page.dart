@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
@@ -75,16 +75,15 @@ class EditSessionPage extends StatelessWidget {
 
   Widget _buildEndTimeButton(BuildContext context) {
     final isOngoing = session.endedAt == null;
-    final dateFormat = DateFormat('d MMM, H:mm');
 
-    // TODO(ohtenkay): This button date formatting is different from the form field. This entire page needs a design review.
+    // TODO(ohtenkay): This entire page needs a design review.
     return OutlinedButton.icon(
       onPressed: () => _showEndTimeDialog(context),
       icon: Icon(isOngoing ? Icons.check_circle_outline : Icons.event),
       label: Text(
         isOngoing
             ? 'Mark as Done'
-            : 'Ended ${dateFormat.format(session.endedAt!)}',
+            : 'Ended ${formatDayMonthTime(session.endedAt!)}',
       ),
       style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
     );
@@ -126,7 +125,6 @@ class EditSessionPage extends StatelessWidget {
   Future<void> _showEndTimeDialog(BuildContext context) async {
     final isOngoing = session.endedAt == null;
     var selectedEndTime = session.endedAt ?? DateTime.now();
-    final timeFormat = DateFormat('dd MMM. yyyy, H:mm');
 
     final confirmed = await showDialog<bool>(
       context: context,
@@ -166,7 +164,7 @@ class EditSessionPage extends StatelessWidget {
                         children: [
                           const Icon(Icons.access_time),
                           const Gap(12),
-                          Text(timeFormat.format(selectedEndTime)),
+                          Text(formatFullDateTime(selectedEndTime)),
                           const Spacer(),
                           const Icon(Icons.edit_outlined, size: 18),
                         ],

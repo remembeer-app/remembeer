@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
 import 'package:remembeer/common/enum/swipe_direction.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/date/type/date_state.dart';
@@ -140,14 +140,7 @@ class DateSelector extends StatelessWidget {
   }
 
   String _formatDate(DateState dateState) {
-    final date = DateUtils.dateOnly(dateState.selectedDate);
-    final nowDate = DateUtils.dateOnly(dateState.effectiveToday);
-
-    return switch (date.difference(nowDate).inDays) {
-      0 => 'Today',
-      -1 => 'Yesterday',
-      _ => DateFormat('EEE, d MMM yyyy').format(date),
-    };
+    return formatRelativeDay(dateState.selectedDate, dateState.effectiveToday);
   }
 
   void _handleSwipe(DragEndDetails details, bool isToday) {

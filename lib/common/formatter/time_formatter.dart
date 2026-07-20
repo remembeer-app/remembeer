@@ -2,6 +2,51 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 
+final _timeFormat = DateFormat('H:mm');
+final _dayMonthFormat = DateFormat('d. MMM');
+final _dayMonthYearFormat = DateFormat('d. MMM yyyy');
+final _fullDateTimeFormat = DateFormat('dd MMM. yyyy, H:mm');
+final _weekdayDateFormat = DateFormat('EEE, d MMM yyyy');
+final _weekdayTimeFormat = DateFormat('EEEE H:mm');
+final _yesterdayTimeFormat = DateFormat("'Yesterday at' H:mm");
+final _monthYearFormat = DateFormat('MMMM yyyy');
+
+/// Formats a time of day, e.g. "14:30".
+String formatTime(DateTime dateTime) => _timeFormat.format(dateTime);
+
+/// Formats a day and month, e.g. "28. Mar".
+String formatDayMonth(DateTime dateTime) => _dayMonthFormat.format(dateTime);
+
+/// Formats a day, month and time, e.g. "28. Mar, 14:30".
+String formatDayMonthTime(DateTime dateTime) =>
+    '${_dayMonthFormat.format(dateTime)}, ${_timeFormat.format(dateTime)}';
+
+/// Formats a full timestamp, e.g. "28 Mar. 2026, 14:30".
+///
+/// Used by form fields and dialogs where the exact moment matters.
+String formatFullDateTime(DateTime dateTime) =>
+    _fullDateTimeFormat.format(dateTime);
+
+/// Formats a month of a year, e.g. "March 2026".
+String formatMonthYear(int year, int month) =>
+    _monthYearFormat.format(DateTime(year, month));
+
+/// Formats a date relative to [effectiveToday] (the current logical day):
+/// "Today", "Yesterday", or a full date like "Sat, 28 Mar 2026".
+///
+/// Both arguments are compared by calendar day only; callers should pass
+/// dates that already account for the end-of-day boundary.
+String formatRelativeDay(DateTime date, DateTime effectiveToday) {
+  final dateOnly = DateUtils.dateOnly(date);
+  final todayOnly = DateUtils.dateOnly(effectiveToday);
+
+  return switch (dateOnly.difference(todayOnly).inDays) {
+    0 => 'Today',
+    -1 => 'Yesterday',
+    _ => _weekdayDateFormat.format(date),
+  };
+}
+
 /// Format a session time range accounting for the user's end-of-day boundary.
 ///
 /// This function determines whether session start/end times should display
@@ -19,8 +64,6 @@ String formatSessionTimeRange(
   TimeOfDay endOfDayBoundary,
 ) {
   final now = DateTime.now();
-  final timeFormat = DateFormat('H:mm');
-  final dateFormat = DateFormat('d. MMM');
 
   final effectiveToday = effectiveDate(now, endOfDayBoundary);
   final effectiveSessionStart = effectiveDate(start, endOfDayBoundary);
@@ -30,20 +73,21 @@ String formatSessionTimeRange(
     effectiveToday,
   );
 
-  final startDatePart = isStartToday ? '' : '${dateFormat.format(start)}, ';
-  final startTime = timeFormat.format(start);
+  final startPart = isStartToday
+      ? formatTime(start)
+      : formatDayMonthTime(start);
 
   if (end == null) {
-    return '$startDatePart$startTime – still going';
+    return '$startPart – still going';
   }
 
-  final isEndToday =
-      end.year == now.year && end.month == now.month && end.day == now.day;
+  final effectiveSessionEnd = effectiveDate(end, endOfDayBoundary);
 
-  final endDatePart = isEndToday ? '' : '${dateFormat.format(end)}, ';
-  final endTime = timeFormat.format(end);
+  final isEndToday = DateUtils.isSameDay(effectiveSessionEnd, effectiveToday);
 
-  return '$startDatePart$startTime – $endDatePart$endTime';
+  final endPart = isEndToday ? formatTime(end) : formatDayMonthTime(end);
+
+  return '$startPart – $endPart';
 }
 
 /// Formats a [dateTime] as a relative time string, accounting for the user's
@@ -59,7 +103,8 @@ String formatSessionTimeRange(
 /// - "3h ago" (< 24 hours)
 /// - "Yesterday at 23:30" (yesterday's logical day)
 /// - "Monday 14:30" (within last 7 days)
-/// - "Mar 15" (older than 7 days)
+/// - "15. Mar" (older than 7 days)
+/// - "15. Mar 2025" (previous years)
 String timeAgo(DateTime dateTime, TimeOfDay endOfDayBoundary) {
   final now = DateTime.now();
   final difference = now.difference(dateTime);
@@ -73,15 +118,15 @@ String timeAgo(DateTime dateTime, TimeOfDay endOfDayBoundary) {
   final daysDifference = effectiveToday.difference(effectiveDateTime).inDays;
 
   if (daysDifference == 1) {
-    return DateFormat("'Yesterday at' HH:mm").format(dateTime);
+    return _yesterdayTimeFormat.format(dateTime);
   }
-  if (daysDifference < 7) return DateFormat('EEEE HH:mm').format(dateTime);
+  if (daysDifference < 7) return _weekdayTimeFormat.format(dateTime);
 
   if (dateTime.year != now.year) {
-    return DateFormat('MMM d, yyyy').format(dateTime);
+    return _dayMonthYearFormat.format(dateTime);
   }
 
-  return DateFormat('MMM d').format(dateTime);
+  return formatDayMonth(dateTime);
 }
 
 /// Formats the difference between [start] and [end] into a human-readable string.

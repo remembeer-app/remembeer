@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 
 class MidnightDivider extends StatelessWidget {
   final DateTime fromDate;
@@ -15,7 +15,6 @@ class MidnightDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dateFormat = DateFormat('MMM d');
     final lowerDate = fromDate.isBefore(toDate) ? fromDate : toDate;
     final higherDate = fromDate.isBefore(toDate) ? toDate : fromDate;
 
@@ -36,7 +35,7 @@ class MidnightDivider extends StatelessWidget {
                 ),
                 const Gap(6),
                 Text(
-                  '${dateFormat.format(lowerDate)} → ${dateFormat.format(higherDate)}',
+                  '${formatDayMonth(lowerDate)} → ${formatDayMonth(higherDate)}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: theme.colorScheme.outline,
                     fontWeight: FontWeight.w500,

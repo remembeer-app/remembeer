@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
+import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -174,9 +174,8 @@ class SummaryPage extends StatelessWidget {
     final sorted = List<Drink>.from(drinks)
       ..sort((a, b) => a.consumedAt.compareTo(b.consumedAt));
 
-    final timeFormat = DateFormat('HH:mm');
-    final startTime = timeFormat.format(sorted.first.consumedAt);
-    final endTime = timeFormat.format(sorted.last.consumedAt);
+    final startTime = formatTime(sorted.first.consumedAt);
+    final endTime = formatTime(sorted.last.consumedAt);
 
     final title = drinks.length == 1
         ? 'No Session ($startTime)'
