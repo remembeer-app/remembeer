@@ -38,7 +38,7 @@ class SessionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(theme, session.name, session.endedAt!),
+              _buildHeader(theme, session.name, session.endedAt),
               const Gap(12),
               _buildMembersRow(theme),
               if (session.hasPictures) ...[
@@ -54,7 +54,7 @@ class SessionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(ThemeData theme, String sessionName, DateTime endedAt) {
+  Widget _buildHeader(ThemeData theme, String sessionName, DateTime? endedAt) {
     return Row(
       children: [
         Icon(Icons.table_bar, size: 20, color: theme.colorScheme.primary),
@@ -67,20 +67,31 @@ class SessionCard extends StatelessWidget {
             ),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.secondaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            timeAgo(endedAt, endOfDayBoundary),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSecondaryContainer,
-            ),
-          ),
-        ),
+        _buildStatusChip(theme, endedAt),
       ],
+    );
+  }
+
+  Widget _buildStatusChip(ThemeData theme, DateTime? endedAt) {
+    final isOngoing = endedAt == null;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isOngoing
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        isOngoing ? 'Ongoing' : timeAgo(endedAt, endOfDayBoundary),
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: isOngoing
+              ? theme.colorScheme.onPrimaryContainer
+              : theme.colorScheme.onSecondaryContainer,
+          fontWeight: isOngoing ? FontWeight.bold : null,
+        ),
+      ),
     );
   }
 
