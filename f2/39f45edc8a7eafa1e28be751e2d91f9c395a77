@@ -1,0 +1,24 @@
+lib/activity/service/activity_service.dart
+  s_a0041f48479c13::t_597243fe811998 48-50
+  s_a0041f48479c13::t_dfb5ac8010d064 51-76,80
+lib/activity/widget/session_card.dart
+  s_a0041f48479c13::t_2185860e88ad33 41
+  s_a0041f48479c13::t_3b102d3a2ce254 57,70,75-94
+  s_a0041f48479c13::t_b198e9a5f85324 95-97
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "f239f45edc8a7eafa1e28be751e2d91f9c395a77",
+  "prompts": {},
+  "sessions": {
+    "s_a0041f48479c13": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9be26e8d-04b5-41ee-926d-33266ff80788",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Matej Klima <matej.klima5@gmail.com>"
+    }
+  }
+}
