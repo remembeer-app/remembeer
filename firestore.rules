@@ -153,7 +153,7 @@ service cloud.firestore {
         && (
           isOwner(resource.data)
           || (isAdmin()
-              && onlyUpdatingFields(["name", "description", "startedAt", "endedAt", "drinks", "updatedAt"]))
+              && onlyUpdatingFields(["name", "description", "startedAt", "endedAt", "drinks", "updatedAt", "pictureUrls"]))
           || (isSignedIn() && isMember() && notBanned()
               && onlyUpdatingFields(["memberIds", "adminIds", "drinks", "updatedAt"])
               && adminIdsSelfRemovalOnly())

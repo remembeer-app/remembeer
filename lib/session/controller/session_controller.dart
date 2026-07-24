@@ -21,6 +21,13 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
               ..sort((a, b) => b.startedAt.compareTo(a.startedAt)),
       );
 
+  Stream<List<Session>> get sharedSessionsStreamWhereCurrentUserIsMember =>
+      entitiesStreamWhereCurrentUserIsMember.map(
+        (sessions) =>
+            sessions.where((session) => !session.isSoloSession).toList()
+              ..sort((a, b) => b.startedAt.compareTo(a.startedAt)),
+      );
+
   Stream<List<Session>> sessionsForMemberIdsStream(
     Set<String> memberIds, {
     required int limit,
@@ -61,12 +68,8 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
   }
 
   Future<List<Session>> sessionsActiveAt(DateTime at) =>
-      sessionsStreamWhereCurrentUserIsMember.first.then((sessions) {
-        return sessions
-            .where(
-              (session) => !session.isSoloSession && session.isActiveAt(at),
-            )
-            .toList();
+      sharedSessionsStreamWhereCurrentUserIsMember.first.then((sessions) {
+        return sessions.where((session) => session.isActiveAt(at)).toList();
       });
 
   void addDrinkInBatch(String sessionId, Drink drink, WriteBatch batch) {
@@ -157,6 +160,20 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
   Future<void> removeAdminsAtomic(String sessionId, List<String> userIds) {
     return writeCollection.doc(sessionId).update({
       adminIdsField: FieldValue.arrayRemove(userIds),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> addPicturesAtomic(String sessionId, List<String> pictureUrls) {
+    return writeCollection.doc(sessionId).update({
+      pictureUrlsFields: FieldValue.arrayUnion(pictureUrls),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> removePictureAtomic(String sessionId, String pictureUrl) {
+    return writeCollection.doc(sessionId).update({
+      pictureUrlsFields: FieldValue.arrayRemove([pictureUrl]),
       updatedAtField: FieldValue.serverTimestamp(),
     });
   }

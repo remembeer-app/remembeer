@@ -45,16 +45,41 @@ class ActivityService {
     });
   }
 
+  Stream<List<Session>> get _myOngoingSessionsStream => sessionController
+      .sharedSessionsStreamWhereCurrentUserIsMember
+      .map((sessions) => sessions.where((s) => s.endedAt == null).toList());
+
+  Stream<({List<Session> sessions, bool hasMore})> get _feedSessionsStream {
+    return Rx.combineLatest3(
+      _myOngoingSessionsStream,
+      _friendsSessionsStream,
+      _limitSubject,
+      (ongoing, ended, limit) {
+        final merged = [...ongoing, ...ended]..sort(_feedSort);
+        return (sessions: merged, hasMore: ended.length >= limit);
+      },
+    );
+  }
+
+  int _feedSort(Session a, Session b) {
+    final aOngoing = a.endedAt == null;
+    final bOngoing = b.endedAt == null;
+
+    if (aOngoing != bOngoing) {
+      return aOngoing ? -1 : 1;
+    }
+    if (aOngoing) {
+      return b.startedAt.compareTo(a.startedAt);
+    }
+    return b.endedAt!.compareTo(a.endedAt!);
+  }
+
   // TODO(metju-ac): Add other activity types (e.g. friend requests, badges earned, etc.)
   Stream<({List<SessionWithMembers> sessions, bool hasMore})>
   get activityFeedStream {
-    return Rx.combineLatest2(
-      _friendsSessionsStream,
-      _limitSubject,
-      (sessions, limit) => (sessions: sessions, limit: limit),
-    ).switchMap((data) {
+    return _feedSessionsStream.switchMap((data) {
       final sessions = data.sessions;
-      final limit = data.limit;
+      final hasMore = data.hasMore;
 
       if (sessions.isEmpty) {
         return Stream.value((sessions: <SessionWithMembers>[], hasMore: false));
@@ -75,7 +100,7 @@ class ActivityService {
 
       return Rx.combineLatestList(
         sessionsWithMembers,
-      ).map((list) => (sessions: list, hasMore: list.length >= limit));
+      ).map((list) => (sessions: list, hasMore: hasMore));
     });
   }
 }

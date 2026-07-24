@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/activity/constants.dart';
@@ -37,9 +38,13 @@ class SessionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(theme, session.name, session.endedAt!),
+              _buildHeader(theme, session.name, session.endedAt),
               const Gap(12),
               _buildMembersRow(theme),
+              if (session.hasPictures) ...[
+                const Gap(12),
+                _buildPhotosRow(theme),
+              ],
               const Gap(12),
               _buildStatsRow(theme),
             ],
@@ -49,7 +54,7 @@ class SessionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(ThemeData theme, String sessionName, DateTime endedAt) {
+  Widget _buildHeader(ThemeData theme, String sessionName, DateTime? endedAt) {
     return Row(
       children: [
         Icon(Icons.table_bar, size: 20, color: theme.colorScheme.primary),
@@ -62,20 +67,31 @@ class SessionCard extends StatelessWidget {
             ),
           ),
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          decoration: BoxDecoration(
-            color: theme.colorScheme.secondaryContainer,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            timeAgo(endedAt, endOfDayBoundary),
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: theme.colorScheme.onSecondaryContainer,
-            ),
-          ),
-        ),
+        _buildStatusChip(theme, endedAt),
       ],
+    );
+  }
+
+  Widget _buildStatusChip(ThemeData theme, DateTime? endedAt) {
+    final isOngoing = endedAt == null;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: isOngoing
+            ? theme.colorScheme.primaryContainer
+            : theme.colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Text(
+        isOngoing ? 'Ongoing' : timeAgo(endedAt, endOfDayBoundary),
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: isOngoing
+              ? theme.colorScheme.onPrimaryContainer
+              : theme.colorScheme.onSecondaryContainer,
+          fontWeight: isOngoing ? FontWeight.bold : null,
+        ),
+      ),
     );
   }
 
@@ -102,6 +118,63 @@ class SessionCard extends StatelessWidget {
             child: Text(
               '+${members.length - avatarsOnSessionPreview}',
               style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildPhotosRow(ThemeData theme) {
+    final pictureUrls = sessionWithMembers.session.pictureUrls;
+    final overflow = pictureUrls.length - thumbnailsOnSessionPreview;
+
+    return Row(
+      children: [
+        ...pictureUrls.take(thumbnailsOnSessionPreview).map((url) {
+          return Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: CachedNetworkImage(
+                imageUrl: url,
+                width: 44,
+                height: 44,
+                fit: BoxFit.cover,
+                placeholder: (context, _) => Container(
+                  width: 44,
+                  height: 44,
+                  color: theme.colorScheme.surfaceContainerHighest,
+                ),
+                errorWidget: (context, _, _) => Container(
+                  width: 44,
+                  height: 44,
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  child: Icon(
+                    Icons.broken_image,
+                    size: 20,
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }),
+
+        if (overflow > 0)
+          Container(
+            width: 44,
+            height: 44,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surfaceContainerHighest,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              '+$overflow',
+              style: theme.textTheme.labelMedium?.copyWith(
                 color: theme.colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.bold,
               ),

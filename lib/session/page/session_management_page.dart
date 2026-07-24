@@ -19,7 +19,7 @@ class SessionManagementPage extends StatelessWidget {
     return PageTemplate(
       title: const Text('Session Management'),
       child: AsyncBuilder<List<Session>>(
-        stream: _sessionService.sessionsWhereCurrentUserIsMemberStream,
+        stream: _sessionService.sharedSessionsWhereCurrentUserIsMemberStream,
         builder: (context, sessions) {
           if (sessions.isEmpty) {
             return _buildEmptyState(context);

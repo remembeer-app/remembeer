@@ -13,5 +13,15 @@ service firebase.storage {
                    && request.resource.contentType == 'image/jpeg'
                    && request.resource.size < 200 * 1024;
     }
+
+    match /sessions/{sessionId}/{fileName} {
+      allow read:   if request.auth != null;
+
+      allow delete: if request.auth != null;
+
+      allow write:  if request.auth != null
+                    && request.resource.contentType == 'image/jpeg'
+                    && request.resource.size < 2 * 1024 * 1024;
+    }
   }
 }

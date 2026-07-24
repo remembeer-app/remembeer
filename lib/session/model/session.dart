@@ -29,6 +29,7 @@ abstract class Session with _$Session implements EntityWithMembers {
     @Default([]) List<Drink> drinks,
     @Default(true) bool isSoloSession,
     @Default('') String description,
+    @Default([]) List<String> pictureUrls,
   }) = _Session;
 
   factory Session.fromJson(Map<String, dynamic> json) =>
@@ -49,6 +50,10 @@ abstract class Session with _$Session implements EntityWithMembers {
         startDate.month != endDate.month ||
         startDate.day != endDate.day;
   }
+
+  bool get hasPictures => pictureUrls.isNotEmpty;
+
+  int get picturesRemaining => maxSessionPictures - pictureUrls.length;
 
   bool isActiveAt(DateTime at) {
     final hasStarted = startedAt.isBefore(at);
