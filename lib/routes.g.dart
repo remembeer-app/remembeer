@@ -12,8 +12,11 @@ List<RouteBase> get $appRoutes => [
   $userProfileRoute,
 ];
 
-RouteBase get $loginRoute =>
-    GoRouteData.$route(path: '/login', factory: $LoginRoute._fromState);
+RouteBase get $loginRoute => GoRouteData.$route(
+  path: '/login',
+  hasOverriddenOnExit: false,
+  factory: $LoginRoute._fromState,
+);
 
 mixin $LoginRoute on GoRouteData {
   static LoginRoute _fromState(GoRouterState state) => const LoginRoute();
@@ -42,10 +45,12 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/profile',
+          hasOverriddenOnExit: false,
           factory: $ProfileRoute._fromState,
           routes: [
             GoRouteData.$route(
               path: 'friend_requests',
+              hasOverriddenOnExit: false,
               factory: $FriendRequestsRoute._fromState,
             ),
           ],
@@ -56,19 +61,25 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/leaderboards',
+          hasOverriddenOnExit: false,
           factory: $LeaderboardsRoute._fromState,
         ),
       ],
     ),
     StatefulShellBranchData.$branch(
       routes: [
-        GoRouteData.$route(path: '/drink', factory: $DrinkRoute._fromState),
+        GoRouteData.$route(
+          path: '/drink',
+          hasOverriddenOnExit: false,
+          factory: $DrinkRoute._fromState,
+        ),
       ],
     ),
     StatefulShellBranchData.$branch(
       routes: [
         GoRouteData.$route(
           path: '/activity',
+          hasOverriddenOnExit: false,
           factory: $ActivityRoute._fromState,
         ),
       ],
@@ -77,6 +88,7 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
       routes: [
         GoRouteData.$route(
           path: '/settings',
+          hasOverriddenOnExit: false,
           factory: $SettingsRoute._fromState,
         ),
       ],
@@ -213,6 +225,7 @@ mixin $SettingsRoute on GoRouteData {
 
 RouteBase get $userProfileRoute => GoRouteData.$route(
   path: '/user/:userId',
+  hasOverriddenOnExit: false,
   factory: $UserProfileRoute._fromState,
 );
 
