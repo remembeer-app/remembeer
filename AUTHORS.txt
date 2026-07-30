@@ -1,0 +1,4 @@
+# Project Authors
+
+Matěj Klíma <matej.klima5@gmail.com>
+Ondřej Hložek <hlozek.o1@gmail.com>
