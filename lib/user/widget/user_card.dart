@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/page/profile_page.dart';
 
 class UserCard extends StatelessWidget {
   final UserModel user;
@@ -21,13 +21,11 @@ class UserCard extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           onTap: () {
-            final route = MaterialPageRoute<void>(
-              builder: (context) => ProfilePage(userId: user.id),
-            );
+            final route = UserProfileRoute(userId: user.id);
             if (replaceRoute) {
-              Navigator.of(context).pushReplacement(route);
+              route.pushReplacement(context);
             } else {
-              Navigator.of(context).push(route);
+              route.push<void>(context);
             }
           },
         ),

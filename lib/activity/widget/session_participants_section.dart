@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/page/profile_page.dart';
 
 class SessionParticipantsSection extends StatelessWidget {
   final List<UserModel> members;
@@ -50,11 +50,7 @@ class SessionParticipantsSection extends StatelessWidget {
       margin: EdgeInsets.zero,
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (context) => ProfilePage(userId: member.id),
-          ),
-        ),
+        onTap: () => UserProfileRoute(userId: member.id).push<void>(context),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
