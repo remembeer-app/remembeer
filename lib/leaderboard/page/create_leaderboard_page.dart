@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
@@ -25,7 +26,7 @@ class CreateLeaderboardPage extends StatelessWidget {
             iconName: icon.name,
           );
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
       ),

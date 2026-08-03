@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
@@ -28,7 +29,7 @@ class AddDrinkTypePage extends StatelessWidget {
             ),
           );
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
       ),

@@ -1,33 +1,48 @@
 import 'package:flutter/cupertino.dart';
+import 'package:go_router/go_router.dart';
+import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink/type/drink_with_session_id.dart';
 import 'package:remembeer/drink/widget/drink_form.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 
 class UpdateDrinkPage extends StatelessWidget {
-  final DrinkWithSessionId drinkWithSessionId;
+  final String sessionId;
+  final String drinkId;
 
-  UpdateDrinkPage({super.key, required this.drinkWithSessionId});
+  UpdateDrinkPage({super.key, required this.sessionId, required this.drinkId});
 
   final _drinkService = get<DrinkService>();
 
-  Drink get _drink => drinkWithSessionId.drink;
-
   @override
   Widget build(BuildContext context) {
+    return AsyncBuilder<DrinkWithSessionId>(
+      stream: _drinkService.drinkWithSessionIdStream(
+        sessionId: sessionId,
+        drinkId: drinkId,
+      ),
+      builder: _buildPage,
+    );
+  }
+
+  Widget _buildPage(
+    BuildContext context,
+    DrinkWithSessionId drinkWithSessionId,
+  ) {
+    final drink = drinkWithSessionId.drink;
+
     return PageTemplate(
       title: const Text('Update Drink'),
       child: DrinkForm(
-        initialDrinkType: _drink.drinkType,
-        initialConsumedAt: _drink.consumedAt,
-        initialVolume: _drink.volumeInMilliliters,
-        initialLocation: _drink.location,
+        initialDrinkType: drink.drinkType,
+        initialConsumedAt: drink.consumedAt,
+        initialVolume: drink.volumeInMilliliters,
+        initialLocation: drink.location,
         onSubmit: (drinkType, consumedAt, volumeInMilliliters, location) async {
           await _drinkService.updateDrink(
-            oldDrink: _drink,
-            newDrink: _drink.copyWith(
+            oldDrink: drink,
+            newDrink: drink.copyWith(
               consumedAt: consumedAt,
               drinkType: drinkType,
               volumeInMilliliters: volumeInMilliliters,
@@ -36,7 +51,7 @@ class UpdateDrinkPage extends StatelessWidget {
             sessionId: drinkWithSessionId.originalSessionId,
           );
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
       ),

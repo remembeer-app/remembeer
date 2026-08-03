@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
 import 'package:remembeer/drink_type/model/drink_type.dart';
@@ -6,14 +8,21 @@ import 'package:remembeer/drink_type/widget/drink_type_form.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 
 class UpdateDrinkTypePage extends StatelessWidget {
-  final DrinkType drinkTypeToUpdate;
+  final String drinkTypeId;
 
-  UpdateDrinkTypePage({super.key, required this.drinkTypeToUpdate});
+  UpdateDrinkTypePage({super.key, required this.drinkTypeId});
 
   final _drinkTypeController = get<DrinkTypeController>();
 
   @override
   Widget build(BuildContext context) {
+    return AsyncBuilder<DrinkType>(
+      stream: _drinkTypeController.streamById(drinkTypeId),
+      builder: _buildPage,
+    );
+  }
+
+  Widget _buildPage(BuildContext context, DrinkType drinkTypeToUpdate) {
     return PageTemplate(
       title: const Text('Update Custom Drink Type'),
       child: DrinkTypeForm(
@@ -29,13 +38,13 @@ class UpdateDrinkTypePage extends StatelessWidget {
             ),
           );
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
         onDelete: () async {
           await _drinkTypeController.deleteSingle(drinkTypeToUpdate);
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
       ),

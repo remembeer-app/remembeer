@@ -1,6 +1,7 @@
 import 'package:remembeer/activity/constants.dart';
 import 'package:remembeer/activity/model/session_with_members.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
@@ -49,6 +50,34 @@ class ActivityService {
       .sharedSessionsStreamWhereCurrentUserIsMember
       .map((sessions) => sessions.where((s) => s.endedAt == null).toList());
 
+  Stream<SessionWithMembers> sessionWithMembersStream(String sessionId) {
+    return Rx.combineLatest2(
+      sessionController.streamById(sessionId),
+      userController.currentUserStream,
+      (session, currentUser) {
+        final relatedUserIds = {...currentUser.friends, currentUser.id};
+        invariant(
+          session.memberIds.any(relatedUserIds.contains),
+          'Activity session must involve the current user or a friend',
+        );
+        return session;
+      },
+    ).switchMap(_sessionWithMembersStream);
+  }
+
+  Stream<SessionWithMembers> _sessionWithMembersStream(Session session) {
+    final memberStreams = session.memberIds
+        .map(userController.streamById)
+        .toList();
+
+    return Rx.combineLatestList(memberStreams).map((users) {
+      final userMap = <String, UserModel>{
+        for (final user in users) user.id: user,
+      };
+      return SessionWithMembers(session: session, members: userMap);
+    });
+  }
+
   Stream<({List<Session> sessions, bool hasMore})> get _feedSessionsStream {
     return Rx.combineLatest3(
       _myOngoingSessionsStream,
@@ -85,18 +114,9 @@ class ActivityService {
         return Stream.value((sessions: <SessionWithMembers>[], hasMore: false));
       }
 
-      final sessionsWithMembers = sessions.map((session) {
-        final memberStreams = session.memberIds
-            .map(userController.streamById)
-            .toList();
-
-        return Rx.combineLatestList(memberStreams).map((users) {
-          final userMap = <String, UserModel>{
-            for (final user in users) user.id: user,
-          };
-          return SessionWithMembers(session: session, members: userMap);
-        });
-      }).toList();
+      final sessionsWithMembers = sessions
+          .map(_sessionWithMembersStream)
+          .toList();
 
       return Rx.combineLatestList(
         sessionsWithMembers,

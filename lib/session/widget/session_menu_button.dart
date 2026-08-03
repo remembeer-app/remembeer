@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/session/page/create_session_page.dart';
-import 'package:remembeer/session/page/session_management_page.dart';
-import 'package:remembeer/session/page/summary_page.dart';
+import 'package:remembeer/routes.dart';
 
 class SessionMenuButton extends StatelessWidget {
   const SessionMenuButton({super.key});
@@ -16,24 +14,14 @@ class SessionMenuButton extends StatelessWidget {
       onSelected: (value) {
         switch (value) {
           case 'create':
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => CreateSessionPage(),
-              ),
-            );
+            const CreateSessionRoute().push<void>(context);
           case 'summary':
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(builder: (context) => SummaryPage()),
-            );
+            const SessionSummaryRoute().push<void>(context);
           case 'signature':
             // TODO(ohtenkay): Implement signature drinks
             break;
           case 'manage':
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => SessionManagementPage(),
-              ),
-            );
+            const SessionManagementRoute().push<void>(context);
         }
       },
       itemBuilder: (context) => [

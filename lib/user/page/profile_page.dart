@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
@@ -11,12 +10,10 @@ import 'package:remembeer/friend_request/model/friendship_status.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/page/search_user_page.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user/widget/badges_section.dart';
 import 'package:remembeer/user/widget/consumption_section.dart';
 import 'package:remembeer/user/widget/social_section.dart';
-import 'package:remembeer/user_settings/page/username_page.dart';
 
 class ProfilePage extends StatelessWidget {
   final String userId;
@@ -92,11 +89,7 @@ class ProfilePage extends StatelessWidget {
   ) {
     return InkWell(
       onTap: isCurrentUser
-          ? () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const ChangeAvatarPage(),
-              ),
-            )
+          ? () => const ProfileChangeAvatarRoute().push<void>(context)
           : null,
       child: Stack(
         children: [
@@ -139,13 +132,7 @@ class ProfilePage extends StatelessWidget {
           },
         ),
         ElevatedButton.icon(
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const SearchUserPage(),
-              ),
-            );
-          },
+          onPressed: () => const UserSearchRoute().push<void>(context),
           icon: const Icon(Icons.search),
           label: const Text('Search for friends'),
           style: ElevatedButton.styleFrom(
@@ -216,13 +203,7 @@ class ProfilePage extends StatelessWidget {
   ) {
     return InkWell(
       onTap: isCurrentUser
-          ? () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (context) => const UserNamePage(),
-                ),
-              );
-            }
+          ? () => const ProfileUsernameRoute().push<void>(context)
           : null,
       child: Text(
         user.username,

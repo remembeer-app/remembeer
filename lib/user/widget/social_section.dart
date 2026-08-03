@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/page/friends_list_page.dart';
 import 'package:remembeer/user/service/user_stats_service.dart';
 
 class SocialSection extends StatelessWidget {
@@ -35,13 +35,11 @@ class SocialSection extends StatelessWidget {
           value: user.friends.length.toString(),
           label: 'Friends',
           onTap: () {
-            final route = MaterialPageRoute<void>(
-              builder: (context) => FriendsListPage(userId: user.id),
-            );
+            final route = UserFriendsRoute(userId: user.id);
             if (isCurrentUser) {
-              Navigator.of(context).push(route);
+              route.push<void>(context);
             } else {
-              Navigator.of(context).pushReplacement(route);
+              route.pushReplacement(context);
             }
           },
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/formatter/uppercase_formatter.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -167,7 +168,7 @@ class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
     switch (result) {
       case JoinLeaderboardResult.success:
       case JoinLeaderboardResult.alreadyMember:
-        Navigator.of(context).pop();
+        context.pop();
       case JoinLeaderboardResult.full:
         setState(() {
           _foundLeaderboard = null;
