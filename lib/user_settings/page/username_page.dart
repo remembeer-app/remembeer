@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/constants.dart';
@@ -74,7 +75,7 @@ class _UserNamePageState extends State<UserNamePage> {
     await form.runAction(() async {
       await _userService.updateUsername(newUsername: _usernameController.text);
       if (mounted) {
-        Navigator.of(context).pop();
+        context.pop();
       }
     });
   }

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/auth/constants.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
@@ -134,7 +135,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
     if (context.mounted) {
       showSuccessNotification('Password changed successfully.');
-      Navigator.of(context).pop();
+      context.pop();
     }
   }
 }

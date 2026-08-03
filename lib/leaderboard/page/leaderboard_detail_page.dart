@@ -112,7 +112,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
       onPressed: () async {
         await _leaderboardService.leaveLeaderboard(leaderboard);
         if (context.mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          const LeaderboardsRoute().go(context);
         }
       },
     );

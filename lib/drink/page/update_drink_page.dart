@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
@@ -50,7 +51,7 @@ class UpdateDrinkPage extends StatelessWidget {
             sessionId: drinkWithSessionId.originalSessionId,
           );
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
       ),

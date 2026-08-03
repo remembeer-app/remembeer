@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
@@ -41,7 +42,7 @@ class EditSessionPage extends StatelessWidget {
             startedAt: startedAt,
           );
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
         additionalActions: _buildAdditionalActions(context, session),
@@ -121,7 +122,7 @@ class EditSessionPage extends StatelessWidget {
       onPressed: () async {
         await _sessionService.deleteSession(session);
         if (context.mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          const DrinkRoute().go(context);
         }
       },
     );
@@ -201,7 +202,7 @@ class EditSessionPage extends StatelessWidget {
         endedAt: selectedEndTime,
       );
       if (context.mounted) {
-        Navigator.of(context).pop();
+        context.pop();
       }
     }
   }

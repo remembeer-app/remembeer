@@ -326,7 +326,7 @@ class ManageLeaderboardPage extends StatelessWidget {
       onPressed: () async {
         await _leaderboardService.deleteLeaderboard(currentLeaderboard);
         if (context.mounted) {
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          const LeaderboardsRoute().go(context);
         }
       },
     );

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/auth/constants.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
@@ -158,7 +159,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _buildLoginLink(BuildContext context, LoadingFormState form) {
     return TextButton(
-      onPressed: form.isLoading ? null : () => Navigator.of(context).pop(),
+      onPressed: form.isLoading ? null : () => context.pop(),
       child: const Text('Already have an account? Login'),
     );
   }
@@ -175,7 +176,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     if (context.mounted) {
-      Navigator.of(context).pop();
+      context.pop();
     }
   }
 }

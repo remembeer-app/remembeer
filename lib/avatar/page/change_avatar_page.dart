@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
@@ -178,7 +179,7 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
       final result = await _avatarService.changeAvatar(context, source);
 
       if (result != null && mounted) {
-        Navigator.of(context).pop();
+        context.pop();
       }
     } on Exception catch (_) {
       setState(() => _errorMessage = 'Failed to update avatar');
@@ -232,7 +233,7 @@ class _ChangeAvatarPageState extends State<ChangeAvatarPage> {
         try {
           await _avatarService.deleteAvatar();
           if (mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         } on Exception catch (_) {
           setState(() => _errorMessage = 'Failed to remove avatar');

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
@@ -37,13 +38,13 @@ class UpdateDrinkTypePage extends StatelessWidget {
             ),
           );
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
         onDelete: () async {
           await _drinkTypeController.deleteSingle(drinkTypeToUpdate);
           if (context.mounted) {
-            Navigator.of(context).pop();
+            context.pop();
           }
         },
       ),
