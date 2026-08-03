@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/activity/constants.dart';
 import 'package:remembeer/activity/model/session_with_members.dart';
-import 'package:remembeer/activity/page/session_detail_page.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/routes.dart';
 
 class SessionCard extends StatelessWidget {
   final SessionWithMembers sessionWithMembers;
@@ -27,11 +27,8 @@ class SessionCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (context) => SessionDetailPage(sessionId: session.id),
-          ),
-        ),
+        onTap: () =>
+            ActivitySessionRoute(sessionId: session.id).push<void>(context),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(

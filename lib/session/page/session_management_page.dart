@@ -5,8 +5,8 @@ import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/model/session.dart';
-import 'package:remembeer/session/page/edit_session_page.dart';
 import 'package:remembeer/session/service/session_service.dart';
 
 class SessionManagementPage extends StatelessWidget {
@@ -147,12 +147,8 @@ class SessionManagementPage extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
                 tooltip: 'Edit session',
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) =>
-                        EditSessionPage(sessionId: session.id),
-                  ),
-                ),
+                onPressed: () =>
+                    EditSessionRoute(sessionId: session.id).push<void>(context),
               )
             else
               IconButton(

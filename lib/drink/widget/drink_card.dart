@@ -6,10 +6,10 @@ import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink/page/update_drink_page.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink/type/drink_with_session_id.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 
 class DrinkCard extends StatelessWidget {
   final DrinkWithSessionId drinkWithSessionId;
@@ -72,16 +72,10 @@ class DrinkCard extends StatelessWidget {
           onPressed: () => _showDeleteConfirmation(context),
           icon: const Icon(Icons.delete_outline, color: Colors.red),
         ),
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (context) => UpdateDrinkPage(
-                sessionId: drinkWithSessionId.originalSessionId,
-                drinkId: _drink.id,
-              ),
-            ),
-          );
-        },
+        onTap: () => UpdateDrinkRoute(
+          sessionId: drinkWithSessionId.originalSessionId,
+          drinkId: _drink.id,
+        ).push<void>(context),
       ),
     );
   }

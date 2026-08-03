@@ -3,10 +3,9 @@ import 'package:gap/gap.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/constants.dart';
 import 'package:remembeer/session/model/session.dart';
-import 'package:remembeer/session/page/add_friends_to_session_page.dart';
-import 'package:remembeer/session/page/edit_session_page.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/user/service/user_service.dart';
 
@@ -55,12 +54,9 @@ class SessionDivider extends StatelessWidget {
             tooltip: 'Add friends',
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) =>
-                    AddFriendsToSessionPage(sessionId: session.id),
-              ),
-            ),
+            onPressed: () => AddSessionFriendsRoute(
+              sessionId: session.id,
+            ).push<void>(context),
           ),
           const Spacer(),
           _buildTime(theme, iconColor),
@@ -70,11 +66,8 @@ class SessionDivider extends StatelessWidget {
               tooltip: 'Edit session',
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (context) => EditSessionPage(sessionId: session.id),
-                ),
-              ),
+              onPressed: () =>
+                  EditSessionRoute(sessionId: session.id).push<void>(context),
             ),
         ],
       ),

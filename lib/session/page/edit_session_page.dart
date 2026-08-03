@@ -5,8 +5,8 @@ import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/model/session.dart';
-import 'package:remembeer/session/page/manage_admins_page.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/session/widget/session_form.dart';
 
@@ -69,11 +69,8 @@ class EditSessionPage extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (context) => ManageAdminsPage(sessionId: session.id),
-          ),
-        ),
+        onPressed: () =>
+            ManageSessionAdminsRoute(sessionId: session.id).push<void>(context),
         style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
         icon: const Icon(Icons.admin_panel_settings),
         label: const Text('Manage Admins'),

@@ -1,11 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/activity/widget/session_photo_viewer.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_picture_service.dart';
 import 'package:remembeer/session/service/session_service.dart';
@@ -103,14 +103,10 @@ class _SessionPhotosSectionState extends State<SessionPhotosSection> {
         fit: StackFit.expand,
         children: [
           InkWell(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => SessionPhotoViewer(
-                  sessionId: session.id,
-                  initialIndex: index,
-                ),
-              ),
-            ),
+            onTap: () => SessionPhotoRoute(
+              sessionId: session.id,
+              initialIndex: index,
+            ).push<void>(context),
             child: CachedNetworkImage(
               imageUrl: urls[index],
               fit: BoxFit.cover,
