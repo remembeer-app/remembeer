@@ -3,8 +3,8 @@ import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
 import 'package:remembeer/drink_type/model/drink_type.dart';
-import 'package:remembeer/drink_type/page/update_drink_type_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 
 class DrinkTypeTile extends StatelessWidget {
   final DrinkType drinkType;
@@ -25,14 +25,9 @@ class DrinkTypeTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (context) =>
-                        UpdateDrinkTypePage(drinkTypeId: drinkType.id),
-                  ),
-                );
-              },
+              onPressed: () => UpdateDrinkTypeRoute(
+                drinkTypeId: drinkType.id,
+              ).push<void>(context),
               icon: const Icon(Icons.edit),
             ),
             IconButton(
