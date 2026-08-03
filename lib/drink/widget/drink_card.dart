@@ -75,8 +75,10 @@ class DrinkCard extends StatelessWidget {
         onTap: () {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
-              builder: (context) =>
-                  UpdateDrinkPage(drinkWithSessionId: drinkWithSessionId),
+              builder: (context) => UpdateDrinkPage(
+                sessionId: drinkWithSessionId.originalSessionId,
+                drinkId: _drink.id,
+              ),
             ),
           );
         },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
+import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/session/model/session.dart';
@@ -10,14 +11,21 @@ import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/session/widget/session_form.dart';
 
 class EditSessionPage extends StatelessWidget {
-  final Session session;
+  final String sessionId;
 
-  EditSessionPage({super.key, required this.session});
+  EditSessionPage({super.key, required this.sessionId});
 
   final _sessionService = get<SessionService>();
 
   @override
   Widget build(BuildContext context) {
+    return AsyncBuilder<Session>(
+      stream: _sessionService.sessionStream(sessionId),
+      builder: _buildPage,
+    );
+  }
+
+  Widget _buildPage(BuildContext context, Session session) {
     return PageTemplate(
       title: const Text('Edit Session'),
       child: SessionForm(
@@ -36,34 +44,34 @@ class EditSessionPage extends StatelessWidget {
             Navigator.of(context).pop();
           }
         },
-        additionalActions: _buildAdditionalActions(context),
+        additionalActions: _buildAdditionalActions(context, session),
       ),
     );
   }
 
-  Widget _buildAdditionalActions(BuildContext context) {
+  Widget _buildAdditionalActions(BuildContext context, Session session) {
     return Column(
       children: [
-        _buildManageAdminsButton(context),
+        _buildManageAdminsButton(context, session),
         const Gap(16),
         Row(
           children: [
-            Expanded(child: _buildDeleteButton(context)),
+            Expanded(child: _buildDeleteButton(context, session)),
             const Gap(16),
-            Expanded(child: _buildEndTimeButton(context)),
+            Expanded(child: _buildEndTimeButton(context, session)),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildManageAdminsButton(BuildContext context) {
+  Widget _buildManageAdminsButton(BuildContext context, Session session) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
         onPressed: () => Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (context) => ManageAdminsPage(session: session),
+            builder: (context) => ManageAdminsPage(sessionId: session.id),
           ),
         ),
         style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
@@ -73,12 +81,12 @@ class EditSessionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildEndTimeButton(BuildContext context) {
+  Widget _buildEndTimeButton(BuildContext context, Session session) {
     final isOngoing = session.endedAt == null;
 
     // TODO(ohtenkay): This entire page needs a design review.
     return OutlinedButton.icon(
-      onPressed: () => _showEndTimeDialog(context),
+      onPressed: () => _showEndTimeDialog(context, session),
       icon: Icon(isOngoing ? Icons.check_circle_outline : Icons.event),
       label: Text(
         isOngoing
@@ -89,11 +97,11 @@ class EditSessionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildDeleteButton(BuildContext context) {
+  Widget _buildDeleteButton(BuildContext context, Session session) {
     final theme = Theme.of(context);
 
     return OutlinedButton.icon(
-      onPressed: () => _showDeleteConfirmationDialog(context),
+      onPressed: () => _showDeleteConfirmationDialog(context, session),
       style: OutlinedButton.styleFrom(
         foregroundColor: theme.colorScheme.error,
         side: BorderSide(color: theme.colorScheme.error),
@@ -104,7 +112,7 @@ class EditSessionPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
+  void _showDeleteConfirmationDialog(BuildContext context, Session session) {
     showConfirmationDialog(
       context: context,
       title: 'Delete Session',
@@ -122,7 +130,7 @@ class EditSessionPage extends StatelessWidget {
     );
   }
 
-  Future<void> _showEndTimeDialog(BuildContext context) async {
+  Future<void> _showEndTimeDialog(BuildContext context, Session session) async {
     final isOngoing = session.endedAt == null;
     var selectedEndTime = session.endedAt ?? DateTime.now();
 
@@ -143,6 +151,7 @@ class EditSessionPage extends StatelessWidget {
                     onTap: () async {
                       final newTime = await _selectDateTime(
                         context,
+                        session,
                         selectedEndTime,
                       );
                       if (newTime != null) {
@@ -202,6 +211,7 @@ class EditSessionPage extends StatelessWidget {
 
   Future<DateTime?> _selectDateTime(
     BuildContext context,
+    Session session,
     DateTime initialDateTime,
   ) async {
     final pickedDate = await showDatePicker(

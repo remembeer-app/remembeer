@@ -83,6 +83,20 @@ class DrinkService {
     ).map((items) => items.map((item) => item.drink).toList());
   }
 
+  Stream<DrinkWithSessionId> drinkWithSessionIdStream({
+    required String sessionId,
+    required String drinkId,
+  }) {
+    return sessionController
+        .streamById(sessionId)
+        .map(
+          (session) => (
+            originalSessionId: session.id,
+            drink: session.drinks.singleWhere((drink) => drink.id == drinkId),
+          ),
+        );
+  }
+
   /// Creates a new drink.
   ///
   /// If exactly one session is active at the drink's consumedAt time,

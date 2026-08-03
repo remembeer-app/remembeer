@@ -149,7 +149,8 @@ class SessionManagementPage extends StatelessWidget {
                 tooltip: 'Edit session',
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute<void>(
-                    builder: (context) => EditSessionPage(session: session),
+                    builder: (context) =>
+                        EditSessionPage(sessionId: session.id),
                   ),
                 ),
               )

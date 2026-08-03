@@ -26,7 +26,7 @@ class LeaderboardCard extends StatelessWidget {
           Navigator.of(context).push(
             MaterialPageRoute<void>(
               builder: (context) =>
-                  LeaderboardDetailPage(leaderboard: leaderboard),
+                  LeaderboardDetailPage(leaderboardId: leaderboard.id),
             ),
           );
         },

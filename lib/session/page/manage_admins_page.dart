@@ -9,9 +9,9 @@ import 'package:remembeer/session/widget/user_list_tile.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 class ManageAdminsPage extends StatelessWidget {
-  final Session session;
+  final String sessionId;
 
-  ManageAdminsPage({super.key, required this.session});
+  ManageAdminsPage({super.key, required this.sessionId});
 
   final _sessionService = get<SessionService>();
 
@@ -20,7 +20,7 @@ class ManageAdminsPage extends StatelessWidget {
     return PageTemplate(
       title: const Text('Manage Admins'),
       child: AsyncBuilder<Session>(
-        stream: _sessionService.sessionStream(session.id),
+        stream: _sessionService.sessionStream(sessionId),
         builder: (context, session) {
           return AsyncBuilder<List<UserModel>>(
             stream: _sessionService.sessionMembersStream(session.id),

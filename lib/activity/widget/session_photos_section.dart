@@ -105,8 +105,10 @@ class _SessionPhotosSectionState extends State<SessionPhotosSection> {
           InkWell(
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (context) =>
-                    SessionPhotoViewer(pictureUrls: urls, initialIndex: index),
+                builder: (context) => SessionPhotoViewer(
+                  sessionId: session.id,
+                  initialIndex: index,
+                ),
               ),
             ),
             child: CachedNetworkImage(

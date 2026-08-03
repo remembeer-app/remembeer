@@ -15,9 +15,9 @@ import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 class ManageLeaderboardPage extends StatelessWidget {
-  final Leaderboard leaderboard;
+  final String leaderboardId;
 
-  ManageLeaderboardPage({super.key, required this.leaderboard});
+  ManageLeaderboardPage({super.key, required this.leaderboardId});
 
   final _userController = get<UserController>();
   final _leaderboardService = get<LeaderboardService>();
@@ -27,7 +27,7 @@ class ManageLeaderboardPage extends StatelessWidget {
     return PageTemplate(
       title: const Text('Manage Leaderboard'),
       child: AsyncBuilder<Leaderboard>(
-        stream: _leaderboardService.streamById(leaderboard.id),
+        stream: _leaderboardService.streamById(leaderboardId),
         builder: (context, currentLeaderboard) {
           return Column(
             children: [
@@ -35,7 +35,7 @@ class ManageLeaderboardPage extends StatelessWidget {
               const Gap(24),
               _buildMembersSection(context, currentLeaderboard),
               const Gap(16),
-              _buildDeleteButton(context),
+              _buildDeleteButton(context, currentLeaderboard),
             ],
           );
         },
@@ -81,7 +81,7 @@ class ManageLeaderboardPage extends StatelessWidget {
         ),
         const Gap(16),
         InkWell(
-          onTap: () => _navigateToUpdateName(context),
+          onTap: () => _navigateToUpdateName(context, currentLeaderboard),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -129,7 +129,7 @@ class ManageLeaderboardPage extends StatelessWidget {
               onPressed: () async {
                 Navigator.of(context).pop();
                 await _leaderboardService.updateLeaderboardIcon(
-                  leaderboard: leaderboard,
+                  leaderboard: currentLeaderboard,
                   newIconName: selectedIcon.name,
                 );
               },
@@ -180,11 +180,14 @@ class ManageLeaderboardPage extends StatelessWidget {
     );
   }
 
-  void _navigateToUpdateName(BuildContext context) {
+  void _navigateToUpdateName(
+    BuildContext context,
+    Leaderboard currentLeaderboard,
+  ) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (context) =>
-            UpdateLeaderboardNamePage(leaderboard: leaderboard),
+            UpdateLeaderboardNamePage(leaderboardId: currentLeaderboard.id),
       ),
     );
   }
@@ -203,8 +206,13 @@ class ManageLeaderboardPage extends StatelessWidget {
             return MemberCard(
               user: user,
               isOwner: isOwner,
-              onRemove: () => _showRemoveConfirmationDialog(context, user),
-              onBan: () => _showBanConfirmationDialog(context, user),
+              onRemove: () => _showRemoveConfirmationDialog(
+                context,
+                currentLeaderboard,
+                user,
+              ),
+              onBan: () =>
+                  _showBanConfirmationDialog(context, currentLeaderboard, user),
             );
           },
         );
@@ -222,7 +230,11 @@ class ManageLeaderboardPage extends StatelessWidget {
           builder: (context, user) {
             return BannedMemberCard(
               user: user,
-              onUnban: () => _showUnbanConfirmationDialog(context, user),
+              onUnban: () => _showUnbanConfirmationDialog(
+                context,
+                currentLeaderboard,
+                user,
+              ),
             );
           },
         );
@@ -230,7 +242,11 @@ class ManageLeaderboardPage extends StatelessWidget {
     );
   }
 
-  void _showRemoveConfirmationDialog(BuildContext context, UserModel user) {
+  void _showRemoveConfirmationDialog(
+    BuildContext context,
+    Leaderboard currentLeaderboard,
+    UserModel user,
+  ) {
     showConfirmationDialog(
       context: context,
       title: 'Remove Member',
@@ -238,13 +254,17 @@ class ManageLeaderboardPage extends StatelessWidget {
           'Are you sure you want to remove "${user.username}" from the leaderboard?',
       submitButtonText: 'Remove',
       onPressed: () => _leaderboardService.removeMember(
-        leaderboard: leaderboard,
+        leaderboard: currentLeaderboard,
         memberId: user.id,
       ),
     );
   }
 
-  void _showBanConfirmationDialog(BuildContext context, UserModel user) {
+  void _showBanConfirmationDialog(
+    BuildContext context,
+    Leaderboard currentLeaderboard,
+    UserModel user,
+  ) {
     showConfirmationDialog(
       context: context,
       title: 'Ban Member',
@@ -252,13 +272,17 @@ class ManageLeaderboardPage extends StatelessWidget {
           'Are you sure you want to ban "${user.username}" from the leaderboard?',
       submitButtonText: 'Ban',
       onPressed: () => _leaderboardService.banMember(
-        leaderboard: leaderboard,
+        leaderboard: currentLeaderboard,
         memberId: user.id,
       ),
     );
   }
 
-  void _showUnbanConfirmationDialog(BuildContext context, UserModel user) {
+  void _showUnbanConfirmationDialog(
+    BuildContext context,
+    Leaderboard currentLeaderboard,
+    UserModel user,
+  ) {
     showConfirmationDialog(
       context: context,
       title: 'Unban Member',
@@ -266,17 +290,21 @@ class ManageLeaderboardPage extends StatelessWidget {
           'Are you sure you want to unban "${user.username}"? They will be able to rejoin the leaderboard.',
       submitButtonText: 'Unban',
       onPressed: () => _leaderboardService.unbanMember(
-        leaderboard: leaderboard,
+        leaderboard: currentLeaderboard,
         memberId: user.id,
       ),
     );
   }
 
-  Widget _buildDeleteButton(BuildContext context) {
+  Widget _buildDeleteButton(
+    BuildContext context,
+    Leaderboard currentLeaderboard,
+  ) {
     final theme = Theme.of(context);
 
     return OutlinedButton.icon(
-      onPressed: () => _showDeleteConfirmationDialog(context),
+      onPressed: () =>
+          _showDeleteConfirmationDialog(context, currentLeaderboard),
       style: OutlinedButton.styleFrom(
         foregroundColor: theme.colorScheme.error,
         side: BorderSide(color: theme.colorScheme.error),
@@ -286,17 +314,20 @@ class ManageLeaderboardPage extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context) {
+  void _showDeleteConfirmationDialog(
+    BuildContext context,
+    Leaderboard currentLeaderboard,
+  ) {
     showConfirmationDialog(
       context: context,
       title: 'Delete Leaderboard',
       text:
-          'Are you sure you want to delete "${leaderboard.name}"? '
+          'Are you sure you want to delete "${currentLeaderboard.name}"? '
           'This action cannot be undone.',
       submitButtonText: 'Delete',
       isDestructive: true,
       onPressed: () async {
-        await _leaderboardService.deleteLeaderboard(leaderboard);
+        await _leaderboardService.deleteLeaderboard(currentLeaderboard);
         if (context.mounted) {
           Navigator.of(context).popUntil((route) => route.isFirst);
         }

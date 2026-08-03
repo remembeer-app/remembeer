@@ -29,8 +29,7 @@ class SessionCard extends StatelessWidget {
       child: InkWell(
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute<void>(
-            builder: (context) =>
-                SessionDetailPage(sessionWithMembers: sessionWithMembers),
+            builder: (context) => SessionDetailPage(sessionId: session.id),
           ),
         ),
         child: Padding(

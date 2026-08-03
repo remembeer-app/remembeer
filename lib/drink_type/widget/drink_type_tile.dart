@@ -29,7 +29,7 @@ class DrinkTypeTile extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
                     builder: (context) =>
-                        UpdateDrinkTypePage(drinkTypeToUpdate: drinkType),
+                        UpdateDrinkTypePage(drinkTypeId: drinkType.id),
                   ),
                 );
               },

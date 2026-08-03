@@ -49,6 +49,25 @@ class ActivityService {
       .sharedSessionsStreamWhereCurrentUserIsMember
       .map((sessions) => sessions.where((s) => s.endedAt == null).toList());
 
+  Stream<SessionWithMembers> sessionWithMembersStream(String sessionId) {
+    return sessionController
+        .streamById(sessionId)
+        .switchMap(_sessionWithMembersStream);
+  }
+
+  Stream<SessionWithMembers> _sessionWithMembersStream(Session session) {
+    final memberStreams = session.memberIds
+        .map(userController.streamById)
+        .toList();
+
+    return Rx.combineLatestList(memberStreams).map((users) {
+      final userMap = <String, UserModel>{
+        for (final user in users) user.id: user,
+      };
+      return SessionWithMembers(session: session, members: userMap);
+    });
+  }
+
   Stream<({List<Session> sessions, bool hasMore})> get _feedSessionsStream {
     return Rx.combineLatest3(
       _myOngoingSessionsStream,
@@ -85,18 +104,9 @@ class ActivityService {
         return Stream.value((sessions: <SessionWithMembers>[], hasMore: false));
       }
 
-      final sessionsWithMembers = sessions.map((session) {
-        final memberStreams = session.memberIds
-            .map(userController.streamById)
-            .toList();
-
-        return Rx.combineLatestList(memberStreams).map((users) {
-          final userMap = <String, UserModel>{
-            for (final user in users) user.id: user,
-          };
-          return SessionWithMembers(session: session, members: userMap);
-        });
-      }).toList();
+      final sessionsWithMembers = sessions
+          .map(_sessionWithMembersStream)
+          .toList();
 
       return Rx.combineLatestList(
         sessionsWithMembers,

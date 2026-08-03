@@ -57,7 +57,8 @@ class SessionDivider extends StatelessWidget {
             constraints: const BoxConstraints(),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
-                builder: (context) => AddFriendsToSessionPage(session: session),
+                builder: (context) =>
+                    AddFriendsToSessionPage(sessionId: session.id),
               ),
             ),
           ),
@@ -71,7 +72,7 @@ class SessionDivider extends StatelessWidget {
               constraints: const BoxConstraints(),
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (context) => EditSessionPage(session: session),
+                  builder: (context) => EditSessionPage(sessionId: session.id),
                 ),
               ),
             ),
