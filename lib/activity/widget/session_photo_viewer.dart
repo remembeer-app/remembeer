@@ -49,7 +49,13 @@ class _PhotoPagesState extends State<_PhotoPages> {
   @override
   void initState() {
     super.initState();
-    _controller = PageController(initialPage: widget.initialIndex);
+    final initialPage = switch (widget.initialIndex) {
+      < 0 => 0,
+      final index when index >= widget.pictureUrls.length =>
+        widget.pictureUrls.isEmpty ? 0 : widget.pictureUrls.length - 1,
+      final index => index,
+    };
+    _controller = PageController(initialPage: initialPage);
   }
 
   @override

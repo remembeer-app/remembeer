@@ -1,6 +1,7 @@
 import 'package:remembeer/activity/constants.dart';
 import 'package:remembeer/activity/model/session_with_members.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
@@ -50,9 +51,18 @@ class ActivityService {
       .map((sessions) => sessions.where((s) => s.endedAt == null).toList());
 
   Stream<SessionWithMembers> sessionWithMembersStream(String sessionId) {
-    return sessionController
-        .streamById(sessionId)
-        .switchMap(_sessionWithMembersStream);
+    return Rx.combineLatest2(
+      sessionController.streamById(sessionId),
+      userController.currentUserStream,
+      (session, currentUser) {
+        final relatedUserIds = {...currentUser.friends, currentUser.id};
+        invariant(
+          session.memberIds.any(relatedUserIds.contains),
+          'Activity session must involve the current user or a friend',
+        );
+        return session;
+      },
+    ).switchMap(_sessionWithMembersStream);
   }
 
   Stream<SessionWithMembers> _sessionWithMembersStream(Session session) {
