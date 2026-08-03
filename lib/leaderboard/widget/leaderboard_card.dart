@@ -4,8 +4,8 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
-import 'package:remembeer/leaderboard/page/leaderboard_detail_page.dart';
 import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
+import 'package:remembeer/routes.dart';
 
 class LeaderboardCard extends StatelessWidget {
   final Leaderboard leaderboard;
@@ -22,14 +22,9 @@ class LeaderboardCard extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        onTap: () {
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (context) =>
-                  LeaderboardDetailPage(leaderboardId: leaderboard.id),
-            ),
-          );
-        },
+        onTap: () => LeaderboardDetailRoute(
+          leaderboardId: leaderboard.id,
+        ).push<void>(context),
         leading: CircleAvatar(
           backgroundColor: theme.colorScheme.primaryContainer,
           child: Icon(icon.icon, color: theme.colorScheme.onPrimaryContainer),

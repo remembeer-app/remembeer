@@ -5,9 +5,8 @@ import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
-import 'package:remembeer/leaderboard/page/create_leaderboard_page.dart';
-import 'package:remembeer/leaderboard/page/join_leaderboard_page.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_card.dart';
+import 'package:remembeer/routes.dart';
 
 class LeaderboardsPage extends StatelessWidget {
   LeaderboardsPage({super.key});
@@ -33,13 +32,7 @@ class LeaderboardsPage extends StatelessWidget {
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (context) => const JoinLeaderboardPage(),
-                ),
-              );
-            },
+            onPressed: () => const JoinLeaderboardRoute().push<void>(context),
             icon: const Icon(Icons.group_add),
             label: const Text('Join'),
           ),
@@ -47,13 +40,7 @@ class LeaderboardsPage extends StatelessWidget {
         const Gap(12),
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () => {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (context) => CreateLeaderboardPage(),
-                ),
-              ),
-            },
+            onPressed: () => const CreateLeaderboardRoute().push<void>(context),
             icon: const Icon(Icons.add),
             label: const Text('Create'),
           ),

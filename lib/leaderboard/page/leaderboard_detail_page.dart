@@ -9,12 +9,12 @@ import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
-import 'package:remembeer/leaderboard/page/manage_leaderboard_page.dart';
 import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/service/month_service.dart';
 import 'package:remembeer/leaderboard/type/leaderboard_entry.dart';
 import 'package:remembeer/leaderboard/widget/month_selector.dart';
 import 'package:remembeer/leaderboard/widget/standing_card.dart';
+import 'package:remembeer/routes.dart';
 
 class LeaderboardDetailPage extends StatefulWidget {
   final String leaderboardId;
@@ -85,12 +85,9 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
         ),
         if (isOwner)
           IconButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) =>
-                    ManageLeaderboardPage(leaderboardId: leaderboard.id),
-              ),
-            ),
+            onPressed: () => ManageLeaderboardRoute(
+              leaderboardId: leaderboard.id,
+            ).push<void>(context),
             icon: const Icon(Icons.settings),
           )
         else

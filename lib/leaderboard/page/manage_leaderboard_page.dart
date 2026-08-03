@@ -6,11 +6,11 @@ import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
-import 'package:remembeer/leaderboard/page/update_leaderboard_name_page.dart';
 import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/widget/banned_member_card.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_icon_picker.dart';
 import 'package:remembeer/leaderboard/widget/member_card.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
@@ -184,12 +184,9 @@ class ManageLeaderboardPage extends StatelessWidget {
     BuildContext context,
     Leaderboard currentLeaderboard,
   ) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) =>
-            UpdateLeaderboardNamePage(leaderboardId: currentLeaderboard.id),
-      ),
-    );
+    UpdateLeaderboardNameRoute(
+      leaderboardId: currentLeaderboard.id,
+    ).push<void>(context);
   }
 
   Widget _buildMembersList(Leaderboard currentLeaderboard) {
