@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/date/widget/date_selector.dart';
-import 'package:remembeer/drink/page/add_drink_page.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink/widget/drink_group_list.dart';
 import 'package:remembeer/drink/widget/streak_indicator.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/widget/session_menu_button.dart';
 
 class DrinkPage extends StatelessWidget {
@@ -28,9 +28,7 @@ class DrinkPage extends StatelessWidget {
         },
         child: FloatingActionButton(
           heroTag: 'add_drink_fab',
-          onPressed: () => Navigator.of(
-            context,
-          ).push(MaterialPageRoute<void>(builder: (context) => AddDrinkPage())),
+          onPressed: () => const AddDrinkRoute().push<void>(context),
           child: const Icon(Icons.add),
         ),
       ),

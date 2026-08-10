@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/auth/page/register_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
 import 'package:remembeer/common/action/notifications.dart';
@@ -11,6 +10,7 @@ import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
 
@@ -188,11 +188,7 @@ class _LoginPageState extends State<LoginPage> {
     return TextButton(
       onPressed: form.isLoading
           ? null
-          : () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (context) => const RegisterPage(),
-              ),
-            ),
+          : () => const RegisterRoute().push<void>(context),
       child: const Text("Don't have an account? Register"),
     );
   }

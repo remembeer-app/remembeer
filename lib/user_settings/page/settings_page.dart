@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/auth/page/change_password_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/drink_type/page/custom_drink_types_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
-import 'package:remembeer/user_settings/page/default_drink_page.dart';
-import 'package:remembeer/user_settings/page/drink_list_sort_page.dart';
-import 'package:remembeer/user_settings/page/end_of_day_page.dart';
-import 'package:remembeer/user_settings/page/username_page.dart';
+import 'package:remembeer/routes.dart';
 
 const _divider = Divider(height: 1);
 
@@ -78,16 +71,13 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildSettingsCard({
-    required BuildContext context,
     required String title,
-    required Widget destinationPage,
+    required VoidCallback onTap,
   }) {
     return ListTile(
       title: Text(title),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () => Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => destinationPage)),
+      onTap: onTap,
     );
   }
 
@@ -96,21 +86,18 @@ class SettingsPage extends StatelessWidget {
       context: context,
       children: [
         _buildSettingsCard(
-          context: context,
           title: 'Custom drinks',
-          destinationPage: const CustomDrinkTypesPage(),
+          onTap: () => const CustomDrinkTypesRoute().push<void>(context),
         ),
         _divider,
         _buildSettingsCard(
-          context: context,
           title: 'Default drink',
-          destinationPage: const DefaultDrinkPage(),
+          onTap: () => const DefaultDrinkSettingsRoute().push<void>(context),
         ),
         _divider,
         _buildSettingsCard(
-          context: context,
           title: 'Drink list order',
-          destinationPage: const DrinkListSortPage(),
+          onTap: () => const DrinkSortSettingsRoute().push<void>(context),
         ),
       ],
     );
@@ -123,28 +110,24 @@ class SettingsPage extends StatelessWidget {
       context: context,
       children: [
         _buildSettingsCard(
-          context: context,
           title: 'Change username',
-          destinationPage: const UserNamePage(),
+          onTap: () => const UsernameSettingsRoute().push<void>(context),
         ),
         _divider,
         _buildSettingsCard(
-          context: context,
           title: 'Change avatar',
-          destinationPage: const ChangeAvatarPage(),
+          onTap: () => const ChangeAvatarSettingsRoute().push<void>(context),
         ),
         _divider,
         _buildSettingsCard(
-          context: context,
           title: 'Badge visibility',
-          destinationPage: const BadgeVisibilityPage(),
+          onTap: () => const BadgeVisibilityRoute().push<void>(context),
         ),
         if (hasPassword) ...[
           _divider,
           _buildSettingsCard(
-            context: context,
             title: 'Change password',
-            destinationPage: const ChangePasswordPage(),
+            onTap: () => const ChangePasswordRoute().push<void>(context),
           ),
         ],
       ],
@@ -156,9 +139,8 @@ class SettingsPage extends StatelessWidget {
       context: context,
       children: [
         _buildSettingsCard(
-          context: context,
           title: 'End of day boundary',
-          destinationPage: const EndOfDayPage(),
+          onTap: () => const EndOfDaySettingsRoute().push<void>(context),
         ),
       ],
     );

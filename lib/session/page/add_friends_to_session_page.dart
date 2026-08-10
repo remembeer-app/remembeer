@@ -2,16 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/session/widget/section_header.dart';
 import 'package:remembeer/session/widget/user_list_tile.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 class AddFriendsToSessionPage extends StatelessWidget {
-  final Session session;
+  final String sessionId;
 
-  AddFriendsToSessionPage({super.key, required this.session});
+  AddFriendsToSessionPage({super.key, required this.sessionId});
 
   final _sessionService = get<SessionService>();
 
@@ -25,7 +24,7 @@ class AddFriendsToSessionPage extends StatelessWidget {
         children: [
           const SectionHeader(title: 'Current Members'),
           AsyncBuilder<List<UserModel>>(
-            stream: _sessionService.sessionMembersStream(session.id),
+            stream: _sessionService.sessionMembersStream(sessionId),
             builder: (context, members) {
               if (members.isEmpty) {
                 return const Padding(
@@ -49,9 +48,7 @@ class AddFriendsToSessionPage extends StatelessWidget {
           ),
           const SectionHeader(title: 'Your Friends'),
           AsyncBuilder<List<UserModel>>(
-            stream: _sessionService.availableFriendsForSessionStream(
-              session.id,
-            ),
+            stream: _sessionService.availableFriendsForSessionStream(sessionId),
             builder: (context, friends) {
               if (friends.isEmpty) {
                 return const Padding(
@@ -67,7 +64,7 @@ class AddFriendsToSessionPage extends StatelessWidget {
                       trailing: IconButton(
                         icon: const Icon(Icons.person_add),
                         onPressed: () => _sessionService.addMemberToSession(
-                          sessionId: session.id,
+                          sessionId: sessionId,
                           memberId: friend.id,
                         ),
                         tooltip: 'Add to session',

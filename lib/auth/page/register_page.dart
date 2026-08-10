@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/auth/constants.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
@@ -8,6 +9,7 @@ import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
@@ -158,7 +160,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Widget _buildLoginLink(BuildContext context, LoadingFormState form) {
     return TextButton(
-      onPressed: form.isLoading ? null : () => Navigator.of(context).pop(),
+      onPressed: form.isLoading ? null : () => const LoginRoute().go(context),
       child: const Text('Already have an account? Login'),
     );
   }
@@ -175,7 +177,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
 
     if (context.mounted) {
-      Navigator.of(context).pop();
+      context.pop();
     }
   }
 }

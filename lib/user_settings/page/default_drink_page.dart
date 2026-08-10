@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
@@ -60,7 +61,7 @@ class _DefaultDrinkPageState extends State<DefaultDrinkPage> {
     await _userSettingsService.updateDefaultDrinkSize(_selectedVolume!);
 
     if (mounted) {
-      Navigator.of(context).pop();
+      context.pop();
     }
   }
 

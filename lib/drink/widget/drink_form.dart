@@ -6,8 +6,8 @@ import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/location/page/location_page.dart';
 import 'package:remembeer/location/service/location_service.dart';
+import 'package:remembeer/routes.dart';
 
 const _defaultPosition = GeoPoint(49.2099, 16.5990);
 
@@ -169,11 +169,10 @@ class _DrinkFormState extends State<DrinkForm> {
 
     if (!mounted) return;
 
-    final newLocation = await Navigator.of(context).push<GeoPoint>(
-      MaterialPageRoute(
-        builder: (context) => LocationPage(location: startLocation!),
-      ),
-    );
+    final newLocation = await LocationPickerRoute(
+      latitude: startLocation.latitude,
+      longitude: startLocation.longitude,
+    ).push<GeoPoint>(context);
 
     if (newLocation != null && mounted) {
       setState(() {

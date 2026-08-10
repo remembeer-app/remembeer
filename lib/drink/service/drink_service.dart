@@ -83,6 +83,20 @@ class DrinkService {
     ).map((items) => items.map((item) => item.drink).toList());
   }
 
+  Stream<DrinkWithSessionId> drinkWithSessionIdStream({
+    required String sessionId,
+    required String drinkId,
+  }) {
+    return sessionController.streamById(sessionId).map((session) {
+      final drink = session.drinks.singleWhere((drink) => drink.id == drinkId);
+      invariant(
+        drink.consumedByUserId == authService.authenticatedUser.uid,
+        'Users can only edit their own drinks',
+      );
+      return (originalSessionId: session.id, drink: drink);
+    });
+  }
+
   /// Creates a new drink.
   ///
   /// If exactly one session is active at the drink's consumedAt time,
@@ -158,6 +172,11 @@ class DrinkService {
     required Drink newDrink,
     required String sessionId,
   }) async {
+    invariant(
+      oldDrink.consumedByUserId == authService.authenticatedUser.uid,
+      'Users can only edit their own drinks',
+    );
+
     final oldEffectiveDate = await _effectiveDate(oldDrink.consumedAt);
     final oldAfter6pm = _calculateIsAfter6pm(
       oldDrink.consumedAt,

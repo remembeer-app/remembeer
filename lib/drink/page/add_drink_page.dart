@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/model/drink_create.dart';
@@ -35,7 +36,7 @@ class AddDrinkPage extends StatelessWidget {
                     ),
                   );
                   if (context.mounted) {
-                    Navigator.of(context).pop();
+                    context.pop();
                   }
                 },
           ),

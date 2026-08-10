@@ -5,7 +5,7 @@ import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
 import 'package:remembeer/leaderboard/type/leaderboard_entry.dart';
-import 'package:remembeer/user/page/profile_page.dart';
+import 'package:remembeer/routes.dart';
 
 class StandingCard extends StatelessWidget {
   final LeaderboardEntry entry;
@@ -88,10 +88,6 @@ class StandingCard extends StatelessWidget {
     final isCurrentUser = entry.user.id == _authService.authenticatedUser.uid;
     if (isCurrentUser) return null;
 
-    return () => Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => ProfilePage(userId: entry.user.id),
-      ),
-    );
+    return () => UserProfileRoute(userId: entry.user.id).push<void>(context);
   }
 }
