@@ -18,10 +18,7 @@ Future<void> main() async {
 
   await dotenv.load();
 
-  await Firebase.initializeApp(
-    name: 'remembeer',
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await GoogleSignIn.instance.initialize(
     serverClientId: dotenv.env['GOOGLE_AUTH_SERVER_CLIENT_ID'],

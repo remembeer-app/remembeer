@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -15,18 +16,28 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Settings'),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildHeading('Profile'),
-          _buildProfileSettingsBox(context),
-          _buildHeading('Drinks'),
-          _buildDrinkSettingsBox(context),
-          _buildHeading('Experience'),
-          _buildExperienceSettingsBox(context),
-          const Spacer(),
-          _buildSignOutButton(context),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildHeading('Profile'),
+                  _buildProfileSettingsBox(context),
+                  _buildHeading('Drinks'),
+                  _buildDrinkSettingsBox(context),
+                  _buildHeading('Experience'),
+                  _buildExperienceSettingsBox(context),
+                  const Gap(8),
+                  const Spacer(),
+                  _buildSignOutButton(context),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

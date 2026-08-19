@@ -2,12 +2,16 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/firebase_options.dart';
 import 'package:remembeer/notification/model/notification_type.dart';
 import 'package:remembeer/routes.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
+  await dotenv.load();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
 
 class NotificationService {
