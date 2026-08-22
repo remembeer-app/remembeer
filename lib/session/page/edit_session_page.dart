@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
+import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
@@ -53,6 +54,8 @@ class EditSessionPage extends StatelessWidget {
   Widget _buildAdditionalActions(BuildContext context, Session session) {
     return Column(
       children: [
+        _buildPartyButton(context, session),
+        const Gap(16),
         _buildManageAdminsButton(context, session),
         const Gap(16),
         Row(
@@ -63,6 +66,28 @@ class EditSessionPage extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildPartyButton(BuildContext context, Session session) {
+    final isEligible = !session.isSoloSession && session.endedAt == null;
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: session.isParty || !isEligible
+            ? null
+            : () => _showPartyConfirmationDialog(context, session),
+        style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
+        icon: const Icon(Icons.celebration),
+        label: Text(
+          session.isParty
+              ? 'Party Mode Enabled'
+              : isEligible
+              ? 'Turn into Party'
+              : 'Party Mode Unavailable',
+        ),
+      ),
     );
   }
 
@@ -124,6 +149,22 @@ class EditSessionPage extends StatelessWidget {
         if (context.mounted) {
           const DrinkRoute().go(context);
         }
+      },
+    );
+  }
+
+  void _showPartyConfirmationDialog(BuildContext context, Session session) {
+    showConfirmationDialog(
+      context: context,
+      title: 'Turn Session into Party',
+      text:
+          'This cannot be undone. All drinks already recorded in the session '
+          'will count toward the party ranking, and session admins will also '
+          'be party admins.',
+      submitButtonText: 'Enable Party Mode',
+      onPressed: () async {
+        await _sessionService.turnSessionIntoParty(session);
+        showSuccessNotification('Party mode enabled!');
       },
     );
   }

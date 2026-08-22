@@ -129,6 +129,24 @@ class SessionService {
     await updateSession(session: session, endedAt: endedAt);
   }
 
+  Future<void> turnSessionIntoParty(Session session) async {
+    invariant(
+      isSessionOwner(session),
+      'Only the session owner can turn the session into a party.',
+    );
+    invariant(
+      !session.isSoloSession,
+      'Automatically generated solo sessions cannot become parties.',
+    );
+    invariant(
+      session.endedAt == null,
+      'Only ongoing sessions can become parties.',
+    );
+    invariant(!session.isParty, 'The session is already a party.');
+
+    await sessionController.turnIntoPartyAtomic(session.id);
+  }
+
   bool isSessionOwner(Session session) {
     return session.userId == currentUserId;
   }

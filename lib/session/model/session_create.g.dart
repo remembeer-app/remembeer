@@ -25,6 +25,7 @@ _SessionCreate _$SessionCreateFromJson(Map<String, dynamic> json) =>
               .toSet() ??
           const {},
       isSoloSession: json['isSoloSession'] as bool? ?? true,
+      isParty: json['isParty'] as bool? ?? false,
       drinks:
           (json['drinks'] as List<dynamic>?)
               ?.map((e) => Drink.fromJson(e as Map<String, dynamic>))
@@ -42,6 +43,7 @@ Map<String, dynamic> _$SessionCreateToJson(_SessionCreate instance) =>
       'adminIds': instance.adminIds.toList(),
       'bannedMemberIds': instance.bannedMemberIds.toList(),
       'isSoloSession': instance.isSoloSession,
+      'isParty': instance.isParty,
       'drinks': instance.drinks.map((e) => e.toJson()).toList(),
       'description': instance.description,
     };

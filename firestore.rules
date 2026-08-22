@@ -101,6 +101,21 @@ service cloud.firestore {
       return isUnchanged('adminIds') || selfRemovedFrom('adminIds');
     }
 
+    function validPartyStateUpdate() {
+      return !request.resource.data.diff(resource.data)
+          .changedKeys().hasAny(["isParty"])
+        || (
+          request.resource.data.isParty == true
+          && (!('isParty' in resource.data) || resource.data.isParty == false)
+          && resource.data.endedAt == null
+          && request.resource.data.endedAt == null
+        )
+        || (
+          !('isParty' in resource.data)
+          && request.resource.data.isParty == false
+        );
+    }
+
     /* =========================
        COLLECTION RULES
        ========================= */
@@ -147,11 +162,12 @@ service cloud.firestore {
     match /sessions/{id} {
       allow read: if isSignedIn();
 
-      allow create: if isOwnerCreate();
+      allow create: if isOwnerCreate()
+        && request.resource.data.isParty == false;
 
       allow update: if ownershipUnchanged()
         && (
-          isOwner(resource.data)
+          (isOwner(resource.data) && validPartyStateUpdate())
           || (isAdmin()
               && onlyUpdatingFields(["name", "description", "startedAt", "endedAt", "drinks", "updatedAt", "pictureUrls"]))
           || (isSignedIn() && isMember() && notBanned()

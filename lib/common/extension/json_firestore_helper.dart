@@ -10,6 +10,7 @@ const memberIdsField = 'memberIds';
 const bannedMemberIdsField = 'bannedMemberIds';
 const adminIdsField = 'adminIds';
 const pictureUrlsFields = 'pictureUrls';
+const isPartyField = 'isParty';
 
 extension JsonFirestoreHelper on Map<String, dynamic> {
   Map<String, dynamic> withId(String id) {
