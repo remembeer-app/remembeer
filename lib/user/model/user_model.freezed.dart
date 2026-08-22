@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'user_model.dart';
@@ -9,6 +9,7 @@ part of 'user_model.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$UserModelCopyWithImpl<$Res>
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? avatarUrl = freezed,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
-  return _then(_self.copyWith(
+  return _then(UserModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
@@ -217,7 +218,7 @@ return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_th
 @JsonSerializable()
 
 class _UserModel extends UserModel {
-  const _UserModel({required this.id, required this.email, required this.username, required this.searchableUsername, this.avatarUrl, final  Set<String> friends = const {}, final  Map<String, MonthlyStats> monthlyStats = const {}, final  Map<String, UnlockedBadge> unlockedBadges = const {}, @TimeOfDayConverter() this.endOfDayBoundary = defaultEndOfDayBoundary}): _friends = friends,_monthlyStats = monthlyStats,_unlockedBadges = unlockedBadges,super._();
+  const _UserModel({required this.id, required this.email, required this.username, required this.searchableUsername, this.avatarUrl,  Set<String> friends = const {},  Map<String, MonthlyStats> monthlyStats = const {},  Map<String, UnlockedBadge> unlockedBadges = const {}, @TimeOfDayConverter() this.endOfDayBoundary = defaultEndOfDayBoundary}): _friends = friends,_monthlyStats = monthlyStats,_unlockedBadges = unlockedBadges,super._();
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override final  String id;
