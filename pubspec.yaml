@@ -62,7 +62,7 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
-  freezed: ^3.2.5
+  freezed: ^4.0.0
   go_router_builder: ^4.4.0
   interface_generator:
     path: packages/interface_generator
