@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/common/converter/time_of_day_converter.dart';
 import 'package:remembeer/common/model/document.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
@@ -132,18 +133,17 @@ abstract class UserModel with _$UserModel implements Document {
 
   UserModel updateBadgeVisibility(String badgeId, bool isShown) {
     final badge = unlockedBadges[badgeId];
-    if (badge == null) {
-      throw StateError(
-        'Cannot update visibility for badge $badgeId that is not unlocked.',
-      );
-    }
+    invariant(
+      badge != null,
+      'Cannot update visibility for badge $badgeId that is not unlocked.',
+    );
 
     final updatedUnlockedBadges = Map<String, UnlockedBadge>.from(
       unlockedBadges,
     );
 
     updatedUnlockedBadges[badgeId] = UnlockedBadge(
-      badgeId: badge.badgeId,
+      badgeId: badge!.badgeId,
       unlockedAt: badge.unlockedAt,
       isShown: isShown,
     );

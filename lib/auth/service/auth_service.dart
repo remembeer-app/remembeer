@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:rxdart/rxdart.dart';
 
 class AuthService {
@@ -20,13 +21,11 @@ class AuthService {
   /// Returns the currently authenticated `User`.
   ///
   /// Intended to be used only in an authenticated context.
-  /// If no user is signed in this getter throws a `StateError`.
+  /// The authenticated-user invariant fails if no user is signed in.
   User get authenticatedUser {
     final user = currentUser;
-    if (user == null) {
-      throw StateError('User is not authenticated.');
-    }
-    return user;
+    invariant(user != null, 'User is not authenticated.');
+    return user!;
   }
 
   bool get isAuthenticated => currentUser != null;
@@ -74,12 +73,10 @@ class AuthService {
   }) async {
     final user = authenticatedUser;
     final email = user.email;
-    if (email == null) {
-      throw StateError('User does not have an email.');
-    }
+    invariant(email != null, 'User does not have an email.');
 
     final credential = EmailAuthProvider.credential(
-      email: email,
+      email: email!,
       password: currentPassword,
     );
     await user.reauthenticateWithCredential(credential);

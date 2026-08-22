@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/extension/searchable.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/friend_request/model/friend_request_create.dart';
@@ -112,24 +113,22 @@ class UserService {
         .getRequestBetween(otherUserId)
         .first;
 
-    if (request == null) {
-      throw StateError(
-        'No friend request found between current user and $otherUserId to revoke.',
-      );
-    }
+    invariant(
+      request != null,
+      'No friend request found between current user and $otherUserId to revoke.',
+    );
 
-    await friendRequestController.deleteSingle(request);
+    await friendRequestController.deleteSingle(request!);
   }
 
   Future<void> acceptFriendRequest(String otherUserId) async {
     final request = await friendRequestController
         .getRequestBetween(otherUserId)
         .first;
-    if (request == null) {
-      throw StateError(
-        'No friend request found between current user and $otherUserId to accept.',
-      );
-    }
+    invariant(
+      request != null,
+      'No friend request found between current user and $otherUserId to accept.',
+    );
 
     final currentUser = await userController.currentUser;
     final otherUser = await userController.findById(otherUserId);
@@ -142,7 +141,7 @@ class UserService {
     userController
       ..createOrUpdateUserInBatch(user: updatedCurrentUser, batch: batch)
       ..createOrUpdateUserInBatch(user: updatedOtherUser, batch: batch);
-    friendRequestController.deleteSingleInBatch(request, batch);
+    friendRequestController.deleteSingleInBatch(request!, batch);
 
     await batch.commit();
 
