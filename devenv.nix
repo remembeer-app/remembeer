@@ -7,12 +7,20 @@
     enable = true;
     flutter.enable = true;
 
-    platforms.version = [ "34" "35" "36" ];
-    buildTools.version = [ "35.0.0" ];
+    platforms.version = [
+      "34"
+      "35"
+      "36"
+    ];
+    buildTools.version = [ "36.0.0" ];
     ndk.version = [ "28.2.13676358" ];
     abis = [ "x86_64" ];
     systemImageTypes = [ "google_apis_playstore" ];
   };
+
+  enterShell = ''
+    unset LD_LIBRARY_PATH
+  '';
 
   scripts.setup.exec = "flutter pub get --enforce-lockfile";
 
