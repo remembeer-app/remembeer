@@ -132,18 +132,18 @@ abstract class UserModel with _$UserModel implements Document {
   }
 
   UserModel updateBadgeVisibility(String badgeId, bool isShown) {
-    final badge = unlockedBadges[badgeId];
-    invariant(
-      badge != null,
-      'Cannot update visibility for badge $badgeId that is not unlocked.',
-    );
+    final badge =
+        unlockedBadges[badgeId] ??
+        never(
+          'Cannot update visibility for badge $badgeId that is not unlocked.',
+        );
 
     final updatedUnlockedBadges = Map<String, UnlockedBadge>.from(
       unlockedBadges,
     );
 
     updatedUnlockedBadges[badgeId] = UnlockedBadge(
-      badgeId: badge!.badgeId,
+      badgeId: badge.badgeId,
       unlockedAt: badge.unlockedAt,
       isShown: isShown,
     );

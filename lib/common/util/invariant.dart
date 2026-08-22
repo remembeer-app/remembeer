@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 ///
 /// Example:
 /// ```dart
-/// invariant(user != null, 'User must not be null');
+/// invariant(items.isNotEmpty, 'Items must not be empty');
 /// ```
 void invariant(bool condition, String message) {
   assert(condition, message);

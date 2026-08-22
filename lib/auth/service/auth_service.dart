@@ -22,11 +22,8 @@ class AuthService {
   ///
   /// Intended to be used only in an authenticated context.
   /// The authenticated-user invariant fails if no user is signed in.
-  User get authenticatedUser {
-    final user = currentUser;
-    invariant(user != null, 'User is not authenticated.');
-    return user!;
-  }
+  User get authenticatedUser =>
+      currentUser ?? never('User is not authenticated.');
 
   bool get isAuthenticated => currentUser != null;
 
@@ -72,11 +69,10 @@ class AuthService {
     required String newPassword,
   }) async {
     final user = authenticatedUser;
-    final email = user.email;
-    invariant(email != null, 'User does not have an email.');
+    final email = user.email ?? never('User does not have an email.');
 
     final credential = EmailAuthProvider.credential(
-      email: email!,
+      email: email,
       password: currentPassword,
     );
     await user.reauthenticateWithCredential(credential);

@@ -61,14 +61,14 @@ class UserService {
   }
 
   Future<void> createDefaultUser({String? username}) async {
-    final resolvedUsername =
-        username ??
-        authService.authenticatedUser.displayName ??
-        authService.authenticatedUser.email!;
+    final authenticatedUser = authService.authenticatedUser;
+    final email =
+        authenticatedUser.email ?? never('User does not have an email.');
+    final resolvedUsername = username ?? authenticatedUser.displayName ?? email;
 
     final defaultUser = UserModel(
-      id: authService.authenticatedUser.uid,
-      email: authService.authenticatedUser.email!,
+      id: authenticatedUser.uid,
+      email: email,
       username: resolvedUsername,
       searchableUsername: resolvedUsername.toSearchable(),
     );
@@ -109,26 +109,21 @@ class UserService {
   }
 
   Future<void> revokeFriendRequest(String otherUserId) async {
-    final request = await friendRequestController
-        .getRequestBetween(otherUserId)
-        .first;
+    final request =
+        (await friendRequestController.getRequestBetween(otherUserId).first) ??
+        never(
+          'No friend request found between current user and $otherUserId to revoke.',
+        );
 
-    invariant(
-      request != null,
-      'No friend request found between current user and $otherUserId to revoke.',
-    );
-
-    await friendRequestController.deleteSingle(request!);
+    await friendRequestController.deleteSingle(request);
   }
 
   Future<void> acceptFriendRequest(String otherUserId) async {
-    final request = await friendRequestController
-        .getRequestBetween(otherUserId)
-        .first;
-    invariant(
-      request != null,
-      'No friend request found between current user and $otherUserId to accept.',
-    );
+    final request =
+        (await friendRequestController.getRequestBetween(otherUserId).first) ??
+        never(
+          'No friend request found between current user and $otherUserId to accept.',
+        );
 
     final currentUser = await userController.currentUser;
     final otherUser = await userController.findById(otherUserId);
@@ -141,7 +136,7 @@ class UserService {
     userController
       ..createOrUpdateUserInBatch(user: updatedCurrentUser, batch: batch)
       ..createOrUpdateUserInBatch(user: updatedOtherUser, batch: batch);
-    friendRequestController.deleteSingleInBatch(request!, batch);
+    friendRequestController.deleteSingleInBatch(request, batch);
 
     await batch.commit();
 
