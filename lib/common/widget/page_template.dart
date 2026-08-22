@@ -7,6 +7,8 @@ class PageTemplate extends StatelessWidget {
   final Widget child;
   final Widget? floatingActionButton;
   final EdgeInsetsGeometry padding;
+  final Color? appBarBackgroundColor;
+  final Color? appBarForegroundColor;
 
   const PageTemplate({
     super.key,
@@ -14,6 +16,8 @@ class PageTemplate extends StatelessWidget {
     required this.child,
     this.floatingActionButton,
     this.padding = _defaultPadding,
+    this.appBarBackgroundColor,
+    this.appBarForegroundColor,
   });
 
   @override
@@ -21,7 +25,10 @@ class PageTemplate extends StatelessWidget {
     return Scaffold(
       appBar: title != null
           ? AppBar(
-              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              backgroundColor:
+                  appBarBackgroundColor ??
+                  Theme.of(context).colorScheme.secondaryContainer,
+              foregroundColor: appBarForegroundColor,
               centerTitle: true,
               title: title,
             )

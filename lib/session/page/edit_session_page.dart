@@ -28,25 +28,41 @@ class EditSessionPage extends StatelessWidget {
   }
 
   Widget _buildPage(BuildContext context, Session session) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return PageTemplate(
-      title: const Text('Edit Session'),
-      child: SessionForm(
-        initialName: session.name,
-        initialDescription: session.description,
-        initialStartedAt: session.startedAt,
-        submitButtonText: 'Save Changes',
-        onSubmit: (name, description, startedAt) async {
-          await _sessionService.updateSession(
-            session: session,
-            name: name,
-            description: description,
-            startedAt: startedAt,
-          );
-          if (context.mounted) {
-            context.pop();
-          }
-        },
-        additionalActions: _buildAdditionalActions(context, session),
+      title: Text(session.isParty ? 'Edit Party' : 'Edit Session'),
+      appBarBackgroundColor: session.isParty
+          ? colorScheme.errorContainer
+          : null,
+      appBarForegroundColor: session.isParty
+          ? colorScheme.onErrorContainer
+          : null,
+      child: Column(
+        children: [
+          _buildPartyButton(context, session),
+          const Gap(16),
+          Expanded(
+            child: SessionForm(
+              initialName: session.name,
+              initialDescription: session.description,
+              initialStartedAt: session.startedAt,
+              submitButtonText: 'Save Changes',
+              onSubmit: (name, description, startedAt) async {
+                await _sessionService.updateSession(
+                  session: session,
+                  name: name,
+                  description: description,
+                  startedAt: startedAt,
+                );
+                if (context.mounted) {
+                  context.pop();
+                }
+              },
+              additionalActions: _buildAdditionalActions(context, session),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -54,8 +70,6 @@ class EditSessionPage extends StatelessWidget {
   Widget _buildAdditionalActions(BuildContext context, Session session) {
     return Column(
       children: [
-        _buildPartyButton(context, session),
-        const Gap(16),
         _buildManageAdminsButton(context, session),
         const Gap(16),
         Row(

@@ -31,14 +31,26 @@ class SessionDetailPage extends StatelessWidget {
     SessionWithMembers sessionWithMembers,
   ) {
     final session = sessionWithMembers.session;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return PageTemplate(
+      appBarBackgroundColor: session.isParty
+          ? colorScheme.errorContainer
+          : null,
+      appBarForegroundColor: session.isParty
+          ? colorScheme.onErrorContainer
+          : null,
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.table_bar, size: 24),
+          Icon(session.isParty ? Icons.celebration : Icons.table_bar, size: 24),
           const Gap(8),
-          Flexible(child: Text(session.name, overflow: TextOverflow.ellipsis)),
+          Flexible(
+            child: Text(
+              session.isParty ? 'Party · ${session.name}' : session.name,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
       child: SingleChildScrollView(
