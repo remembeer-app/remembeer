@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'leaderboard.dart';
@@ -9,6 +9,7 @@ part of 'leaderboard.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$LeaderboardCopyWithImpl<$Res>
 /// Create a copy of Leaderboard
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? memberIds = null,Object? bannedMemberIds = null,Object? name = null,Object? iconName = null,Object? inviteCode = null,}) {
-  return _then(_self.copyWith(
+  return _then(Leaderboard(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -218,7 +219,7 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 @JsonSerializable()
 
 class _Leaderboard implements Leaderboard {
-  const _Leaderboard({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required final  Set<String> memberIds, required final  Set<String> bannedMemberIds, required this.name, required this.iconName, required this.inviteCode}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds;
+  const _Leaderboard({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required  Set<String> memberIds, required  Set<String> bannedMemberIds, required this.name, required this.iconName, required this.inviteCode}): _memberIds = memberIds,_bannedMemberIds = bannedMemberIds;
   factory _Leaderboard.fromJson(Map<String, dynamic> json) => _$LeaderboardFromJson(json);
 
 @override final  String id;

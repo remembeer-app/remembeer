@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'session.dart';
@@ -9,6 +9,7 @@ part of 'session.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$SessionCopyWithImpl<$Res>
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? createdAt = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? memberIds = null,Object? adminIds = null,Object? bannedMemberIds = null,Object? name = null,Object? startedAt = null,Object? endedAt = freezed,Object? drinks = null,Object? isSoloSession = null,Object? description = null,Object? pictureUrls = null,}) {
-  return _then(_self.copyWith(
+  return _then(Session(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -223,7 +224,7 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 @JsonSerializable()
 
 class _Session extends Session {
-  const _Session({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required final  Set<String> memberIds, required final  Set<String> adminIds, required final  Set<String> bannedMemberIds, required this.name, required this.startedAt, this.endedAt, final  List<Drink> drinks = const [], this.isSoloSession = true, this.description = '', final  List<String> pictureUrls = const []}): _memberIds = memberIds,_adminIds = adminIds,_bannedMemberIds = bannedMemberIds,_drinks = drinks,_pictureUrls = pictureUrls,super._();
+  const _Session({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required  Set<String> memberIds, required  Set<String> adminIds, required  Set<String> bannedMemberIds, required this.name, required this.startedAt, this.endedAt,  List<Drink> drinks = const [], this.isSoloSession = true, this.description = '',  List<String> pictureUrls = const []}): _memberIds = memberIds,_adminIds = adminIds,_bannedMemberIds = bannedMemberIds,_drinks = drinks,_pictureUrls = pictureUrls,super._();
   factory _Session.fromJson(Map<String, dynamic> json) => _$SessionFromJson(json);
 
 @override final  String id;

@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // coverage:ignore-file
-// ignore_for_file: type=lint
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'session_create.dart';
@@ -9,6 +9,7 @@ part of 'session_create.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
 // dart format off
 T _$identity<T>(T value) => value;
 
@@ -66,7 +67,7 @@ class _$SessionCreateCopyWithImpl<$Res>
 /// Create a copy of SessionCreate
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') @override $Res call({Object? name = null,Object? startedAt = null,Object? endedAt = freezed,Object? memberIds = null,Object? adminIds = null,Object? bannedMemberIds = null,Object? isSoloSession = null,Object? drinks = null,Object? description = null,}) {
-  return _then(_self.copyWith(
+  return _then(SessionCreate(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,startedAt: null == startedAt ? _self.startedAt : startedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,endedAt: freezed == endedAt ? _self.endedAt : endedAt // ignore: cast_nullable_to_non_nullable
@@ -217,7 +218,7 @@ return $default(_that.name,_that.startedAt,_that.endedAt,_that.memberIds,_that.a
 @JsonSerializable()
 
 class _SessionCreate implements SessionCreate {
-  const _SessionCreate({required this.name, required this.startedAt, this.endedAt, required final  Set<String> memberIds, required final  Set<String> adminIds, final  Set<String> bannedMemberIds = const {}, this.isSoloSession = true, final  List<Drink> drinks = const [], this.description = ''}): _memberIds = memberIds,_adminIds = adminIds,_bannedMemberIds = bannedMemberIds,_drinks = drinks;
+  const _SessionCreate({required this.name, required this.startedAt, this.endedAt, required  Set<String> memberIds, required  Set<String> adminIds,  Set<String> bannedMemberIds = const {}, this.isSoloSession = true,  List<Drink> drinks = const [], this.description = ''}): _memberIds = memberIds,_adminIds = adminIds,_bannedMemberIds = bannedMemberIds,_drinks = drinks;
   factory _SessionCreate.fromJson(Map<String, dynamic> json) => _$SessionCreateFromJson(json);
 
 @override final  String name;
