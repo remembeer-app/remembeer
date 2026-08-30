@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
+import 'package:remembeer/common/widget/async_builder.dart';
+import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/constants.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_service.dart';
+import 'package:remembeer/user/service/user_service.dart';
 
 class SessionDivider extends StatefulWidget {
   final Session session;
@@ -18,6 +21,7 @@ class SessionDivider extends StatefulWidget {
 
 class _SessionDividerState extends State<SessionDivider> {
   final _sessionService = get<SessionService>();
+  final _userService = get<UserService>();
   var _isExpanded = false;
 
   Session get _session => widget.session;
@@ -107,11 +111,14 @@ class _SessionDividerState extends State<SessionDivider> {
         Icon(Icons.schedule, size: 14, color: detailColor),
         const Gap(4),
         Flexible(
-          child: Text(
-            _compactTimeRange,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: theme.textTheme.bodySmall?.copyWith(color: detailColor),
+          child: AsyncBuilder(
+            stream: _userService.currentUserStream,
+            builder: (context, user) => Text(
+              _compactTimeRange(user.endOfDayBoundary),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodySmall?.copyWith(color: detailColor),
+            ),
           ),
         ),
       ],
@@ -198,12 +205,20 @@ class _SessionDividerState extends State<SessionDivider> {
     );
   }
 
-  String get _compactTimeRange {
-    final start = formatTime(_session.startedAt);
+  String _compactTimeRange(TimeOfDay endOfDayBoundary) {
+    final startedAt = _session.startedAt;
     final endedAt = _session.endedAt;
 
-    return endedAt == null
-        ? '$start - ongoing'
-        : '$start - ${formatTime(endedAt)}';
+    if (endedAt == null) {
+      return formatSessionTimeRange(startedAt, null, endOfDayBoundary);
+    }
+
+    final effectiveStart = effectiveDate(startedAt, endOfDayBoundary);
+    final effectiveEnd = effectiveDate(endedAt, endOfDayBoundary);
+    if (!DateUtils.isSameDay(effectiveStart, effectiveEnd)) {
+      return formatDayMonth(startedAt);
+    }
+
+    return '${formatTime(startedAt)} – ${formatTime(endedAt)}';
   }
 }
