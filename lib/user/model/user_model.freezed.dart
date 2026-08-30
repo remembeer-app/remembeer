@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserModel {
 
- String get id; String get email; String get username; String get searchableUsername; Gender? get gender; AccentColorKey? get accentColorKey; String? get avatarUrl; Set<String> get friends; Map<String, MonthlyStats> get monthlyStats; Map<String, UnlockedBadge> get unlockedBadges;@TimeOfDayConverter() TimeOfDay get endOfDayBoundary;
+ String get id; String get email; String get username; String get searchableUsername; AccentColorKey? get accentColorKey; String? get avatarUrl; Set<String> get friends; Map<String, MonthlyStats> get monthlyStats; Map<String, UnlockedBadge> get unlockedBadges;@TimeOfDayConverter() TimeOfDay get endOfDayBoundary;
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $UserModelCopyWith<UserModel> get copyWith => _$UserModelCopyWithImpl<UserModel>
 @override
 bool operator ==(Object other) {
   final _this = this as UserModel;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.searchableUsername, _this.searchableUsername) || other.searchableUsername == _this.searchableUsername)&&(identical(other.gender, _this.gender) || other.gender == _this.gender)&&(identical(other.accentColorKey, _this.accentColorKey) || other.accentColorKey == _this.accentColorKey)&&(identical(other.avatarUrl, _this.avatarUrl) || other.avatarUrl == _this.avatarUrl)&&const DeepCollectionEquality().equals(other.friends, _this.friends)&&const DeepCollectionEquality().equals(other.monthlyStats, _this.monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, _this.unlockedBadges)&&(identical(other.endOfDayBoundary, _this.endOfDayBoundary) || other.endOfDayBoundary == _this.endOfDayBoundary));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.searchableUsername, _this.searchableUsername) || other.searchableUsername == _this.searchableUsername)&&(identical(other.accentColorKey, _this.accentColorKey) || other.accentColorKey == _this.accentColorKey)&&(identical(other.avatarUrl, _this.avatarUrl) || other.avatarUrl == _this.avatarUrl)&&const DeepCollectionEquality().equals(other.friends, _this.friends)&&const DeepCollectionEquality().equals(other.monthlyStats, _this.monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, _this.unlockedBadges)&&(identical(other.endOfDayBoundary, _this.endOfDayBoundary) || other.endOfDayBoundary == _this.endOfDayBoundary));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as UserModel;
-  return Object.hash(runtimeType,_this.id,_this.email,_this.username,_this.searchableUsername,_this.gender,_this.accentColorKey,_this.avatarUrl,const DeepCollectionEquality().hash(_this.friends),const DeepCollectionEquality().hash(_this.monthlyStats),const DeepCollectionEquality().hash(_this.unlockedBadges),_this.endOfDayBoundary);
+  return Object.hash(runtimeType,_this.id,_this.email,_this.username,_this.searchableUsername,_this.accentColorKey,_this.avatarUrl,const DeepCollectionEquality().hash(_this.friends),const DeepCollectionEquality().hash(_this.monthlyStats),const DeepCollectionEquality().hash(_this.unlockedBadges),_this.endOfDayBoundary);
 }
 
 @override
 String toString() {
   final _this = this as UserModel;
-  return 'UserModel(id: ${_this.id}, email: ${_this.email}, username: ${_this.username}, searchableUsername: ${_this.searchableUsername}, gender: ${_this.gender}, accentColorKey: ${_this.accentColorKey}, avatarUrl: ${_this.avatarUrl}, friends: ${_this.friends}, monthlyStats: ${_this.monthlyStats}, unlockedBadges: ${_this.unlockedBadges}, endOfDayBoundary: ${_this.endOfDayBoundary})';
+  return 'UserModel(id: ${_this.id}, email: ${_this.email}, username: ${_this.username}, searchableUsername: ${_this.searchableUsername}, accentColorKey: ${_this.accentColorKey}, avatarUrl: ${_this.avatarUrl}, friends: ${_this.friends}, monthlyStats: ${_this.monthlyStats}, unlockedBadges: ${_this.unlockedBadges}, endOfDayBoundary: ${_this.endOfDayBoundary})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $UserModelCopyWith<$Res>  {
   factory $UserModelCopyWith(UserModel value, $Res Function(UserModel) _then) = _$UserModelCopyWithImpl;
 @useResult
 $Res call({
- String id, String email, String username, String searchableUsername, Gender? gender, AccentColorKey? accentColorKey, String? avatarUrl, Set<String> friends, Map<String, MonthlyStats> monthlyStats, Map<String, UnlockedBadge> unlockedBadges,@TimeOfDayConverter() TimeOfDay endOfDayBoundary
+ String id, String email, String username, String searchableUsername, AccentColorKey? accentColorKey, String? avatarUrl, Set<String> friends, Map<String, MonthlyStats> monthlyStats, Map<String, UnlockedBadge> unlockedBadges,@TimeOfDayConverter() TimeOfDay endOfDayBoundary
 });
 
 
@@ -71,14 +71,13 @@ class _$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? gender = freezed,Object? accentColorKey = freezed,Object? avatarUrl = freezed,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? accentColorKey = freezed,Object? avatarUrl = freezed,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
   return _then(UserModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
 as String,searchableUsername: null == searchableUsername ? _self.searchableUsername : searchableUsername // ignore: cast_nullable_to_non_nullable
-as String,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
-as Gender?,accentColorKey: freezed == accentColorKey ? _self.accentColorKey : accentColorKey // ignore: cast_nullable_to_non_nullable
+as String,accentColorKey: freezed == accentColorKey ? _self.accentColorKey : accentColorKey // ignore: cast_nullable_to_non_nullable
 as AccentColorKey?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,friends: null == friends ? _self.friends : friends // ignore: cast_nullable_to_non_nullable
 as Set<String>,monthlyStats: null == monthlyStats ? _self.monthlyStats : monthlyStats // ignore: cast_nullable_to_non_nullable
@@ -169,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String searchableUsername,  Gender? gender,  AccentColorKey? accentColorKey,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String searchableUsername,  AccentColorKey? accentColorKey,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.gender,_that.accentColorKey,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
+return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.accentColorKey,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
   return orElse();
 
 }
@@ -190,10 +189,10 @@ return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String searchableUsername,  Gender? gender,  AccentColorKey? accentColorKey,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String email,  String username,  String searchableUsername,  AccentColorKey? accentColorKey,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)  $default,) {final _that = this;
 switch (_that) {
 case _UserModel():
-return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.gender,_that.accentColorKey,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
+return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.accentColorKey,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +209,10 @@ return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String username,  String searchableUsername,  Gender? gender,  AccentColorKey? accentColorKey,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String email,  String username,  String searchableUsername,  AccentColorKey? accentColorKey,  String? avatarUrl,  Set<String> friends,  Map<String, MonthlyStats> monthlyStats,  Map<String, UnlockedBadge> unlockedBadges, @TimeOfDayConverter()  TimeOfDay endOfDayBoundary)?  $default,) {final _that = this;
 switch (_that) {
 case _UserModel() when $default != null:
-return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.gender,_that.accentColorKey,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
+return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_that.accentColorKey,_that.avatarUrl,_that.friends,_that.monthlyStats,_that.unlockedBadges,_that.endOfDayBoundary);case _:
   return null;
 
 }
@@ -225,14 +224,13 @@ return $default(_that.id,_that.email,_that.username,_that.searchableUsername,_th
 @JsonSerializable()
 
 class _UserModel extends UserModel {
-  const _UserModel({required this.id, required this.email, required this.username, required this.searchableUsername, this.gender, this.accentColorKey, this.avatarUrl,  Set<String> friends = const {},  Map<String, MonthlyStats> monthlyStats = const {},  Map<String, UnlockedBadge> unlockedBadges = const {}, @TimeOfDayConverter() this.endOfDayBoundary = defaultEndOfDayBoundary}): _friends = friends,_monthlyStats = monthlyStats,_unlockedBadges = unlockedBadges,super._();
+  const _UserModel({required this.id, required this.email, required this.username, required this.searchableUsername, this.accentColorKey, this.avatarUrl,  Set<String> friends = const {},  Map<String, MonthlyStats> monthlyStats = const {},  Map<String, UnlockedBadge> unlockedBadges = const {}, @TimeOfDayConverter() this.endOfDayBoundary = defaultEndOfDayBoundary}): _friends = friends,_monthlyStats = monthlyStats,_unlockedBadges = unlockedBadges,super._();
   factory _UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
 
 @override final  String id;
 @override final  String email;
 @override final  String username;
 @override final  String searchableUsername;
-@override final  Gender? gender;
 @override final  AccentColorKey? accentColorKey;
 @override final  String? avatarUrl;
  final  Set<String> _friends;
@@ -271,18 +269,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.accentColorKey, accentColorKey) || other.accentColorKey == accentColorKey)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other.friends, _friends)&&const DeepCollectionEquality().equals(other.monthlyStats, _monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, _unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.accentColorKey, accentColorKey) || other.accentColorKey == accentColorKey)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other.friends, _friends)&&const DeepCollectionEquality().equals(other.monthlyStats, _monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, _unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,email,username,searchableUsername,gender,accentColorKey,avatarUrl,const DeepCollectionEquality().hash(_friends),const DeepCollectionEquality().hash(_monthlyStats),const DeepCollectionEquality().hash(_unlockedBadges),endOfDayBoundary);
+    return Object.hash(runtimeType,id,email,username,searchableUsername,accentColorKey,avatarUrl,const DeepCollectionEquality().hash(_friends),const DeepCollectionEquality().hash(_monthlyStats),const DeepCollectionEquality().hash(_unlockedBadges),endOfDayBoundary);
 }
 
 @override
 String toString() {
-    return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, gender: $gender, accentColorKey: $accentColorKey, avatarUrl: $avatarUrl, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
+    return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, accentColorKey: $accentColorKey, avatarUrl: $avatarUrl, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
 }
 
 
@@ -293,7 +291,7 @@ abstract mixin class _$UserModelCopyWith<$Res> implements $UserModelCopyWith<$Re
   factory _$UserModelCopyWith(_UserModel value, $Res Function(_UserModel) _then) = __$UserModelCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String email, String username, String searchableUsername, Gender? gender, AccentColorKey? accentColorKey, String? avatarUrl, Set<String> friends, Map<String, MonthlyStats> monthlyStats, Map<String, UnlockedBadge> unlockedBadges,@TimeOfDayConverter() TimeOfDay endOfDayBoundary
+ String id, String email, String username, String searchableUsername, AccentColorKey? accentColorKey, String? avatarUrl, Set<String> friends, Map<String, MonthlyStats> monthlyStats, Map<String, UnlockedBadge> unlockedBadges,@TimeOfDayConverter() TimeOfDay endOfDayBoundary
 });
 
 
@@ -310,14 +308,13 @@ class __$UserModelCopyWithImpl<$Res>
 
 /// Create a copy of UserModel
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? gender = freezed,Object? accentColorKey = freezed,Object? avatarUrl = freezed,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? email = null,Object? username = null,Object? searchableUsername = null,Object? accentColorKey = freezed,Object? avatarUrl = freezed,Object? friends = null,Object? monthlyStats = null,Object? unlockedBadges = null,Object? endOfDayBoundary = null,}) {
   return _then(_UserModel(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,username: null == username ? _self.username : username // ignore: cast_nullable_to_non_nullable
 as String,searchableUsername: null == searchableUsername ? _self.searchableUsername : searchableUsername // ignore: cast_nullable_to_non_nullable
-as String,gender: freezed == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
-as Gender?,accentColorKey: freezed == accentColorKey ? _self.accentColorKey : accentColorKey // ignore: cast_nullable_to_non_nullable
+as String,accentColorKey: freezed == accentColorKey ? _self.accentColorKey : accentColorKey // ignore: cast_nullable_to_non_nullable
 as AccentColorKey?,avatarUrl: freezed == avatarUrl ? _self.avatarUrl : avatarUrl // ignore: cast_nullable_to_non_nullable
 as String?,friends: null == friends ? _self._friends : friends // ignore: cast_nullable_to_non_nullable
 as Set<String>,monthlyStats: null == monthlyStats ? _self._monthlyStats : monthlyStats // ignore: cast_nullable_to_non_nullable

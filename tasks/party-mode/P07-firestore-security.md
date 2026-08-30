@@ -27,7 +27,7 @@ Enforce Session-backed Party privacy and callable-only mutation, then add indexe
 - Permit Party reads only to Session members.
 - Deny direct writes to events, aggregates, game transitions, and archived Party data.
 - Make embedded drink changes callable-only when `Session.isParty` is true while preserving non-Party behavior.
-- Validate owned profile gender and accent-key updates.
+- Validate owned profile accent-key updates.
 - Add exact composite indexes required by implemented queries and disable unused large-field indexes.
 - Establish Firestore Emulator rules tests if absent.
 
@@ -68,6 +68,5 @@ This task exclusively owns `firestore.rules` and `firestore.indexes.json` until 
 
 P01 profile validation requirements:
 
-- `gender` accepts only `male` or `female`.
 - `accentColorKey` accepts only `amber`, `rose`, `violet`, `sky`, `emerald`, `lime`, `orange`, or `fuchsia` (palette version 1).
 - Profile-field updates are owner-only and must preserve all unrelated user fields.

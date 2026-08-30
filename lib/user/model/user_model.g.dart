@@ -11,7 +11,6 @@ _UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   email: json['email'] as String,
   username: json['username'] as String,
   searchableUsername: json['searchableUsername'] as String,
-  gender: $enumDecodeNullable(_$GenderEnumMap, json['gender']),
   accentColorKey: $enumDecodeNullable(
     _$AccentColorKeyEnumMap,
     json['accentColorKey'],
@@ -45,7 +44,6 @@ Map<String, dynamic> _$UserModelToJson(
   'email': instance.email,
   'username': instance.username,
   'searchableUsername': instance.searchableUsername,
-  'gender': _$GenderEnumMap[instance.gender],
   'accentColorKey': _$AccentColorKeyEnumMap[instance.accentColorKey],
   'avatarUrl': instance.avatarUrl,
   'friends': instance.friends.toList(),
@@ -57,8 +55,6 @@ Map<String, dynamic> _$UserModelToJson(
     instance.endOfDayBoundary,
   ),
 };
-
-const _$GenderEnumMap = {Gender.male: 'male', Gender.female: 'female'};
 
 const _$AccentColorKeyEnumMap = {
   AccentColorKey.amber: 'amber',

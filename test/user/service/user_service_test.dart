@@ -4,11 +4,10 @@ import 'package:remembeer/friend_request/controller/friend_request_controller.da
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/accent_color.dart';
-import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/service/user_service.dart';
 
 void main() {
-  test('profile update delegates a validated owned-field update', () async {
+  test('accent update delegates a validated owned-field update', () async {
     final userController = _FakeUserController();
     final service = UserService(
       authService: _FakeAuthService(),
@@ -17,28 +16,21 @@ void main() {
       userController: userController,
     );
 
-    await service.updateProfile(
-      gender: Gender.male,
-      accentColorKey: AccentColorKey.emerald,
-    );
+    await service.updateAccentColor(AccentColorKey.emerald);
 
-    expect(userController.updatedGender, Gender.male);
     expect(userController.updatedAccentColorKey, AccentColorKey.emerald);
     expect(userController.fullDocumentWriteCalled, isFalse);
   });
 }
 
 class _FakeUserController implements UserController {
-  Gender? updatedGender;
   AccentColorKey? updatedAccentColorKey;
   var fullDocumentWriteCalled = false;
 
   @override
-  Future<void> updateCurrentUserProfile({
-    required Gender gender,
-    required AccentColorKey accentColorKey,
-  }) async {
-    updatedGender = gender;
+  Future<void> updateCurrentUserAccentColor(
+    AccentColorKey accentColorKey,
+  ) async {
     updatedAccentColorKey = accentColorKey;
   }
 

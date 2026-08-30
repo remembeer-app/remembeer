@@ -2,7 +2,7 @@
 
 ## Objective
 
-Collect gender during registration, assign an accent, require existing users to complete missing fields, and expose later editing.
+Assign an accent during registration, require existing users to complete a missing accent, and expose later editing.
 
 ## Dependencies
 
@@ -17,11 +17,10 @@ Collect gender during registration, assign an accent, require existing users to 
 
 ## Scope
 
-- Add male/female selection to email registration and any Google first-login onboarding.
-- Assign the deterministic accent from P01 during profile creation.
-- Add a required profile-completion page for authenticated users with missing fields.
+- Assign the deterministic accent from P01 during email and Google profile creation.
+- Add a required profile-completion page for authenticated users missing an accent.
 - Add router redirection without loops or flashes into protected app pages.
-- Add editable gender/accent controls to the established profile/settings UI.
+- Add editable accent controls to the established profile/settings UI.
 - Add widget and routing tests for complete and incomplete users.
 
 ## Likely Files
@@ -42,8 +41,8 @@ Collect gender during registration, assign an accent, require existing users to 
 
 - An authenticated incomplete user cannot enter normal app routes.
 - The completion route cannot redirect to itself in a loop.
-- New email and Google-created profiles have both fields.
-- Users can edit both values later.
+- New email and Google-created profiles have an accent.
+- Users can edit their accent later.
 - Invalid or absent choices cannot be submitted.
 
 ## Verification

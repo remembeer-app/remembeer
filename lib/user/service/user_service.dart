@@ -10,7 +10,6 @@ import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/accent_color.dart';
-import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -62,7 +61,7 @@ class UserService {
     });
   }
 
-  Future<void> createDefaultUser({String? username, Gender? gender}) async {
+  Future<void> createDefaultUser({String? username}) async {
     final authenticatedUser = authService.authenticatedUser;
     final email =
         authenticatedUser.email ?? never('User does not have an email.');
@@ -73,22 +72,14 @@ class UserService {
       email: email,
       username: resolvedUsername,
       searchableUsername: resolvedUsername.toSearchable(),
-      gender: gender,
       accentColorKey: defaultAccentColorFor(authenticatedUser.uid),
     );
 
     await userController.createOrUpdateUser(defaultUser);
   }
 
-  Future<void> updateProfile({
-    required Gender gender,
-    required AccentColorKey accentColorKey,
-  }) {
-    return userController.updateCurrentUserProfile(
-      gender: gender,
-      accentColorKey: accentColorKey,
-    );
-  }
+  Future<void> updateAccentColor(AccentColorKey accentColorKey) =>
+      userController.updateCurrentUserAccentColor(accentColorKey);
 
   Future<void> updateUsername({required String newUsername}) async {
     final trimmedUsername = newUsername.trim();

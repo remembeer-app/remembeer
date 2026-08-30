@@ -20,7 +20,7 @@ Port and generalize Rozlucka's 16 social quest concepts into a versioned, testab
 
 - Define a versioned English built-in catalog.
 - Generalize class quests across beer, cider, cocktail, spirit, and wine.
-- Implement same/different accent, different gender, new ally/history, ranking, team, and finalist eligibility.
+- Implement same/different accent, new ally/history, ranking, team, and finalist eligibility.
 - Define deterministic inputs and outputs independent of Firestore calls.
 - Handle ranking ties consistently with Party ranking rules.
 - Support custom templates through `allEligibleMembers` only.

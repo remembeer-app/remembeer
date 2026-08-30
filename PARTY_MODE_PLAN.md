@@ -40,8 +40,8 @@ Agent-sized implementation tasks, dependencies, and shared-file ownership are in
 | Custom quests | Admin-defined title, instructions, points, and duration; mutual partner confirmation remains required |
 | Admin challenges | Timed and admin-created; multiple winners may be awarded |
 | Beerpong | Per-party opt-in; 2-16 teams; single elimination; byes; optional third-place match |
-| Profiles | Permanent editable male/female gender and auto-assigned, editable accent color |
-| Existing users | Required profile-completion screen after login when fields are missing |
+| Profiles | Auto-assigned, editable accent color |
+| Existing users | Required profile-completion screen after login when the accent is missing |
 | Party end | Freeze all game actions and retain a read-only archive |
 | Activity filters | Filter by people and event type |
 | Notifications | Send pushes for all actionable party events with direct deep links |
@@ -71,7 +71,7 @@ Agent-sized implementation tasks, dependencies, and shared-file ownership are in
 | Random social events | Scheduled built-in/custom mutual-selection quests |
 | Quick challenges | Admin challenges with multiple winners |
 | Fixed eight-team bracket | Configurable 2-16-team single-elimination bracket |
-| Gender/accent eligibility | Permanent editable user profile fields |
+| Accent eligibility | Permanent editable user profile field |
 | Browser push | Existing FCM/APNs notification pipeline |
 | Convex scheduled jobs | Firebase scheduled Cloud Functions in `europe-west4` |
 
@@ -79,9 +79,9 @@ Agent-sized implementation tasks, dependencies, and shared-file ownership are in
 
 ### Profile Completion
 
-1. Registration collects `gender` as `male` or `female` and assigns an accent from an accessible palette.
-2. Existing authenticated users missing either field are redirected to a required profile-completion page before entering the app.
-3. Gender and accent remain editable from profile/settings.
+1. Registration assigns an accent from an accessible palette.
+2. Existing authenticated users missing the accent are redirected to a required profile-completion page before entering the app.
+3. The accent remains editable from profile/settings.
 4. Store a stable accent key, not an arbitrary color value. Resolve it through a versioned palette in `lib/user/constants.dart`.
 5. Profile updates affect future quest eligibility. Active quests retain their eligibility snapshot.
 
@@ -214,7 +214,7 @@ parties/{sessionId}/members/{userId}
 - Create/remove member records in response to valid Session membership changes while the Party is active.
 - A newly added member starts with no class, no beerpong opt-in, and zero points.
 - Preserve departed members and their score in archived activity/ranking, but mark them inactive if the product continues to allow leaving an active Session.
-- Use the current `UserModel` for username, avatar, gender, and accent presentation. Snapshot eligibility inputs on each quest so profile edits do not alter an active quest.
+- Use the current `UserModel` for username, avatar, and accent presentation. Snapshot eligibility inputs on each quest so profile edits do not alter an active quest.
 
 ### Immutable Score Events
 
@@ -258,7 +258,7 @@ parties/{sessionId}/questTemplates/{templateId}
 ```
 
 - Seed a versioned built-in catalog at activation.
-- Adapt the 16 source concepts around class, same/different accent, different gender, interaction history, rank, and beerpong team/finalist state.
+- Adapt the source concepts around class, same/different accent, interaction history, rank, and beerpong team/finalist state.
 - Generalize class-specific templates across all five Remembeer classes rather than privileging the original four.
 - Custom templates always use `eligibilityRule: allEligibleMembers`; v1 does not include a rule builder.
 
@@ -350,7 +350,7 @@ parties/{sessionId}/tournaments/{tournamentId}/matches/{matchId}
 
 - Members opt in per Party before enrollment is locked.
 - An admin chooses a team count from 2 through `min(16, participantCount)` and generates teams.
-- Server-side seeded randomization balances team sizes and distributes male/female participants as evenly as practical.
+- Server-side seeded randomization balances team sizes with deterministic draws.
 - Team sizes may differ by at most one.
 - Generate the next power-of-two bracket and advance byes transactionally.
 - Admins may rename teams before the first result; roster changes require redrawing the tournament.
@@ -363,11 +363,10 @@ parties/{sessionId}/tournaments/{tournamentId}/matches/{matchId}
 Add to `UserModel`:
 
 ```text
-gender: male | female
 accentColorKey: string
 ```
 
-Both are editable by the owning user. Firestore rules validate the enum and palette key. Registration and required profile completion guarantee non-null values in the new code; no long-term nullable compatibility branch is retained.
+The accent is editable by the owning user. Firestore rules validate the palette key. Registration and required profile completion guarantee a non-null value in the new code; no long-term nullable compatibility branch is retained.
 
 ## Server-Authoritative Commands
 
@@ -559,7 +558,7 @@ Rules must enforce:
 - Archived Party data is readable but immutable.
 - Party Session drink mutations are callable-only; tighten the current rule that broadly allows members to change the shared `drinks` array.
 - Non-Party drink and Session behavior remains unchanged unless needed to close an existing privilege gap.
-- Users may update only their own valid gender and accent key, alongside the profile fields already allowed.
+- Users may update only their own valid accent key, alongside the profile fields already allowed.
 - Custom quest/challenge input limits are enforced server-side; rules remain deny-by-default for direct writes.
 
 Add Firebase Emulator rules tests before deploying the broader Party rules.
@@ -623,7 +622,7 @@ The exact auth/profile page paths should be confirmed when implementing profile 
 
 ### Milestone 1: Profile And Party Foundation
 
-- Add gender/accent models, registration fields, required existing-user onboarding, profile editing, constants, rules, and tests.
+- Add the accent model, deterministic registration default, required existing-user onboarding, profile editing, constants, rules, and tests.
 - Add Party root/member models, controllers, services, IoC registrations, rules, and indexes.
 - Replace client-only conversion with atomic `activate_party`.
 - Add Party archive lifecycle linked to Session end.
@@ -686,7 +685,7 @@ Acceptance criteria:
 Acceptance criteria:
 
 - Draws support 2-16 teams and non-power-of-two brackets.
-- Team sizes differ by at most one and gender distribution is balanced where possible.
+- Team sizes differ by at most one.
 - Winners propagate correctly; dependent results reset safely after correction.
 - Final placement awards are exactly-once and auditable.
 
@@ -713,7 +712,7 @@ Acceptance criteria:
 - Integer rounding at ABV/volume boundaries.
 - Class-version snapshot behavior.
 - Shared leaderboard ranks and deterministic tie ordering.
-- Built-in quest eligibility rules for class, gender, accent, ranking, history, and beerpong state.
+- Built-in quest eligibility rules for class, accent, ranking, history, and beerpong state.
 - Team balancing, seeded shuffle, byes, match propagation, third-place generation, and downstream reset.
 
 ### Flutter Widget Tests
@@ -731,7 +730,7 @@ Acceptance criteria:
 - Direct event/score writes denied.
 - Active versus archived behavior.
 - Party versus non-Party Session drink writes.
-- Valid and invalid profile gender/accent updates.
+- Valid and invalid profile accent updates.
 - Custom content input constraints and deny-by-default coverage.
 
 ### Cloud Function And Emulator Tests

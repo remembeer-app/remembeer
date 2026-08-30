@@ -7,7 +7,6 @@ import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
-import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
 
 part 'user_model.freezed.dart';
@@ -23,7 +22,6 @@ abstract class UserModel with _$UserModel implements Document {
     required String email,
     required String username,
     required String searchableUsername,
-    Gender? gender,
     AccentColorKey? accentColorKey,
     String? avatarUrl,
     @Default({}) Set<String> friends,
@@ -37,7 +35,7 @@ abstract class UserModel with _$UserModel implements Document {
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
 
-  bool get isProfileComplete => gender != null && accentColorKey != null;
+  bool get isProfileComplete => accentColorKey != null;
 
   AccentColor? get accentColor => accentColorPalette[accentColorKey];
 

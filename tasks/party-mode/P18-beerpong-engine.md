@@ -18,7 +18,7 @@ Implement deterministic team balancing and flexible single-elimination bracket l
 ## Scope
 
 - Implement seeded random player ordering.
-- Balance team sizes and distribute male/female participants as evenly as practical.
+- Balance team sizes while preserving deterministic seeded draws.
 - Validate 2-16 teams and participant constraints.
 - Generate next-power-of-two brackets with byes.
 - Add optional third-place match generation.
@@ -39,7 +39,7 @@ Implement deterministic team balancing and flexible single-elimination bracket l
 ## Acceptance Criteria
 
 - Team sizes differ by at most one.
-- Gender distribution is as even as possible for the roster.
+- Team sizes differ by at most one for every supported roster.
 - Identical roster/seed/settings produce identical output.
 - Every allowed team count creates a valid bracket.
 - Byes, third place, propagation, and correction dependencies are correct.
