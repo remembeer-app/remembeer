@@ -6,6 +6,8 @@ Product decisions are complete. This document is the implementation plan for ada
 
 The source project is a reference for behavior and rules, not a code dependency. React, Convex, browser push, and Tailwind code will not be copied into the Flutter/Firebase application.
 
+Agent-sized implementation tasks, dependencies, and shared-file ownership are indexed in [`tasks/party-mode/README.md`](tasks/party-mode/README.md).
+
 ## Goals
 
 - Turn each converted multi-user Session into a live competition hub.
