@@ -25,6 +25,7 @@ import 'package:remembeer/leaderboard/page/leaderboards_page.dart';
 import 'package:remembeer/leaderboard/page/manage_leaderboard_page.dart';
 import 'package:remembeer/leaderboard/page/update_leaderboard_name_page.dart';
 import 'package:remembeer/location/page/location_page.dart';
+import 'package:remembeer/party/page/party_page.dart';
 import 'package:remembeer/session/page/add_friends_to_session_page.dart';
 import 'package:remembeer/session/page/create_session_page.dart';
 import 'package:remembeer/session/page/edit_session_page.dart';
@@ -124,6 +125,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
           path: '/drink',
           routes: [
             TypedGoRoute<AddDrinkRoute>(path: 'new'),
+            TypedGoRoute<PartyRoute>(path: 'parties/:sessionId'),
             TypedGoRoute<LocationPickerRoute>(path: 'location-picker'),
             TypedGoRoute<CreateSessionRoute>(path: 'sessions/new'),
             TypedGoRoute<SessionSummaryRoute>(path: 'sessions/summary'),
@@ -353,11 +355,24 @@ class UpdateLeaderboardNameRoute extends GoRouteData
 }
 
 class AddDrinkRoute extends GoRouteData with $AddDrinkRoute {
-  const AddDrinkRoute();
+  final String? targetSessionId;
+
+  const AddDrinkRoute({this.targetSessionId});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return AddDrinkPage();
+    return AddDrinkPage(targetSessionId: targetSessionId);
+  }
+}
+
+class PartyRoute extends GoRouteData with $PartyRoute {
+  final String sessionId;
+
+  const PartyRoute({required this.sessionId});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PartyPage(sessionId: sessionId);
   }
 }
 

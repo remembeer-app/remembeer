@@ -34,7 +34,12 @@ class SessionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildHeader(theme, session.name, session.endedAt),
+              _buildHeader(
+                theme,
+                session.name,
+                session.endedAt,
+                session.isParty,
+              ),
               const Gap(12),
               _buildMembersRow(theme),
               if (session.hasPictures) ...[
@@ -50,16 +55,30 @@ class SessionCard extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(ThemeData theme, String sessionName, DateTime? endedAt) {
+  Widget _buildHeader(
+    ThemeData theme,
+    String sessionName,
+    DateTime? endedAt,
+    bool isParty,
+  ) {
+    final headerColor = isParty
+        ? theme.colorScheme.error
+        : theme.colorScheme.primary;
+
     return Row(
       children: [
-        Icon(Icons.table_bar, size: 20, color: theme.colorScheme.primary),
+        Icon(
+          isParty ? Icons.celebration : Icons.table_bar,
+          size: 20,
+          color: headerColor,
+        ),
         const Gap(8),
         Expanded(
           child: Text(
-            sessionName,
+            isParty ? 'Party · $sessionName' : sessionName,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.bold,
+              color: headerColor,
             ),
           ),
         ),

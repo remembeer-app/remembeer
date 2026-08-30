@@ -101,8 +101,12 @@ class DrinkService {
   ///
   /// If exactly one session is active at the drink's consumedAt time,
   /// the drink is added to that session. Otherwise, a new solo session
-  /// is created for the drink.
-  Future<void> createDrink(DrinkCreate drinkCreate) async {
+  /// is created for the drink. When [targetSessionId] is provided, the drink
+  /// is added only to that session after validating it can accept the drink.
+  Future<void> createDrink(
+    DrinkCreate drinkCreate, {
+    String? targetSessionId,
+  }) async {
     final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
     final after6pm = _calculateIsAfter6pm(
       drinkCreate.consumedAt,
@@ -128,9 +132,30 @@ class DrinkService {
 
     final alcohol = drink.alcoholMl;
 
-    final activeSessions = await sessionController.sessionsActiveAt(
-      drinkCreate.consumedAt,
-    );
+    final Session? targetSession;
+    final List<Session> activeSessions;
+    if (targetSessionId != null) {
+      targetSession = await sessionController.findById(targetSessionId);
+      activeSessions = const [];
+      invariant(
+        targetSession.memberIds.contains(userId),
+        'Drinks can only be added to sessions the user belongs to.',
+      );
+      invariant(
+        !targetSession.isSoloSession,
+        'Drinks cannot explicitly target a solo session.',
+      );
+      invariant(
+        targetSession.isActiveAt(drinkCreate.consumedAt),
+        'The drink time must be within the targeted session.',
+      );
+      invariant(targetSession.hasFreeSpace, 'The targeted session is full.');
+    } else {
+      targetSession = null;
+      activeSessions = await sessionController.sessionsActiveAt(
+        drinkCreate.consumedAt,
+      );
+    }
 
     var user = await userController.currentUser;
     user = user.addDrink(
@@ -147,11 +172,14 @@ class DrinkService {
 
     final batch = sessionController.batch;
 
-    final canAddToExisting =
-        activeSessions.length == 1 && activeSessions.single.hasFreeSpace;
+    final automaticallySelectedSession = activeSessions.length == 1
+        ? activeSessions.single
+        : null;
+    final selectedSession = targetSession ?? automaticallySelectedSession;
+    final canAddToExisting = selectedSession?.hasFreeSpace ?? false;
 
     if (canAddToExisting) {
-      sessionController.addDrinkInBatch(activeSessions.single.id, drink, batch);
+      sessionController.addDrinkInBatch(selectedSession!.id, drink, batch);
     } else {
       sessionController.createSoloSessionWithDrinkInBatch(drink, batch);
 
@@ -270,7 +298,7 @@ class DrinkService {
     await batch.commit();
   }
 
-  Future<void> addDefaultDrink() async {
+  Future<void> addDefaultDrink({String? targetSessionId}) async {
     final userSettings = await userSettingsController.currentUserSettings;
     final position = await locationService.getLastPositionIfAllowed();
     final location = position != null
@@ -284,6 +312,7 @@ class DrinkService {
         volumeInMilliliters: userSettings.defaultDrinkSize,
         location: location,
       ),
+      targetSessionId: targetSessionId,
     );
     showSuccessNotification('Default drink added!');
   }

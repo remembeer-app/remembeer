@@ -28,6 +28,7 @@ abstract class Session with _$Session implements EntityWithMembers {
     DateTime? endedAt,
     @Default([]) List<Drink> drinks,
     @Default(true) bool isSoloSession,
+    @Default(false) bool isParty,
     @Default('') String description,
     @Default([]) List<String> pictureUrls,
   }) = _Session;

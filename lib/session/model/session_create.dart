@@ -16,6 +16,7 @@ abstract class SessionCreate with _$SessionCreate implements ValueObject {
     required Set<String> adminIds,
     @Default({}) Set<String> bannedMemberIds,
     @Default(true) bool isSoloSession,
+    @Default(false) bool isParty,
     @Default([]) List<Drink> drinks,
     @Default('') String description,
   }) = _SessionCreate;

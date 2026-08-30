@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
+import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
@@ -27,25 +28,41 @@ class EditSessionPage extends StatelessWidget {
   }
 
   Widget _buildPage(BuildContext context, Session session) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return PageTemplate(
-      title: const Text('Edit Session'),
-      child: SessionForm(
-        initialName: session.name,
-        initialDescription: session.description,
-        initialStartedAt: session.startedAt,
-        submitButtonText: 'Save Changes',
-        onSubmit: (name, description, startedAt) async {
-          await _sessionService.updateSession(
-            session: session,
-            name: name,
-            description: description,
-            startedAt: startedAt,
-          );
-          if (context.mounted) {
-            context.pop();
-          }
-        },
-        additionalActions: _buildAdditionalActions(context, session),
+      title: Text(session.isParty ? 'Edit Party' : 'Edit Session'),
+      appBarBackgroundColor: session.isParty
+          ? colorScheme.errorContainer
+          : null,
+      appBarForegroundColor: session.isParty
+          ? colorScheme.onErrorContainer
+          : null,
+      child: Column(
+        children: [
+          _buildPartyButton(context, session),
+          const Gap(16),
+          Expanded(
+            child: SessionForm(
+              initialName: session.name,
+              initialDescription: session.description,
+              initialStartedAt: session.startedAt,
+              submitButtonText: 'Save Changes',
+              onSubmit: (name, description, startedAt) async {
+                await _sessionService.updateSession(
+                  session: session,
+                  name: name,
+                  description: description,
+                  startedAt: startedAt,
+                );
+                if (context.mounted) {
+                  context.pop();
+                }
+              },
+              additionalActions: _buildAdditionalActions(context, session),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -63,6 +80,30 @@ class EditSessionPage extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildPartyButton(BuildContext context, Session session) {
+    final isEligible = !session.isSoloSession && session.endedAt == null;
+
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: session.isParty
+            ? () => PartyRoute(sessionId: session.id).go(context)
+            : !isEligible
+            ? null
+            : () => _showPartyConfirmationDialog(context, session),
+        style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
+        icon: Icon(session.isParty ? Icons.open_in_full : Icons.celebration),
+        label: Text(
+          session.isParty
+              ? 'Open Party'
+              : isEligible
+              ? 'Turn into Party'
+              : 'Party Mode Unavailable',
+        ),
+      ),
     );
   }
 
@@ -123,6 +164,25 @@ class EditSessionPage extends StatelessWidget {
         await _sessionService.deleteSession(session);
         if (context.mounted) {
           const DrinkRoute().go(context);
+        }
+      },
+    );
+  }
+
+  void _showPartyConfirmationDialog(BuildContext context, Session session) {
+    showConfirmationDialog(
+      context: context,
+      title: 'Turn Session into Party',
+      text:
+          'This cannot be undone. All drinks already recorded in the session '
+          'will count toward the party ranking, and session admins will also '
+          'be party admins.',
+      submitButtonText: 'Enable Party Mode',
+      onPressed: () async {
+        await _sessionService.turnSessionIntoParty(session);
+        showSuccessNotification('Party mode enabled!');
+        if (context.mounted) {
+          PartyRoute(sessionId: session.id).go(context);
         }
       },
     );

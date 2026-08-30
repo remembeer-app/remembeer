@@ -39,6 +39,14 @@ class SessionHeaderCard extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+                if (session.isParty) ...[
+                  const Gap(8),
+                  const Chip(
+                    avatar: Icon(Icons.celebration, size: 18),
+                    label: Text('Party'),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
                 const Gap(8),
                 Row(
                   children: [

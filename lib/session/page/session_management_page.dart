@@ -113,15 +113,14 @@ class SessionManagementPage extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: theme.colorScheme.primaryContainer,
-          // TODO(ohtenkay): Replace with session signature drink icon
           child: Icon(
-            Icons.sports_bar,
+            session.isParty ? Icons.celebration : Icons.sports_bar,
             color: theme.colorScheme.onPrimaryContainer,
           ),
         ),
         title: Text(session.name, style: theme.textTheme.titleMedium),
         subtitle: Text(
-          '${dateFormat.format(session.startedAt)} · $memberCount ${memberCount == 1 ? 'member' : 'members'}',
+          '${dateFormat.format(session.startedAt)} · $memberCount ${memberCount == 1 ? 'member' : 'members'}${session.isParty ? ' · Party' : ''}',
           style: theme.textTheme.bodySmall,
         ),
         trailing: Row(

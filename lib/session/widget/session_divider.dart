@@ -64,21 +64,37 @@ class _SessionDividerState extends State<SessionDivider> {
   }
 
   Widget _buildTitleRow(ThemeData theme) {
+    final partyColor = theme.colorScheme.error;
+
     return Row(
       children: [
-        Icon(Icons.table_bar, size: 20, color: theme.colorScheme.primary),
+        Icon(
+          _session.isParty ? Icons.celebration : Icons.table_bar,
+          size: 20,
+          color: _session.isParty ? partyColor : theme.colorScheme.primary,
+        ),
         const Gap(8),
         Expanded(
           child: Text(
-            _session.name,
+            _session.isParty ? 'Party · ${_session.name}' : _session.name,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
+              color: _session.isParty ? partyColor : null,
             ),
           ),
         ),
         const Gap(8),
+        if (_session.isParty) ...[
+          TextButton.icon(
+            onPressed: () =>
+                PartyRoute(sessionId: _session.id).push<void>(context),
+            icon: const Icon(Icons.open_in_full, size: 18),
+            label: const Text('Open'),
+          ),
+          const Gap(4),
+        ],
         AnimatedRotation(
           turns: _isExpanded ? 0.5 : 0,
           duration: const Duration(milliseconds: 200),

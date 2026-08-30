@@ -9,7 +9,9 @@ import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
 
 class AddDrinkPage extends StatelessWidget {
-  AddDrinkPage({super.key});
+  final String? targetSessionId;
+
+  AddDrinkPage({super.key, this.targetSessionId});
 
   final _drinkService = get<DrinkService>();
   final _userSettingsService = get<UserSettingsService>();
@@ -20,7 +22,9 @@ class AddDrinkPage extends StatelessWidget {
       future: _userSettingsService.currentUserSettings,
       builder: (context, userSettings) {
         return PageTemplate(
-          title: const Text('Record a Drink'),
+          title: Text(
+            targetSessionId == null ? 'Record a Drink' : 'Add Party Drink',
+          ),
           child: DrinkForm(
             initialDrinkType: userSettings.defaultDrinkType,
             initialConsumedAt: DateTime.now(),
@@ -34,6 +38,7 @@ class AddDrinkPage extends StatelessWidget {
                       volumeInMilliliters: volumeInMilliliters,
                       location: location,
                     ),
+                    targetSessionId: targetSessionId,
                   );
                   if (context.mounted) {
                     context.pop();

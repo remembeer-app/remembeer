@@ -152,6 +152,11 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               factory: $AddDrinkRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'parties/:sessionId',
+              hasOverriddenOnExit: false,
+              factory: $PartyRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'location-picker',
               hasOverriddenOnExit: false,
               factory: $LocationPickerRoute._fromState,
@@ -558,10 +563,45 @@ mixin $DrinkRoute on GoRouteData {
 }
 
 mixin $AddDrinkRoute on GoRouteData {
-  static AddDrinkRoute _fromState(GoRouterState state) => const AddDrinkRoute();
+  static AddDrinkRoute _fromState(GoRouterState state) => AddDrinkRoute(
+    targetSessionId: state.uri.queryParameters['target-session-id'],
+  );
+
+  AddDrinkRoute get _self => this as AddDrinkRoute;
 
   @override
-  String get location => GoRouteData.$location('/drink/new');
+  String get location => GoRouteData.$location(
+    '/drink/new',
+    queryParams: {
+      if (_self.targetSessionId != null)
+        'target-session-id': _self.targetSessionId,
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $PartyRoute on GoRouteData {
+  static PartyRoute _fromState(GoRouterState state) =>
+      PartyRoute(sessionId: state.pathParameters['sessionId']!);
+
+  PartyRoute get _self => this as PartyRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/drink/parties/${Uri.encodeComponent(_self.sessionId)}',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);
