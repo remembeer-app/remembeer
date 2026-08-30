@@ -55,18 +55,22 @@ final router = GoRouter(
   initialLocation: const DrinkRoute().location,
   redirect: (context, state) async {
     final isAuthenticated = _authService.isAuthenticated;
+    final loginLocation = const LoginRoute().location;
     final registerLocation = const RegisterRoute().location;
+    final isOnAuthRoute = {
+      loginLocation,
+      registerLocation,
+    }.contains(state.matchedLocation);
     bool? isProfileComplete;
-    if (isAuthenticated && state.matchedLocation != registerLocation) {
-      isProfileComplete =
-          (await _userService.currentUserOrNull)?.isProfileComplete;
+    if (isAuthenticated && !isOnAuthRoute) {
+      isProfileComplete = (await _userService.currentUser).isProfileComplete;
     }
 
     return profileRouteRedirect(
       isAuthenticated: isAuthenticated,
       isProfileComplete: isProfileComplete,
       matchedLocation: state.matchedLocation,
-      loginLocation: const LoginRoute().location,
+      loginLocation: loginLocation,
       registerLocation: registerLocation,
       completionLocation: const ProfileCompletionRoute().location,
       appLocation: const DrinkRoute().location,

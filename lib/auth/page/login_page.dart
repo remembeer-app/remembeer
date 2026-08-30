@@ -200,6 +200,9 @@ class _LoginPageState extends State<LoginPage> {
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
+    if (mounted) {
+      const DrinkRoute().go(context);
+    }
   }
 
   Future<void> _signInWithGoogle() async {
@@ -217,6 +220,8 @@ class _LoginPageState extends State<LoginPage> {
       if (mounted) {
         const DrinkRoute().go(context);
       }
+    } else if (result != null && mounted) {
+      const DrinkRoute().go(context);
     }
   }
 
