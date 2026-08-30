@@ -11,9 +11,7 @@ import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
-import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/service/user_service.dart';
-import 'package:remembeer/user/widget/gender_selector.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -209,62 +207,14 @@ class _LoginPageState extends State<LoginPage> {
     final result = await _authService.signInWithGoogle();
 
     if (result != null && result.isNewUser) {
-      final gender = await _selectGender();
-      if (gender == null) {
-        await _authService.signOut();
-        return;
-      }
-
       await _userSettingsService.createDefaultUserSettings();
-      await _userService.createDefaultUser(gender: gender);
+      await _userService.createDefaultUser();
       if (mounted) {
         const DrinkRoute().go(context);
       }
     } else if (result != null && mounted) {
       const DrinkRoute().go(context);
     }
-  }
-
-  Future<Gender?> _selectGender() {
-    return showDialog<Gender>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) {
-        Gender? selectedGender;
-        return PopScope(
-          canPop: false,
-          child: StatefulBuilder(
-            builder: (context, setDialogState) => AlertDialog(
-              title: const Text('Complete your profile'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Select your gender to finish creating your account.',
-                  ),
-                  const Gap(16),
-                  GenderSelector(
-                    value: selectedGender,
-                    onChanged: (value) {
-                      setDialogState(() => selectedGender = value);
-                    },
-                  ),
-                ],
-              ),
-              actions: [
-                FilledButton(
-                  onPressed: selectedGender == null
-                      ? null
-                      : () => Navigator.of(context).pop(selectedGender),
-                  child: const Text('Continue'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
   }
 
   Future<void> _showPasswordResetDialog(BuildContext context) async {

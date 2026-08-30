@@ -4,9 +4,8 @@ import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/model/accent_color.dart';
-import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/service/user_service.dart';
-import 'package:remembeer/user/widget/profile_details_form.dart';
+import 'package:remembeer/user/widget/accent_color_form.dart';
 import 'package:remembeer/user_settings/widget/settings_page_template.dart';
 
 class ProfileDetailsPage extends StatelessWidget {
@@ -17,16 +16,15 @@ class ProfileDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SettingsPageTemplate(
-      title: const Text('Gender and accent'),
-      hint: 'These details personalize Party Mode and can be changed anytime.',
+      title: const Text('Accent color'),
+      hint:
+          'Your accent identifies you in Party Mode and can be changed anytime.',
       child: AsyncBuilder(
         future: _userService.currentUser,
-        builder: (context, user) => ProfileDetailsForm(
-          initialGender: user.gender,
-          initialAccentColorKey: user.accentColorKey,
+        builder: (context, user) => AccentColorForm(
+          initialValue: user.accentColorKey,
           submitText: 'Save changes',
-          onSubmit: (gender, accentColorKey) =>
-              _save(context, gender, accentColorKey),
+          onSubmit: (accentColorKey) => _save(context, accentColorKey),
         ),
       ),
     );
@@ -34,15 +32,11 @@ class ProfileDetailsPage extends StatelessWidget {
 
   Future<void> _save(
     BuildContext context,
-    Gender gender,
     AccentColorKey accentColorKey,
   ) async {
-    await _userService.updateProfile(
-      gender: gender,
-      accentColorKey: accentColorKey,
-    );
+    await _userService.updateAccentColor(accentColorKey);
     if (context.mounted) {
-      showSuccessNotification('Profile updated.');
+      showSuccessNotification('Accent color updated.');
       context.pop();
     }
   }

@@ -6,9 +6,8 @@ import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/accent_color.dart';
-import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/service/user_service.dart';
-import 'package:remembeer/user/widget/profile_details_form.dart';
+import 'package:remembeer/user/widget/accent_color_form.dart';
 
 class ProfileCompletionPage extends StatelessWidget {
   ProfileCompletionPage({super.key});
@@ -27,28 +26,27 @@ class ProfileCompletionPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'One last step',
+                'Make Party Mode yours',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const Gap(8),
               Text(
-                'Choose the profile details used for Party Mode. You can '
-                'change both later in Settings.',
+                'Your account predates profile accents. Choose one before '
+                'continuing; you can change it later in Settings.',
                 style: TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
               const Gap(24),
               Expanded(
-                child: ProfileDetailsForm(
-                  initialGender: user.gender,
-                  initialAccentColorKey:
+                child: AccentColorForm(
+                  initialValue:
                       user.accentColorKey ?? defaultAccentColorFor(user.id),
                   submitText: 'Continue',
-                  onSubmit: (gender, accentColorKey) =>
-                      _completeProfile(context, gender, accentColorKey),
+                  onSubmit: (accentColorKey) =>
+                      _completeProfile(context, accentColorKey),
                 ),
               ),
             ],
@@ -60,13 +58,9 @@ class ProfileCompletionPage extends StatelessWidget {
 
   Future<void> _completeProfile(
     BuildContext context,
-    Gender gender,
     AccentColorKey accentColorKey,
   ) async {
-    await _userService.updateProfile(
-      gender: gender,
-      accentColorKey: accentColorKey,
-    );
+    await _userService.updateAccentColor(accentColorKey);
     if (context.mounted) {
       const DrinkRoute().go(context);
     }

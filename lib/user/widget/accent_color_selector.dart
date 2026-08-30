@@ -16,9 +16,12 @@ class AccentColorSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
+    return GridView.count(
+      crossAxisCount: 4,
+      mainAxisSpacing: 8,
+      crossAxisSpacing: 8,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       children: [
         for (final entry in accentColorPalette.entries)
           _AccentChoice(
@@ -55,11 +58,10 @@ class _AccentChoice extends StatelessWidget {
           onTap: onPressed,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
-            width: 48,
-            height: 48,
-            padding: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(7),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
+              color: isSelected ? accent.softColor : null,
               border: Border.all(
                 color: isSelected
                     ? accent.color

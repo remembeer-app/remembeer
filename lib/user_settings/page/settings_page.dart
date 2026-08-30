@@ -126,7 +126,7 @@ class SettingsPage extends StatelessWidget {
         ),
         _divider,
         _buildSettingsCard(
-          title: 'Gender and accent',
+          title: 'Accent color',
           onTap: () => const ProfileDetailsSettingsRoute().push<void>(context),
         ),
         _divider,
