@@ -86,6 +86,15 @@ class _SessionDividerState extends State<SessionDivider> {
           ),
         ),
         const Gap(8),
+        if (_session.isParty) ...[
+          TextButton.icon(
+            onPressed: () =>
+                PartyRoute(sessionId: _session.id).push<void>(context),
+            icon: const Icon(Icons.open_in_full, size: 18),
+            label: const Text('Open'),
+          ),
+          const Gap(4),
+        ],
         AnimatedRotation(
           turns: _isExpanded ? 0.5 : 0,
           duration: const Duration(milliseconds: 200),

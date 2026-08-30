@@ -89,14 +89,16 @@ class EditSessionPage extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: session.isParty || !isEligible
+        onPressed: session.isParty
+            ? () => PartyRoute(sessionId: session.id).go(context)
+            : !isEligible
             ? null
             : () => _showPartyConfirmationDialog(context, session),
         style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
-        icon: const Icon(Icons.celebration),
+        icon: Icon(session.isParty ? Icons.open_in_full : Icons.celebration),
         label: Text(
           session.isParty
-              ? 'Party Mode Enabled'
+              ? 'Open Party'
               : isEligible
               ? 'Turn into Party'
               : 'Party Mode Unavailable',
@@ -179,6 +181,9 @@ class EditSessionPage extends StatelessWidget {
       onPressed: () async {
         await _sessionService.turnSessionIntoParty(session);
         showSuccessNotification('Party mode enabled!');
+        if (context.mounted) {
+          PartyRoute(sessionId: session.id).go(context);
+        }
       },
     );
   }
