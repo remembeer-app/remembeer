@@ -28,7 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  cached_network_image: ^3.4.1
+  cached_network_image: ^4.0.0
   cloud_firestore: ^6.7.0
   cloud_functions: ^6.2.0
   cupertino_icons: ^1.0.9
