@@ -29,16 +29,21 @@ $UnlockedBadgeCopyWith<UnlockedBadge> get copyWith => _$UnlockedBadgeCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UnlockedBadge&&(identical(other.badgeId, badgeId) || other.badgeId == badgeId)&&(identical(other.unlockedAt, unlockedAt) || other.unlockedAt == unlockedAt)&&(identical(other.isShown, isShown) || other.isShown == isShown));
+  final _this = this as UnlockedBadge;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UnlockedBadge&&(identical(other.badgeId, _this.badgeId) || other.badgeId == _this.badgeId)&&(identical(other.unlockedAt, _this.unlockedAt) || other.unlockedAt == _this.unlockedAt)&&(identical(other.isShown, _this.isShown) || other.isShown == _this.isShown));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,badgeId,unlockedAt,isShown);
+int get hashCode {
+  final _this = this as UnlockedBadge;
+  return Object.hash(runtimeType,_this.badgeId,_this.unlockedAt,_this.isShown);
+}
 
 @override
 String toString() {
-  return 'UnlockedBadge(badgeId: $badgeId, unlockedAt: $unlockedAt, isShown: $isShown)';
+  final _this = this as UnlockedBadge;
+  return 'UnlockedBadge(badgeId: ${_this.badgeId}, unlockedAt: ${_this.unlockedAt}, isShown: ${_this.isShown})';
 }
 
 
@@ -232,16 +237,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UnlockedBadge&&(identical(other.badgeId, badgeId) || other.badgeId == badgeId)&&(identical(other.unlockedAt, unlockedAt) || other.unlockedAt == unlockedAt)&&(identical(other.isShown, isShown) || other.isShown == isShown));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UnlockedBadge&&(identical(other.badgeId, badgeId) || other.badgeId == badgeId)&&(identical(other.unlockedAt, unlockedAt) || other.unlockedAt == unlockedAt)&&(identical(other.isShown, isShown) || other.isShown == isShown));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,badgeId,unlockedAt,isShown);
+int get hashCode {
+    return Object.hash(runtimeType,badgeId,unlockedAt,isShown);
+}
 
 @override
 String toString() {
-  return 'UnlockedBadge(badgeId: $badgeId, unlockedAt: $unlockedAt, isShown: $isShown)';
+    return 'UnlockedBadge(badgeId: $badgeId, unlockedAt: $unlockedAt, isShown: $isShown)';
 }
 
 

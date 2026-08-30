@@ -29,16 +29,21 @@ $LeaderboardCopyWith<Leaderboard> get copyWith => _$LeaderboardCopyWithImpl<Lead
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Leaderboard&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
+  final _this = this as Leaderboard;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Leaderboard&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt)&&const DeepCollectionEquality().equals(other.memberIds, _this.memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, _this.bannedMemberIds)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.iconName, _this.iconName) || other.iconName == _this.iconName)&&(identical(other.inviteCode, _this.inviteCode) || other.inviteCode == _this.inviteCode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(memberIds),const DeepCollectionEquality().hash(bannedMemberIds),name,iconName,inviteCode);
+int get hashCode {
+  final _this = this as Leaderboard;
+  return Object.hash(runtimeType,_this.id,_this.userId,_this.createdAt,_this.updatedAt,_this.deletedAt,const DeepCollectionEquality().hash(_this.memberIds),const DeepCollectionEquality().hash(_this.bannedMemberIds),_this.name,_this.iconName,_this.inviteCode);
+}
 
 @override
 String toString() {
-  return 'Leaderboard(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, name: $name, iconName: $iconName, inviteCode: $inviteCode)';
+  final _this = this as Leaderboard;
+  return 'Leaderboard(id: ${_this.id}, userId: ${_this.userId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt}, memberIds: ${_this.memberIds}, bannedMemberIds: ${_this.bannedMemberIds}, name: ${_this.name}, iconName: ${_this.iconName}, inviteCode: ${_this.inviteCode})';
 }
 
 
@@ -258,16 +263,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Leaderboard&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&const DeepCollectionEquality().equals(other._bannedMemberIds, _bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Leaderboard&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&const DeepCollectionEquality().equals(other.memberIds, _memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, _bannedMemberIds)&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_bannedMemberIds),name,iconName,inviteCode);
+int get hashCode {
+    return Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_bannedMemberIds),name,iconName,inviteCode);
+}
 
 @override
 String toString() {
-  return 'Leaderboard(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, name: $name, iconName: $iconName, inviteCode: $inviteCode)';
+    return 'Leaderboard(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, name: $name, iconName: $iconName, inviteCode: $inviteCode)';
 }
 
 

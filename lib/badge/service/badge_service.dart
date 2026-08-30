@@ -3,6 +3,7 @@ import 'package:remembeer/badge/data/onetime_badge_id.dart';
 import 'package:remembeer/badge/model/badge_category.dart';
 import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/type/user_stats.dart';
 
@@ -33,7 +34,9 @@ class BadgeService {
     var updatedUser = user;
 
     for (final badge in getBadgesByCategory(BadgeCategory.beersTotal)) {
-      if (stats.totalBeersConsumed >= badge.goal!) {
+      final goal =
+          badge.goal ?? never('Beer total badge ${badge.id} must have a goal.');
+      if (stats.totalBeersConsumed >= goal) {
         updatedUser = _unlockIfNew(updatedUser, badge);
       }
     }
@@ -45,7 +48,10 @@ class BadgeService {
     var updatedUser = user;
 
     for (final badge in getBadgesByCategory(BadgeCategory.alcoholTotal)) {
-      if (stats.totalAlcoholConsumed >= badge.goal!) {
+      final goal =
+          badge.goal ??
+          never('Alcohol total badge ${badge.id} must have a goal.');
+      if (stats.totalAlcoholConsumed >= goal) {
         updatedUser = _unlockIfNew(updatedUser, badge);
       }
     }
@@ -57,7 +63,9 @@ class BadgeService {
     var updatedUser = user;
 
     for (final badge in getBadgesByCategory(BadgeCategory.streak)) {
-      if (stats.isStreakActive && stats.streakDays >= badge.goal!) {
+      final goal =
+          badge.goal ?? never('Streak badge ${badge.id} must have a goal.');
+      if (stats.isStreakActive && stats.streakDays >= goal) {
         updatedUser = _unlockIfNew(updatedUser, badge);
       }
     }

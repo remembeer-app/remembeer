@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/extension/searchable.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/friend_request/model/friend_request_create.dart';
@@ -60,14 +61,14 @@ class UserService {
   }
 
   Future<void> createDefaultUser({String? username}) async {
-    final resolvedUsername =
-        username ??
-        authService.authenticatedUser.displayName ??
-        authService.authenticatedUser.email!;
+    final authenticatedUser = authService.authenticatedUser;
+    final email =
+        authenticatedUser.email ?? never('User does not have an email.');
+    final resolvedUsername = username ?? authenticatedUser.displayName ?? email;
 
     final defaultUser = UserModel(
-      id: authService.authenticatedUser.uid,
-      email: authService.authenticatedUser.email!,
+      id: authenticatedUser.uid,
+      email: email,
       username: resolvedUsername,
       searchableUsername: resolvedUsername.toSearchable(),
     );
@@ -108,28 +109,21 @@ class UserService {
   }
 
   Future<void> revokeFriendRequest(String otherUserId) async {
-    final request = await friendRequestController
-        .getRequestBetween(otherUserId)
-        .first;
-
-    if (request == null) {
-      throw StateError(
-        'No friend request found between current user and $otherUserId to revoke.',
-      );
-    }
+    final request =
+        (await friendRequestController.getRequestBetween(otherUserId).first) ??
+        never(
+          'No friend request found between current user and $otherUserId to revoke.',
+        );
 
     await friendRequestController.deleteSingle(request);
   }
 
   Future<void> acceptFriendRequest(String otherUserId) async {
-    final request = await friendRequestController
-        .getRequestBetween(otherUserId)
-        .first;
-    if (request == null) {
-      throw StateError(
-        'No friend request found between current user and $otherUserId to accept.',
-      );
-    }
+    final request =
+        (await friendRequestController.getRequestBetween(otherUserId).first) ??
+        never(
+          'No friend request found between current user and $otherUserId to accept.',
+        );
 
     final currentUser = await userController.currentUser;
     final otherUser = await userController.findById(otherUserId);

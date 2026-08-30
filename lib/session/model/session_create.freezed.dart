@@ -29,16 +29,21 @@ $SessionCreateCopyWith<SessionCreate> get copyWith => _$SessionCreateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&const DeepCollectionEquality().equals(other.adminIds, adminIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, bannedMemberIds)&&(identical(other.isSoloSession, isSoloSession) || other.isSoloSession == isSoloSession)&&const DeepCollectionEquality().equals(other.drinks, drinks)&&(identical(other.description, description) || other.description == description));
+  final _this = this as SessionCreate;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionCreate&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.startedAt, _this.startedAt) || other.startedAt == _this.startedAt)&&(identical(other.endedAt, _this.endedAt) || other.endedAt == _this.endedAt)&&const DeepCollectionEquality().equals(other.memberIds, _this.memberIds)&&const DeepCollectionEquality().equals(other.adminIds, _this.adminIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, _this.bannedMemberIds)&&(identical(other.isSoloSession, _this.isSoloSession) || other.isSoloSession == _this.isSoloSession)&&const DeepCollectionEquality().equals(other.drinks, _this.drinks)&&(identical(other.description, _this.description) || other.description == _this.description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,startedAt,endedAt,const DeepCollectionEquality().hash(memberIds),const DeepCollectionEquality().hash(adminIds),const DeepCollectionEquality().hash(bannedMemberIds),isSoloSession,const DeepCollectionEquality().hash(drinks),description);
+int get hashCode {
+  final _this = this as SessionCreate;
+  return Object.hash(runtimeType,_this.name,_this.startedAt,_this.endedAt,const DeepCollectionEquality().hash(_this.memberIds),const DeepCollectionEquality().hash(_this.adminIds),const DeepCollectionEquality().hash(_this.bannedMemberIds),_this.isSoloSession,const DeepCollectionEquality().hash(_this.drinks),_this.description);
+}
 
 @override
 String toString() {
-  return 'SessionCreate(name: $name, startedAt: $startedAt, endedAt: $endedAt, memberIds: $memberIds, adminIds: $adminIds, bannedMemberIds: $bannedMemberIds, isSoloSession: $isSoloSession, drinks: $drinks, description: $description)';
+  final _this = this as SessionCreate;
+  return 'SessionCreate(name: ${_this.name}, startedAt: ${_this.startedAt}, endedAt: ${_this.endedAt}, memberIds: ${_this.memberIds}, adminIds: ${_this.adminIds}, bannedMemberIds: ${_this.bannedMemberIds}, isSoloSession: ${_this.isSoloSession}, drinks: ${_this.drinks}, description: ${_this.description})';
 }
 
 
@@ -268,16 +273,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SessionCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&const DeepCollectionEquality().equals(other._adminIds, _adminIds)&&const DeepCollectionEquality().equals(other._bannedMemberIds, _bannedMemberIds)&&(identical(other.isSoloSession, isSoloSession) || other.isSoloSession == isSoloSession)&&const DeepCollectionEquality().equals(other._drinks, _drinks)&&(identical(other.description, description) || other.description == description));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SessionCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.startedAt, startedAt) || other.startedAt == startedAt)&&(identical(other.endedAt, endedAt) || other.endedAt == endedAt)&&const DeepCollectionEquality().equals(other.memberIds, _memberIds)&&const DeepCollectionEquality().equals(other.adminIds, _adminIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, _bannedMemberIds)&&(identical(other.isSoloSession, isSoloSession) || other.isSoloSession == isSoloSession)&&const DeepCollectionEquality().equals(other.drinks, _drinks)&&(identical(other.description, description) || other.description == description));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,startedAt,endedAt,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_adminIds),const DeepCollectionEquality().hash(_bannedMemberIds),isSoloSession,const DeepCollectionEquality().hash(_drinks),description);
+int get hashCode {
+    return Object.hash(runtimeType,name,startedAt,endedAt,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_adminIds),const DeepCollectionEquality().hash(_bannedMemberIds),isSoloSession,const DeepCollectionEquality().hash(_drinks),description);
+}
 
 @override
 String toString() {
-  return 'SessionCreate(name: $name, startedAt: $startedAt, endedAt: $endedAt, memberIds: $memberIds, adminIds: $adminIds, bannedMemberIds: $bannedMemberIds, isSoloSession: $isSoloSession, drinks: $drinks, description: $description)';
+    return 'SessionCreate(name: $name, startedAt: $startedAt, endedAt: $endedAt, memberIds: $memberIds, adminIds: $adminIds, bannedMemberIds: $bannedMemberIds, isSoloSession: $isSoloSession, drinks: $drinks, description: $description)';
 }
 
 

@@ -29,16 +29,21 @@ $LeaderboardCreateCopyWith<LeaderboardCreate> get copyWith => _$LeaderboardCreat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LeaderboardCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, bannedMemberIds)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
+  final _this = this as LeaderboardCreate;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LeaderboardCreate&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.iconName, _this.iconName) || other.iconName == _this.iconName)&&const DeepCollectionEquality().equals(other.memberIds, _this.memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, _this.bannedMemberIds)&&(identical(other.inviteCode, _this.inviteCode) || other.inviteCode == _this.inviteCode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,iconName,const DeepCollectionEquality().hash(memberIds),const DeepCollectionEquality().hash(bannedMemberIds),inviteCode);
+int get hashCode {
+  final _this = this as LeaderboardCreate;
+  return Object.hash(runtimeType,_this.name,_this.iconName,const DeepCollectionEquality().hash(_this.memberIds),const DeepCollectionEquality().hash(_this.bannedMemberIds),_this.inviteCode);
+}
 
 @override
 String toString() {
-  return 'LeaderboardCreate(name: $name, iconName: $iconName, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, inviteCode: $inviteCode)';
+  final _this = this as LeaderboardCreate;
+  return 'LeaderboardCreate(name: ${_this.name}, iconName: ${_this.iconName}, memberIds: ${_this.memberIds}, bannedMemberIds: ${_this.bannedMemberIds}, inviteCode: ${_this.inviteCode})';
 }
 
 
@@ -248,16 +253,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LeaderboardCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&const DeepCollectionEquality().equals(other._bannedMemberIds, _bannedMemberIds)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _LeaderboardCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.iconName, iconName) || other.iconName == iconName)&&const DeepCollectionEquality().equals(other.memberIds, _memberIds)&&const DeepCollectionEquality().equals(other.bannedMemberIds, _bannedMemberIds)&&(identical(other.inviteCode, inviteCode) || other.inviteCode == inviteCode));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,iconName,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_bannedMemberIds),inviteCode);
+int get hashCode {
+    return Object.hash(runtimeType,name,iconName,const DeepCollectionEquality().hash(_memberIds),const DeepCollectionEquality().hash(_bannedMemberIds),inviteCode);
+}
 
 @override
 String toString() {
-  return 'LeaderboardCreate(name: $name, iconName: $iconName, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, inviteCode: $inviteCode)';
+    return 'LeaderboardCreate(name: $name, iconName: $iconName, memberIds: $memberIds, bannedMemberIds: $bannedMemberIds, inviteCode: $inviteCode)';
 }
 
 

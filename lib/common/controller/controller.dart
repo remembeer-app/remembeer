@@ -38,18 +38,12 @@ abstract class Controller<T extends Document> {
 
   Future<T> findById(String id) async {
     final doc = await readCollection.doc(id).get();
-    final entity = doc.data();
-    invariant(entity != null, '$T with id $id not found.');
-
-    return entity!;
+    return doc.data() ?? never('$T with id $id not found.');
   }
 
   Stream<T> streamById(String id) {
     return readCollection.doc(id).snapshots().map((snapshot) {
-      final entity = snapshot.data();
-      invariant(entity != null, '$T with id $id not found.');
-
-      return entity!;
+      return snapshot.data() ?? never('$T with id $id not found.');
     });
   }
 }

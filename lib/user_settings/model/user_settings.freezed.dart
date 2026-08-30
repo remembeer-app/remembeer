@@ -29,16 +29,21 @@ $UserSettingsCopyWith<UserSettings> get copyWith => _$UserSettingsCopyWithImpl<U
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserSettings&&(identical(other.id, id) || other.id == id)&&(identical(other.defaultDrinkType, defaultDrinkType) || other.defaultDrinkType == defaultDrinkType)&&(identical(other.defaultDrinkSize, defaultDrinkSize) || other.defaultDrinkSize == defaultDrinkSize)&&(identical(other.drinkListSortOrder, drinkListSortOrder) || other.drinkListSortOrder == drinkListSortOrder)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
+  final _this = this as UserSettings;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserSettings&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.defaultDrinkType, _this.defaultDrinkType) || other.defaultDrinkType == _this.defaultDrinkType)&&(identical(other.defaultDrinkSize, _this.defaultDrinkSize) || other.defaultDrinkSize == _this.defaultDrinkSize)&&(identical(other.drinkListSortOrder, _this.drinkListSortOrder) || other.drinkListSortOrder == _this.drinkListSortOrder)&&(identical(other.notificationToken, _this.notificationToken) || other.notificationToken == _this.notificationToken));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,defaultDrinkType,defaultDrinkSize,drinkListSortOrder,notificationToken);
+int get hashCode {
+  final _this = this as UserSettings;
+  return Object.hash(runtimeType,_this.id,_this.defaultDrinkType,_this.defaultDrinkSize,_this.drinkListSortOrder,_this.notificationToken);
+}
 
 @override
 String toString() {
-  return 'UserSettings(id: $id, defaultDrinkType: $defaultDrinkType, defaultDrinkSize: $defaultDrinkSize, drinkListSortOrder: $drinkListSortOrder, notificationToken: $notificationToken)';
+  final _this = this as UserSettings;
+  return 'UserSettings(id: ${_this.id}, defaultDrinkType: ${_this.defaultDrinkType}, defaultDrinkSize: ${_this.defaultDrinkSize}, drinkListSortOrder: ${_this.drinkListSortOrder}, notificationToken: ${_this.notificationToken})';
 }
 
 
@@ -245,16 +250,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserSettings&&(identical(other.id, id) || other.id == id)&&(identical(other.defaultDrinkType, defaultDrinkType) || other.defaultDrinkType == defaultDrinkType)&&(identical(other.defaultDrinkSize, defaultDrinkSize) || other.defaultDrinkSize == defaultDrinkSize)&&(identical(other.drinkListSortOrder, drinkListSortOrder) || other.drinkListSortOrder == drinkListSortOrder)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserSettings&&(identical(other.id, id) || other.id == id)&&(identical(other.defaultDrinkType, defaultDrinkType) || other.defaultDrinkType == defaultDrinkType)&&(identical(other.defaultDrinkSize, defaultDrinkSize) || other.defaultDrinkSize == defaultDrinkSize)&&(identical(other.drinkListSortOrder, drinkListSortOrder) || other.drinkListSortOrder == drinkListSortOrder)&&(identical(other.notificationToken, notificationToken) || other.notificationToken == notificationToken));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,defaultDrinkType,defaultDrinkSize,drinkListSortOrder,notificationToken);
+int get hashCode {
+    return Object.hash(runtimeType,id,defaultDrinkType,defaultDrinkSize,drinkListSortOrder,notificationToken);
+}
 
 @override
 String toString() {
-  return 'UserSettings(id: $id, defaultDrinkType: $defaultDrinkType, defaultDrinkSize: $defaultDrinkSize, drinkListSortOrder: $drinkListSortOrder, notificationToken: $notificationToken)';
+    return 'UserSettings(id: $id, defaultDrinkType: $defaultDrinkType, defaultDrinkSize: $defaultDrinkSize, drinkListSortOrder: $drinkListSortOrder, notificationToken: $notificationToken)';
 }
 
 

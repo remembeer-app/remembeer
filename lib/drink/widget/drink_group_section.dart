@@ -20,7 +20,7 @@ const _borderRadius = 12.0;
 /// A unified widget that displays a group of drinks.
 ///
 /// When [isSharedSession] is true, displays drinks within a single shared
-/// session with a background and a [SessionDivider] at the bottom. The
+/// session with a background and a [SessionDivider] at the top. The
 /// [sessions] list must contain exactly one session.
 ///
 /// When [isSharedSession] is false, displays solo drinks (each in its own
@@ -165,8 +165,8 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (drinks.isEmpty) const Gap(32) else ..._buildDrinkItems(drinks),
             SessionDivider(session: widget.sessions.first),
+            if (drinks.isEmpty) const Gap(32) else ..._buildDrinkItems(drinks),
           ],
         );
       },

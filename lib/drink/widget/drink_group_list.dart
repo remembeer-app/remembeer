@@ -76,7 +76,11 @@ class _DrinkGroupListState extends State<DrinkGroupList> {
     final sessionSections = <Widget>[];
     for (final session in sharedSessions) {
       sessionSections.add(
-        DrinkGroupSection(isSharedSession: true, sessions: [session]),
+        DrinkGroupSection(
+          key: ValueKey(session.id),
+          isSharedSession: true,
+          sessions: [session],
+        ),
       );
     }
 
