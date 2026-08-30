@@ -65,3 +65,9 @@ Also validate `firestore.indexes.json` as JSON and run any repository-specific F
 ## Coordination
 
 This task exclusively owns `firestore.rules` and `firestore.indexes.json` until P21. Do not broaden unrelated collection access while adding Party helpers.
+
+P01 profile validation requirements:
+
+- `gender` accepts only `male` or `female`.
+- `accentColorKey` accepts only `amber`, `rose`, `violet`, `sky`, `emerald`, `lime`, `orange`, or `fuchsia` (palette version 1).
+- Profile-field updates are owner-only and must preserve all unrelated user fields.
