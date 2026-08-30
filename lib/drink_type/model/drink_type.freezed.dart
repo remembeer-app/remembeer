@@ -29,16 +29,21 @@ $DrinkTypeCopyWith<DrinkType> get copyWith => _$DrinkTypeCopyWithImpl<DrinkType>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DrinkType&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.alcoholPercentage, alcoholPercentage) || other.alcoholPercentage == alcoholPercentage));
+  final _this = this as DrinkType;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DrinkType&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.category, _this.category) || other.category == _this.category)&&(identical(other.alcoholPercentage, _this.alcoholPercentage) || other.alcoholPercentage == _this.alcoholPercentage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,name,category,alcoholPercentage);
+int get hashCode {
+  final _this = this as DrinkType;
+  return Object.hash(runtimeType,_this.id,_this.userId,_this.createdAt,_this.updatedAt,_this.deletedAt,_this.name,_this.category,_this.alcoholPercentage);
+}
 
 @override
 String toString() {
-  return 'DrinkType(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, name: $name, category: $category, alcoholPercentage: $alcoholPercentage)';
+  final _this = this as DrinkType;
+  return 'DrinkType(id: ${_this.id}, userId: ${_this.userId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt}, name: ${_this.name}, category: ${_this.category}, alcoholPercentage: ${_this.alcoholPercentage})';
 }
 
 
@@ -242,16 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DrinkType&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.alcoholPercentage, alcoholPercentage) || other.alcoholPercentage == alcoholPercentage));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DrinkType&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.alcoholPercentage, alcoholPercentage) || other.alcoholPercentage == alcoholPercentage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,name,category,alcoholPercentage);
+int get hashCode {
+    return Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,name,category,alcoholPercentage);
+}
 
 @override
 String toString() {
-  return 'DrinkType(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, name: $name, category: $category, alcoholPercentage: $alcoholPercentage)';
+    return 'DrinkType(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, name: $name, category: $category, alcoholPercentage: $alcoholPercentage)';
 }
 
 

@@ -26,16 +26,21 @@ $SessionWithMembersCopyWith<SessionWithMembers> get copyWith => _$SessionWithMem
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionWithMembers&&(identical(other.session, session) || other.session == session)&&const DeepCollectionEquality().equals(other.members, members));
+  final _this = this as SessionWithMembers;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SessionWithMembers&&(identical(other.session, _this.session) || other.session == _this.session)&&const DeepCollectionEquality().equals(other.members, _this.members));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,session,const DeepCollectionEquality().hash(members));
+int get hashCode {
+  final _this = this as SessionWithMembers;
+  return Object.hash(runtimeType,_this.session,const DeepCollectionEquality().hash(_this.members));
+}
 
 @override
 String toString() {
-  return 'SessionWithMembers(session: $session, members: $members)';
+  final _this = this as SessionWithMembers;
+  return 'SessionWithMembers(session: ${_this.session}, members: ${_this.members})';
 }
 
 
@@ -239,16 +244,18 @@ _$SessionWithMembersCopyWith<_SessionWithMembers> get copyWith => __$SessionWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SessionWithMembers&&(identical(other.session, session) || other.session == session)&&const DeepCollectionEquality().equals(other._members, _members));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SessionWithMembers&&(identical(other.session, session) || other.session == session)&&const DeepCollectionEquality().equals(other.members, _members));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,session,const DeepCollectionEquality().hash(_members));
+int get hashCode {
+    return Object.hash(runtimeType,session,const DeepCollectionEquality().hash(_members));
+}
 
 @override
 String toString() {
-  return 'SessionWithMembers(session: $session, members: $members)';
+    return 'SessionWithMembers(session: $session, members: $members)';
 }
 
 

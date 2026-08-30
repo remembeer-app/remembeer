@@ -29,16 +29,21 @@ $FriendRequestCreateCopyWith<FriendRequestCreate> get copyWith => _$FriendReques
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendRequestCreate&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId)&&(identical(other.senderUsername, senderUsername) || other.senderUsername == senderUsername));
+  final _this = this as FriendRequestCreate;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendRequestCreate&&(identical(other.toUserId, _this.toUserId) || other.toUserId == _this.toUserId)&&(identical(other.senderUsername, _this.senderUsername) || other.senderUsername == _this.senderUsername));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,toUserId,senderUsername);
+int get hashCode {
+  final _this = this as FriendRequestCreate;
+  return Object.hash(runtimeType,_this.toUserId,_this.senderUsername);
+}
 
 @override
 String toString() {
-  return 'FriendRequestCreate(toUserId: $toUserId, senderUsername: $senderUsername)';
+  final _this = this as FriendRequestCreate;
+  return 'FriendRequestCreate(toUserId: ${_this.toUserId}, senderUsername: ${_this.senderUsername})';
 }
 
 
@@ -230,16 +235,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendRequestCreate&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId)&&(identical(other.senderUsername, senderUsername) || other.senderUsername == senderUsername));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendRequestCreate&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId)&&(identical(other.senderUsername, senderUsername) || other.senderUsername == senderUsername));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,toUserId,senderUsername);
+int get hashCode {
+    return Object.hash(runtimeType,toUserId,senderUsername);
+}
 
 @override
 String toString() {
-  return 'FriendRequestCreate(toUserId: $toUserId, senderUsername: $senderUsername)';
+    return 'FriendRequestCreate(toUserId: $toUserId, senderUsername: $senderUsername)';
 }
 
 

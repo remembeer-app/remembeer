@@ -29,16 +29,21 @@ $DrinkTypeCreateCopyWith<DrinkTypeCreate> get copyWith => _$DrinkTypeCreateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DrinkTypeCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.alcoholPercentage, alcoholPercentage) || other.alcoholPercentage == alcoholPercentage));
+  final _this = this as DrinkTypeCreate;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DrinkTypeCreate&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.category, _this.category) || other.category == _this.category)&&(identical(other.alcoholPercentage, _this.alcoholPercentage) || other.alcoholPercentage == _this.alcoholPercentage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,category,alcoholPercentage);
+int get hashCode {
+  final _this = this as DrinkTypeCreate;
+  return Object.hash(runtimeType,_this.name,_this.category,_this.alcoholPercentage);
+}
 
 @override
 String toString() {
-  return 'DrinkTypeCreate(name: $name, category: $category, alcoholPercentage: $alcoholPercentage)';
+  final _this = this as DrinkTypeCreate;
+  return 'DrinkTypeCreate(name: ${_this.name}, category: ${_this.category}, alcoholPercentage: ${_this.alcoholPercentage})';
 }
 
 
@@ -232,16 +237,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DrinkTypeCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.alcoholPercentage, alcoholPercentage) || other.alcoholPercentage == alcoholPercentage));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DrinkTypeCreate&&(identical(other.name, name) || other.name == name)&&(identical(other.category, category) || other.category == category)&&(identical(other.alcoholPercentage, alcoholPercentage) || other.alcoholPercentage == alcoholPercentage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,name,category,alcoholPercentage);
+int get hashCode {
+    return Object.hash(runtimeType,name,category,alcoholPercentage);
+}
 
 @override
 String toString() {
-  return 'DrinkTypeCreate(name: $name, category: $category, alcoholPercentage: $alcoholPercentage)';
+    return 'DrinkTypeCreate(name: $name, category: $category, alcoholPercentage: $alcoholPercentage)';
 }
 
 

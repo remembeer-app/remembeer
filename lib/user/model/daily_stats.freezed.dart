@@ -29,16 +29,21 @@ $DailyStatsCopyWith<DailyStats> get copyWith => _$DailyStatsCopyWithImpl<DailySt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is DailyStats&&(identical(other.day, day) || other.day == day)&&(identical(other.beersConsumed, beersConsumed) || other.beersConsumed == beersConsumed)&&(identical(other.alcoholConsumedMl, alcoholConsumedMl) || other.alcoholConsumedMl == alcoholConsumedMl)&&(identical(other.beersAfter6pm, beersAfter6pm) || other.beersAfter6pm == beersAfter6pm));
+  final _this = this as DailyStats;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DailyStats&&(identical(other.day, _this.day) || other.day == _this.day)&&(identical(other.beersConsumed, _this.beersConsumed) || other.beersConsumed == _this.beersConsumed)&&(identical(other.alcoholConsumedMl, _this.alcoholConsumedMl) || other.alcoholConsumedMl == _this.alcoholConsumedMl)&&(identical(other.beersAfter6pm, _this.beersAfter6pm) || other.beersAfter6pm == _this.beersAfter6pm));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,day,beersConsumed,alcoholConsumedMl,beersAfter6pm);
+int get hashCode {
+  final _this = this as DailyStats;
+  return Object.hash(runtimeType,_this.day,_this.beersConsumed,_this.alcoholConsumedMl,_this.beersAfter6pm);
+}
 
 @override
 String toString() {
-  return 'DailyStats(day: $day, beersConsumed: $beersConsumed, alcoholConsumedMl: $alcoholConsumedMl, beersAfter6pm: $beersAfter6pm)';
+  final _this = this as DailyStats;
+  return 'DailyStats(day: ${_this.day}, beersConsumed: ${_this.beersConsumed}, alcoholConsumedMl: ${_this.alcoholConsumedMl}, beersAfter6pm: ${_this.beersAfter6pm})';
 }
 
 
@@ -234,16 +239,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DailyStats&&(identical(other.day, day) || other.day == day)&&(identical(other.beersConsumed, beersConsumed) || other.beersConsumed == beersConsumed)&&(identical(other.alcoholConsumedMl, alcoholConsumedMl) || other.alcoholConsumedMl == alcoholConsumedMl)&&(identical(other.beersAfter6pm, beersAfter6pm) || other.beersAfter6pm == beersAfter6pm));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DailyStats&&(identical(other.day, day) || other.day == day)&&(identical(other.beersConsumed, beersConsumed) || other.beersConsumed == beersConsumed)&&(identical(other.alcoholConsumedMl, alcoholConsumedMl) || other.alcoholConsumedMl == alcoholConsumedMl)&&(identical(other.beersAfter6pm, beersAfter6pm) || other.beersAfter6pm == beersAfter6pm));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,day,beersConsumed,alcoholConsumedMl,beersAfter6pm);
+int get hashCode {
+    return Object.hash(runtimeType,day,beersConsumed,alcoholConsumedMl,beersAfter6pm);
+}
 
 @override
 String toString() {
-  return 'DailyStats(day: $day, beersConsumed: $beersConsumed, alcoholConsumedMl: $alcoholConsumedMl, beersAfter6pm: $beersAfter6pm)';
+    return 'DailyStats(day: $day, beersConsumed: $beersConsumed, alcoholConsumedMl: $alcoholConsumedMl, beersAfter6pm: $beersAfter6pm)';
 }
 
 

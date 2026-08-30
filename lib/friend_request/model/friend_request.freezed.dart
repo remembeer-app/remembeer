@@ -29,16 +29,21 @@ $FriendRequestCopyWith<FriendRequest> get copyWith => _$FriendRequestCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendRequest&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId)&&(identical(other.senderUsername, senderUsername) || other.senderUsername == senderUsername));
+  final _this = this as FriendRequest;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FriendRequest&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt)&&(identical(other.deletedAt, _this.deletedAt) || other.deletedAt == _this.deletedAt)&&(identical(other.toUserId, _this.toUserId) || other.toUserId == _this.toUserId)&&(identical(other.senderUsername, _this.senderUsername) || other.senderUsername == _this.senderUsername));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,toUserId,senderUsername);
+int get hashCode {
+  final _this = this as FriendRequest;
+  return Object.hash(runtimeType,_this.id,_this.userId,_this.createdAt,_this.updatedAt,_this.deletedAt,_this.toUserId,_this.senderUsername);
+}
 
 @override
 String toString() {
-  return 'FriendRequest(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, toUserId: $toUserId, senderUsername: $senderUsername)';
+  final _this = this as FriendRequest;
+  return 'FriendRequest(id: ${_this.id}, userId: ${_this.userId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt}, deletedAt: ${_this.deletedAt}, toUserId: ${_this.toUserId}, senderUsername: ${_this.senderUsername})';
 }
 
 
@@ -240,16 +245,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendRequest&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId)&&(identical(other.senderUsername, senderUsername) || other.senderUsername == senderUsername));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FriendRequest&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.toUserId, toUserId) || other.toUserId == toUserId)&&(identical(other.senderUsername, senderUsername) || other.senderUsername == senderUsername));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,toUserId,senderUsername);
+int get hashCode {
+    return Object.hash(runtimeType,id,userId,createdAt,updatedAt,deletedAt,toUserId,senderUsername);
+}
 
 @override
 String toString() {
-  return 'FriendRequest(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, toUserId: $toUserId, senderUsername: $senderUsername)';
+    return 'FriendRequest(id: $id, userId: $userId, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, toUserId: $toUserId, senderUsername: $senderUsername)';
 }
 
 

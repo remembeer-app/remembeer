@@ -29,16 +29,21 @@ $MonthlyStatsCopyWith<MonthlyStats> get copyWith => _$MonthlyStatsCopyWithImpl<M
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MonthlyStats&&(identical(other.year, year) || other.year == year)&&(identical(other.month, month) || other.month == month)&&(identical(other.beersConsumed, beersConsumed) || other.beersConsumed == beersConsumed)&&(identical(other.alcoholConsumedMl, alcoholConsumedMl) || other.alcoholConsumedMl == alcoholConsumedMl)&&const DeepCollectionEquality().equals(other.dailyStats, dailyStats));
+  final _this = this as MonthlyStats;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MonthlyStats&&(identical(other.year, _this.year) || other.year == _this.year)&&(identical(other.month, _this.month) || other.month == _this.month)&&(identical(other.beersConsumed, _this.beersConsumed) || other.beersConsumed == _this.beersConsumed)&&(identical(other.alcoholConsumedMl, _this.alcoholConsumedMl) || other.alcoholConsumedMl == _this.alcoholConsumedMl)&&const DeepCollectionEquality().equals(other.dailyStats, _this.dailyStats));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,year,month,beersConsumed,alcoholConsumedMl,const DeepCollectionEquality().hash(dailyStats));
+int get hashCode {
+  final _this = this as MonthlyStats;
+  return Object.hash(runtimeType,_this.year,_this.month,_this.beersConsumed,_this.alcoholConsumedMl,const DeepCollectionEquality().hash(_this.dailyStats));
+}
 
 @override
 String toString() {
-  return 'MonthlyStats(year: $year, month: $month, beersConsumed: $beersConsumed, alcoholConsumedMl: $alcoholConsumedMl, dailyStats: $dailyStats)';
+  final _this = this as MonthlyStats;
+  return 'MonthlyStats(year: ${_this.year}, month: ${_this.month}, beersConsumed: ${_this.beersConsumed}, alcoholConsumedMl: ${_this.alcoholConsumedMl}, dailyStats: ${_this.dailyStats})';
 }
 
 
@@ -242,16 +247,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MonthlyStats&&(identical(other.year, year) || other.year == year)&&(identical(other.month, month) || other.month == month)&&(identical(other.beersConsumed, beersConsumed) || other.beersConsumed == beersConsumed)&&(identical(other.alcoholConsumedMl, alcoholConsumedMl) || other.alcoholConsumedMl == alcoholConsumedMl)&&const DeepCollectionEquality().equals(other._dailyStats, _dailyStats));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MonthlyStats&&(identical(other.year, year) || other.year == year)&&(identical(other.month, month) || other.month == month)&&(identical(other.beersConsumed, beersConsumed) || other.beersConsumed == beersConsumed)&&(identical(other.alcoholConsumedMl, alcoholConsumedMl) || other.alcoholConsumedMl == alcoholConsumedMl)&&const DeepCollectionEquality().equals(other.dailyStats, _dailyStats));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,year,month,beersConsumed,alcoholConsumedMl,const DeepCollectionEquality().hash(_dailyStats));
+int get hashCode {
+    return Object.hash(runtimeType,year,month,beersConsumed,alcoholConsumedMl,const DeepCollectionEquality().hash(_dailyStats));
+}
 
 @override
 String toString() {
-  return 'MonthlyStats(year: $year, month: $month, beersConsumed: $beersConsumed, alcoholConsumedMl: $alcoholConsumedMl, dailyStats: $dailyStats)';
+    return 'MonthlyStats(year: $year, month: $month, beersConsumed: $beersConsumed, alcoholConsumedMl: $alcoholConsumedMl, dailyStats: $dailyStats)';
 }
 
 

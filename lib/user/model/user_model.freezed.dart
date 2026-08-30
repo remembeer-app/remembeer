@@ -29,16 +29,21 @@ $UserModelCopyWith<UserModel> get copyWith => _$UserModelCopyWithImpl<UserModel>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other.friends, friends)&&const DeepCollectionEquality().equals(other.monthlyStats, monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
+  final _this = this as UserModel;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserModel&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.username, _this.username) || other.username == _this.username)&&(identical(other.searchableUsername, _this.searchableUsername) || other.searchableUsername == _this.searchableUsername)&&(identical(other.avatarUrl, _this.avatarUrl) || other.avatarUrl == _this.avatarUrl)&&const DeepCollectionEquality().equals(other.friends, _this.friends)&&const DeepCollectionEquality().equals(other.monthlyStats, _this.monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, _this.unlockedBadges)&&(identical(other.endOfDayBoundary, _this.endOfDayBoundary) || other.endOfDayBoundary == _this.endOfDayBoundary));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,username,searchableUsername,avatarUrl,const DeepCollectionEquality().hash(friends),const DeepCollectionEquality().hash(monthlyStats),const DeepCollectionEquality().hash(unlockedBadges),endOfDayBoundary);
+int get hashCode {
+  final _this = this as UserModel;
+  return Object.hash(runtimeType,_this.id,_this.email,_this.username,_this.searchableUsername,_this.avatarUrl,const DeepCollectionEquality().hash(_this.friends),const DeepCollectionEquality().hash(_this.monthlyStats),const DeepCollectionEquality().hash(_this.unlockedBadges),_this.endOfDayBoundary);
+}
 
 @override
 String toString() {
-  return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, avatarUrl: $avatarUrl, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
+  final _this = this as UserModel;
+  return 'UserModel(id: ${_this.id}, email: ${_this.email}, username: ${_this.username}, searchableUsername: ${_this.searchableUsername}, avatarUrl: ${_this.avatarUrl}, friends: ${_this.friends}, monthlyStats: ${_this.monthlyStats}, unlockedBadges: ${_this.unlockedBadges}, endOfDayBoundary: ${_this.endOfDayBoundary})';
 }
 
 
@@ -262,16 +267,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other._friends, _friends)&&const DeepCollectionEquality().equals(other._monthlyStats, _monthlyStats)&&const DeepCollectionEquality().equals(other._unlockedBadges, _unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserModel&&(identical(other.id, id) || other.id == id)&&(identical(other.email, email) || other.email == email)&&(identical(other.username, username) || other.username == username)&&(identical(other.searchableUsername, searchableUsername) || other.searchableUsername == searchableUsername)&&(identical(other.avatarUrl, avatarUrl) || other.avatarUrl == avatarUrl)&&const DeepCollectionEquality().equals(other.friends, _friends)&&const DeepCollectionEquality().equals(other.monthlyStats, _monthlyStats)&&const DeepCollectionEquality().equals(other.unlockedBadges, _unlockedBadges)&&(identical(other.endOfDayBoundary, endOfDayBoundary) || other.endOfDayBoundary == endOfDayBoundary));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,email,username,searchableUsername,avatarUrl,const DeepCollectionEquality().hash(_friends),const DeepCollectionEquality().hash(_monthlyStats),const DeepCollectionEquality().hash(_unlockedBadges),endOfDayBoundary);
+int get hashCode {
+    return Object.hash(runtimeType,id,email,username,searchableUsername,avatarUrl,const DeepCollectionEquality().hash(_friends),const DeepCollectionEquality().hash(_monthlyStats),const DeepCollectionEquality().hash(_unlockedBadges),endOfDayBoundary);
+}
 
 @override
 String toString() {
-  return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, avatarUrl: $avatarUrl, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
+    return 'UserModel(id: $id, email: $email, username: $username, searchableUsername: $searchableUsername, avatarUrl: $avatarUrl, friends: $friends, monthlyStats: $monthlyStats, unlockedBadges: $unlockedBadges, endOfDayBoundary: $endOfDayBoundary)';
 }
 
 

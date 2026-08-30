@@ -29,16 +29,21 @@ $DrinkCopyWith<Drink> get copyWith => _$DrinkCopyWithImpl<Drink>(this as Drink, 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Drink&&(identical(other.id, id) || other.id == id)&&(identical(other.consumedByUserId, consumedByUserId) || other.consumedByUserId == consumedByUserId)&&(identical(other.consumedAt, consumedAt) || other.consumedAt == consumedAt)&&(identical(other.drinkType, drinkType) || other.drinkType == drinkType)&&(identical(other.volumeInMilliliters, volumeInMilliliters) || other.volumeInMilliliters == volumeInMilliliters)&&(identical(other.location, location) || other.location == location));
+  final _this = this as Drink;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Drink&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.consumedByUserId, _this.consumedByUserId) || other.consumedByUserId == _this.consumedByUserId)&&(identical(other.consumedAt, _this.consumedAt) || other.consumedAt == _this.consumedAt)&&(identical(other.drinkType, _this.drinkType) || other.drinkType == _this.drinkType)&&(identical(other.volumeInMilliliters, _this.volumeInMilliliters) || other.volumeInMilliliters == _this.volumeInMilliliters)&&(identical(other.location, _this.location) || other.location == _this.location));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,consumedByUserId,consumedAt,drinkType,volumeInMilliliters,location);
+int get hashCode {
+  final _this = this as Drink;
+  return Object.hash(runtimeType,_this.id,_this.consumedByUserId,_this.consumedAt,_this.drinkType,_this.volumeInMilliliters,_this.location);
+}
 
 @override
 String toString() {
-  return 'Drink(id: $id, consumedByUserId: $consumedByUserId, consumedAt: $consumedAt, drinkType: $drinkType, volumeInMilliliters: $volumeInMilliliters, location: $location)';
+  final _this = this as Drink;
+  return 'Drink(id: ${_this.id}, consumedByUserId: ${_this.consumedByUserId}, consumedAt: ${_this.consumedAt}, drinkType: ${_this.drinkType}, volumeInMilliliters: ${_this.volumeInMilliliters}, location: ${_this.location})';
 }
 
 
@@ -247,16 +252,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Drink&&(identical(other.id, id) || other.id == id)&&(identical(other.consumedByUserId, consumedByUserId) || other.consumedByUserId == consumedByUserId)&&(identical(other.consumedAt, consumedAt) || other.consumedAt == consumedAt)&&(identical(other.drinkType, drinkType) || other.drinkType == drinkType)&&(identical(other.volumeInMilliliters, volumeInMilliliters) || other.volumeInMilliliters == volumeInMilliliters)&&(identical(other.location, location) || other.location == location));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Drink&&(identical(other.id, id) || other.id == id)&&(identical(other.consumedByUserId, consumedByUserId) || other.consumedByUserId == consumedByUserId)&&(identical(other.consumedAt, consumedAt) || other.consumedAt == consumedAt)&&(identical(other.drinkType, drinkType) || other.drinkType == drinkType)&&(identical(other.volumeInMilliliters, volumeInMilliliters) || other.volumeInMilliliters == volumeInMilliliters)&&(identical(other.location, location) || other.location == location));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,consumedByUserId,consumedAt,drinkType,volumeInMilliliters,location);
+int get hashCode {
+    return Object.hash(runtimeType,id,consumedByUserId,consumedAt,drinkType,volumeInMilliliters,location);
+}
 
 @override
 String toString() {
-  return 'Drink(id: $id, consumedByUserId: $consumedByUserId, consumedAt: $consumedAt, drinkType: $drinkType, volumeInMilliliters: $volumeInMilliliters, location: $location)';
+    return 'Drink(id: $id, consumedByUserId: $consumedByUserId, consumedAt: $consumedAt, drinkType: $drinkType, volumeInMilliliters: $volumeInMilliliters, location: $location)';
 }
 
 
