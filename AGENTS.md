@@ -12,7 +12,7 @@ Remembeer is a Flutter mobile app (iOS & Android) for tracking drinks with socia
 # Install dependencies
 flutter pub get
 
-# Run code generation (freezed, json_serializable, go_router_builder, interface_generator)
+# Run code generation (freezed, json_serializable, go_router_builder)
 dart run build_runner build --delete-conflicting-outputs
 
 # Format
@@ -47,11 +47,10 @@ go_router with go_router_builder for type-safe routes. Route definitions in `lib
 
 ### Code Generation
 
-Four generators configured in `build.yaml`:
+Three generators are used by the project:
 - **freezed**: Immutable data classes (`*.freezed.dart`)
 - **json_serializable**: JSON serialization with `explicit_to_json: true` (`*.g.dart`)
 - **go_router_builder**: Type-safe routes (`routes.g.dart`)
-- **interface_generator**: Custom generator in `packages/interface_generator/` — generates `*Fields` abstract classes from `*Core` classes
 
 ### Key Patterns
 

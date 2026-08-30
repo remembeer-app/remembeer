@@ -64,8 +64,6 @@ dev_dependencies:
     sdk: flutter
   freezed: ^4.0.0
   go_router_builder: ^4.4.0
-  interface_generator:
-    path: packages/interface_generator
   json_serializable: ^6.14.0
   meta: ^1.16.0
 
