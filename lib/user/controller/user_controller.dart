@@ -3,6 +3,8 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/controller/controller.dart';
 import 'package:remembeer/common/extension/searchable.dart';
 import 'package:remembeer/common/util/invariant.dart';
+import 'package:remembeer/user/model/accent_color.dart';
+import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 class UserController extends Controller<UserModel> {
@@ -60,6 +62,17 @@ class UserController extends Controller<UserModel> {
     );
 
     return writeCollection.doc(userId).set(user.toJson());
+  }
+
+  Future<void> updateCurrentUserProfile({
+    required Gender gender,
+    required AccentColorKey accentColorKey,
+  }) {
+    final userId = authService.authenticatedUser.uid;
+    return writeCollection.doc(userId).update({
+      'gender': gender.name,
+      'accentColorKey': accentColorKey.name,
+    });
   }
 
   void createOrUpdateUserInBatch({

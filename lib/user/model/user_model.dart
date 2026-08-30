@@ -5,7 +5,9 @@ import 'package:remembeer/common/converter/time_of_day_converter.dart';
 import 'package:remembeer/common/model/document.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/constants.dart';
+import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/model/daily_stats.dart';
+import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/model/monthly_stats.dart';
 
 part 'user_model.freezed.dart';
@@ -21,6 +23,8 @@ abstract class UserModel with _$UserModel implements Document {
     required String email,
     required String username,
     required String searchableUsername,
+    Gender? gender,
+    AccentColorKey? accentColorKey,
     String? avatarUrl,
     @Default({}) Set<String> friends,
     @Default({}) Map<String, MonthlyStats> monthlyStats,
@@ -32,6 +36,10 @@ abstract class UserModel with _$UserModel implements Document {
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
+
+  bool get isProfileComplete => gender != null && accentColorKey != null;
+
+  AccentColor? get accentColor => accentColorPalette[accentColorKey];
 
   UserModel addFriend(String friendId) {
     final updatedFriends = Set<String>.from(friends)..add(friendId);

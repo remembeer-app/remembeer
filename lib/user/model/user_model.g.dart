@@ -11,6 +11,11 @@ _UserModel _$UserModelFromJson(Map<String, dynamic> json) => _UserModel(
   email: json['email'] as String,
   username: json['username'] as String,
   searchableUsername: json['searchableUsername'] as String,
+  gender: $enumDecodeNullable(_$GenderEnumMap, json['gender']),
+  accentColorKey: $enumDecodeNullable(
+    _$AccentColorKeyEnumMap,
+    json['accentColorKey'],
+  ),
   avatarUrl: json['avatarUrl'] as String?,
   friends:
       (json['friends'] as List<dynamic>?)?.map((e) => e as String).toSet() ??
@@ -40,6 +45,8 @@ Map<String, dynamic> _$UserModelToJson(
   'email': instance.email,
   'username': instance.username,
   'searchableUsername': instance.searchableUsername,
+  'gender': _$GenderEnumMap[instance.gender],
+  'accentColorKey': _$AccentColorKeyEnumMap[instance.accentColorKey],
   'avatarUrl': instance.avatarUrl,
   'friends': instance.friends.toList(),
   'monthlyStats': instance.monthlyStats.map((k, e) => MapEntry(k, e.toJson())),
@@ -49,4 +56,17 @@ Map<String, dynamic> _$UserModelToJson(
   'endOfDayBoundary': const TimeOfDayConverter().toJson(
     instance.endOfDayBoundary,
   ),
+};
+
+const _$GenderEnumMap = {Gender.male: 'male', Gender.female: 'female'};
+
+const _$AccentColorKeyEnumMap = {
+  AccentColorKey.amber: 'amber',
+  AccentColorKey.rose: 'rose',
+  AccentColorKey.violet: 'violet',
+  AccentColorKey.sky: 'sky',
+  AccentColorKey.emerald: 'emerald',
+  AccentColorKey.lime: 'lime',
+  AccentColorKey.orange: 'orange',
+  AccentColorKey.fuchsia: 'fuchsia',
 };
