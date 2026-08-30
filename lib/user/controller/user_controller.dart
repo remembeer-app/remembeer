@@ -16,6 +16,13 @@ class UserController extends Controller<UserModel> {
   Future<UserModel> get currentUser async =>
       findById(authService.authenticatedUser.uid);
 
+  Future<UserModel?> get currentUserOrNull async {
+    final doc = await readCollection
+        .doc(authService.authenticatedUser.uid)
+        .get();
+    return doc.data();
+  }
+
   Stream<UserModel> get currentUserStream =>
       streamById(authService.authenticatedUser.uid);
 

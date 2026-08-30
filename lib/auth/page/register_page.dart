@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:remembeer/auth/constants.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/util/firebase_error_mapper.dart';
@@ -11,7 +10,9 @@ import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/constants.dart';
+import 'package:remembeer/user/model/gender.dart';
 import 'package:remembeer/user/service/user_service.dart';
+import 'package:remembeer/user/widget/gender_selector.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
 
 class RegisterPage extends StatefulWidget {
@@ -32,6 +33,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _confirmPasswordController = TextEditingController();
 
   var _obscurePassword = true;
+  Gender? _gender;
 
   @override
   void dispose() {
@@ -58,6 +60,8 @@ class _RegisterPageState extends State<RegisterPage> {
               _buildEmailField(form),
               const Gap(16),
               _buildUsernameField(form),
+              const Gap(16),
+              _buildGenderField(form),
               const Gap(16),
               _buildPasswordField(form),
               const Gap(8),
@@ -118,6 +122,35 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  Widget _buildGenderField(LoadingFormState form) {
+    return FormField<Gender>(
+      initialValue: _gender,
+      validator: (value) => value == null ? 'Please select your gender.' : null,
+      builder: (field) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Gender', style: Theme.of(context).textTheme.titleMedium),
+          const Gap(8),
+          GenderSelector(
+            value: _gender,
+            enabled: !form.isLoading,
+            onChanged: (value) {
+              setState(() => _gender = value);
+              field.didChange(value);
+            },
+          ),
+          if (field.hasError) ...[
+            const Gap(8),
+            Text(
+              field.errorText!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildConfirmPasswordField(LoadingFormState form) {
     return form.buildPasswordField(
       controller: _confirmPasswordController,
@@ -174,10 +207,11 @@ class _RegisterPageState extends State<RegisterPage> {
     await _userSettingsService.createDefaultUserSettings();
     await _userService.createDefaultUser(
       username: _usernameController.text.trim(),
+      gender: _gender!,
     );
 
     if (context.mounted) {
-      context.pop();
+      const DrinkRoute().go(context);
     }
   }
 }

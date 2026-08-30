@@ -8,6 +8,7 @@ import 'package:remembeer/auth/page/change_password_page.dart';
 import 'package:remembeer/auth/page/login_page.dart';
 import 'package:remembeer/auth/page/register_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/auth/util/profile_route_redirect.dart';
 import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/common/widget/nav_bar.dart';
 import 'package:remembeer/drink/page/add_drink_page.dart';
@@ -33,31 +34,43 @@ import 'package:remembeer/session/page/manage_admins_page.dart';
 import 'package:remembeer/session/page/session_management_page.dart';
 import 'package:remembeer/session/page/summary_page.dart';
 import 'package:remembeer/user/page/friends_list_page.dart';
+import 'package:remembeer/user/page/profile_completion_page.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user/page/search_user_page.dart';
+import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
 import 'package:remembeer/user_settings/page/default_drink_page.dart';
 import 'package:remembeer/user_settings/page/drink_list_sort_page.dart';
 import 'package:remembeer/user_settings/page/end_of_day_page.dart';
+import 'package:remembeer/user_settings/page/profile_details_page.dart';
 import 'package:remembeer/user_settings/page/settings_page.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
 
 part 'routes.g.dart';
 
 final _authService = get<AuthService>();
+final _userService = get<UserService>();
 
 final router = GoRouter(
   initialLocation: const DrinkRoute().location,
-  redirect: (context, state) {
-    final isOnAuthPage = {
-      const LoginRoute().location,
-      const RegisterRoute().location,
-    }.contains(state.matchedLocation);
-    return switch ((_authService.isAuthenticated, isOnAuthPage)) {
-      (true, true) => const DrinkRoute().location,
-      (false, false) => const LoginRoute().location,
-      _ => null,
-    };
+  redirect: (context, state) async {
+    final isAuthenticated = _authService.isAuthenticated;
+    final registerLocation = const RegisterRoute().location;
+    bool? isProfileComplete;
+    if (isAuthenticated && state.matchedLocation != registerLocation) {
+      isProfileComplete =
+          (await _userService.currentUserOrNull)?.isProfileComplete;
+    }
+
+    return profileRouteRedirect(
+      isAuthenticated: isAuthenticated,
+      isProfileComplete: isProfileComplete,
+      matchedLocation: state.matchedLocation,
+      loginLocation: const LoginRoute().location,
+      registerLocation: registerLocation,
+      completionLocation: const ProfileCompletionRoute().location,
+      appLocation: const DrinkRoute().location,
+    );
   },
   routes: $appRoutes,
 );
@@ -79,6 +92,16 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const RegisterPage();
+  }
+}
+
+@TypedGoRoute<ProfileCompletionRoute>(path: '/complete-profile')
+class ProfileCompletionRoute extends GoRouteData with $ProfileCompletionRoute {
+  const ProfileCompletionRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ProfileCompletionPage();
   }
 }
 
@@ -174,6 +197,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             TypedGoRoute<DefaultDrinkSettingsRoute>(path: 'default-drink'),
             TypedGoRoute<DrinkSortSettingsRoute>(path: 'drink-sort'),
             TypedGoRoute<UsernameSettingsRoute>(path: 'username'),
+            TypedGoRoute<ProfileDetailsSettingsRoute>(path: 'profile-details'),
             TypedGoRoute<ChangeAvatarSettingsRoute>(path: 'avatar'),
             TypedGoRoute<BadgeVisibilityRoute>(path: 'badge-visibility'),
             TypedGoRoute<ChangePasswordRoute>(path: 'password'),
@@ -541,6 +565,16 @@ class UsernameSettingsRoute extends GoRouteData with $UsernameSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const UserNamePage();
+  }
+}
+
+class ProfileDetailsSettingsRoute extends GoRouteData
+    with $ProfileDetailsSettingsRoute {
+  const ProfileDetailsSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ProfileDetailsPage();
   }
 }
 

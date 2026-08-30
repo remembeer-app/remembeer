@@ -28,6 +28,8 @@ class UserService {
 
   Future<UserModel> get currentUser => userController.currentUser;
 
+  Future<UserModel?> get currentUserOrNull => userController.currentUserOrNull;
+
   Stream<UserModel> get currentUserStream => userController.currentUserStream;
 
   Future<UserModel> userById(String userId) => userController.findById(userId);
