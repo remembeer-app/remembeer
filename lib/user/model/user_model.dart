@@ -35,8 +35,6 @@ abstract class UserModel with _$UserModel implements Document {
   factory UserModel.fromJson(Map<String, dynamic> json) =>
       _$UserModelFromJson(json);
 
-  bool get isProfileComplete => accentColorKey != null;
-
   AccentColor? get accentColor => accentColorPalette[accentColorKey];
 
   UserModel addFriend(String friendId) {

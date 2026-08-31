@@ -9,7 +9,6 @@ part of 'routes.dart';
 List<RouteBase> get $appRoutes => [
   $loginRoute,
   $registerRoute,
-  $profileCompletionRoute,
   $navbarShellRouteData,
   $userProfileRoute,
 ];
@@ -51,33 +50,6 @@ mixin $RegisterRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/register');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $profileCompletionRoute => GoRouteData.$route(
-  path: '/complete-profile',
-  hasOverriddenOnExit: false,
-  factory: $ProfileCompletionRoute._fromState,
-);
-
-mixin $ProfileCompletionRoute on GoRouteData {
-  static ProfileCompletionRoute _fromState(GoRouterState state) =>
-      const ProfileCompletionRoute();
-
-  @override
-  String get location => GoRouteData.$location('/complete-profile');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -41,7 +41,7 @@ Agent-sized implementation tasks, dependencies, and shared-file ownership are in
 | Admin challenges | Timed and admin-created; multiple winners may be awarded |
 | Beerpong | Per-party opt-in; 2-16 teams; single elimination; byes; optional third-place match |
 | Profiles | Auto-assigned, editable accent color |
-| Existing users | Required profile-completion screen after login when the accent is missing |
+| Existing users | Non-blocking profile warning when the accent is missing |
 | Party end | Freeze all game actions and retain a read-only archive |
 | Activity filters | Filter by people and event type |
 | Notifications | Send pushes for all actionable party events with direct deep links |
@@ -77,10 +77,10 @@ Agent-sized implementation tasks, dependencies, and shared-file ownership are in
 
 ## User Experience
 
-### Profile Completion
+### Profile Accents
 
 1. Registration assigns an accent from an accessible palette.
-2. Existing authenticated users missing the accent are redirected to a required profile-completion page before entering the app.
+2. Existing authenticated users missing the accent see a warning on their profile with a direct editing action.
 3. The accent remains editable from profile/settings.
 4. Store a stable accent key, not an arbitrary color value. Resolve it through a versioned palette in `lib/user/constants.dart`.
 5. Profile updates affect future quest eligibility. Active quests retain their eligibility snapshot.
@@ -366,7 +366,7 @@ Add to `UserModel`:
 accentColorKey: string
 ```
 
-The accent is editable by the owning user. Firestore rules validate the palette key. Registration and required profile completion guarantee a non-null value in the new code; no long-term nullable compatibility branch is retained.
+The accent is editable by the owning user. Firestore rules validate the palette key. Registration guarantees a non-null value for new profiles; legacy profiles may remain null until the user responds to the profile warning.
 
 ## Server-Authoritative Commands
 
@@ -616,13 +616,13 @@ firestore.rules
 firestore.indexes.json
 ```
 
-The exact auth/profile page paths should be confirmed when implementing profile completion because current registration behavior is spread across Auth and User services. Every changed Freezed/JSON model and typed route requires regenerated committed output.
+Profile accent editing should follow the existing profile/settings navigation patterns. Every changed Freezed/JSON model and typed route requires regenerated committed output.
 
 ## Delivery Milestones
 
 ### Milestone 1: Profile And Party Foundation
 
-- Add the accent model, deterministic registration default, required existing-user onboarding, profile editing, constants, rules, and tests.
+- Add the accent model, deterministic registration default, existing-user profile warning, profile editing, constants, rules, and tests.
 - Add Party root/member models, controllers, services, IoC registrations, rules, and indexes.
 - Replace client-only conversion with atomic `activate_party`.
 - Add Party archive lifecycle linked to Session end.
@@ -630,7 +630,7 @@ The exact auth/profile page paths should be confirmed when implementing profile 
 
 Acceptance criteria:
 
-- New and existing users cannot bypass required profile completion.
+- New users receive an accent automatically and legacy users missing one see a profile warning.
 - Any Session admin can activate an eligible Session exactly once.
 - Members can open the three Party tabs; non-members cannot read Party data.
 - Ending the Session freezes Party writes while retaining reads.

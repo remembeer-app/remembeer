@@ -198,9 +198,6 @@ class _LoginPageState extends State<LoginPage> {
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
-    if (mounted) {
-      const DrinkRoute().go(context);
-    }
   }
 
   Future<void> _signInWithGoogle() async {
@@ -209,11 +206,6 @@ class _LoginPageState extends State<LoginPage> {
     if (result != null && result.isNewUser) {
       await _userSettingsService.createDefaultUserSettings();
       await _userService.createDefaultUser();
-      if (mounted) {
-        const DrinkRoute().go(context);
-      }
-    } else if (result != null && mounted) {
-      const DrinkRoute().go(context);
     }
   }
 

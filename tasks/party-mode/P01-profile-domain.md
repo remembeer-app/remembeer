@@ -10,7 +10,7 @@ None. This is part of the initial parallel wave.
 
 ## References
 
-- `PARTY_MODE_PLAN.md`: Profile Completion, User Profile Additions
+- `PARTY_MODE_PLAN.md`: Profile Accents, User Profile Additions
 - `lib/user/model/user_model.dart`
 - `lib/user/constants.dart`
 - `lib/user/controller/user_controller.dart`
@@ -24,8 +24,8 @@ None. This is part of the initial parallel wave.
 - Add a versioned, accessible accent palette represented by stable keys rather than arbitrary stored colors.
 - Implement deterministic accent assignment from a stable user seed.
 - Extend `UserModel` serialization and profile persistence.
-- Expose profile completeness and validated update operations.
-- Keep a missing accent readable at the deserialization boundary so an existing user can reach P02's required completion screen. Completed/new profiles must persist the accent key; do not add indefinite behavioral fallbacks.
+- Expose validated accent update operations.
+- Keep a missing accent readable at the deserialization boundary so existing users can see P02's profile warning. New profiles persist the accent key.
 
 ## Likely Files
 
@@ -39,7 +39,7 @@ None. This is part of the initial parallel wave.
 ## Deliverables
 
 - Accent domain APIs.
-- Safe JSON round trips for complete and incomplete existing documents.
+- Safe JSON round trips for documents with and without an accent.
 - Deterministic accent tests and profile update tests.
 - Generated Freezed/JSON files.
 
@@ -47,7 +47,7 @@ None. This is part of the initial parallel wave.
 
 - Accent persistence uses a known palette key.
 - The same stable seed always selects the same default accent.
-- Existing documents missing the accent key deserialize and report incomplete.
+- Existing documents missing the accent key deserialize safely.
 - Updates preserve unrelated user data.
 
 ## Verification

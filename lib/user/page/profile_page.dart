@@ -44,6 +44,10 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                if (isCurrentUser && user.accentColorKey == null) ...[
+                  _buildMissingAccentWarning(context),
+                  const Gap(12),
+                ],
                 _buildProfileHeader(
                   context: context,
                   user: user,
@@ -59,6 +63,28 @@ class ProfilePage extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildMissingAccentWarning(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      color: colorScheme.tertiaryContainer,
+      child: ListTile(
+        leading: Icon(
+          Icons.palette_outlined,
+          color: colorScheme.onTertiaryContainer,
+        ),
+        title: const Text('Choose an accent color'),
+        subtitle: const Text(
+          'Add a color so friends can recognize you in Party Mode.',
+        ),
+        trailing: TextButton(
+          onPressed: () =>
+              const ProfileDetailsSettingsRoute().push<void>(context),
+          child: const Text('Choose'),
+        ),
       ),
     );
   }
