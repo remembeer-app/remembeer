@@ -2,6 +2,18 @@ import 'package:remembeer/drink_type/model/drink_category.dart';
 
 const partySchemaVersion = 1;
 
+const partyFunctionsRegion = 'europe-west4';
+const partiesCollection = 'parties';
+const partyMembersCollection = 'members';
+const partyEventsCollection = 'events';
+const partyQuestTemplatesCollection = 'questTemplates';
+const partyQuestsCollection = 'quests';
+const partyQuestSelectionsCollection = 'selections';
+const partyChallengesCollection = 'challenges';
+const partyTournamentsCollection = 'tournaments';
+const partyTeamsCollection = 'teams';
+const partyMatchesCollection = 'matches';
+
 const partyScoreUnitsPerPoint = 1000;
 const partyClassBonusNumerator = 1;
 const partyClassBonusDenominator = 10;
