@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/model/party_member.dart';
@@ -10,6 +11,22 @@ import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 
 void main() {
+  test('activation delegates to the idempotent callable wrapper', () async {
+    final partyController = _FakePartyController(party: _party());
+    final service = PartyService(
+      authService: _FakeAuthService(),
+      sessionController: _FakeSessionController(
+        _session(memberIds: {'user-1'}, adminIds: {'user-1'}),
+      ),
+      partyController: partyController,
+    );
+
+    await service.activateParty('session-1');
+
+    expect(partyController.activatedSessionId, 'session-1');
+    expect(partyController.activatedCommandId, 'command-1');
+  });
+
   test('state identifies an active admin and current member', () async {
     final member = _member('user-1');
     final service = _service(
@@ -149,6 +166,21 @@ class _FakePartyController implements PartyController {
   final Party party;
   final PartyMember? member;
   var memberStreamCalls = 0;
+  String? activatedSessionId;
+  String? activatedCommandId;
+
+  @override
+  String generateCommandId() => 'command-1';
+
+  @override
+  Future<PartyCommandResult> activateParty({
+    required String sessionId,
+    required String commandId,
+  }) async {
+    activatedSessionId = sessionId;
+    activatedCommandId = commandId;
+    return const PartyCommandResult({});
+  }
 
   @override
   Stream<Party> partyStream(String sessionId) => Stream.value(party);

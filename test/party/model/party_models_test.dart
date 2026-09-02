@@ -54,6 +54,7 @@ void main() {
     expect(member.beerpongOptIn, isFalse);
     expect(member.scoreUnits, 0);
     expect(member.drinkCount, 0);
+    expect(member.isActive, isTrue);
     expect(member.toJson()['selectedClass'], 'cider');
   });
 

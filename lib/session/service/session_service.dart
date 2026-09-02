@@ -2,6 +2,7 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
+import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
@@ -18,6 +19,7 @@ class SessionService {
   final UserSettingsController userSettingsController;
   final UserService userService;
   final NotificationService notificationService;
+  final PartyController partyController;
 
   SessionService({
     required this.authService,
@@ -26,6 +28,7 @@ class SessionService {
     required this.userSettingsController,
     required this.userService,
     required this.notificationService,
+    required this.partyController,
   });
 
   String get currentUserId => authService.authenticatedUser.uid;
@@ -91,6 +94,14 @@ class SessionService {
     DateTime? startedAt,
     DateTime? endedAt,
   }) async {
+    if (session.isParty && session.endedAt == null && endedAt != null) {
+      await partyController.archiveParty(
+        sessionId: session.id,
+        commandId: partyController.generateCommandId(),
+        endedAt: endedAt,
+      );
+      return;
+    }
     final newName = name ?? session.name;
     final newDescription = description ?? session.description;
     final newStartedAt = startedAt ?? session.startedAt;
@@ -131,8 +142,8 @@ class SessionService {
 
   Future<void> turnSessionIntoParty(Session session) async {
     invariant(
-      isSessionOwner(session),
-      'Only the session owner can turn the session into a party.',
+      isSessionAdmin(session),
+      'Only a session admin can turn the session into a party.',
     );
     invariant(
       !session.isSoloSession,
@@ -144,12 +155,18 @@ class SessionService {
     );
     invariant(!session.isParty, 'The session is already a party.');
 
-    await sessionController.turnIntoPartyAtomic(session.id);
+    await partyController.activateParty(
+      sessionId: session.id,
+      commandId: partyController.generateCommandId(),
+    );
   }
 
   bool isSessionOwner(Session session) {
     return session.userId == currentUserId;
   }
+
+  bool isSessionAdmin(Session session) =>
+      isSessionOwner(session) || session.adminIds.contains(currentUserId);
 
   Future<void> deleteSession(Session session) async {
     invariant(
@@ -192,7 +209,16 @@ class SessionService {
     final currentUser = await userService.currentUser;
     final session = await sessionController.streamById(sessionId).first;
 
-    await sessionController.addMemberAtomic(sessionId, memberId);
+    if (session.isParty) {
+      await partyController.syncMembership(
+        sessionId: sessionId,
+        commandId: partyController.generateCommandId(),
+        action: 'add',
+        memberId: memberId,
+      );
+    } else {
+      await sessionController.addMemberAtomic(sessionId, memberId);
+    }
     await notificationService.notifyAddedToSession(
       memberId,
       currentUser.username,
@@ -206,10 +232,19 @@ class SessionService {
       'Session owner cannot leave. Delete the session instead.',
     );
 
-    await sessionController.removeMemberAndAdminAtomic(
-      session.id,
-      currentUserId,
-    );
+    if (session.isParty) {
+      await partyController.syncMembership(
+        sessionId: session.id,
+        commandId: partyController.generateCommandId(),
+        action: 'leave',
+        memberId: currentUserId,
+      );
+    } else {
+      await sessionController.removeMemberAndAdminAtomic(
+        session.id,
+        currentUserId,
+      );
+    }
   }
 
   Future<void> addAdminToSession({
