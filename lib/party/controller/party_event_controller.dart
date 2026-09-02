@@ -85,6 +85,22 @@ class PartyEventController {
             ),
           );
 
+  Stream<List<PartyEvent>> challengeEventsStream({
+    required String sessionId,
+    required String challengeId,
+  }) => eventsReference(sessionId)
+      .where(
+        'sourceCollection',
+        isEqualTo: PartyEventSourceCollection.challenges.name,
+      )
+      .where('sourceId', isEqualTo: challengeId)
+      .snapshots()
+      .map(
+        (snapshot) => List<PartyEvent>.unmodifiable(
+          snapshot.docs.map((document) => document.data()),
+        ),
+      );
+
   Future<PartyEventPage> fetchEventPage({
     required String sessionId,
     Set<PartyEventKind> kinds = const {},
