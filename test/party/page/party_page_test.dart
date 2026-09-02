@@ -3,10 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/model/party.dart';
+import 'package:remembeer/party/model/party_member.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
 import 'package:remembeer/party/page/party_page.dart';
 import 'package:remembeer/party/service/party_service.dart';
+import 'package:remembeer/party/widget/party_class_selector.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/user/model/user_model.dart';
@@ -39,6 +41,7 @@ void main() {
     expect(find.textContaining('Archived Party'), findsOneWidget);
     expect(find.byTooltip('Manage Party'), findsNothing);
     expect(find.byType(FloatingActionButton), findsNothing);
+    expect(find.byType(PartyClassSelector), findsNothing);
   });
 }
 
@@ -80,6 +83,12 @@ PartyState _state({bool isArchived = false}) {
     party: party,
     access: PartyAccess.admin,
     lifecycle: isArchived ? PartyLifecycle.archived : PartyLifecycle.active,
+    currentMember: PartyMember(
+      id: 'user-1',
+      userId: 'user-1',
+      joinedAt: now,
+      updatedAt: now,
+    ),
   );
 }
 

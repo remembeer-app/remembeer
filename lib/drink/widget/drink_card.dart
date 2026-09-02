@@ -22,6 +22,9 @@ class DrinkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (drinkWithSessionId.isParty) {
+      return _buildCard(context);
+    }
     return LongPressDraggable<DrinkWithSessionId>(
       data: drinkWithSessionId,
       onDragStarted: () {
@@ -68,14 +71,18 @@ class DrinkCard extends StatelessWidget {
             ),
           ],
         ),
-        trailing: IconButton(
-          onPressed: () => _showDeleteConfirmation(context),
-          icon: const Icon(Icons.delete_outline, color: Colors.red),
-        ),
-        onTap: () => UpdateDrinkRoute(
-          sessionId: drinkWithSessionId.originalSessionId,
-          drinkId: _drink.id,
-        ).push<void>(context),
+        trailing: drinkWithSessionId.isReadOnly
+            ? null
+            : IconButton(
+                onPressed: () => _showDeleteConfirmation(context),
+                icon: const Icon(Icons.delete_outline, color: Colors.red),
+              ),
+        onTap: drinkWithSessionId.isReadOnly
+            ? null
+            : () => UpdateDrinkRoute(
+                sessionId: drinkWithSessionId.originalSessionId,
+                drinkId: _drink.id,
+              ).push<void>(context),
       ),
     );
   }

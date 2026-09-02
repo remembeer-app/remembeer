@@ -1,4 +1,5 @@
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/model/party_member.dart';
@@ -36,6 +37,30 @@ class PartyService {
     await partyController.activateParty(
       sessionId: sessionId,
       commandId: partyController.generateCommandId(),
+    );
+  }
+
+  Future<void> selectClass(
+    String sessionId,
+    DrinkCategory selectedClass,
+  ) async {
+    await partyController.selectPartyClass(
+      sessionId: sessionId,
+      commandId: partyController.generateCommandId(),
+      selectedClass: selectedClass,
+    );
+  }
+
+  Future<void> setMemberClass(
+    String sessionId,
+    String memberId,
+    DrinkCategory selectedClass,
+  ) async {
+    await partyController.setPartyMemberClass(
+      sessionId: sessionId,
+      commandId: partyController.generateCommandId(),
+      memberId: memberId,
+      selectedClass: selectedClass,
     );
   }
 

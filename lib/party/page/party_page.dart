@@ -184,7 +184,11 @@ class _PartyPageState extends State<PartyPage>
                 children: [
                   const PartyActivityTab(),
                   PartyRankingTab(session: session, members: members),
-                  PartyGamesTab(isReadOnly: state.isArchived),
+                  PartyGamesTab(
+                    state: state,
+                    onSelectClass: (selectedClass) =>
+                        _partyService.selectClass(session.id, selectedClass),
+                  ),
                 ],
               ),
             ),
