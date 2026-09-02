@@ -29,6 +29,14 @@ const maxPartyInstructionsLength = 500;
 const minPartyAwardPointsUnits = partyScoreUnitsPerPoint;
 const maxPartyAwardPointsUnits = 100 * partyScoreUnitsPerPoint;
 
+const maxPartyChallengeTitleLength = 120;
+const maxPartyChallengeInstructionsLength = 1000;
+const minPartyChallengePoints = 1;
+const maxPartyChallengePoints = 500;
+const minPartyChallengeDurationMinutes = 1;
+const maxPartyChallengeDurationMinutes = 60;
+const partyChallengeRecentResultCount = 3;
+
 const minPartyQuestDurationMinutes = 1;
 const maxPartyQuestDurationMinutes = 60;
 const minPartyQuestIntervalMinutes = 5;

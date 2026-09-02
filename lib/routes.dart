@@ -441,7 +441,7 @@ class PartyChallengeRoute extends GoRouteData with $PartyChallengeRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ChallengeDetailPage(challengeId: challengeId);
+    return ChallengeDetailPage(sessionId: sessionId, challengeId: challengeId);
   }
 }
 

@@ -191,6 +191,7 @@ class _PartyPageState extends State<PartyPage>
                   ),
                   PartyGamesTab(
                     state: state,
+                    members: members,
                     onSelectClass: (selectedClass) =>
                         _partyService.selectClass(session.id, selectedClass),
                   ),
