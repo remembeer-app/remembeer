@@ -8,7 +8,6 @@ const profilePageHeading = TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
 const globalUserId = 'global';
 const defaultEndOfDayBoundary = TimeOfDay(hour: 6, minute: 0);
 const searchDebounceDuration = Duration(milliseconds: 500);
-const accentPaletteVersion = 1;
 const accentColorPalette = <AccentColorKey, AccentColor>{
   AccentColorKey.amber: AccentColor(
     key: AccentColorKey.amber,

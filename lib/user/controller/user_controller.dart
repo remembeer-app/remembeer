@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/controller/controller.dart';
+import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/extension/searchable.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/model/accent_color.dart';
@@ -66,7 +67,7 @@ class UserController extends Controller<UserModel> {
   Future<void> updateCurrentUserAccentColor(AccentColorKey accentColorKey) {
     final userId = authService.authenticatedUser.uid;
     return writeCollection.doc(userId).update({
-      'accentColorKey': accentColorKey.name,
+      accentColorKeyField: accentColorKey.name,
     });
   }
 

@@ -42,6 +42,5 @@ void main() {
     expect(second, first);
     expect(accentColorPalette, contains(first));
     expect(accentColorPalette.length, AccentColorKey.values.length);
-    expect(accentPaletteVersion, 1);
   });
 }
