@@ -11,8 +11,10 @@ import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
 import 'package:remembeer/party/service/party_challenge_service.dart';
+import 'package:remembeer/party/service/party_quest_service.dart';
 import 'package:remembeer/party/widget/challenge_card.dart';
 import 'package:remembeer/party/widget/party_class_selector.dart';
+import 'package:remembeer/party/widget/party_quest_games_section.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
@@ -30,6 +32,7 @@ class PartyGamesTab extends StatelessWidget {
     required this.members,
     required this.onSelectClass,
     this.challengeService,
+    this.questService,
     this.socialQuestSectionBuilder,
     this.beerpongSectionBuilder,
   });
@@ -38,6 +41,7 @@ class PartyGamesTab extends StatelessWidget {
   final List<UserModel> members;
   final Future<void> Function(DrinkCategory selectedClass) onSelectClass;
   final PartyChallengeService? challengeService;
+  final PartyQuestService? questService;
   final PartyGamesSectionBuilder? socialQuestSectionBuilder;
   final PartyGamesSectionBuilder? beerpongSectionBuilder;
 
@@ -48,10 +52,10 @@ class PartyGamesTab extends StatelessWidget {
       ..._classSection(),
       if (settings.socialQuestsEnabled)
         socialQuestSectionBuilder?.call(context, state, members) ??
-            const _ModulePlaceholder(
-              icon: Icons.group_work_outlined,
-              title: 'Social quests',
-              text: 'The next scheduled quest will appear here.',
+            PartyQuestGamesSection(
+              state: state,
+              members: members,
+              service: _questService,
             ),
       if (settings.adminChallengesEnabled) _buildChallenges(context),
       if (settings.beerpongEnabled)
@@ -199,6 +203,13 @@ class PartyGamesTab extends StatelessWidget {
         partyController: get<PartyController>(),
         gameController: get<PartyGameController>(),
         eventController: get<PartyEventController>(),
+      );
+
+  PartyQuestService get _questService =>
+      questService ??
+      PartyQuestService(
+        partyController: get<PartyController>(),
+        gameController: get<PartyGameController>(),
       );
 }
 

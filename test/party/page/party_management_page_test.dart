@@ -3,9 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_member.dart';
+import 'package:remembeer/party/model/party_quest_template.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/page/party_management_page.dart';
 import 'package:remembeer/party/service/party_challenge_service.dart';
+import 'package:remembeer/party/service/party_quest_service.dart';
 import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_service.dart';
@@ -49,8 +51,11 @@ void main() {
 
     expect(find.byType(SwitchListTile), findsNWidgets(3));
     expect(find.text('Social quest schedule'), findsOneWidget);
-    await tester.drag(find.byType(ListView), const Offset(0, -600));
-    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Start challenge'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
     expect(find.text('Start challenge'), findsWidgets);
   });
 }
@@ -61,6 +66,7 @@ Widget _page(PartyState state) => MaterialApp(
     partyService: _FakePartyService(state),
     sessionService: _FakeSessionService(),
     challengeService: _FakeChallengeService(),
+    questService: _FakeQuestService(),
   ),
 );
 
@@ -142,6 +148,15 @@ class _FakeSessionService implements SessionService {
 class _FakeChallengeService implements PartyChallengeService {
   @override
   Stream<List<PartyChallenge>> challengesStream(String sessionId) =>
+      Stream.value(const []);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeQuestService implements PartyQuestService {
+  @override
+  Stream<List<PartyQuestTemplate>> templatesStream(String sessionId) =>
       Stream.value(const []);
 
   @override

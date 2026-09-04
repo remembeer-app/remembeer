@@ -14,9 +14,11 @@ import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
 import 'package:remembeer/party/page/party_profile_page.dart';
 import 'package:remembeer/party/service/party_challenge_service.dart';
+import 'package:remembeer/party/service/party_quest_service.dart';
 import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/party/widget/challenge_card.dart';
 import 'package:remembeer/party/widget/party_module_settings.dart';
+import 'package:remembeer/party/widget/party_quest_management_section.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/user/model/user_model.dart';
@@ -32,6 +34,7 @@ class PartyManagementPage extends StatelessWidget {
     PartyService? partyService,
     SessionService? sessionService,
     PartyChallengeService? challengeService,
+    PartyQuestService? questService,
     this.socialQuestSectionBuilder,
     this.beerpongSectionBuilder,
   }) : _partyService = partyService ?? get<PartyService>(),
@@ -42,12 +45,19 @@ class PartyManagementPage extends StatelessWidget {
              partyController: get<PartyController>(),
              gameController: get<PartyGameController>(),
              eventController: get<PartyEventController>(),
+           ),
+       _questService =
+           questService ??
+           PartyQuestService(
+             partyController: get<PartyController>(),
+             gameController: get<PartyGameController>(),
            );
 
   final String sessionId;
   final PartyService _partyService;
   final SessionService _sessionService;
   final PartyChallengeService _challengeService;
+  final PartyQuestService _questService;
   final PartyManagementSectionBuilder? socialQuestSectionBuilder;
   final PartyManagementSectionBuilder? beerpongSectionBuilder;
 
@@ -96,12 +106,15 @@ class PartyManagementPage extends StatelessWidget {
         onSaveSettings: (settings) =>
             _challengeService.setModuleSettings(sessionId, settings),
         onSaveSchedule: (schedule) =>
-            _challengeService.setQuestSchedule(sessionId, schedule),
+            _questService.setSchedule(sessionId, schedule),
       ),
-      if (state.party.moduleSettings.socialQuestsEnabled &&
-          socialQuestSectionBuilder != null) ...[
+      if (state.party.moduleSettings.socialQuestsEnabled) ...[
         const Gap(24),
-        socialQuestSectionBuilder!(context, state),
+        socialQuestSectionBuilder?.call(context, state) ??
+            PartyQuestManagementSection(
+              sessionId: sessionId,
+              service: _questService,
+            ),
       ],
       if (state.party.moduleSettings.adminChallengesEnabled) ...[
         const Gap(24),
