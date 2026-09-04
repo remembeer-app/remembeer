@@ -3,12 +3,12 @@ from typing import Any
 
 import pytest
 from firebase_functions import https_fn
+
 from party_commands import (
     activate_party_command,
     archive_party_command,
     sync_party_membership_command,
 )
-
 from tests.fakes import Database, Transaction
 
 
@@ -121,9 +121,30 @@ def test_admin_activation_creates_complete_party_and_base_awards_once() -> None:
     assert event["payload"]["selectedClass"] is None
     assert event["payload"]["appliedMultiplier"] == 1
     assert db.store["parties/session-a/questTemplates/meet"] == template
-    assert transaction.created_paths.count(
-        "parties/session-a/events/drink:drink-a:v:1"
-    ) == 1
+    assert (
+        transaction.created_paths.count("parties/session-a/events/drink:drink-a:v:1")
+        == 1
+    )
+
+
+def test_activation_uses_versioned_builtin_catalog_by_default() -> None:
+    db = Database({"sessions/session-a": _session()})
+
+    result = activate_party_command(
+        Request(
+            Auth("owner"),
+            {"sessionId": "session-a", "commandId": "activate-a"},
+        ),
+        db,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+
+    assert result["templateCount"] == 18
+    template = db.store["parties/session-a/questTemplates/builtin-v1-toast-with-beer"]
+    assert template["source"] == "builtIn"
+    assert template["builtInKey"] == "toast-with-beer"
+    assert template["catalogVersion"] == 1
+    assert template["eligibilityRule"] == "oneMemberClass:beer"
 
 
 @pytest.mark.parametrize(
