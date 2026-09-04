@@ -22,6 +22,17 @@ void main() {
     expect(partyController.lastCommandId, 'command-1');
   });
 
+  test('session with fewer than two members cannot become a Party', () async {
+    final partyController = _FakePartyController();
+    final service = _service(partyController);
+
+    expect(
+      () => service.turnSessionIntoParty(_session(memberIds: const {'admin'})),
+      throwsAssertionError,
+    );
+    expect(partyController.activatedSessionId, isNull);
+  });
+
   test(
     'ending an active Party delegates the whole transition to archive',
     () async {
@@ -51,12 +62,12 @@ SessionService _service(PartyController partyController) => SessionService(
   partyController: partyController,
 );
 
-Session _session({bool isParty = false}) => Session(
+Session _session({bool isParty = false, Set<String>? memberIds}) => Session(
   id: 'session-1',
   userId: 'owner',
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
-  memberIds: const {'owner', 'admin'},
+  memberIds: memberIds ?? const {'owner', 'admin'},
   adminIds: const {'owner', 'admin'},
   bannedMemberIds: const {},
   name: 'Party',

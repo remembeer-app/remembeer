@@ -2,6 +2,7 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
+import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
@@ -148,6 +149,10 @@ class SessionService {
     invariant(
       !session.isSoloSession,
       'Automatically generated solo sessions cannot become parties.',
+    );
+    invariant(
+      session.memberIds.length >= minPartyMemberCount,
+      'A party requires at least $minPartyMemberCount session members.',
     );
     invariant(
       session.endedAt == null,
