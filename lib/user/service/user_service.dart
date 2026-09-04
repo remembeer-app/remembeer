@@ -9,6 +9,7 @@ import 'package:remembeer/friend_request/model/friendship_status.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
+import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -71,10 +72,14 @@ class UserService {
       email: email,
       username: resolvedUsername,
       searchableUsername: resolvedUsername.toSearchable(),
+      accentColorKey: defaultAccentColorFor(authenticatedUser.uid),
     );
 
     await userController.createOrUpdateUser(defaultUser);
   }
+
+  Future<void> updateAccentColor(AccentColorKey accentColorKey) =>
+      userController.updateCurrentUserAccentColor(accentColorKey);
 
   Future<void> updateUsername({required String newUsername}) async {
     final trimmedUsername = newUsername.trim();
