@@ -20,6 +20,7 @@ abstract class PartyQuest with _$PartyQuest implements Document {
     @TimestampConverter() required DateTime endsAt,
     required PartyQuestStatus status,
     @Default(<String>[]) List<String> eligibleMemberIds,
+    @Default(<String>[]) List<String> eligiblePairKeys,
     @Default(<String>[]) List<String> completedPairKeys,
     @TimestampConverterOptimistic() required DateTime createdAt,
   }) = _PartyQuest;
