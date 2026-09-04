@@ -10,6 +10,7 @@ from typing import Any
 
 from firebase_admin import firestore
 from firebase_functions import https_fn
+
 from party_common import (
     callable_error,
     load_party_context,
@@ -22,6 +23,7 @@ from party_common import (
     run_idempotent_command,
 )
 from party_notifications import party_notification_data, send_notification_to_users
+from party_quest_catalog import built_in_template_seed_documents
 from party_scoring import calculate_drink_score, deterministic_event_id
 
 PARTY_SCHEMA_VERSION = 1
@@ -34,10 +36,10 @@ TemplateSeedProvider = Callable[[str], Sequence[TemplateSeed]]
 
 
 def built_in_template_seeds(actor_user_id: str) -> Sequence[TemplateSeed]:
-    """P15 extension point for the versioned built-in quest catalog."""
+    """Adapt P15's pure catalog to P06's transactional activation hook."""
 
     del actor_user_id
-    return ()
+    return built_in_template_seed_documents(firestore.SERVER_TIMESTAMP)
 
 
 def activate_party(request: Any) -> Mapping[str, Any]:
@@ -64,7 +66,9 @@ def activate_party_command(
     *,
     template_seed_provider: TemplateSeedProvider | None = None,
     notification_dispatcher: Callable[..., Any] = send_notification_to_users,
-    transaction_runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
     | None = None,
 ) -> Mapping[str, Any]:
     actor_user_id = require_auth(request)
@@ -199,7 +203,9 @@ def sync_party_membership_command(
     request: Any,
     db: Any,
     *,
-    transaction_runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
     | None = None,
 ) -> Mapping[str, Any]:
     actor_user_id = require_auth(request)
@@ -284,7 +290,9 @@ def archive_party_command(
     db: Any,
     *,
     notification_dispatcher: Callable[..., Any] = send_notification_to_users,
-    transaction_runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
     | None = None,
 ) -> Mapping[str, Any]:
     actor_user_id = require_auth(request)
