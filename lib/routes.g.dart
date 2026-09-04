@@ -155,6 +155,28 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               path: 'parties/:sessionId',
               hasOverriddenOnExit: false,
               factory: $PartyRoute._fromState,
+              routes: [
+                GoRouteData.$route(
+                  path: 'manage',
+                  hasOverriddenOnExit: false,
+                  factory: $PartyManagementRoute._fromState,
+                ),
+                GoRouteData.$route(
+                  path: 'quests/:questId',
+                  hasOverriddenOnExit: false,
+                  factory: $PartyQuestRoute._fromState,
+                ),
+                GoRouteData.$route(
+                  path: 'challenges/:challengeId',
+                  hasOverriddenOnExit: false,
+                  factory: $PartyChallengeRoute._fromState,
+                ),
+                GoRouteData.$route(
+                  path: 'tournaments/:tournamentId',
+                  hasOverriddenOnExit: false,
+                  factory: $PartyTournamentRoute._fromState,
+                ),
+              ],
             ),
             GoRouteData.$route(
               path: 'location-picker',
@@ -598,14 +620,181 @@ mixin $AddDrinkRoute on GoRouteData {
 }
 
 mixin $PartyRoute on GoRouteData {
-  static PartyRoute _fromState(GoRouterState state) =>
-      PartyRoute(sessionId: state.pathParameters['sessionId']!);
+  static PartyRoute _fromState(GoRouterState state) => PartyRoute(
+    sessionId: state.pathParameters['sessionId']!,
+    tab:
+        _$convertMapValue(
+          'tab',
+          state.uri.queryParameters,
+          _$PartyTabEnumMap._$fromName,
+        ) ??
+        PartyTab.activity,
+  );
 
   PartyRoute get _self => this as PartyRoute;
 
   @override
   String get location => GoRouteData.$location(
     '/drink/parties/${Uri.encodeComponent(_self.sessionId)}',
+    queryParams: {
+      if (_self.tab != PartyTab.activity) 'tab': _$PartyTabEnumMap[_self.tab],
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+const _$PartyTabEnumMap = {
+  PartyTab.activity: 'activity',
+  PartyTab.ranking: 'ranking',
+  PartyTab.games: 'games',
+};
+
+mixin $PartyManagementRoute on GoRouteData {
+  static PartyManagementRoute _fromState(GoRouterState state) =>
+      PartyManagementRoute(
+        sessionId: state.pathParameters['sessionId']!,
+        tab:
+            _$convertMapValue(
+              'tab',
+              state.uri.queryParameters,
+              _$PartyTabEnumMap._$fromName,
+            ) ??
+            PartyTab.activity,
+      );
+
+  PartyManagementRoute get _self => this as PartyManagementRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/drink/parties/${Uri.encodeComponent(_self.sessionId)}/manage',
+    queryParams: {
+      if (_self.tab != PartyTab.activity) 'tab': _$PartyTabEnumMap[_self.tab],
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $PartyQuestRoute on GoRouteData {
+  static PartyQuestRoute _fromState(GoRouterState state) => PartyQuestRoute(
+    sessionId: state.pathParameters['sessionId']!,
+    questId: state.pathParameters['questId']!,
+    tab:
+        _$convertMapValue(
+          'tab',
+          state.uri.queryParameters,
+          _$PartyTabEnumMap._$fromName,
+        ) ??
+        PartyTab.activity,
+  );
+
+  PartyQuestRoute get _self => this as PartyQuestRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/drink/parties/${Uri.encodeComponent(_self.sessionId)}/quests/${Uri.encodeComponent(_self.questId)}',
+    queryParams: {
+      if (_self.tab != PartyTab.activity) 'tab': _$PartyTabEnumMap[_self.tab],
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $PartyChallengeRoute on GoRouteData {
+  static PartyChallengeRoute _fromState(GoRouterState state) =>
+      PartyChallengeRoute(
+        sessionId: state.pathParameters['sessionId']!,
+        challengeId: state.pathParameters['challengeId']!,
+        tab:
+            _$convertMapValue(
+              'tab',
+              state.uri.queryParameters,
+              _$PartyTabEnumMap._$fromName,
+            ) ??
+            PartyTab.activity,
+      );
+
+  PartyChallengeRoute get _self => this as PartyChallengeRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/drink/parties/${Uri.encodeComponent(_self.sessionId)}/challenges/${Uri.encodeComponent(_self.challengeId)}',
+    queryParams: {
+      if (_self.tab != PartyTab.activity) 'tab': _$PartyTabEnumMap[_self.tab],
+    },
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $PartyTournamentRoute on GoRouteData {
+  static PartyTournamentRoute _fromState(GoRouterState state) =>
+      PartyTournamentRoute(
+        sessionId: state.pathParameters['sessionId']!,
+        tournamentId: state.pathParameters['tournamentId']!,
+        tab:
+            _$convertMapValue(
+              'tab',
+              state.uri.queryParameters,
+              _$PartyTabEnumMap._$fromName,
+            ) ??
+            PartyTab.activity,
+      );
+
+  PartyTournamentRoute get _self => this as PartyTournamentRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/drink/parties/${Uri.encodeComponent(_self.sessionId)}/tournaments/${Uri.encodeComponent(_self.tournamentId)}',
+    queryParams: {
+      if (_self.tab != PartyTab.activity) 'tab': _$PartyTabEnumMap[_self.tab],
+    },
   );
 
   @override
@@ -1144,6 +1333,20 @@ mixin $EndOfDaySettingsRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+T? _$convertMapValue<T>(
+  String key,
+  Map<String, String> map,
+  T? Function(String) converter,
+) {
+  final value = map[key];
+  return value == null ? null : converter(value);
+}
+
+extension<T extends Enum> on Map<T, String> {
+  T? _$fromName(String? value) =>
+      entries.where((element) => element.value == value).firstOrNull?.key;
 }
 
 RouteBase get $userProfileRoute => GoRouteData.$route(

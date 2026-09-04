@@ -4,26 +4,79 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/party/widget/party_ranking.dart';
+import 'package:remembeer/party/model/party_state.dart';
+import 'package:remembeer/party/model/party_tab.dart';
+import 'package:remembeer/party/service/party_service.dart';
+import 'package:remembeer/party/widget/party_activity_tab.dart';
+import 'package:remembeer/party/widget/party_games_tab.dart';
+import 'package:remembeer/party/widget/party_ranking_tab.dart';
 import 'package:remembeer/routes.dart';
-import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
-class PartyPage extends StatelessWidget {
+class PartyPage extends StatefulWidget {
+  const PartyPage({
+    super.key,
+    required this.sessionId,
+    this.tab = PartyTab.activity,
+  });
+
   final String sessionId;
+  final PartyTab tab;
 
-  PartyPage({super.key, required this.sessionId});
+  @override
+  State<PartyPage> createState() => _PartyPageState();
+}
 
+class _PartyPageState extends State<PartyPage>
+    with SingleTickerProviderStateMixin {
   final _drinkService = get<DrinkService>();
+  final _partyService = get<PartyService>();
   final _sessionService = get<SessionService>();
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: PartyTab.values.length,
+      initialIndex: widget.tab.index,
+      vsync: this,
+    )..addListener(_onTabChanged);
+  }
+
+  @override
+  void didUpdateWidget(covariant PartyPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.tab != PartyTab.values[_tabController.index]) {
+      _tabController.index = widget.tab.index;
+    }
+  }
+
+  @override
+  void dispose() {
+    _tabController
+      ..removeListener(_onTabChanged)
+      ..dispose();
+    super.dispose();
+  }
+
+  void _onTabChanged() {
+    if (_tabController.indexIsChanging || !mounted) {
+      return;
+    }
+    final tab = PartyTab.values[_tabController.index];
+    if (tab != widget.tab) {
+      PartyRoute(sessionId: widget.sessionId, tab: tab).replace(context);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return AsyncBuilder<Session>(
-      stream: _sessionService.sessionStream(sessionId),
-      builder: (context, session) {
-        if (!session.isParty) {
+    return AsyncBuilder<PartyState>(
+      stream: _partyService.stateStream(widget.sessionId),
+      builder: (context, state) {
+        if (!state.session.isParty) {
           return const PageTemplate(
             title: Text('Party'),
             child: Center(child: Text('This session is not a party.')),
@@ -31,8 +84,8 @@ class PartyPage extends StatelessWidget {
         }
 
         return AsyncBuilder<List<UserModel>>(
-          stream: _sessionService.sessionMembersStream(session.id),
-          builder: (context, members) => _buildPage(context, session, members),
+          stream: _sessionService.sessionMembersStream(state.session.id),
+          builder: (context, members) => _buildPage(context, state, members),
         );
       },
     );
@@ -40,11 +93,11 @@ class PartyPage extends StatelessWidget {
 
   Widget _buildPage(
     BuildContext context,
-    Session session,
+    PartyState state,
     List<UserModel> members,
   ) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isOngoing = session.endedAt == null;
+    final session = state.session;
 
     return PageTemplate(
       title: Row(
@@ -55,10 +108,22 @@ class PartyPage extends StatelessWidget {
           Flexible(child: Text(session.name, overflow: TextOverflow.ellipsis)),
         ],
       ),
+      actions: state.isAdmin && state.isActive
+          ? [
+              IconButton(
+                tooltip: 'Manage Party',
+                onPressed: () => PartyManagementRoute(
+                  sessionId: session.id,
+                  tab: PartyTab.values[_tabController.index],
+                ).push<void>(context),
+                icon: const Icon(Icons.settings),
+              ),
+            ]
+          : null,
       appBarBackgroundColor: colorScheme.errorContainer,
       appBarForegroundColor: colorScheme.onErrorContainer,
-      padding: const EdgeInsets.all(16),
-      floatingActionButton: isOngoing && session.hasFreeSpace
+      padding: EdgeInsets.zero,
+      floatingActionButton: state.isActive && session.hasFreeSpace
           ? GestureDetector(
               onLongPress: () =>
                   _drinkService.addDefaultDrink(targetSessionId: session.id),
@@ -74,53 +139,55 @@ class PartyPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Card(
+          Container(
             color: colorScheme.errorContainer,
-            margin: EdgeInsets.zero,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Row(
+              children: [
+                Icon(
+                  state.isActive ? Icons.local_fire_department : Icons.archive,
+                  color: colorScheme.onErrorContainer,
+                ),
+                const Gap(12),
+                Expanded(
+                  child: Text(
+                    state.isActive
+                        ? '${members.length} participants · Party in progress'
+                        : '${members.length} participants · Archived Party',
+                    style: TextStyle(color: colorScheme.onErrorContainer),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Material(
+            color: colorScheme.errorContainer,
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: colorScheme.onErrorContainer,
+              labelColor: colorScheme.onErrorContainer,
+              unselectedLabelColor: colorScheme.onErrorContainer.withValues(
+                alpha: 0.7,
+              ),
+              tabs: const [
+                Tab(icon: Icon(Icons.bolt), text: 'Activity'),
+                Tab(icon: Icon(Icons.emoji_events), text: 'Ranking'),
+                Tab(icon: Icon(Icons.casino), text: 'Games'),
+              ],
+            ),
+          ),
+          Expanded(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Row(
+              child: TabBarView(
+                controller: _tabController,
                 children: [
-                  Icon(
-                    isOngoing ? Icons.local_fire_department : Icons.flag,
-                    color: colorScheme.onErrorContainer,
-                  ),
-                  const Gap(12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          isOngoing ? 'Party in progress' : 'Party ended',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                color: colorScheme.onErrorContainer,
-                                fontWeight: FontWeight.bold,
-                              ),
-                        ),
-                        Text(
-                          '${members.length} ${members.length == 1 ? 'participant' : 'participants'} · '
-                          '${session.drinksCount} ${session.drinksCount == 1 ? 'drink' : 'drinks'}',
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: colorScheme.onErrorContainer),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const PartyActivityTab(),
+                  PartyRankingTab(session: session, members: members),
+                  PartyGamesTab(isReadOnly: state.isArchived),
                 ],
               ),
             ),
-          ),
-          const Gap(20),
-          Text(
-            'Live ranking',
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const Gap(12),
-          Expanded(
-            child: PartyRanking(session: session, members: members),
           ),
         ],
       ),
