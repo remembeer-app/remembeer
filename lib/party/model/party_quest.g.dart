@@ -20,6 +20,11 @@ _PartyQuest _$PartyQuestFromJson(Map<String, dynamic> json) => _PartyQuest(
           ?.map((e) => e as String)
           .toList() ??
       const <String>[],
+  eligiblePairKeys:
+      (json['eligiblePairKeys'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const <String>[],
   completedPairKeys:
       (json['completedPairKeys'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -42,6 +47,7 @@ Map<String, dynamic> _$PartyQuestToJson(
   'endsAt': const TimestampConverter().toJson(instance.endsAt),
   'status': _$PartyQuestStatusEnumMap[instance.status]!,
   'eligibleMemberIds': instance.eligibleMemberIds,
+  'eligiblePairKeys': instance.eligiblePairKeys,
   'completedPairKeys': instance.completedPairKeys,
   'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
 };
