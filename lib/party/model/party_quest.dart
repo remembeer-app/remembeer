@@ -21,7 +21,7 @@ abstract class PartyQuest with _$PartyQuest implements Document {
     required PartyQuestStatus status,
     @Default(<String>[]) List<String> eligibleMemberIds,
     @Default(<String>[]) List<String> completedPairKeys,
-    @TimestampConverter() required DateTime createdAt,
+    @TimestampConverterOptimistic() required DateTime createdAt,
   }) = _PartyQuest;
 
   factory PartyQuest.fromJson(Map<String, dynamic> json) =>

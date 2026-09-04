@@ -20,8 +20,8 @@ abstract class PartyChallenge with _$PartyChallenge implements Document {
     required PartyChallengeStatus status,
     @Default(<String>[]) List<String> winnerIds,
     required String createdByUserId,
-    @TimestampConverter() required DateTime createdAt,
-    @TimestampConverter() required DateTime updatedAt,
+    @TimestampConverterOptimistic() required DateTime createdAt,
+    @TimestampConverterOptimistic() required DateTime updatedAt,
   }) = _PartyChallenge;
 
   factory PartyChallenge.fromJson(Map<String, dynamic> json) =>

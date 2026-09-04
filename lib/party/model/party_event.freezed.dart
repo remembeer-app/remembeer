@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PartyEvent {
 
- String get id; PartyEventKind get kind; String get recipientUserId; List<String> get participantIds; int get pointsUnits; PartyEventSourceCollection get sourceCollection; String get sourceId; String? get reversesEventId; String? get actorUserId;@TimestampConverter() DateTime get occurredAt;@TimestampConverter() DateTime get createdAt; Map<String, Object?> get payload;
+ String get id; PartyEventKind get kind; String get recipientUserId; List<String> get participantIds; int get pointsUnits; PartyEventSourceCollection get sourceCollection; String get sourceId; String? get reversesEventId; String? get actorUserId;@TimestampConverter() DateTime get occurredAt;@TimestampConverterOptimistic() DateTime get createdAt; Map<String, Object?> get payload;
 /// Create a copy of PartyEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $PartyEventCopyWith<$Res>  {
   factory $PartyEventCopyWith(PartyEvent value, $Res Function(PartyEvent) _then) = _$PartyEventCopyWithImpl;
 @useResult
 $Res call({
- String id, PartyEventKind kind, String recipientUserId, List<String> participantIds, int pointsUnits, PartyEventSourceCollection sourceCollection, String sourceId, String? reversesEventId, String? actorUserId,@TimestampConverter() DateTime occurredAt,@TimestampConverter() DateTime createdAt, Map<String, Object?> payload
+ String id, PartyEventKind kind, String recipientUserId, List<String> participantIds, int pointsUnits, PartyEventSourceCollection sourceCollection, String sourceId, String? reversesEventId, String? actorUserId,@TimestampConverter() DateTime occurredAt,@TimestampConverterOptimistic() DateTime createdAt, Map<String, Object?> payload
 });
 
 
@@ -170,7 +170,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  PartyEventKind kind,  String recipientUserId,  List<String> participantIds,  int pointsUnits,  PartyEventSourceCollection sourceCollection,  String sourceId,  String? reversesEventId,  String? actorUserId, @TimestampConverter()  DateTime occurredAt, @TimestampConverter()  DateTime createdAt,  Map<String, Object?> payload)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  PartyEventKind kind,  String recipientUserId,  List<String> participantIds,  int pointsUnits,  PartyEventSourceCollection sourceCollection,  String sourceId,  String? reversesEventId,  String? actorUserId, @TimestampConverter()  DateTime occurredAt, @TimestampConverterOptimistic()  DateTime createdAt,  Map<String, Object?> payload)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PartyEvent() when $default != null:
 return $default(_that.id,_that.kind,_that.recipientUserId,_that.participantIds,_that.pointsUnits,_that.sourceCollection,_that.sourceId,_that.reversesEventId,_that.actorUserId,_that.occurredAt,_that.createdAt,_that.payload);case _:
@@ -191,7 +191,7 @@ return $default(_that.id,_that.kind,_that.recipientUserId,_that.participantIds,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  PartyEventKind kind,  String recipientUserId,  List<String> participantIds,  int pointsUnits,  PartyEventSourceCollection sourceCollection,  String sourceId,  String? reversesEventId,  String? actorUserId, @TimestampConverter()  DateTime occurredAt, @TimestampConverter()  DateTime createdAt,  Map<String, Object?> payload)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  PartyEventKind kind,  String recipientUserId,  List<String> participantIds,  int pointsUnits,  PartyEventSourceCollection sourceCollection,  String sourceId,  String? reversesEventId,  String? actorUserId, @TimestampConverter()  DateTime occurredAt, @TimestampConverterOptimistic()  DateTime createdAt,  Map<String, Object?> payload)  $default,) {final _that = this;
 switch (_that) {
 case _PartyEvent():
 return $default(_that.id,_that.kind,_that.recipientUserId,_that.participantIds,_that.pointsUnits,_that.sourceCollection,_that.sourceId,_that.reversesEventId,_that.actorUserId,_that.occurredAt,_that.createdAt,_that.payload);case _:
@@ -211,7 +211,7 @@ return $default(_that.id,_that.kind,_that.recipientUserId,_that.participantIds,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  PartyEventKind kind,  String recipientUserId,  List<String> participantIds,  int pointsUnits,  PartyEventSourceCollection sourceCollection,  String sourceId,  String? reversesEventId,  String? actorUserId, @TimestampConverter()  DateTime occurredAt, @TimestampConverter()  DateTime createdAt,  Map<String, Object?> payload)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  PartyEventKind kind,  String recipientUserId,  List<String> participantIds,  int pointsUnits,  PartyEventSourceCollection sourceCollection,  String sourceId,  String? reversesEventId,  String? actorUserId, @TimestampConverter()  DateTime occurredAt, @TimestampConverterOptimistic()  DateTime createdAt,  Map<String, Object?> payload)?  $default,) {final _that = this;
 switch (_that) {
 case _PartyEvent() when $default != null:
 return $default(_that.id,_that.kind,_that.recipientUserId,_that.participantIds,_that.pointsUnits,_that.sourceCollection,_that.sourceId,_that.reversesEventId,_that.actorUserId,_that.occurredAt,_that.createdAt,_that.payload);case _:
@@ -226,7 +226,7 @@ return $default(_that.id,_that.kind,_that.recipientUserId,_that.participantIds,_
 @JsonSerializable()
 
 class _PartyEvent implements PartyEvent {
-  const _PartyEvent({required this.id, required this.kind, required this.recipientUserId, required  List<String> participantIds, required this.pointsUnits, required this.sourceCollection, required this.sourceId, this.reversesEventId, this.actorUserId, @TimestampConverter() required this.occurredAt, @TimestampConverter() required this.createdAt,  Map<String, Object?> payload = const <String, Object?>{}}): _participantIds = participantIds,_payload = payload;
+  const _PartyEvent({required this.id, required this.kind, required this.recipientUserId, required  List<String> participantIds, required this.pointsUnits, required this.sourceCollection, required this.sourceId, this.reversesEventId, this.actorUserId, @TimestampConverter() required this.occurredAt, @TimestampConverterOptimistic() required this.createdAt,  Map<String, Object?> payload = const <String, Object?>{}}): _participantIds = participantIds,_payload = payload;
   factory _PartyEvent.fromJson(Map<String, dynamic> json) => _$PartyEventFromJson(json);
 
 @override final  String id;
@@ -245,7 +245,7 @@ class _PartyEvent implements PartyEvent {
 @override final  String? reversesEventId;
 @override final  String? actorUserId;
 @override@TimestampConverter() final  DateTime occurredAt;
-@override@TimestampConverter() final  DateTime createdAt;
+@override@TimestampConverterOptimistic() final  DateTime createdAt;
  final  Map<String, Object?> _payload;
 @override@JsonKey() Map<String, Object?> get payload {
   if (_payload is EqualUnmodifiableMapView) return _payload;
@@ -289,7 +289,7 @@ abstract mixin class _$PartyEventCopyWith<$Res> implements $PartyEventCopyWith<$
   factory _$PartyEventCopyWith(_PartyEvent value, $Res Function(_PartyEvent) _then) = __$PartyEventCopyWithImpl;
 @override @useResult
 $Res call({
- String id, PartyEventKind kind, String recipientUserId, List<String> participantIds, int pointsUnits, PartyEventSourceCollection sourceCollection, String sourceId, String? reversesEventId, String? actorUserId,@TimestampConverter() DateTime occurredAt,@TimestampConverter() DateTime createdAt, Map<String, Object?> payload
+ String id, PartyEventKind kind, String recipientUserId, List<String> participantIds, int pointsUnits, PartyEventSourceCollection sourceCollection, String sourceId, String? reversesEventId, String? actorUserId,@TimestampConverter() DateTime occurredAt,@TimestampConverterOptimistic() DateTime createdAt, Map<String, Object?> payload
 });
 
 

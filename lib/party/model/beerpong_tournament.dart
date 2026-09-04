@@ -24,7 +24,7 @@ abstract class BeerpongTournament
     required String randomSeedHash,
     String? randomSeedReveal,
     required String createdByUserId,
-    @TimestampConverter() required DateTime createdAt,
+    @TimestampConverterOptimistic() required DateTime createdAt,
     @TimestampConverter() DateTime? completedAt,
   }) = _BeerpongTournament;
 

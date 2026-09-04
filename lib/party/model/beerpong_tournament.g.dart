@@ -23,8 +23,8 @@ _BeerpongTournament _$BeerpongTournamentFromJson(Map<String, dynamic> json) =>
       randomSeedHash: json['randomSeedHash'] as String,
       randomSeedReveal: json['randomSeedReveal'] as String?,
       createdByUserId: json['createdByUserId'] as String,
-      createdAt: const TimestampConverter().fromJson(
-        json['createdAt'] as Timestamp,
+      createdAt: const TimestampConverterOptimistic().fromJson(
+        json['createdAt'] as Timestamp?,
       ),
       completedAt: _$JsonConverterFromJson<Timestamp, DateTime>(
         json['completedAt'],
@@ -32,25 +32,26 @@ _BeerpongTournament _$BeerpongTournamentFromJson(Map<String, dynamic> json) =>
       ),
     );
 
-Map<String, dynamic> _$BeerpongTournamentToJson(_BeerpongTournament instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'status': _$BeerpongTournamentStatusEnumMap[instance.status]!,
-      'participantIds': instance.participantIds,
-      'teamCount': instance.teamCount,
-      'thirdPlaceEnabled': instance.thirdPlaceEnabled,
-      'firstPlacePointsUnits': instance.firstPlacePointsUnits,
-      'secondPlacePointsUnits': instance.secondPlacePointsUnits,
-      'thirdPlacePointsUnits': instance.thirdPlacePointsUnits,
-      'randomSeedHash': instance.randomSeedHash,
-      'randomSeedReveal': instance.randomSeedReveal,
-      'createdByUserId': instance.createdByUserId,
-      'createdAt': const TimestampConverter().toJson(instance.createdAt),
-      'completedAt': _$JsonConverterToJson<Timestamp, DateTime>(
-        instance.completedAt,
-        const TimestampConverter().toJson,
-      ),
-    };
+Map<String, dynamic> _$BeerpongTournamentToJson(
+  _BeerpongTournament instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'status': _$BeerpongTournamentStatusEnumMap[instance.status]!,
+  'participantIds': instance.participantIds,
+  'teamCount': instance.teamCount,
+  'thirdPlaceEnabled': instance.thirdPlaceEnabled,
+  'firstPlacePointsUnits': instance.firstPlacePointsUnits,
+  'secondPlacePointsUnits': instance.secondPlacePointsUnits,
+  'thirdPlacePointsUnits': instance.thirdPlacePointsUnits,
+  'randomSeedHash': instance.randomSeedHash,
+  'randomSeedReveal': instance.randomSeedReveal,
+  'createdByUserId': instance.createdByUserId,
+  'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
+  'completedAt': _$JsonConverterToJson<Timestamp, DateTime>(
+    instance.completedAt,
+    const TimestampConverter().toJson,
+  ),
+};
 
 const _$BeerpongTournamentStatusEnumMap = {
   BeerpongTournamentStatus.enrollment: 'enrollment',

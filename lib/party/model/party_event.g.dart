@@ -24,29 +24,30 @@ _PartyEvent _$PartyEventFromJson(Map<String, dynamic> json) => _PartyEvent(
   occurredAt: const TimestampConverter().fromJson(
     json['occurredAt'] as Timestamp,
   ),
-  createdAt: const TimestampConverter().fromJson(
-    json['createdAt'] as Timestamp,
+  createdAt: const TimestampConverterOptimistic().fromJson(
+    json['createdAt'] as Timestamp?,
   ),
   payload:
       json['payload'] as Map<String, dynamic>? ?? const <String, Object?>{},
 );
 
-Map<String, dynamic> _$PartyEventToJson(_PartyEvent instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'kind': _$PartyEventKindEnumMap[instance.kind]!,
-      'recipientUserId': instance.recipientUserId,
-      'participantIds': instance.participantIds,
-      'pointsUnits': instance.pointsUnits,
-      'sourceCollection':
-          _$PartyEventSourceCollectionEnumMap[instance.sourceCollection]!,
-      'sourceId': instance.sourceId,
-      'reversesEventId': instance.reversesEventId,
-      'actorUserId': instance.actorUserId,
-      'occurredAt': const TimestampConverter().toJson(instance.occurredAt),
-      'createdAt': const TimestampConverter().toJson(instance.createdAt),
-      'payload': instance.payload,
-    };
+Map<String, dynamic> _$PartyEventToJson(
+  _PartyEvent instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'kind': _$PartyEventKindEnumMap[instance.kind]!,
+  'recipientUserId': instance.recipientUserId,
+  'participantIds': instance.participantIds,
+  'pointsUnits': instance.pointsUnits,
+  'sourceCollection':
+      _$PartyEventSourceCollectionEnumMap[instance.sourceCollection]!,
+  'sourceId': instance.sourceId,
+  'reversesEventId': instance.reversesEventId,
+  'actorUserId': instance.actorUserId,
+  'occurredAt': const TimestampConverter().toJson(instance.occurredAt),
+  'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
+  'payload': instance.payload,
+};
 
 const _$PartyEventKindEnumMap = {
   PartyEventKind.drink: 'drink',

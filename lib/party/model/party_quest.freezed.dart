@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PartyQuest {
 
- String get id; String get templateId; String get titleSnapshot; String get instructionsSnapshot; int get pointsUnits;@TimestampConverter() DateTime get startsAt;@TimestampConverter() DateTime get endsAt; PartyQuestStatus get status; List<String> get eligibleMemberIds; List<String> get completedPairKeys;@TimestampConverter() DateTime get createdAt;
+ String get id; String get templateId; String get titleSnapshot; String get instructionsSnapshot; int get pointsUnits;@TimestampConverter() DateTime get startsAt;@TimestampConverter() DateTime get endsAt; PartyQuestStatus get status; List<String> get eligibleMemberIds; List<String> get completedPairKeys;@TimestampConverterOptimistic() DateTime get createdAt;
 /// Create a copy of PartyQuest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $PartyQuestCopyWith<$Res>  {
   factory $PartyQuestCopyWith(PartyQuest value, $Res Function(PartyQuest) _then) = _$PartyQuestCopyWithImpl;
 @useResult
 $Res call({
- String id, String templateId, String titleSnapshot, String instructionsSnapshot, int pointsUnits,@TimestampConverter() DateTime startsAt,@TimestampConverter() DateTime endsAt, PartyQuestStatus status, List<String> eligibleMemberIds, List<String> completedPairKeys,@TimestampConverter() DateTime createdAt
+ String id, String templateId, String titleSnapshot, String instructionsSnapshot, int pointsUnits,@TimestampConverter() DateTime startsAt,@TimestampConverter() DateTime endsAt, PartyQuestStatus status, List<String> eligibleMemberIds, List<String> completedPairKeys,@TimestampConverterOptimistic() DateTime createdAt
 });
 
 
@@ -169,7 +169,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String templateId,  String titleSnapshot,  String instructionsSnapshot,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyQuestStatus status,  List<String> eligibleMemberIds,  List<String> completedPairKeys, @TimestampConverter()  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String templateId,  String titleSnapshot,  String instructionsSnapshot,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyQuestStatus status,  List<String> eligibleMemberIds,  List<String> completedPairKeys, @TimestampConverterOptimistic()  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PartyQuest() when $default != null:
 return $default(_that.id,_that.templateId,_that.titleSnapshot,_that.instructionsSnapshot,_that.pointsUnits,_that.startsAt,_that.endsAt,_that.status,_that.eligibleMemberIds,_that.completedPairKeys,_that.createdAt);case _:
@@ -190,7 +190,7 @@ return $default(_that.id,_that.templateId,_that.titleSnapshot,_that.instructions
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String templateId,  String titleSnapshot,  String instructionsSnapshot,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyQuestStatus status,  List<String> eligibleMemberIds,  List<String> completedPairKeys, @TimestampConverter()  DateTime createdAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String templateId,  String titleSnapshot,  String instructionsSnapshot,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyQuestStatus status,  List<String> eligibleMemberIds,  List<String> completedPairKeys, @TimestampConverterOptimistic()  DateTime createdAt)  $default,) {final _that = this;
 switch (_that) {
 case _PartyQuest():
 return $default(_that.id,_that.templateId,_that.titleSnapshot,_that.instructionsSnapshot,_that.pointsUnits,_that.startsAt,_that.endsAt,_that.status,_that.eligibleMemberIds,_that.completedPairKeys,_that.createdAt);case _:
@@ -210,7 +210,7 @@ return $default(_that.id,_that.templateId,_that.titleSnapshot,_that.instructions
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String templateId,  String titleSnapshot,  String instructionsSnapshot,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyQuestStatus status,  List<String> eligibleMemberIds,  List<String> completedPairKeys, @TimestampConverter()  DateTime createdAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String templateId,  String titleSnapshot,  String instructionsSnapshot,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyQuestStatus status,  List<String> eligibleMemberIds,  List<String> completedPairKeys, @TimestampConverterOptimistic()  DateTime createdAt)?  $default,) {final _that = this;
 switch (_that) {
 case _PartyQuest() when $default != null:
 return $default(_that.id,_that.templateId,_that.titleSnapshot,_that.instructionsSnapshot,_that.pointsUnits,_that.startsAt,_that.endsAt,_that.status,_that.eligibleMemberIds,_that.completedPairKeys,_that.createdAt);case _:
@@ -225,7 +225,7 @@ return $default(_that.id,_that.templateId,_that.titleSnapshot,_that.instructions
 @JsonSerializable()
 
 class _PartyQuest implements PartyQuest {
-  const _PartyQuest({required this.id, required this.templateId, required this.titleSnapshot, required this.instructionsSnapshot, required this.pointsUnits, @TimestampConverter() required this.startsAt, @TimestampConverter() required this.endsAt, required this.status,  List<String> eligibleMemberIds = const <String>[],  List<String> completedPairKeys = const <String>[], @TimestampConverter() required this.createdAt}): _eligibleMemberIds = eligibleMemberIds,_completedPairKeys = completedPairKeys;
+  const _PartyQuest({required this.id, required this.templateId, required this.titleSnapshot, required this.instructionsSnapshot, required this.pointsUnits, @TimestampConverter() required this.startsAt, @TimestampConverter() required this.endsAt, required this.status,  List<String> eligibleMemberIds = const <String>[],  List<String> completedPairKeys = const <String>[], @TimestampConverterOptimistic() required this.createdAt}): _eligibleMemberIds = eligibleMemberIds,_completedPairKeys = completedPairKeys;
   factory _PartyQuest.fromJson(Map<String, dynamic> json) => _$PartyQuestFromJson(json);
 
 @override final  String id;
@@ -250,7 +250,7 @@ class _PartyQuest implements PartyQuest {
   return EqualUnmodifiableListView(_completedPairKeys);
 }
 
-@override@TimestampConverter() final  DateTime createdAt;
+@override@TimestampConverterOptimistic() final  DateTime createdAt;
 
 /// Create a copy of PartyQuest
 /// with the given fields replaced by the non-null parameter values.
@@ -287,7 +287,7 @@ abstract mixin class _$PartyQuestCopyWith<$Res> implements $PartyQuestCopyWith<$
   factory _$PartyQuestCopyWith(_PartyQuest value, $Res Function(_PartyQuest) _then) = __$PartyQuestCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String templateId, String titleSnapshot, String instructionsSnapshot, int pointsUnits,@TimestampConverter() DateTime startsAt,@TimestampConverter() DateTime endsAt, PartyQuestStatus status, List<String> eligibleMemberIds, List<String> completedPairKeys,@TimestampConverter() DateTime createdAt
+ String id, String templateId, String titleSnapshot, String instructionsSnapshot, int pointsUnits,@TimestampConverter() DateTime startsAt,@TimestampConverter() DateTime endsAt, PartyQuestStatus status, List<String> eligibleMemberIds, List<String> completedPairKeys,@TimestampConverterOptimistic() DateTime createdAt
 });
 
 

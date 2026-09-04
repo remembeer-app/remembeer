@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PartyChallenge {
 
- String get id; String get title; String get instructions; int get pointsUnits;@TimestampConverter() DateTime get startsAt;@TimestampConverter() DateTime get endsAt; PartyChallengeStatus get status; List<String> get winnerIds; String get createdByUserId;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
+ String get id; String get title; String get instructions; int get pointsUnits;@TimestampConverter() DateTime get startsAt;@TimestampConverter() DateTime get endsAt; PartyChallengeStatus get status; List<String> get winnerIds; String get createdByUserId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;
 /// Create a copy of PartyChallenge
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $PartyChallengeCopyWith<$Res>  {
   factory $PartyChallengeCopyWith(PartyChallenge value, $Res Function(PartyChallenge) _then) = _$PartyChallengeCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String instructions, int pointsUnits,@TimestampConverter() DateTime startsAt,@TimestampConverter() DateTime endsAt, PartyChallengeStatus status, List<String> winnerIds, String createdByUserId,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id, String title, String instructions, int pointsUnits,@TimestampConverter() DateTime startsAt,@TimestampConverter() DateTime endsAt, PartyChallengeStatus status, List<String> winnerIds, String createdByUserId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt
 });
 
 
@@ -169,7 +169,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String instructions,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyChallengeStatus status,  List<String> winnerIds,  String createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String instructions,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyChallengeStatus status,  List<String> winnerIds,  String createdByUserId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PartyChallenge() when $default != null:
 return $default(_that.id,_that.title,_that.instructions,_that.pointsUnits,_that.startsAt,_that.endsAt,_that.status,_that.winnerIds,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
@@ -190,7 +190,7 @@ return $default(_that.id,_that.title,_that.instructions,_that.pointsUnits,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String instructions,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyChallengeStatus status,  List<String> winnerIds,  String createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String instructions,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyChallengeStatus status,  List<String> winnerIds,  String createdByUserId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _PartyChallenge():
 return $default(_that.id,_that.title,_that.instructions,_that.pointsUnits,_that.startsAt,_that.endsAt,_that.status,_that.winnerIds,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
@@ -210,7 +210,7 @@ return $default(_that.id,_that.title,_that.instructions,_that.pointsUnits,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String instructions,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyChallengeStatus status,  List<String> winnerIds,  String createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String instructions,  int pointsUnits, @TimestampConverter()  DateTime startsAt, @TimestampConverter()  DateTime endsAt,  PartyChallengeStatus status,  List<String> winnerIds,  String createdByUserId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _PartyChallenge() when $default != null:
 return $default(_that.id,_that.title,_that.instructions,_that.pointsUnits,_that.startsAt,_that.endsAt,_that.status,_that.winnerIds,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
@@ -225,7 +225,7 @@ return $default(_that.id,_that.title,_that.instructions,_that.pointsUnits,_that.
 @JsonSerializable()
 
 class _PartyChallenge implements PartyChallenge {
-  const _PartyChallenge({required this.id, required this.title, required this.instructions, required this.pointsUnits, @TimestampConverter() required this.startsAt, @TimestampConverter() required this.endsAt, required this.status,  List<String> winnerIds = const <String>[], required this.createdByUserId, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt}): _winnerIds = winnerIds;
+  const _PartyChallenge({required this.id, required this.title, required this.instructions, required this.pointsUnits, @TimestampConverter() required this.startsAt, @TimestampConverter() required this.endsAt, required this.status,  List<String> winnerIds = const <String>[], required this.createdByUserId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt}): _winnerIds = winnerIds;
   factory _PartyChallenge.fromJson(Map<String, dynamic> json) => _$PartyChallengeFromJson(json);
 
 @override final  String id;
@@ -243,8 +243,8 @@ class _PartyChallenge implements PartyChallenge {
 }
 
 @override final  String createdByUserId;
-@override@TimestampConverter() final  DateTime createdAt;
-@override@TimestampConverter() final  DateTime updatedAt;
+@override@TimestampConverterOptimistic() final  DateTime createdAt;
+@override@TimestampConverterOptimistic() final  DateTime updatedAt;
 
 /// Create a copy of PartyChallenge
 /// with the given fields replaced by the non-null parameter values.
@@ -281,7 +281,7 @@ abstract mixin class _$PartyChallengeCopyWith<$Res> implements $PartyChallengeCo
   factory _$PartyChallengeCopyWith(_PartyChallenge value, $Res Function(_PartyChallenge) _then) = __$PartyChallengeCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String instructions, int pointsUnits,@TimestampConverter() DateTime startsAt,@TimestampConverter() DateTime endsAt, PartyChallengeStatus status, List<String> winnerIds, String createdByUserId,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id, String title, String instructions, int pointsUnits,@TimestampConverter() DateTime startsAt,@TimestampConverter() DateTime endsAt, PartyChallengeStatus status, List<String> winnerIds, String createdByUserId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt
 });
 
 

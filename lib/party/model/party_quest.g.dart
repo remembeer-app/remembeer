@@ -25,25 +25,26 @@ _PartyQuest _$PartyQuestFromJson(Map<String, dynamic> json) => _PartyQuest(
           ?.map((e) => e as String)
           .toList() ??
       const <String>[],
-  createdAt: const TimestampConverter().fromJson(
-    json['createdAt'] as Timestamp,
+  createdAt: const TimestampConverterOptimistic().fromJson(
+    json['createdAt'] as Timestamp?,
   ),
 );
 
-Map<String, dynamic> _$PartyQuestToJson(_PartyQuest instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'templateId': instance.templateId,
-      'titleSnapshot': instance.titleSnapshot,
-      'instructionsSnapshot': instance.instructionsSnapshot,
-      'pointsUnits': instance.pointsUnits,
-      'startsAt': const TimestampConverter().toJson(instance.startsAt),
-      'endsAt': const TimestampConverter().toJson(instance.endsAt),
-      'status': _$PartyQuestStatusEnumMap[instance.status]!,
-      'eligibleMemberIds': instance.eligibleMemberIds,
-      'completedPairKeys': instance.completedPairKeys,
-      'createdAt': const TimestampConverter().toJson(instance.createdAt),
-    };
+Map<String, dynamic> _$PartyQuestToJson(
+  _PartyQuest instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'templateId': instance.templateId,
+  'titleSnapshot': instance.titleSnapshot,
+  'instructionsSnapshot': instance.instructionsSnapshot,
+  'pointsUnits': instance.pointsUnits,
+  'startsAt': const TimestampConverter().toJson(instance.startsAt),
+  'endsAt': const TimestampConverter().toJson(instance.endsAt),
+  'status': _$PartyQuestStatusEnumMap[instance.status]!,
+  'eligibleMemberIds': instance.eligibleMemberIds,
+  'completedPairKeys': instance.completedPairKeys,
+  'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
+};
 
 const _$PartyQuestStatusEnumMap = {
   PartyQuestStatus.active: 'active',

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$BeerpongTournament {
 
- String get id; BeerpongTournamentStatus get status; List<String> get participantIds; int get teamCount; bool get thirdPlaceEnabled; int get firstPlacePointsUnits; int get secondPlacePointsUnits; int get thirdPlacePointsUnits; String get randomSeedHash; String? get randomSeedReveal; String get createdByUserId;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime? get completedAt;
+ String get id; BeerpongTournamentStatus get status; List<String> get participantIds; int get teamCount; bool get thirdPlaceEnabled; int get firstPlacePointsUnits; int get secondPlacePointsUnits; int get thirdPlacePointsUnits; String get randomSeedHash; String? get randomSeedReveal; String get createdByUserId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverter() DateTime? get completedAt;
 /// Create a copy of BeerpongTournament
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $BeerpongTournamentCopyWith<$Res>  {
   factory $BeerpongTournamentCopyWith(BeerpongTournament value, $Res Function(BeerpongTournament) _then) = _$BeerpongTournamentCopyWithImpl;
 @useResult
 $Res call({
- String id, BeerpongTournamentStatus status, List<String> participantIds, int teamCount, bool thirdPlaceEnabled, int firstPlacePointsUnits, int secondPlacePointsUnits, int thirdPlacePointsUnits, String randomSeedHash, String? randomSeedReveal, String createdByUserId,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime? completedAt
+ String id, BeerpongTournamentStatus status, List<String> participantIds, int teamCount, bool thirdPlaceEnabled, int firstPlacePointsUnits, int secondPlacePointsUnits, int thirdPlacePointsUnits, String randomSeedHash, String? randomSeedReveal, String createdByUserId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverter() DateTime? completedAt
 });
 
 
@@ -171,7 +171,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  BeerpongTournamentStatus status,  List<String> participantIds,  int teamCount,  bool thirdPlaceEnabled,  int firstPlacePointsUnits,  int secondPlacePointsUnits,  int thirdPlacePointsUnits,  String randomSeedHash,  String? randomSeedReveal,  String createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime? completedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  BeerpongTournamentStatus status,  List<String> participantIds,  int teamCount,  bool thirdPlaceEnabled,  int firstPlacePointsUnits,  int secondPlacePointsUnits,  int thirdPlacePointsUnits,  String randomSeedHash,  String? randomSeedReveal,  String createdByUserId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverter()  DateTime? completedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BeerpongTournament() when $default != null:
 return $default(_that.id,_that.status,_that.participantIds,_that.teamCount,_that.thirdPlaceEnabled,_that.firstPlacePointsUnits,_that.secondPlacePointsUnits,_that.thirdPlacePointsUnits,_that.randomSeedHash,_that.randomSeedReveal,_that.createdByUserId,_that.createdAt,_that.completedAt);case _:
@@ -192,7 +192,7 @@ return $default(_that.id,_that.status,_that.participantIds,_that.teamCount,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  BeerpongTournamentStatus status,  List<String> participantIds,  int teamCount,  bool thirdPlaceEnabled,  int firstPlacePointsUnits,  int secondPlacePointsUnits,  int thirdPlacePointsUnits,  String randomSeedHash,  String? randomSeedReveal,  String createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime? completedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  BeerpongTournamentStatus status,  List<String> participantIds,  int teamCount,  bool thirdPlaceEnabled,  int firstPlacePointsUnits,  int secondPlacePointsUnits,  int thirdPlacePointsUnits,  String randomSeedHash,  String? randomSeedReveal,  String createdByUserId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverter()  DateTime? completedAt)  $default,) {final _that = this;
 switch (_that) {
 case _BeerpongTournament():
 return $default(_that.id,_that.status,_that.participantIds,_that.teamCount,_that.thirdPlaceEnabled,_that.firstPlacePointsUnits,_that.secondPlacePointsUnits,_that.thirdPlacePointsUnits,_that.randomSeedHash,_that.randomSeedReveal,_that.createdByUserId,_that.createdAt,_that.completedAt);case _:
@@ -212,7 +212,7 @@ return $default(_that.id,_that.status,_that.participantIds,_that.teamCount,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  BeerpongTournamentStatus status,  List<String> participantIds,  int teamCount,  bool thirdPlaceEnabled,  int firstPlacePointsUnits,  int secondPlacePointsUnits,  int thirdPlacePointsUnits,  String randomSeedHash,  String? randomSeedReveal,  String createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime? completedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  BeerpongTournamentStatus status,  List<String> participantIds,  int teamCount,  bool thirdPlaceEnabled,  int firstPlacePointsUnits,  int secondPlacePointsUnits,  int thirdPlacePointsUnits,  String randomSeedHash,  String? randomSeedReveal,  String createdByUserId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverter()  DateTime? completedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _BeerpongTournament() when $default != null:
 return $default(_that.id,_that.status,_that.participantIds,_that.teamCount,_that.thirdPlaceEnabled,_that.firstPlacePointsUnits,_that.secondPlacePointsUnits,_that.thirdPlacePointsUnits,_that.randomSeedHash,_that.randomSeedReveal,_that.createdByUserId,_that.createdAt,_that.completedAt);case _:
@@ -227,7 +227,7 @@ return $default(_that.id,_that.status,_that.participantIds,_that.teamCount,_that
 @JsonSerializable()
 
 class _BeerpongTournament implements BeerpongTournament {
-  const _BeerpongTournament({required this.id, required this.status,  List<String> participantIds = const <String>[], required this.teamCount, this.thirdPlaceEnabled = false, required this.firstPlacePointsUnits, required this.secondPlacePointsUnits, required this.thirdPlacePointsUnits, required this.randomSeedHash, this.randomSeedReveal, required this.createdByUserId, @TimestampConverter() required this.createdAt, @TimestampConverter() this.completedAt}): _participantIds = participantIds;
+  const _BeerpongTournament({required this.id, required this.status,  List<String> participantIds = const <String>[], required this.teamCount, this.thirdPlaceEnabled = false, required this.firstPlacePointsUnits, required this.secondPlacePointsUnits, required this.thirdPlacePointsUnits, required this.randomSeedHash, this.randomSeedReveal, required this.createdByUserId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverter() this.completedAt}): _participantIds = participantIds;
   factory _BeerpongTournament.fromJson(Map<String, dynamic> json) => _$BeerpongTournamentFromJson(json);
 
 @override final  String id;
@@ -247,7 +247,7 @@ class _BeerpongTournament implements BeerpongTournament {
 @override final  String randomSeedHash;
 @override final  String? randomSeedReveal;
 @override final  String createdByUserId;
-@override@TimestampConverter() final  DateTime createdAt;
+@override@TimestampConverterOptimistic() final  DateTime createdAt;
 @override@TimestampConverter() final  DateTime? completedAt;
 
 /// Create a copy of BeerpongTournament
@@ -285,7 +285,7 @@ abstract mixin class _$BeerpongTournamentCopyWith<$Res> implements $BeerpongTour
   factory _$BeerpongTournamentCopyWith(_BeerpongTournament value, $Res Function(_BeerpongTournament) _then) = __$BeerpongTournamentCopyWithImpl;
 @override @useResult
 $Res call({
- String id, BeerpongTournamentStatus status, List<String> participantIds, int teamCount, bool thirdPlaceEnabled, int firstPlacePointsUnits, int secondPlacePointsUnits, int thirdPlacePointsUnits, String randomSeedHash, String? randomSeedReveal, String createdByUserId,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime? completedAt
+ String id, BeerpongTournamentStatus status, List<String> participantIds, int teamCount, bool thirdPlaceEnabled, int firstPlacePointsUnits, int secondPlacePointsUnits, int thirdPlacePointsUnits, String randomSeedHash, String? randomSeedReveal, String createdByUserId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverter() DateTime? completedAt
 });
 
 

@@ -49,8 +49,8 @@ abstract class Party with _$Party implements Document {
     String? activeChallengeId,
     String? activeTournamentId,
     @Default(partySchemaVersion) int schemaVersion,
-    @TimestampConverter() required DateTime createdAt,
-    @TimestampConverter() required DateTime updatedAt,
+    @TimestampConverterOptimistic() required DateTime createdAt,
+    @TimestampConverterOptimistic() required DateTime updatedAt,
   }) = _Party;
 
   factory Party.fromJson(Map<String, dynamic> json) => _$PartyFromJson(json);

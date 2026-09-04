@@ -85,11 +85,11 @@ _Party _$PartyFromJson(Map<String, dynamic> json) => _Party(
   activeChallengeId: json['activeChallengeId'] as String?,
   activeTournamentId: json['activeTournamentId'] as String?,
   schemaVersion: (json['schemaVersion'] as num?)?.toInt() ?? partySchemaVersion,
-  createdAt: const TimestampConverter().fromJson(
-    json['createdAt'] as Timestamp,
+  createdAt: const TimestampConverterOptimistic().fromJson(
+    json['createdAt'] as Timestamp?,
   ),
-  updatedAt: const TimestampConverter().fromJson(
-    json['updatedAt'] as Timestamp,
+  updatedAt: const TimestampConverterOptimistic().fromJson(
+    json['updatedAt'] as Timestamp?,
   ),
 );
 
@@ -109,8 +109,8 @@ Map<String, dynamic> _$PartyToJson(_Party instance) => <String, dynamic>{
   'activeChallengeId': instance.activeChallengeId,
   'activeTournamentId': instance.activeTournamentId,
   'schemaVersion': instance.schemaVersion,
-  'createdAt': const TimestampConverter().toJson(instance.createdAt),
-  'updatedAt': const TimestampConverter().toJson(instance.updatedAt),
+  'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
+  'updatedAt': const TimestampConverterOptimistic().toJson(instance.updatedAt),
 };
 
 const _$PartyStatusEnumMap = {

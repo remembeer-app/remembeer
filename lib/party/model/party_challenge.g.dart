@@ -20,28 +20,29 @@ _PartyChallenge _$PartyChallengeFromJson(
       (json['winnerIds'] as List<dynamic>?)?.map((e) => e as String).toList() ??
       const <String>[],
   createdByUserId: json['createdByUserId'] as String,
-  createdAt: const TimestampConverter().fromJson(
-    json['createdAt'] as Timestamp,
+  createdAt: const TimestampConverterOptimistic().fromJson(
+    json['createdAt'] as Timestamp?,
   ),
-  updatedAt: const TimestampConverter().fromJson(
-    json['updatedAt'] as Timestamp,
+  updatedAt: const TimestampConverterOptimistic().fromJson(
+    json['updatedAt'] as Timestamp?,
   ),
 );
 
-Map<String, dynamic> _$PartyChallengeToJson(_PartyChallenge instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'title': instance.title,
-      'instructions': instance.instructions,
-      'pointsUnits': instance.pointsUnits,
-      'startsAt': const TimestampConverter().toJson(instance.startsAt),
-      'endsAt': const TimestampConverter().toJson(instance.endsAt),
-      'status': _$PartyChallengeStatusEnumMap[instance.status]!,
-      'winnerIds': instance.winnerIds,
-      'createdByUserId': instance.createdByUserId,
-      'createdAt': const TimestampConverter().toJson(instance.createdAt),
-      'updatedAt': const TimestampConverter().toJson(instance.updatedAt),
-    };
+Map<String, dynamic> _$PartyChallengeToJson(
+  _PartyChallenge instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'title': instance.title,
+  'instructions': instance.instructions,
+  'pointsUnits': instance.pointsUnits,
+  'startsAt': const TimestampConverter().toJson(instance.startsAt),
+  'endsAt': const TimestampConverter().toJson(instance.endsAt),
+  'status': _$PartyChallengeStatusEnumMap[instance.status]!,
+  'winnerIds': instance.winnerIds,
+  'createdByUserId': instance.createdByUserId,
+  'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
+  'updatedAt': const TimestampConverterOptimistic().toJson(instance.updatedAt),
+};
 
 const _$PartyChallengeStatusEnumMap = {
   PartyChallengeStatus.active: 'active',

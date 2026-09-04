@@ -571,7 +571,7 @@ as DateTime?,
 /// @nodoc
 mixin _$Party {
 
- String get id; String get sessionId; PartyStatus get status;@TimestampConverter() DateTime get activatedAt; String get activatedByUserId;@TimestampConverter() DateTime? get archivedAt; PartyModuleSettings get moduleSettings; PartyQuestSchedule get questSchedule; String? get activeQuestId; String? get activeChallengeId; String? get activeTournamentId; int get schemaVersion;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
+ String get id; String get sessionId; PartyStatus get status;@TimestampConverter() DateTime get activatedAt; String get activatedByUserId;@TimestampConverter() DateTime? get archivedAt; PartyModuleSettings get moduleSettings; PartyQuestSchedule get questSchedule; String? get activeQuestId; String? get activeChallengeId; String? get activeTournamentId; int get schemaVersion;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;
 /// Create a copy of Party
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -609,7 +609,7 @@ abstract mixin class $PartyCopyWith<$Res>  {
   factory $PartyCopyWith(Party value, $Res Function(Party) _then) = _$PartyCopyWithImpl;
 @useResult
 $Res call({
- String id, String sessionId, PartyStatus status,@TimestampConverter() DateTime activatedAt, String activatedByUserId,@TimestampConverter() DateTime? archivedAt, PartyModuleSettings moduleSettings, PartyQuestSchedule questSchedule, String? activeQuestId, String? activeChallengeId, String? activeTournamentId, int schemaVersion,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id, String sessionId, PartyStatus status,@TimestampConverter() DateTime activatedAt, String activatedByUserId,@TimestampConverter() DateTime? archivedAt, PartyModuleSettings moduleSettings, PartyQuestSchedule questSchedule, String? activeQuestId, String? activeChallengeId, String? activeTournamentId, int schemaVersion,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt
 });
 
 
@@ -745,7 +745,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String sessionId,  PartyStatus status, @TimestampConverter()  DateTime activatedAt,  String activatedByUserId, @TimestampConverter()  DateTime? archivedAt,  PartyModuleSettings moduleSettings,  PartyQuestSchedule questSchedule,  String? activeQuestId,  String? activeChallengeId,  String? activeTournamentId,  int schemaVersion, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String sessionId,  PartyStatus status, @TimestampConverter()  DateTime activatedAt,  String activatedByUserId, @TimestampConverter()  DateTime? archivedAt,  PartyModuleSettings moduleSettings,  PartyQuestSchedule questSchedule,  String? activeQuestId,  String? activeChallengeId,  String? activeTournamentId,  int schemaVersion, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Party() when $default != null:
 return $default(_that.id,_that.sessionId,_that.status,_that.activatedAt,_that.activatedByUserId,_that.archivedAt,_that.moduleSettings,_that.questSchedule,_that.activeQuestId,_that.activeChallengeId,_that.activeTournamentId,_that.schemaVersion,_that.createdAt,_that.updatedAt);case _:
@@ -766,7 +766,7 @@ return $default(_that.id,_that.sessionId,_that.status,_that.activatedAt,_that.ac
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String sessionId,  PartyStatus status, @TimestampConverter()  DateTime activatedAt,  String activatedByUserId, @TimestampConverter()  DateTime? archivedAt,  PartyModuleSettings moduleSettings,  PartyQuestSchedule questSchedule,  String? activeQuestId,  String? activeChallengeId,  String? activeTournamentId,  int schemaVersion, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String sessionId,  PartyStatus status, @TimestampConverter()  DateTime activatedAt,  String activatedByUserId, @TimestampConverter()  DateTime? archivedAt,  PartyModuleSettings moduleSettings,  PartyQuestSchedule questSchedule,  String? activeQuestId,  String? activeChallengeId,  String? activeTournamentId,  int schemaVersion, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Party():
 return $default(_that.id,_that.sessionId,_that.status,_that.activatedAt,_that.activatedByUserId,_that.archivedAt,_that.moduleSettings,_that.questSchedule,_that.activeQuestId,_that.activeChallengeId,_that.activeTournamentId,_that.schemaVersion,_that.createdAt,_that.updatedAt);case _:
@@ -786,7 +786,7 @@ return $default(_that.id,_that.sessionId,_that.status,_that.activatedAt,_that.ac
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String sessionId,  PartyStatus status, @TimestampConverter()  DateTime activatedAt,  String activatedByUserId, @TimestampConverter()  DateTime? archivedAt,  PartyModuleSettings moduleSettings,  PartyQuestSchedule questSchedule,  String? activeQuestId,  String? activeChallengeId,  String? activeTournamentId,  int schemaVersion, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String sessionId,  PartyStatus status, @TimestampConverter()  DateTime activatedAt,  String activatedByUserId, @TimestampConverter()  DateTime? archivedAt,  PartyModuleSettings moduleSettings,  PartyQuestSchedule questSchedule,  String? activeQuestId,  String? activeChallengeId,  String? activeTournamentId,  int schemaVersion, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Party() when $default != null:
 return $default(_that.id,_that.sessionId,_that.status,_that.activatedAt,_that.activatedByUserId,_that.archivedAt,_that.moduleSettings,_that.questSchedule,_that.activeQuestId,_that.activeChallengeId,_that.activeTournamentId,_that.schemaVersion,_that.createdAt,_that.updatedAt);case _:
@@ -801,7 +801,7 @@ return $default(_that.id,_that.sessionId,_that.status,_that.activatedAt,_that.ac
 @JsonSerializable()
 
 class _Party implements Party {
-  const _Party({required this.id, required this.sessionId, required this.status, @TimestampConverter() required this.activatedAt, required this.activatedByUserId, @TimestampConverter() this.archivedAt, this.moduleSettings = const PartyModuleSettings(), this.questSchedule = const PartyQuestSchedule(), this.activeQuestId, this.activeChallengeId, this.activeTournamentId, this.schemaVersion = partySchemaVersion, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt});
+  const _Party({required this.id, required this.sessionId, required this.status, @TimestampConverter() required this.activatedAt, required this.activatedByUserId, @TimestampConverter() this.archivedAt, this.moduleSettings = const PartyModuleSettings(), this.questSchedule = const PartyQuestSchedule(), this.activeQuestId, this.activeChallengeId, this.activeTournamentId, this.schemaVersion = partySchemaVersion, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt});
   factory _Party.fromJson(Map<String, dynamic> json) => _$PartyFromJson(json);
 
 @override final  String id;
@@ -816,8 +816,8 @@ class _Party implements Party {
 @override final  String? activeChallengeId;
 @override final  String? activeTournamentId;
 @override@JsonKey() final  int schemaVersion;
-@override@TimestampConverter() final  DateTime createdAt;
-@override@TimestampConverter() final  DateTime updatedAt;
+@override@TimestampConverterOptimistic() final  DateTime createdAt;
+@override@TimestampConverterOptimistic() final  DateTime updatedAt;
 
 /// Create a copy of Party
 /// with the given fields replaced by the non-null parameter values.
@@ -854,7 +854,7 @@ abstract mixin class _$PartyCopyWith<$Res> implements $PartyCopyWith<$Res> {
   factory _$PartyCopyWith(_Party value, $Res Function(_Party) _then) = __$PartyCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String sessionId, PartyStatus status,@TimestampConverter() DateTime activatedAt, String activatedByUserId,@TimestampConverter() DateTime? archivedAt, PartyModuleSettings moduleSettings, PartyQuestSchedule questSchedule, String? activeQuestId, String? activeChallengeId, String? activeTournamentId, int schemaVersion,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id, String sessionId, PartyStatus status,@TimestampConverter() DateTime activatedAt, String activatedByUserId,@TimestampConverter() DateTime? archivedAt, PartyModuleSettings moduleSettings, PartyQuestSchedule questSchedule, String? activeQuestId, String? activeChallengeId, String? activeTournamentId, int schemaVersion,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt
 });
 
 

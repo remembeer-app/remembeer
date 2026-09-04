@@ -19,7 +19,7 @@ abstract class PartyMember with _$PartyMember implements Document {
     @Default(0) int scoreUnits,
     @Default(0) int drinkCount,
     @TimestampConverter() required DateTime joinedAt,
-    @TimestampConverter() required DateTime updatedAt,
+    @TimestampConverterOptimistic() required DateTime updatedAt,
   }) = _PartyMember;
 
   factory PartyMember.fromJson(Map<String, dynamic> json) =>

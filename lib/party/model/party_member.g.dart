@@ -22,27 +22,28 @@ _PartyMember _$PartyMemberFromJson(Map<String, dynamic> json) => _PartyMember(
   scoreUnits: (json['scoreUnits'] as num?)?.toInt() ?? 0,
   drinkCount: (json['drinkCount'] as num?)?.toInt() ?? 0,
   joinedAt: const TimestampConverter().fromJson(json['joinedAt'] as Timestamp),
-  updatedAt: const TimestampConverter().fromJson(
-    json['updatedAt'] as Timestamp,
+  updatedAt: const TimestampConverterOptimistic().fromJson(
+    json['updatedAt'] as Timestamp?,
   ),
 );
 
-Map<String, dynamic> _$PartyMemberToJson(_PartyMember instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'userId': instance.userId,
-      'selectedClass': _$DrinkCategoryEnumMap[instance.selectedClass],
-      'classVersion': instance.classVersion,
-      'classChangedAt': _$JsonConverterToJson<Timestamp, DateTime>(
-        instance.classChangedAt,
-        const TimestampConverter().toJson,
-      ),
-      'beerpongOptIn': instance.beerpongOptIn,
-      'scoreUnits': instance.scoreUnits,
-      'drinkCount': instance.drinkCount,
-      'joinedAt': const TimestampConverter().toJson(instance.joinedAt),
-      'updatedAt': const TimestampConverter().toJson(instance.updatedAt),
-    };
+Map<String, dynamic> _$PartyMemberToJson(
+  _PartyMember instance,
+) => <String, dynamic>{
+  'id': instance.id,
+  'userId': instance.userId,
+  'selectedClass': _$DrinkCategoryEnumMap[instance.selectedClass],
+  'classVersion': instance.classVersion,
+  'classChangedAt': _$JsonConverterToJson<Timestamp, DateTime>(
+    instance.classChangedAt,
+    const TimestampConverter().toJson,
+  ),
+  'beerpongOptIn': instance.beerpongOptIn,
+  'scoreUnits': instance.scoreUnits,
+  'drinkCount': instance.drinkCount,
+  'joinedAt': const TimestampConverter().toJson(instance.joinedAt),
+  'updatedAt': const TimestampConverterOptimistic().toJson(instance.updatedAt),
+};
 
 const _$DrinkCategoryEnumMap = {
   DrinkCategory.beer: 'beer',

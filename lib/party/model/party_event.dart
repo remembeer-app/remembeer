@@ -29,7 +29,7 @@ abstract class PartyEvent with _$PartyEvent implements Document {
     String? reversesEventId,
     String? actorUserId,
     @TimestampConverter() required DateTime occurredAt,
-    @TimestampConverter() required DateTime createdAt,
+    @TimestampConverterOptimistic() required DateTime createdAt,
     @Default(<String, Object?>{}) Map<String, Object?> payload,
   }) = _PartyEvent;
 
