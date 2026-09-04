@@ -32,6 +32,13 @@ class PartyService {
   Stream<PartyMember?> currentMemberStream(String sessionId) =>
       partyController.memberStream(sessionId, currentUserId);
 
+  Future<void> activateParty(String sessionId) async {
+    await partyController.activateParty(
+      sessionId: sessionId,
+      commandId: partyController.generateCommandId(),
+    );
+  }
+
   Stream<PartyState> stateStream(String sessionId) =>
       Rx.combineLatest2(
         sessionStream(sessionId),
@@ -49,7 +56,7 @@ class PartyService {
         return memberStream.map((member) {
           final access = !isMember
               ? PartyAccess.nonMember
-              : session.adminIds.contains(userId)
+              : session.userId == userId || session.adminIds.contains(userId)
               ? PartyAccess.admin
               : PartyAccess.member;
           final lifecycle =

@@ -21,6 +21,7 @@ _PartyMember _$PartyMemberFromJson(Map<String, dynamic> json) => _PartyMember(
   beerpongOptIn: json['beerpongOptIn'] as bool? ?? false,
   scoreUnits: (json['scoreUnits'] as num?)?.toInt() ?? 0,
   drinkCount: (json['drinkCount'] as num?)?.toInt() ?? 0,
+  isActive: json['isActive'] as bool? ?? true,
   joinedAt: const TimestampConverter().fromJson(json['joinedAt'] as Timestamp),
   updatedAt: const TimestampConverterOptimistic().fromJson(
     json['updatedAt'] as Timestamp?,
@@ -41,6 +42,7 @@ Map<String, dynamic> _$PartyMemberToJson(
   'beerpongOptIn': instance.beerpongOptIn,
   'scoreUnits': instance.scoreUnits,
   'drinkCount': instance.drinkCount,
+  'isActive': instance.isActive,
   'joinedAt': const TimestampConverter().toJson(instance.joinedAt),
   'updatedAt': const TimestampConverterOptimistic().toJson(instance.updatedAt),
 };

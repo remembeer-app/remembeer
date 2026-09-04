@@ -7,6 +7,8 @@ import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/party/constants.dart';
+import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_service.dart';
@@ -18,6 +20,7 @@ class EditSessionPage extends StatelessWidget {
   EditSessionPage({super.key, required this.sessionId});
 
   final _sessionService = get<SessionService>();
+  final _partyService = get<PartyService>();
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +87,10 @@ class EditSessionPage extends StatelessWidget {
   }
 
   Widget _buildPartyButton(BuildContext context, Session session) {
-    final isEligible = !session.isSoloSession && session.endedAt == null;
+    final isEligible =
+        !session.isSoloSession &&
+        session.endedAt == null &&
+        session.memberIds.length >= minPartyMemberCount;
 
     return SizedBox(
       width: double.infinity,
@@ -179,7 +185,7 @@ class EditSessionPage extends StatelessWidget {
           'be party admins.',
       submitButtonText: 'Enable Party Mode',
       onPressed: () async {
-        await _sessionService.turnSessionIntoParty(session);
+        await _partyService.activateParty(session.id);
         showSuccessNotification('Party mode enabled!');
         if (context.mounted) {
           PartyRoute(sessionId: session.id).go(context);

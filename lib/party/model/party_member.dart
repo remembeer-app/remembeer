@@ -18,6 +18,7 @@ abstract class PartyMember with _$PartyMember implements Document {
     @Default(false) bool beerpongOptIn,
     @Default(0) int scoreUnits,
     @Default(0) int drinkCount,
+    @Default(true) bool isActive,
     @TimestampConverter() required DateTime joinedAt,
     @TimestampConverterOptimistic() required DateTime updatedAt,
   }) = _PartyMember;

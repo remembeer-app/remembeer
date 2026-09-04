@@ -164,13 +164,6 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
     });
   }
 
-  Future<void> turnIntoPartyAtomic(String sessionId) {
-    return writeCollection.doc(sessionId).update({
-      isPartyField: true,
-      updatedAtField: FieldValue.serverTimestamp(),
-    });
-  }
-
   Future<void> addPicturesAtomic(String sessionId, List<String> pictureUrls) {
     return writeCollection.doc(sessionId).update({
       pictureUrlsFields: FieldValue.arrayUnion(pictureUrls),

@@ -98,6 +98,18 @@ class PartyController {
     commandId: commandId,
   );
 
+  Future<PartyCommandResult> syncMembership({
+    required String sessionId,
+    required String commandId,
+    required String action,
+    required String memberId,
+  }) => invokeCommand(
+    commandName: 'sync_party_membership',
+    sessionId: sessionId,
+    commandId: commandId,
+    data: {'action': action, 'memberId': memberId},
+  );
+
   Future<PartyCommandResult> setModuleSettings({
     required String sessionId,
     required String commandId,
@@ -157,9 +169,11 @@ class PartyController {
   Future<PartyCommandResult> archiveParty({
     required String sessionId,
     required String commandId,
+    required DateTime endedAt,
   }) => invokeCommand(
     commandName: 'archive_party',
     sessionId: sessionId,
     commandId: commandId,
+    data: {'endedAt': endedAt.toIso8601String()},
   );
 }

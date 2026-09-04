@@ -110,6 +110,7 @@ class IoCContainer {
           dateService: get<DateService>(),
           userService: get<UserService>(),
           notificationService: get<NotificationService>(),
+          partyController: get<PartyController>(),
         ),
       )
       ..registerSingleton(
