@@ -1,4 +1,4 @@
-"""Transactional admin challenge commands and scheduler-facing expiry.
+"""Transactional admin challenge commands.
 
 Handlers are intentionally undecorated for P21 to export. Notifications are
 dispatched only after authoritative state commits and are therefore best-effort.
@@ -22,7 +22,7 @@ from party_common import (
     require_string,
     run_idempotent_command,
 )
-from party_notifications import send_notification_to_users
+from party_notifications import party_notification_data, send_notification_to_users
 from party_scoring import (
     SCORE_UNITS_PER_POINT,
     create_award,
@@ -204,11 +204,11 @@ def create_admin_challenge_command(
             actor_user_id=actor_user_id,
             title=title,
             body=instructions,
-            data={
-                "type": "party_challenge_started",
-                "sessionId": session_id,
-                "challengeId": challenge_id,
-            },
+            data=party_notification_data(
+                "party_challenge_started",
+                session_id,
+                source_id=challenge_id,
+            ),
         )
     return result
 
@@ -318,11 +318,11 @@ def award_admin_challenge_winner_command(
             actor_user_id=actor_user_id,
             title="Challenge won",
             body=challenge_title,
-            data={
-                "type": "party_challenge_winner",
-                "sessionId": session_id,
-                "challengeId": challenge_id,
-            },
+            data=party_notification_data(
+                "party_challenge_winner",
+                session_id,
+                source_id=challenge_id,
+            ),
         )
     return result
 

@@ -21,6 +21,7 @@ from party_common import (
     require_string,
     run_idempotent_command,
 )
+from party_notifications import party_notification_data, send_notification_to_users
 from party_scoring import calculate_drink_score, deterministic_event_id
 
 PARTY_SCHEMA_VERSION = 1
@@ -62,6 +63,7 @@ def activate_party_command(
     db: Any,
     *,
     template_seed_provider: TemplateSeedProvider | None = None,
+    notification_dispatcher: Callable[..., Any] = send_notification_to_users,
     transaction_runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
     | None = None,
 ) -> Mapping[str, Any]:
@@ -69,8 +71,12 @@ def activate_party_command(
     data = require_object(getattr(request, "data", None))
     session_id = require_string(data, "sessionId", max_length=1_500)
     command_id = require_command_id(data)
+    did_activate = False
+    recipients: Sequence[str] = ()
+    session_name = "Party"
 
     def operation(transaction: Any) -> Mapping[str, Any]:
+        nonlocal did_activate, recipients, session_name
         session_ref = db.collection("sessions").document(session_id)
         party_ref = db.collection("parties").document(session_id)
         session_snapshot = transaction.get(session_ref)
@@ -108,6 +114,9 @@ def activate_party_command(
         template_seeds = list(seed_provider(actor_user_id))
         _validate_template_seeds(template_seeds)
         awards, member_totals = _initial_drink_awards(session, member_ids)
+        stored_name = session.get("name")
+        if isinstance(stored_name, str) and stored_name:
+            session_name = stored_name
 
         transaction.update(
             session_ref,
@@ -156,6 +165,8 @@ def activate_party_command(
                 party_ref.collection("events").document(event_id),
                 event,
             )
+        recipients = member_ids
+        did_activate = True
         return {
             "sessionId": session_id,
             "memberCount": len(member_ids),
@@ -163,7 +174,7 @@ def activate_party_command(
             "initialAwardCount": len(awards),
         }
 
-    return run_idempotent_command(
+    result = run_idempotent_command(
         db,
         party_id=session_id,
         command_id=command_id,
@@ -172,6 +183,16 @@ def activate_party_command(
         operation=operation,
         transaction_runner=transaction_runner,
     )
+    if did_activate:
+        notification_dispatcher(
+            db,
+            recipients,
+            actor_user_id=actor_user_id,
+            title="Party started",
+            body=f"{session_name} is now in Party Mode.",
+            data=party_notification_data("party_activated", session_id),
+        )
+    return result
 
 
 def sync_party_membership_command(
@@ -262,6 +283,7 @@ def archive_party_command(
     request: Any,
     db: Any,
     *,
+    notification_dispatcher: Callable[..., Any] = send_notification_to_users,
     transaction_runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
     | None = None,
 ) -> Mapping[str, Any]:
@@ -275,8 +297,11 @@ def archive_party_command(
             https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
             "endedAt must be an ISO-8601 string.",
         )
+    did_archive = False
+    recipients: Sequence[str] = ()
 
     def operation(transaction: Any) -> Mapping[str, Any]:
+        nonlocal did_archive, recipients
         context = load_party_context(
             transaction,
             db,
@@ -313,9 +338,11 @@ def archive_party_command(
                 "updatedAt": firestore.SERVER_TIMESTAMP,
             },
         )
+        recipients = _stored_string_list(context.session, "memberIds")
+        did_archive = True
         return {"sessionId": session_id, "status": "archived", "endedAt": ended_at}
 
-    return run_idempotent_command(
+    result = run_idempotent_command(
         db,
         party_id=session_id,
         command_id=command_id,
@@ -324,6 +351,16 @@ def archive_party_command(
         operation=operation,
         transaction_runner=transaction_runner,
     )
+    if did_archive:
+        notification_dispatcher(
+            db,
+            recipients,
+            actor_user_id=actor_user_id,
+            title="Party archived",
+            body="The final Party results are ready.",
+            data=party_notification_data("party_archived", session_id),
+        )
+    return result
 
 
 def _initial_drink_awards(
