@@ -13,6 +13,10 @@ import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/service/month_service.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
+import 'package:remembeer/party/controller/party_controller.dart';
+import 'package:remembeer/party/controller/party_event_controller.dart';
+import 'package:remembeer/party/controller/party_game_controller.dart';
+import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/service/session_picture_service.dart';
 import 'package:remembeer/session/service/session_service.dart';
@@ -54,7 +58,10 @@ class IoCContainer {
       ..registerSingleton(
         LeaderboardController(authService: get<AuthService>()),
       )
-      ..registerSingleton(SessionController(authService: get<AuthService>()));
+      ..registerSingleton(SessionController(authService: get<AuthService>()))
+      ..registerSingleton(PartyController())
+      ..registerSingleton(PartyEventController())
+      ..registerSingleton(PartyGameController());
   }
 
   static void _registerServices() {
@@ -103,6 +110,13 @@ class IoCContainer {
           dateService: get<DateService>(),
           userService: get<UserService>(),
           notificationService: get<NotificationService>(),
+        ),
+      )
+      ..registerSingleton(
+        PartyService(
+          authService: get<AuthService>(),
+          sessionController: get<SessionController>(),
+          partyController: get<PartyController>(),
         ),
       )
       ..registerSingleton(
