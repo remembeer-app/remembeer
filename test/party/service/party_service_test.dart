@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/model/party.dart';
@@ -25,6 +26,25 @@ void main() {
 
     expect(partyController.activatedSessionId, 'session-1');
     expect(partyController.activatedCommandId, 'command-1');
+  });
+
+  test('class selection delegates with a stable command id', () async {
+    final partyController = _FakePartyController(party: _party());
+    final service = PartyService(
+      authService: _FakeAuthService(),
+      sessionController: _FakeSessionController(
+        _session(memberIds: {'user-1'}, adminIds: const {}),
+      ),
+      partyController: partyController,
+    );
+
+    await service.selectClass('session-1', DrinkCategory.wine);
+    await service.setMemberClass('session-1', 'user-2', DrinkCategory.spirit);
+
+    expect(partyController.selectedClass, DrinkCategory.wine);
+    expect(partyController.changedMemberId, 'user-2');
+    expect(partyController.changedMemberClass, DrinkCategory.spirit);
+    expect(partyController.classCommandIds, everyElement('command-1'));
   });
 
   test('state identifies an active admin and current member', () async {
@@ -168,6 +188,10 @@ class _FakePartyController implements PartyController {
   var memberStreamCalls = 0;
   String? activatedSessionId;
   String? activatedCommandId;
+  DrinkCategory? selectedClass;
+  String? changedMemberId;
+  DrinkCategory? changedMemberClass;
+  final classCommandIds = <String>[];
 
   @override
   String generateCommandId() => 'command-1';
@@ -179,6 +203,30 @@ class _FakePartyController implements PartyController {
   }) async {
     activatedSessionId = sessionId;
     activatedCommandId = commandId;
+    return const PartyCommandResult({});
+  }
+
+  @override
+  Future<PartyCommandResult> selectPartyClass({
+    required String sessionId,
+    required String commandId,
+    required DrinkCategory selectedClass,
+  }) async {
+    this.selectedClass = selectedClass;
+    classCommandIds.add(commandId);
+    return const PartyCommandResult({});
+  }
+
+  @override
+  Future<PartyCommandResult> setPartyMemberClass({
+    required String sessionId,
+    required String commandId,
+    required String memberId,
+    required DrinkCategory selectedClass,
+  }) async {
+    changedMemberId = memberId;
+    changedMemberClass = selectedClass;
+    classCommandIds.add(commandId);
     return const PartyCommandResult({});
   }
 

@@ -77,6 +77,8 @@ class IoCContainer {
           locationService: get<LocationService>(),
           userStatsService: get<UserStatsService>(),
           badgeService: get<BadgeService>(),
+          drinkTypeController: get<DrinkTypeController>(),
+          partyController: get<PartyController>(),
         ),
       )
       ..registerSingleton(
