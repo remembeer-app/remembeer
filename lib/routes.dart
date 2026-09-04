@@ -458,7 +458,7 @@ class PartyTournamentRoute extends GoRouteData with $PartyTournamentRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BeerpongPage(tournamentId: tournamentId);
+    return BeerpongPage(sessionId: sessionId, tournamentId: tournamentId);
   }
 }
 

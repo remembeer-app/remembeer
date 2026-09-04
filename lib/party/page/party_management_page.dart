@@ -13,9 +13,11 @@ import 'package:remembeer/party/model/party_member.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
 import 'package:remembeer/party/page/party_profile_page.dart';
+import 'package:remembeer/party/service/beerpong_service.dart';
 import 'package:remembeer/party/service/party_challenge_service.dart';
 import 'package:remembeer/party/service/party_quest_service.dart';
 import 'package:remembeer/party/service/party_service.dart';
+import 'package:remembeer/party/widget/beerpong_management_section.dart';
 import 'package:remembeer/party/widget/challenge_card.dart';
 import 'package:remembeer/party/widget/party_module_settings.dart';
 import 'package:remembeer/party/widget/party_quest_management_section.dart';
@@ -35,6 +37,7 @@ class PartyManagementPage extends StatelessWidget {
     SessionService? sessionService,
     PartyChallengeService? challengeService,
     PartyQuestService? questService,
+    this.beerpongService,
     this.socialQuestSectionBuilder,
     this.beerpongSectionBuilder,
   }) : _partyService = partyService ?? get<PartyService>(),
@@ -58,6 +61,7 @@ class PartyManagementPage extends StatelessWidget {
   final SessionService _sessionService;
   final PartyChallengeService _challengeService;
   final PartyQuestService _questService;
+  final BeerpongService? beerpongService;
   final PartyManagementSectionBuilder? socialQuestSectionBuilder;
   final PartyManagementSectionBuilder? beerpongSectionBuilder;
 
@@ -124,10 +128,14 @@ class PartyManagementPage extends StatelessWidget {
           service: _challengeService,
         ),
       ],
-      if (state.party.moduleSettings.beerpongEnabled &&
-          beerpongSectionBuilder != null) ...[
+      if (state.party.moduleSettings.beerpongEnabled) ...[
         const Gap(24),
-        beerpongSectionBuilder!(context, state),
+        beerpongSectionBuilder?.call(context, state) ??
+            BeerpongManagementSection(
+              state: state,
+              service: beerpongService ?? get<BeerpongService>(),
+              partyMembersStream: _partyService.membersStream(sessionId),
+            ),
       ],
       const Gap(24),
       _buildMembers(context, state, partyMembers, users),

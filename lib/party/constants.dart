@@ -53,6 +53,13 @@ const minBeerpongTeamCount = 2;
 const maxBeerpongTeamCount = 16;
 const minBeerpongParticipantCount = 2;
 const maxBeerpongTeamNameLength = 30;
+const minBeerpongPlacementPoints = 1;
+const maxBeerpongPlacementPoints = 500;
+const defaultBeerpongFirstPlacePoints = 100;
+const defaultBeerpongSecondPlacePoints = 50;
+const defaultBeerpongThirdPlacePoints = 25;
+const beerpongWideBracketBreakpoint = 700.0;
+const beerpongBracketColumnWidth = 260.0;
 
 class PartyClassMetadata {
   const PartyClassMetadata({required this.category, required this.title});

@@ -31,6 +31,7 @@ dependencies:
   cached_network_image: ^4.0.0
   cloud_firestore: ^6.7.0
   cloud_functions: ^6.2.0
+  crypto: ^3.0.7
   cupertino_icons: ^1.0.9
   diacritic: ^0.1.6
   firebase_auth: ^6.4.0

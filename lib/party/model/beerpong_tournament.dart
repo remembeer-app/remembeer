@@ -21,6 +21,7 @@ abstract class BeerpongTournament
     required int firstPlacePointsUnits,
     required int secondPlacePointsUnits,
     required int thirdPlacePointsUnits,
+    @Default(0) int revision,
     required String randomSeedHash,
     String? randomSeedReveal,
     required String createdByUserId,

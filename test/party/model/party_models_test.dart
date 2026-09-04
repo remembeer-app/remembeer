@@ -149,6 +149,7 @@ void main() {
       firstPlacePointsUnits: 30000,
       secondPlacePointsUnits: 20000,
       thirdPlacePointsUnits: 10000,
+      revision: 4,
       randomSeedHash: 'hash',
       randomSeedReveal: 'seed',
       createdByUserId: 'admin-1',
