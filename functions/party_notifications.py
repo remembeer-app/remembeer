@@ -10,6 +10,46 @@ from typing import Any
 from firebase_admin import messaging
 from firebase_functions import logger
 
+PARTY_NOTIFICATION_DESTINATIONS = {
+    "party_activated": "activity",
+    "party_quest_started": "games",
+    "party_quest_completed": "activity",
+    "party_challenge_started": "games",
+    "party_challenge_winner": "activity",
+    "party_beerpong_enrollment": "games",
+    "party_beerpong_match_ready": "games",
+    "party_beerpong_match_result": "games",
+    "party_beerpong_completed": "ranking",
+    "party_archived": "activity",
+}
+
+
+def party_notification_data(
+    notification_type: str,
+    session_id: str,
+    *,
+    source_id: str | None = None,
+) -> Mapping[str, str]:
+    """Build the stable FCM data contract consumed by the Flutter client."""
+
+    destination = PARTY_NOTIFICATION_DESTINATIONS.get(notification_type)
+    if destination is None:
+        raise ValueError(f"Unsupported Party notification type: {notification_type}")
+    if not session_id:
+        raise ValueError("session_id must not be empty")
+    if source_id is not None and not source_id:
+        raise ValueError("source_id must not be empty")
+
+    data = {
+        "type": notification_type,
+        "sessionId": session_id,
+        "tab": destination,
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
+    }
+    if source_id is not None:
+        data["sourceId"] = source_id
+    return data
+
 
 def send_notification_to_user(
     db: Any,
