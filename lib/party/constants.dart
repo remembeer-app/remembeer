@@ -20,6 +20,7 @@ const partyClassBonusNumerator = 1;
 const partyClassBonusDenominator = 10;
 
 const partyEventPageSize = 25;
+const partyEventParticipantFilterLimit = 30;
 
 const minPartyTitleLength = 1;
 const maxPartyTitleLength = 80;

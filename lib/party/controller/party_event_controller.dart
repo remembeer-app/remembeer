@@ -32,8 +32,15 @@ class PartyEventController {
   Query<PartyEvent> eventsQuery({
     required String sessionId,
     Set<PartyEventKind> kinds = const {},
-    String? participantId,
+    Set<String> participantIds = const {},
   }) {
+    if (participantIds.length > partyEventParticipantFilterLimit) {
+      throw ArgumentError.value(
+        participantIds,
+        'participantIds',
+        'Firestore supports at most $partyEventParticipantFilterLimit values.',
+      );
+    }
     Query<PartyEvent> query = eventsReference(
       sessionId,
     ).orderBy('occurredAt', descending: true);
@@ -45,8 +52,16 @@ class PartyEventController {
         whereIn: kinds.map((kind) => kind.name).toList(),
       );
     }
-    if (participantId != null) {
-      query = query.where('participantIds', arrayContains: participantId);
+    if (participantIds.length == 1) {
+      query = query.where(
+        'participantIds',
+        arrayContains: participantIds.single,
+      );
+    } else if (participantIds.length > 1) {
+      query = query.where(
+        'participantIds',
+        arrayContainsAny: participantIds.toList(),
+      );
     }
     return query;
   }
@@ -54,13 +69,13 @@ class PartyEventController {
   Stream<List<PartyEvent>> eventsStream({
     required String sessionId,
     Set<PartyEventKind> kinds = const {},
-    String? participantId,
+    Set<String> participantIds = const {},
     int limit = partyEventPageSize,
   }) =>
       eventsQuery(
             sessionId: sessionId,
             kinds: kinds,
-            participantId: participantId,
+            participantIds: participantIds,
           )
           .limit(limit)
           .snapshots()
@@ -73,14 +88,14 @@ class PartyEventController {
   Future<PartyEventPage> fetchEventPage({
     required String sessionId,
     Set<PartyEventKind> kinds = const {},
-    String? participantId,
+    Set<String> participantIds = const {},
     DocumentSnapshot<PartyEvent>? startAfter,
     int pageSize = partyEventPageSize,
   }) async {
     var query = eventsQuery(
       sessionId: sessionId,
       kinds: kinds,
-      participantId: participantId,
+      participantIds: participantIds,
     );
     if (startAfter != null) {
       query = query.startAfterDocument(startAfter);
