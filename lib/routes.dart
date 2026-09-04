@@ -424,7 +424,7 @@ class PartyQuestRoute extends GoRouteData with $PartyQuestRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return QuestDetailPage(questId: questId);
+    return QuestDetailPage(sessionId: sessionId, questId: questId);
   }
 }
 
