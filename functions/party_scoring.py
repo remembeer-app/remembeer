@@ -53,6 +53,14 @@ class AwardInput:
     drink_count_delta: int | None = None
 
 
+@dataclass(frozen=True)
+class ReversalInput:
+    award_event_id: str
+    occurred_at: Any
+    actor_user_id: str | None = None
+    reason: str | None = None
+
+
 def calculate_drink_score(
     volume_ml: float | Decimal,
     alcohol_percentage: float | Decimal,
@@ -271,92 +279,153 @@ def create_reversal(
 ) -> EventWriteResult:
     """Create the sole immutable exact negation of an existing award."""
 
-    award_ref = party_ref.collection("events").document(award_event_id)
-    reverse_id = reversal_event_id(award_event_id)
-    reversal_ref = party_ref.collection("events").document(reverse_id)
-    award_snapshot = transaction.get(award_ref)
-    reversal_snapshot = transaction.get(reversal_ref)
-    if not award_snapshot.exists:
-        raise callable_error(
-            https_fn.FunctionsErrorCode.NOT_FOUND,
-            "Award event was not found.",
-        )
-    award = award_snapshot.to_dict() or {}
-    if award.get("kind") == "reversal" or award.get("reversesEventId") is not None:
-        raise callable_error(
-            https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-            "Only award events can be reversed.",
-        )
-    points_units = _stored_int(award, "pointsUnits")
-    if points_units <= 0:
-        raise callable_error(
-            https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-            "Only positive award events can be reversed.",
-        )
-
-    recipient_user_id = award.get("recipientUserId")
-    if not isinstance(recipient_user_id, str) or not recipient_user_id:
-        raise ValueError("Stored award recipientUserId is invalid")
-    member_ref = party_ref.collection("members").document(recipient_user_id)
-    member_snapshot = transaction.get(member_ref)
-    payload = {"reversedKind": award.get("kind")}
-    if reason is not None:
-        payload["reason"] = reason
-    reversal = {
-        "kind": "reversal",
-        "recipientUserId": recipient_user_id,
-        "participantIds": list(award.get("participantIds", [])),
-        "pointsUnits": -points_units,
-        "sourceCollection": award.get("sourceCollection"),
-        "sourceId": award.get("sourceId"),
-        "reversesEventId": award_event_id,
-        "actorUserId": actor_user_id,
-        "occurredAt": occurred_at,
-        "createdAt": firestore.SERVER_TIMESTAMP,
-        "payload": payload,
-    }
-    if reversal_snapshot.exists:
-        existing = reversal_snapshot.to_dict() or {}
-        immutable_reversal_fields = (
-            "kind",
-            "recipientUserId",
-            "participantIds",
-            "pointsUnits",
-            "sourceCollection",
-            "sourceId",
-            "reversesEventId",
-        )
-        if any(
-            existing.get(field) != reversal.get(field)
-            for field in immutable_reversal_fields
-        ):
-            raise callable_error(
-                https_fn.FunctionsErrorCode.ALREADY_EXISTS,
-                "Reversal event ID already exists with different content.",
+    return create_reversals(
+        transaction,
+        party_ref,
+        [
+            ReversalInput(
+                award_event_id=award_event_id,
+                occurred_at=occurred_at,
+                actor_user_id=actor_user_id,
+                reason=reason,
             )
-        return EventWriteResult(reverse_id, existing, False)
-    if not member_snapshot.exists:
-        raise callable_error(
-            https_fn.FunctionsErrorCode.NOT_FOUND,
-            "Party member was not found.",
+        ],
+    )[0]
+
+
+def create_reversals(
+    transaction: Any,
+    party_ref: Any,
+    reversals: Sequence[ReversalInput],
+) -> list[EventWriteResult]:
+    """Reverse multiple awards after performing every Firestore read first."""
+
+    award_ids = [item.award_event_id for item in reversals]
+    if len(set(award_ids)) != len(award_ids):
+        raise ValueError("Reversal award event IDs must be unique within a batch")
+
+    prepared: list[tuple[ReversalInput, Any, Any, Mapping[str, Any], str, int]] = []
+    member_refs: dict[str, Any] = {}
+    member_snapshots: dict[str, Any] = {}
+    for item in reversals:
+        award_ref = party_ref.collection("events").document(item.award_event_id)
+        reverse_id = reversal_event_id(item.award_event_id)
+        reversal_ref = party_ref.collection("events").document(reverse_id)
+        award_snapshot = transaction.get(award_ref)
+        reversal_snapshot = transaction.get(reversal_ref)
+        if not award_snapshot.exists:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.NOT_FOUND,
+                "Award event was not found.",
+            )
+        award = award_snapshot.to_dict() or {}
+        if award.get("kind") == "reversal" or award.get("reversesEventId") is not None:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "Only award events can be reversed.",
+            )
+        points_units = _stored_int(award, "pointsUnits")
+        if points_units <= 0:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "Only positive award events can be reversed.",
+            )
+        recipient_user_id = award.get("recipientUserId")
+        if not isinstance(recipient_user_id, str) or not recipient_user_id:
+            raise ValueError("Stored award recipientUserId is invalid")
+        if recipient_user_id not in member_refs:
+            member_ref = party_ref.collection("members").document(recipient_user_id)
+            member_refs[recipient_user_id] = member_ref
+            member_snapshots[recipient_user_id] = transaction.get(member_ref)
+        payload = {"reversedKind": award.get("kind")}
+        if item.reason is not None:
+            payload["reason"] = item.reason
+        reversal = {
+            "kind": "reversal",
+            "recipientUserId": recipient_user_id,
+            "participantIds": list(award.get("participantIds", [])),
+            "pointsUnits": -points_units,
+            "sourceCollection": award.get("sourceCollection"),
+            "sourceId": award.get("sourceId"),
+            "reversesEventId": item.award_event_id,
+            "actorUserId": item.actor_user_id,
+            "occurredAt": item.occurred_at,
+            "createdAt": firestore.SERVER_TIMESTAMP,
+            "payload": payload,
+        }
+        prepared.append(
+            (
+                item,
+                reversal_ref,
+                reversal_snapshot,
+                reversal,
+                recipient_user_id,
+                points_units,
+            )
         )
 
-    member = member_snapshot.to_dict() or {}
-    score_units = _stored_int(member, "scoreUnits")
-    drink_count = _stored_int(member, "drinkCount")
-    drink_delta = -1 if award.get("kind") == "drink" else 0
-    if drink_count + drink_delta < 0:
-        raise ValueError("Stored Party member drinkCount would become negative")
-    transaction.create(reversal_ref, reversal)
-    transaction.update(
-        member_ref,
-        {
-            "scoreUnits": score_units - points_units,
-            "drinkCount": drink_count + drink_delta,
-            "updatedAt": firestore.SERVER_TIMESTAMP,
-        },
+    results: list[EventWriteResult] = []
+    score_deltas: dict[str, int] = {}
+    drink_deltas: dict[str, int] = {}
+    pending_creates: list[tuple[Any, Mapping[str, Any]]] = []
+    immutable_fields = (
+        "kind",
+        "recipientUserId",
+        "participantIds",
+        "pointsUnits",
+        "sourceCollection",
+        "sourceId",
+        "reversesEventId",
     )
-    return EventWriteResult(reverse_id, reversal, True)
+    for item, reversal_ref, snapshot, reversal, recipient_id, points_units in prepared:
+        if snapshot.exists:
+            existing = snapshot.to_dict() or {}
+            if any(
+                existing.get(field) != reversal.get(field) for field in immutable_fields
+            ):
+                raise callable_error(
+                    https_fn.FunctionsErrorCode.ALREADY_EXISTS,
+                    "Reversal event ID already exists with different content.",
+                )
+            results.append(
+                EventWriteResult(reversal_ref.path.rsplit("/", 1)[-1], existing, False)
+            )
+            continue
+        pending_creates.append((reversal_ref, reversal))
+        score_deltas[recipient_id] = score_deltas.get(recipient_id, 0) - points_units
+        drink_deltas[recipient_id] = drink_deltas.get(recipient_id, 0) - (
+            1 if reversal["payload"]["reversedKind"] == "drink" else 0
+        )
+        results.append(
+            EventWriteResult(reversal_ref.path.rsplit("/", 1)[-1], reversal, True)
+        )
+
+    member_updates: list[tuple[str, int, int]] = []
+    for recipient_id, score_delta in score_deltas.items():
+        if not member_snapshots[recipient_id].exists:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.NOT_FOUND,
+                "Party member was not found.",
+            )
+        member = member_snapshots[recipient_id].to_dict() or {}
+        drink_count = _stored_int(member, "drinkCount") + drink_deltas[recipient_id]
+        if drink_count < 0:
+            raise ValueError("Stored Party member drinkCount would become negative")
+        member_updates.append((recipient_id, score_delta, drink_count))
+
+    for reversal_ref, reversal in pending_creates:
+        transaction.create(reversal_ref, reversal)
+    for recipient_id, score_delta, drink_count in member_updates:
+        member = member_snapshots[recipient_id].to_dict() or {}
+        transaction.update(
+            member_refs[recipient_id],
+            {
+                "scoreUnits": _stored_int(member, "scoreUnits") + score_delta,
+                "drinkCount": drink_count,
+                "updatedAt": firestore.SERVER_TIMESTAMP,
+            },
+        )
+    return results
 
 
 def _positive_decimal(value: float | Decimal, name: str) -> Decimal:
