@@ -10,7 +10,6 @@ from typing import Any
 
 from firebase_admin import firestore
 from firebase_functions import https_fn
-
 from party_common import (
     callable_error,
     load_party_context,
@@ -69,6 +68,7 @@ def set_party_module_settings_command(
     request: Any,
     db: Any,
     *,
+    now_provider: Callable[[], datetime] | None = None,
     transaction_runner: TransactionRunner | None = None,
 ) -> Mapping[str, Any]:
     actor_user_id, data, session_id, command_id = _command_input(request)
@@ -91,9 +91,42 @@ def set_party_module_settings_command(
                 https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
                 "The active challenge must be completed or cancelled first.",
             )
+        if (
+            not settings["socialQuestsEnabled"]
+            and context.party.get("activeQuestId") is not None
+        ):
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "The active social quest must expire or be cancelled first.",
+            )
+        schedule = context.party.get("questSchedule")
+        if not isinstance(schedule, Mapping):
+            schedule = {
+                "minIntervalMinutes": 15,
+                "maxIntervalMinutes": 45,
+                "defaultDurationMinutes": 15,
+                "nextQuestAt": None,
+            }
+        else:
+            schedule = dict(schedule)
+        was_enabled = (
+            isinstance(context.party.get("moduleSettings"), Mapping)
+            and context.party["moduleSettings"].get("socialQuestsEnabled") is True
+        )
+        if settings["socialQuestsEnabled"] and not was_enabled:
+            minimum = schedule.get("minIntervalMinutes", 15)
+            if isinstance(minimum, bool) or not isinstance(minimum, int):
+                minimum = 15
+            schedule["nextQuestAt"] = _now(now_provider) + timedelta(minutes=minimum)
+        elif not settings["socialQuestsEnabled"]:
+            schedule["nextQuestAt"] = None
         transaction.update(
             db.collection("parties").document(session_id),
-            {"moduleSettings": settings, "updatedAt": firestore.SERVER_TIMESTAMP},
+            {
+                "moduleSettings": settings,
+                "questSchedule": schedule,
+                "updatedAt": firestore.SERVER_TIMESTAMP,
+            },
         )
         return {"sessionId": session_id, "moduleSettings": settings}
 
