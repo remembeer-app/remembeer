@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from datetime import datetime
 from typing import Any
 
 import pytest
@@ -274,7 +273,7 @@ def test_archive_ends_session_and_clears_all_future_activity() -> None:
     )
 
     assert retry == result
-    assert db.store["sessions/session-a"]["endedAt"] == datetime(2026, 1, 2, 1)
+    assert db.store["sessions/session-a"]["endedAt"] == "2026-01-02T01:00:00"
     party = db.store["parties/session-a"]
     assert party["status"] == "archived"
     assert party["questSchedule"]["nextQuestAt"] is None

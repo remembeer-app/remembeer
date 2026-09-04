@@ -290,7 +290,7 @@ def archive_party_command(
                 https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 "endedAt is required when the Session is ongoing.",
             )
-        parsed_ended_at = _parse_end_time(ended_at, context.session.get("startedAt"))
+        _validate_end_time(ended_at, context.session.get("startedAt"))
         schedule = context.party.get("questSchedule", {})
         if not isinstance(schedule, Mapping):
             schedule = {}
@@ -299,10 +299,7 @@ def archive_party_command(
         party_ref = db.collection("parties").document(session_id)
         transaction.update(
             session_ref,
-            {
-                "endedAt": parsed_ended_at,
-                "updatedAt": firestore.SERVER_TIMESTAMP,
-            },
+            {"endedAt": ended_at, "updatedAt": firestore.SERVER_TIMESTAMP},
         )
         transaction.update(
             party_ref,
@@ -453,7 +450,7 @@ def _stored_string(document: Mapping[str, Any], field_name: str) -> str:
     return value
 
 
-def _parse_end_time(ended_at: str, started_at: Any) -> datetime:
+def _validate_end_time(ended_at: str, started_at: Any) -> None:
     try:
         parsed_end = datetime.fromisoformat(ended_at.replace("Z", "+00:00"))
         parsed_start = (
@@ -468,7 +465,6 @@ def _parse_end_time(ended_at: str, started_at: Any) -> datetime:
             https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
             "endedAt must be after the Session start time.",
         ) from error
-    return parsed_end
 
 
 def _invalid_stored_drink() -> https_fn.HttpsError:
