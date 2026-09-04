@@ -44,7 +44,7 @@ void main() {
         sessionId: 'session-1',
         commandId: 'command-1',
       ),
-      throwsStateError,
+      throwsAssertionError,
     );
   });
 
