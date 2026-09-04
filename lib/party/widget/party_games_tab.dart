@@ -10,8 +10,10 @@ import 'package:remembeer/party/controller/party_game_controller.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
+import 'package:remembeer/party/service/beerpong_service.dart';
 import 'package:remembeer/party/service/party_challenge_service.dart';
 import 'package:remembeer/party/service/party_quest_service.dart';
+import 'package:remembeer/party/widget/beerpong_games_section.dart';
 import 'package:remembeer/party/widget/challenge_card.dart';
 import 'package:remembeer/party/widget/party_class_selector.dart';
 import 'package:remembeer/party/widget/party_quest_games_section.dart';
@@ -33,6 +35,7 @@ class PartyGamesTab extends StatelessWidget {
     required this.onSelectClass,
     this.challengeService,
     this.questService,
+    this.beerpongService,
     this.socialQuestSectionBuilder,
     this.beerpongSectionBuilder,
   });
@@ -42,6 +45,7 @@ class PartyGamesTab extends StatelessWidget {
   final Future<void> Function(DrinkCategory selectedClass) onSelectClass;
   final PartyChallengeService? challengeService;
   final PartyQuestService? questService;
+  final BeerpongService? beerpongService;
   final PartyGamesSectionBuilder? socialQuestSectionBuilder;
   final PartyGamesSectionBuilder? beerpongSectionBuilder;
 
@@ -60,10 +64,13 @@ class PartyGamesTab extends StatelessWidget {
       if (settings.adminChallengesEnabled) _buildChallenges(context),
       if (settings.beerpongEnabled)
         beerpongSectionBuilder?.call(context, state, members) ??
-            const _ModulePlaceholder(
-              icon: Icons.sports_bar_outlined,
-              title: 'Beerpong',
-              text: 'Enrollment and tournament results will appear here.',
+            BeerpongGamesSection(
+              state: state,
+              members: members,
+              partyMembersStream: _beerpongService.partyMembersStream(
+                state.session.id,
+              ),
+              service: _beerpongService,
             ),
     ];
     final disabledCount = [
@@ -211,6 +218,9 @@ class PartyGamesTab extends StatelessWidget {
         partyController: get<PartyController>(),
         gameController: get<PartyGameController>(),
       );
+
+  BeerpongService get _beerpongService =>
+      beerpongService ?? get<BeerpongService>();
 }
 
 class _ModulePlaceholder extends StatelessWidget {
