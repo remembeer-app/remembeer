@@ -1,4 +1,5 @@
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/party/constants.dart';
 
 typedef PartyCommandInvoker =
@@ -30,18 +31,17 @@ class PartyCommandClient {
     if (rawResult == null) {
       return const PartyCommandResult({});
     }
-    if (rawResult is! Map<Object?, Object?>) {
-      throw StateError('Party command $commandName returned a non-map result.');
-    }
+
+    rawResult is Map<Object?, Object?> ||
+        never('Party command $commandName returned a non-map result.');
 
     final result = <String, Object?>{};
     for (final entry in rawResult.entries) {
       final key = entry.key;
-      if (key is! String) {
-        throw StateError(
-          'Party command $commandName returned a map with a non-string key.',
-        );
-      }
+      key is String ||
+          never(
+            'Party command $commandName returned a map with a non-string key.',
+          );
       result[key] = entry.value;
     }
     return PartyCommandResult(Map.unmodifiable(result));

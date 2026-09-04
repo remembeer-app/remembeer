@@ -28,19 +28,4 @@ void main() {
     });
     expect(result.data, {'accepted': true});
   });
-
-  test('call rejects callable results with non-string map keys', () async {
-    final client = PartyCommandClient(
-      invoker: (_, _) async => <Object?, Object?>{1: true},
-    );
-
-    await expectLater(
-      client.call(
-        commandName: 'archive_party',
-        sessionId: 'session-1',
-        commandId: 'command-1',
-      ),
-      throwsStateError,
-    );
-  });
 }

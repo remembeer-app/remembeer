@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
+import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/controller/party_command_client.dart';
@@ -50,10 +51,9 @@ class PartyController {
 
   Stream<Party> partyStream(String sessionId) =>
       partyReference(sessionId).snapshots().map((snapshot) {
-        final party = snapshot.data();
-        if (party == null) {
-          throw StateError('Party with session id $sessionId not found.');
-        }
+        final party =
+            snapshot.data() ??
+            never('Party with session id $sessionId not found.');
         return party;
       });
 
