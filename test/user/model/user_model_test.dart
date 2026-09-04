@@ -16,7 +16,6 @@ void main() {
 
     expect(user.accentColorKey, AccentColorKey.violet);
     expect(user.accentColor, accentColorPalette[AccentColorKey.violet]);
-    expect(user.isProfileComplete, isTrue);
     expect(user.toJson(), containsPair('accentColorKey', 'violet'));
   });
 
@@ -25,7 +24,6 @@ void main() {
 
     expect(user.accentColorKey, isNull);
     expect(user.accentColor, isNull);
-    expect(user.isProfileComplete, isFalse);
   });
 
   test('unknown persisted accent key is rejected', () {

@@ -1,7 +1,9 @@
-{ ... }:
+{ lib, ... }:
 
 {
   dotenv.disableHint = true;
+
+  env.ANDROID_AVD_HOME = lib.mkForce "${builtins.getEnv "HOME"}/.android/avd";
 
   android = {
     enable = true;
@@ -19,6 +21,8 @@
   };
 
   enterShell = ''
+    export ANDROID_AVD_HOME="$HOME/.android/avd"
+    mkdir -p "$ANDROID_AVD_HOME"
     unset LD_LIBRARY_PATH
   '';
 
@@ -27,16 +31,20 @@
   scripts.create-emulator.exec = ''
     set -euo pipefail
 
+    export ANDROID_AVD_HOME="$HOME/.android/avd"
+    mkdir -p "$ANDROID_AVD_HOME"
+
     printf 'no\n' | avdmanager create avd \
-      --name remembeer-api-36 \
+      --name pixel-6-pro-api-36 \
       --package 'system-images;android-36;google_apis_playstore;x86_64' \
       --device pixel_6_pro
     sed -i 's/^hw.keyboard=no$/hw.keyboard=yes/' \
-      "$ANDROID_AVD_HOME/remembeer-api-36.avd/config.ini"
+      "$ANDROID_AVD_HOME/pixel-6-pro-api-36.avd/config.ini"
   '';
 
   scripts.start-emulator.exec = ''
     exec env -u LD_LIBRARY_PATH \
-      emulator -avd remembeer-api-36 -gpu host "$@"
+      ANDROID_AVD_HOME="$HOME/.android/avd" \
+      emulator -avd pixel-6-pro-api-36 -gpu host "$@"
   '';
 }

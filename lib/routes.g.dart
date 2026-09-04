@@ -263,6 +263,11 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               factory: $UsernameSettingsRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'profile-details',
+              hasOverriddenOnExit: false,
+              factory: $ProfileDetailsSettingsRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'avatar',
               hasOverriddenOnExit: false,
               factory: $ChangeAvatarSettingsRoute._fromState,
@@ -1021,6 +1026,27 @@ mixin $UsernameSettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/username');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ProfileDetailsSettingsRoute on GoRouteData {
+  static ProfileDetailsSettingsRoute _fromState(GoRouterState state) =>
+      const ProfileDetailsSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/profile-details');
 
   @override
   void go(BuildContext context) => context.go(location);

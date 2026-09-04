@@ -126,6 +126,11 @@ class SettingsPage extends StatelessWidget {
         ),
         _divider,
         _buildSettingsCard(
+          title: 'Accent color',
+          onTap: () => const ProfileDetailsSettingsRoute().push<void>(context),
+        ),
+        _divider,
+        _buildSettingsCard(
           title: 'Change avatar',
           onTap: () => const ChangeAvatarSettingsRoute().push<void>(context),
         ),

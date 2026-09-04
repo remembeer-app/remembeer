@@ -1,8 +1,8 @@
-# P02: Required Profile Rollout And Editing
+# P02: Profile Accent Rollout And Editing
 
 ## Objective
 
-Assign an accent during registration, require existing users to complete a missing accent, and expose later editing.
+Assign an accent during registration, prompt existing users when it is missing, and expose later editing.
 
 ## Dependencies
 
@@ -10,7 +10,7 @@ Assign an accent during registration, require existing users to complete a missi
 
 ## References
 
-- `PARTY_MODE_PLAN.md`: Profile Completion
+- `PARTY_MODE_PLAN.md`: Profile Accents
 - Current auth, router, profile, and settings code under `lib/auth/`, `lib/routes.dart`, `lib/user/`, and `lib/user_settings/`
 - `/home/ondrej/projects/rozlucka/src/components/AuthForm.tsx`
 - `/home/ondrej/projects/rozlucka/src/components/ProfilePage.tsx`
@@ -18,30 +18,25 @@ Assign an accent during registration, require existing users to complete a missi
 ## Scope
 
 - Assign the deterministic accent from P01 during email and Google profile creation.
-- Add a required profile-completion page for authenticated users missing an accent.
-- Add router redirection without loops or flashes into protected app pages.
+- Show a non-blocking warning on the current user's profile when the accent is missing.
 - Add editable accent controls to the established profile/settings UI.
-- Add widget and routing tests for complete and incomplete users.
+- Add widget tests for accent selection and the missing-accent warning.
 
 ## Likely Files
 
 - Registration/login pages and auth service under `lib/auth/`
-- New profile-completion page
 - Profile/settings pages under `lib/user/` and `lib/user_settings/`
-- `lib/routes.dart` and generated `lib/routes.g.dart`
-- Auth/profile widget tests
+- Profile widget tests
 
 ## Deliverables
 
-- Complete registration and existing-user onboarding flows.
+- Deterministic registration defaults and an existing-user profile prompt.
 - Profile editing UI using existing form and notification patterns.
-- Route guard tests, including Google sign-in behavior.
 
 ## Acceptance Criteria
 
-- An authenticated incomplete user cannot enter normal app routes.
-- The completion route cannot redirect to itself in a loop.
 - New email and Google-created profiles have an accent.
+- Existing users missing an accent can use the app and see a profile warning.
 - Users can edit their accent later.
 - Invalid or absent choices cannot be submitted.
 
@@ -55,4 +50,4 @@ flutter analyze --fatal-warnings
 
 ## Coordination
 
-This task owns the first route changes. P08 must build on its resulting route tree rather than replacing it.
+P08 may build its Party route tree independently; this task does not add a profile-completion route.

@@ -39,6 +39,7 @@ import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
 import 'package:remembeer/user_settings/page/default_drink_page.dart';
 import 'package:remembeer/user_settings/page/drink_list_sort_page.dart';
 import 'package:remembeer/user_settings/page/end_of_day_page.dart';
+import 'package:remembeer/user_settings/page/profile_details_page.dart';
 import 'package:remembeer/user_settings/page/settings_page.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
 
@@ -174,6 +175,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             TypedGoRoute<DefaultDrinkSettingsRoute>(path: 'default-drink'),
             TypedGoRoute<DrinkSortSettingsRoute>(path: 'drink-sort'),
             TypedGoRoute<UsernameSettingsRoute>(path: 'username'),
+            TypedGoRoute<ProfileDetailsSettingsRoute>(path: 'profile-details'),
             TypedGoRoute<ChangeAvatarSettingsRoute>(path: 'avatar'),
             TypedGoRoute<BadgeVisibilityRoute>(path: 'badge-visibility'),
             TypedGoRoute<ChangePasswordRoute>(path: 'password'),
@@ -541,6 +543,16 @@ class UsernameSettingsRoute extends GoRouteData with $UsernameSettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const UserNamePage();
+  }
+}
+
+class ProfileDetailsSettingsRoute extends GoRouteData
+    with $ProfileDetailsSettingsRoute {
+  const ProfileDetailsSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return ProfileDetailsPage();
   }
 }
 
