@@ -99,6 +99,23 @@ def set_party_module_settings_command(
                 https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
                 "The active social quest must expire or be cancelled first.",
             )
+        active_tournament_id = context.party.get("activeTournamentId")
+        if not settings["beerpongEnabled"] and isinstance(active_tournament_id, str):
+            tournament_snapshot = transaction.get(
+                db.collection("parties")
+                .document(session_id)
+                .collection("tournaments")
+                .document(active_tournament_id)
+            )
+            tournament = tournament_snapshot.to_dict() or {}
+            if tournament_snapshot.exists and tournament.get("status") in {
+                "enrollment",
+                "active",
+            }:
+                raise callable_error(
+                    https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                    "The current beerpong tournament must finish first.",
+                )
         schedule = context.party.get("questSchedule")
         if not isinstance(schedule, Mapping):
             schedule = {
