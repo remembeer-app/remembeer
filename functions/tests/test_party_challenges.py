@@ -228,7 +228,9 @@ def test_create_sets_deadline_active_pointer_notifies_once_and_is_idempotent() -
     assert notifications.calls[0]["data"] == {
         "type": "party_challenge_started",
         "sessionId": "party-a",
-        "challengeId": "challenge-a",
+        "tab": "games",
+        "sourceId": "challenge-a",
+        "click_action": "FLUTTER_NOTIFICATION_CLICK",
     }
 
 
