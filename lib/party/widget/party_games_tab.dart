@@ -4,9 +4,6 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/constants.dart';
-import 'package:remembeer/party/controller/party_controller.dart';
-import 'package:remembeer/party/controller/party_event_controller.dart';
-import 'package:remembeer/party/controller/party_game_controller.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
@@ -205,19 +202,10 @@ class PartyGamesTab extends StatelessWidget {
   }
 
   PartyChallengeService get _challengeService =>
-      challengeService ??
-      PartyChallengeService(
-        partyController: get<PartyController>(),
-        gameController: get<PartyGameController>(),
-        eventController: get<PartyEventController>(),
-      );
+      challengeService ?? get<PartyChallengeService>();
 
   PartyQuestService get _questService =>
-      questService ??
-      PartyQuestService(
-        partyController: get<PartyController>(),
-        gameController: get<PartyGameController>(),
-      );
+      questService ?? get<PartyQuestService>();
 
   BeerpongService get _beerpongService =>
       beerpongService ?? get<BeerpongService>();

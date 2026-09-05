@@ -7,9 +7,6 @@ import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/party/controller/party_controller.dart';
-import 'package:remembeer/party/controller/party_event_controller.dart';
-import 'package:remembeer/party/controller/party_game_controller.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/service/party_challenge_service.dart';
@@ -28,13 +25,7 @@ class ChallengeDetailPage extends StatefulWidget {
     PartyChallengeService? challengeService,
   }) : partyService = partyService ?? get<PartyService>(),
        sessionService = sessionService ?? get<SessionService>(),
-       challengeService =
-           challengeService ??
-           PartyChallengeService(
-             partyController: get<PartyController>(),
-             gameController: get<PartyGameController>(),
-             eventController: get<PartyEventController>(),
-           );
+       challengeService = challengeService ?? get<PartyChallengeService>();
 
   final String sessionId;
   final String challengeId;

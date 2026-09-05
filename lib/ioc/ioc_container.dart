@@ -17,6 +17,8 @@ import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/controller/party_event_controller.dart';
 import 'package:remembeer/party/controller/party_game_controller.dart';
 import 'package:remembeer/party/service/beerpong_service.dart';
+import 'package:remembeer/party/service/party_challenge_service.dart';
+import 'package:remembeer/party/service/party_quest_service.dart';
 import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/service/session_picture_service.dart';
@@ -121,6 +123,19 @@ class IoCContainer {
           authService: get<AuthService>(),
           sessionController: get<SessionController>(),
           partyController: get<PartyController>(),
+        ),
+      )
+      ..registerSingleton(
+        PartyChallengeService(
+          partyController: get<PartyController>(),
+          gameController: get<PartyGameController>(),
+          eventController: get<PartyEventController>(),
+        ),
+      )
+      ..registerSingleton(
+        PartyQuestService(
+          partyController: get<PartyController>(),
+          gameController: get<PartyGameController>(),
         ),
       )
       ..registerSingleton(
