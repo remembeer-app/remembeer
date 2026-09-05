@@ -1,19 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/party/constants.dart';
-import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/model/party_event_page.dart';
 
 class PartyEventController {
-  PartyEventController({
-    FirebaseFirestore? firestore,
-    PartyCommandClient? commandClient,
-  }) : _firestore = firestore,
-       _commandClient = commandClient ?? PartyCommandClient();
+  PartyEventController({FirebaseFirestore? firestore}) : _firestore = firestore;
 
   final FirebaseFirestore? _firestore;
-  final PartyCommandClient _commandClient;
 
   FirebaseFirestore get _database => _firestore ?? FirebaseFirestore.instance;
 
@@ -128,15 +122,4 @@ class PartyEventController {
       hasMore: hasMore,
     );
   }
-
-  Future<PartyCommandResult> reversePartyEvent({
-    required String sessionId,
-    required String commandId,
-    required String eventId,
-  }) => _commandClient.call(
-    commandName: 'reverse_party_event',
-    sessionId: sessionId,
-    commandId: commandId,
-    data: {'eventId': eventId},
-  );
 }

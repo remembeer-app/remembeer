@@ -5,9 +5,6 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/constants.dart';
-import 'package:remembeer/party/controller/party_controller.dart';
-import 'package:remembeer/party/controller/party_event_controller.dart';
-import 'package:remembeer/party/controller/party_game_controller.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_member.dart';
 import 'package:remembeer/party/model/party_state.dart';
@@ -42,19 +39,8 @@ class PartyManagementPage extends StatelessWidget {
     this.beerpongSectionBuilder,
   }) : _partyService = partyService ?? get<PartyService>(),
        _sessionService = sessionService ?? get<SessionService>(),
-       _challengeService =
-           challengeService ??
-           PartyChallengeService(
-             partyController: get<PartyController>(),
-             gameController: get<PartyGameController>(),
-             eventController: get<PartyEventController>(),
-           ),
-       _questService =
-           questService ??
-           PartyQuestService(
-             partyController: get<PartyController>(),
-             gameController: get<PartyGameController>(),
-           );
+       _challengeService = challengeService ?? get<PartyChallengeService>(),
+       _questService = questService ?? get<PartyQuestService>();
 
   final String sessionId;
   final PartyService _partyService;

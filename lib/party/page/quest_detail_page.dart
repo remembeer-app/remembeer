@@ -6,8 +6,6 @@ import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/party/controller/party_controller.dart';
-import 'package:remembeer/party/controller/party_game_controller.dart';
 import 'package:remembeer/party/model/party_quest.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/service/party_quest_service.dart';
@@ -26,12 +24,7 @@ class QuestDetailPage extends StatefulWidget {
     PartyQuestService? questService,
   }) : partyService = partyService ?? get<PartyService>(),
        sessionService = sessionService ?? get<SessionService>(),
-       questService =
-           questService ??
-           PartyQuestService(
-             partyController: get<PartyController>(),
-             gameController: get<PartyGameController>(),
-           );
+       questService = questService ?? get<PartyQuestService>();
 
   final String sessionId;
   final String questId;
