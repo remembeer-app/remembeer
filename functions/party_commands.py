@@ -10,7 +10,6 @@ from typing import Any
 
 from firebase_admin import firestore
 from firebase_functions import https_fn
-
 from party_common import (
     callable_error,
     load_party_context,
@@ -27,6 +26,7 @@ from party_quest_catalog import built_in_template_seed_documents
 from party_scoring import calculate_drink_score, deterministic_event_id
 
 PARTY_SCHEMA_VERSION = 1
+PARTY_CLASSES = {"beer", "cider", "cocktail", "spirit", "wine"}
 DEFAULT_QUEST_MIN_INTERVAL_MINUTES = 15
 DEFAULT_QUEST_MAX_INTERVAL_MINUTES = 45
 DEFAULT_QUEST_DURATION_MINUTES = 15
@@ -58,6 +58,18 @@ def sync_party_membership(request: Any) -> Mapping[str, Any]:
     """Callable handler for Party-aware Session member additions/departures."""
 
     return sync_party_membership_command(request, firestore.client())
+
+
+def select_party_class(request: Any) -> Mapping[str, Any]:
+    """Callable handler for a member's initial Party class selection."""
+
+    return select_party_class_command(request, firestore.client())
+
+
+def set_party_member_class(request: Any) -> Mapping[str, Any]:
+    """Callable handler for an admin changing a Party member's class."""
+
+    return set_party_member_class_command(request, firestore.client())
 
 
 def activate_party_command(
@@ -285,6 +297,131 @@ def sync_party_membership_command(
     )
 
 
+def select_party_class_command(
+    request: Any,
+    db: Any,
+    *,
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
+    | None = None,
+) -> Mapping[str, Any]:
+    actor_user_id, data, session_id, command_id = _class_command_input(request)
+    selected_class = _selected_class(data)
+
+    def operation(transaction: Any) -> Mapping[str, Any]:
+        load_party_context(transaction, db, session_id, actor_user_id)
+        member_ref = (
+            db.collection("parties")
+            .document(session_id)
+            .collection("members")
+            .document(actor_user_id)
+        )
+        member_snapshot = transaction.get(member_ref)
+        member = member_snapshot.to_dict() or {}
+        if not member_snapshot.exists or member.get("isActive") is not True:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "Only active Party members can select a class.",
+            )
+        if member.get("selectedClass") is not None:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "A selected class can only be changed by a Party admin.",
+            )
+        version = _stored_nonnegative_int(member, "classVersion") + 1
+        transaction.update(
+            member_ref,
+            {
+                "selectedClass": selected_class,
+                "classVersion": version,
+                "classChangedAt": firestore.SERVER_TIMESTAMP,
+                "updatedAt": firestore.SERVER_TIMESTAMP,
+            },
+        )
+        return {
+            "sessionId": session_id,
+            "memberId": actor_user_id,
+            "selectedClass": selected_class,
+            "classVersion": version,
+        }
+
+    return run_idempotent_command(
+        db,
+        party_id=session_id,
+        command_id=command_id,
+        command_name="select_party_class",
+        actor_user_id=actor_user_id,
+        operation=operation,
+        transaction_runner=transaction_runner,
+    )
+
+
+def set_party_member_class_command(
+    request: Any,
+    db: Any,
+    *,
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
+    | None = None,
+) -> Mapping[str, Any]:
+    actor_user_id, data, session_id, command_id = _class_command_input(request)
+    member_id = require_string(data, "memberId", max_length=1_500)
+    selected_class = _selected_class(data)
+
+    def operation(transaction: Any) -> Mapping[str, Any]:
+        load_party_context(
+            transaction,
+            db,
+            session_id,
+            actor_user_id,
+            require_admin=True,
+        )
+        member_ref = (
+            db.collection("parties")
+            .document(session_id)
+            .collection("members")
+            .document(member_id)
+        )
+        member_snapshot = transaction.get(member_ref)
+        member = member_snapshot.to_dict() or {}
+        if not member_snapshot.exists or member.get("isActive") is not True:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "Only active Party members can be assigned a class.",
+            )
+        current_class = member.get("selectedClass")
+        version = _stored_nonnegative_int(member, "classVersion")
+        if current_class != selected_class:
+            version += 1
+            transaction.update(
+                member_ref,
+                {
+                    "selectedClass": selected_class,
+                    "classVersion": version,
+                    "classChangedAt": firestore.SERVER_TIMESTAMP,
+                    "updatedAt": firestore.SERVER_TIMESTAMP,
+                },
+            )
+        return {
+            "sessionId": session_id,
+            "memberId": member_id,
+            "selectedClass": selected_class,
+            "classVersion": version,
+        }
+
+    return run_idempotent_command(
+        db,
+        party_id=session_id,
+        command_id=command_id,
+        command_name="set_party_member_class",
+        actor_user_id=actor_user_id,
+        operation=operation,
+        transaction_runner=transaction_runner,
+    )
+
+
 def archive_party_command(
     request: Any,
     db: Any,
@@ -486,6 +623,39 @@ def _stored_string_list(document: Mapping[str, Any], field_name: str) -> list[st
             f"Stored {field_name} is invalid.",
         )
     return list(dict.fromkeys(value))
+
+
+def _class_command_input(
+    request: Any,
+) -> tuple[str, Mapping[str, Any], str, str]:
+    actor_user_id = require_auth(request)
+    data = require_object(getattr(request, "data", None))
+    return (
+        actor_user_id,
+        data,
+        require_string(data, "sessionId", max_length=1_500),
+        require_command_id(data),
+    )
+
+
+def _selected_class(data: Mapping[str, Any]) -> str:
+    selected_class = require_string(data, "selectedClass", max_length=16)
+    if selected_class not in PARTY_CLASSES:
+        raise callable_error(
+            https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            "selectedClass is not a supported Party class.",
+        )
+    return selected_class
+
+
+def _stored_nonnegative_int(document: Mapping[str, Any], field_name: str) -> int:
+    value = document.get(field_name)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise callable_error(
+            https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+            f"Stored {field_name} is invalid.",
+        )
+    return value
 
 
 def _stored_string(document: Mapping[str, Any], field_name: str) -> str:

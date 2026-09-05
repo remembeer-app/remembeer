@@ -3,12 +3,14 @@ from typing import Any
 
 import pytest
 from firebase_functions import https_fn
-
 from party_commands import (
     activate_party_command,
     archive_party_command,
+    select_party_class_command,
+    set_party_member_class_command,
     sync_party_membership_command,
 )
+
 from tests.fakes import Database, Transaction
 
 
@@ -263,6 +265,127 @@ def test_active_party_membership_adds_defaults_and_preserves_departed_score() ->
     assert added["scoreUnits"] == 0
     assert added["drinkCount"] == 0
     assert added["isActive"] is True
+
+
+def test_member_selects_initial_class_once_and_retry_is_idempotent() -> None:
+    db = Database(
+        {
+            "sessions/session-a": _session(isParty=True),
+            "parties/session-a": _active_party(),
+            "parties/session-a/members/member": {
+                "userId": "member",
+                "selectedClass": None,
+                "classVersion": 0,
+                "isActive": True,
+            },
+        }
+    )
+    request = Request(
+        Auth("member"),
+        {
+            "sessionId": "session-a",
+            "commandId": "select-class-a",
+            "selectedClass": "beer",
+        },
+    )
+    transaction = Transaction(db.store)
+
+    result = select_party_class_command(
+        request,
+        db,
+        transaction_runner=_runner(transaction),
+    )
+    retry = select_party_class_command(
+        request,
+        db,
+        transaction_runner=_runner(transaction),
+    )
+
+    assert retry == result
+    assert result["classVersion"] == 1
+    member = db.store["parties/session-a/members/member"]
+    assert member["selectedClass"] == "beer"
+    assert member["classVersion"] == 1
+
+    with pytest.raises(https_fn.HttpsError) as error:
+        select_party_class_command(
+            Request(
+                Auth("member"),
+                {
+                    "sessionId": "session-a",
+                    "commandId": "select-class-b",
+                    "selectedClass": "wine",
+                },
+            ),
+            db,
+            transaction_runner=_runner(Transaction(db.store)),
+        )
+    assert error.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
+
+
+def test_admin_class_change_is_authorized_versioned_and_archive_safe() -> None:
+    db = Database(
+        {
+            "sessions/session-a": _session(isParty=True),
+            "parties/session-a": _active_party(),
+            "parties/session-a/members/member": {
+                "userId": "member",
+                "selectedClass": "beer",
+                "classVersion": 2,
+                "isActive": True,
+            },
+        }
+    )
+
+    result = set_party_member_class_command(
+        Request(
+            Auth("admin"),
+            {
+                "sessionId": "session-a",
+                "commandId": "admin-class-a",
+                "memberId": "member",
+                "selectedClass": "wine",
+            },
+        ),
+        db,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+
+    assert result["classVersion"] == 3
+    assert db.store["parties/session-a/members/member"]["selectedClass"] == "wine"
+
+    with pytest.raises(https_fn.HttpsError) as unauthorized:
+        set_party_member_class_command(
+            Request(
+                Auth("member"),
+                {
+                    "sessionId": "session-a",
+                    "commandId": "member-class-a",
+                    "memberId": "member",
+                    "selectedClass": "cider",
+                },
+            ),
+            db,
+            transaction_runner=_runner(Transaction(db.store)),
+        )
+    assert unauthorized.value.code == https_fn.FunctionsErrorCode.PERMISSION_DENIED
+
+    db.store["parties/session-a"]["status"] = "archived"
+    with pytest.raises(https_fn.HttpsError) as archived:
+        set_party_member_class_command(
+            Request(
+                Auth("admin"),
+                {
+                    "sessionId": "session-a",
+                    "commandId": "archived-class-a",
+                    "memberId": "member",
+                    "selectedClass": "cider",
+                },
+            ),
+            db,
+            transaction_runner=_runner(Transaction(db.store)),
+        )
+    assert archived.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
 
 
 def test_archive_ends_session_and_clears_all_future_activity() -> None:
