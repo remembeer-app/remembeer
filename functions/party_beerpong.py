@@ -960,7 +960,7 @@ def _collection_documents(
 ) -> list[tuple[Any, Mapping[str, Any]]]:
     return [
         (snapshot.reference, snapshot.to_dict() or {})
-        for snapshot in transaction.get(collection)
+        for snapshot in collection.stream(transaction=transaction)
     ]
 
 

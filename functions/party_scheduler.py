@@ -435,7 +435,7 @@ def _stored_optional_strings(document: Mapping[str, Any], field: str) -> set[str
 
 
 def _transaction_collection(transaction: Any, collection: Any) -> list[Any]:
-    return list(transaction.get(collection))
+    return list(collection.stream(transaction=transaction))
 
 
 def _quest_id(due_at: datetime) -> str:
