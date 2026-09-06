@@ -225,7 +225,7 @@ class PartyController {
   }) => {
     'drinkId': drink.id,
     'drinkTypeId': drinkTypeId,
-    'consumedAt': drink.consumedAt.toUtc().toIso8601String(),
+    'consumedAt': drink.consumedAt.toIso8601String(),
     'volumeInMilliliters': drink.volumeInMilliliters,
     'location': switch (drink.location) {
       final location? => {

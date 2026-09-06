@@ -84,7 +84,7 @@ void main() {
     expect(invokedData, {
       'drinkId': 'drink-1',
       'drinkTypeId': 'type-1',
-      'consumedAt': drink.consumedAt.toUtc().toIso8601String(),
+      'consumedAt': drink.consumedAt.toIso8601String(),
       'volumeInMilliliters': 200,
       'location': {'latitude': 49.2, 'longitude': 16.6},
       'sessionId': 'party-1',
