@@ -182,8 +182,12 @@ def load_party_context(
 ) -> PartyCommandContext:
     """Read and authorize a Session-backed Party inside ``transaction``."""
 
-    session_snapshot = transaction.get(db.collection("sessions").document(party_id))
-    party_snapshot = transaction.get(db.collection("parties").document(party_id))
+    session_snapshot = db.collection("sessions").document(party_id).get(
+        transaction=transaction
+    )
+    party_snapshot = db.collection("parties").document(party_id).get(
+        transaction=transaction
+    )
     if not session_snapshot.exists or not party_snapshot.exists:
         raise callable_error(
             https_fn.FunctionsErrorCode.NOT_FOUND,
@@ -216,7 +220,7 @@ def read_command_receipt(
     command_name: str,
     actor_user_id: str,
 ) -> Mapping[str, Any] | None:
-    snapshot = transaction.get(receipt_ref)
+    snapshot = receipt_ref.get(transaction=transaction)
     if not snapshot.exists:
         return None
     receipt = snapshot.to_dict() or {}

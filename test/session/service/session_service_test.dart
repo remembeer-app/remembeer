@@ -22,15 +22,13 @@ void main() {
     expect(partyController.lastCommandId, 'command-1');
   });
 
-  test('session with fewer than two members cannot become a Party', () async {
+  test('single-member session can become a Party', () async {
     final partyController = _FakePartyController();
     final service = _service(partyController);
 
-    expect(
-      () => service.turnSessionIntoParty(_session(memberIds: const {'admin'})),
-      throwsAssertionError,
-    );
-    expect(partyController.activatedSessionId, isNull);
+    await service.turnSessionIntoParty(_session(memberIds: const {'admin'}));
+
+    expect(partyController.activatedSessionId, 'session-1');
   });
 
   test(

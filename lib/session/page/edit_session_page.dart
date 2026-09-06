@@ -7,7 +7,6 @@ import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/model/session.dart';
@@ -87,10 +86,7 @@ class EditSessionPage extends StatelessWidget {
   }
 
   Widget _buildPartyButton(BuildContext context, Session session) {
-    final isEligible =
-        !session.isSoloSession &&
-        session.endedAt == null &&
-        session.memberIds.length >= minPartyMemberCount;
+    final isEligible = !session.isSoloSession && session.endedAt == null;
 
     return SizedBox(
       width: double.infinity,

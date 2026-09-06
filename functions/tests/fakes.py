@@ -30,7 +30,8 @@ class DocumentReference:
     def collection(self, name: str) -> "CollectionReference":
         return CollectionReference(self.store, f"{self.path}/{name}")
 
-    def get(self) -> Snapshot:
+    def get(self, *, transaction: Any = None) -> Snapshot:
+        del transaction
         return Snapshot(self.store.get(self.path), self)
 
     @property
