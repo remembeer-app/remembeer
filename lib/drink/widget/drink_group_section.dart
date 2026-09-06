@@ -118,6 +118,11 @@ class _DrinkGroupSectionState extends State<DrinkGroupSection> {
   }
 
   bool _shouldAcceptDrink(DrinkWithSessionId dragData) {
+    if (dragData.isParty ||
+        (widget.isSharedSession && widget.sessions.first.isParty)) {
+      return false;
+    }
+
     // Don't accept if the drink is already in one of our sessions
     for (final session in widget.sessions) {
       if (dragData.originalSessionId == session.id) {

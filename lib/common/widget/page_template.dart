@@ -9,6 +9,7 @@ class PageTemplate extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Color? appBarBackgroundColor;
   final Color? appBarForegroundColor;
+  final List<Widget>? actions;
 
   const PageTemplate({
     super.key,
@@ -18,6 +19,7 @@ class PageTemplate extends StatelessWidget {
     this.padding = _defaultPadding,
     this.appBarBackgroundColor,
     this.appBarForegroundColor,
+    this.actions,
   });
 
   @override
@@ -31,6 +33,7 @@ class PageTemplate extends StatelessWidget {
               foregroundColor: appBarForegroundColor,
               centerTitle: true,
               title: title,
+              actions: actions,
             )
           : null,
       body: SafeArea(

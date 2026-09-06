@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/common/action/notifications.dart';
@@ -8,9 +9,13 @@ import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/drink/constants.dart';
 import 'package:remembeer/drink/model/drink.dart';
 import 'package:remembeer/drink/model/drink_create.dart';
+import 'package:remembeer/drink/model/party_drink_command_result.dart';
 import 'package:remembeer/drink/type/drink_with_session_id.dart';
+import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/location/service/location_service.dart';
+import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
@@ -27,6 +32,8 @@ class DrinkService {
   final LocationService locationService;
   final UserStatsService userStatsService;
   final BadgeService badgeService;
+  final DrinkTypeController drinkTypeController;
+  final PartyController partyController;
 
   DrinkService({
     required this.authService,
@@ -37,6 +44,8 @@ class DrinkService {
     required this.locationService,
     required this.userStatsService,
     required this.badgeService,
+    required this.drinkTypeController,
+    required this.partyController,
   });
 
   Stream<List<DrinkWithSessionId>> _drinksToShowFromSession(Session session) {
@@ -55,7 +64,14 @@ class DrinkService {
             )
             .where((drink) => drink.consumedAt.isAfter(startTime))
             .where((drink) => !drink.consumedAt.isAfter(endTime))
-            .map((drink) => (originalSessionId: session.id, drink: drink))
+            .map(
+              (drink) => (
+                originalSessionId: session.id,
+                drink: drink,
+                isParty: session.isParty,
+                isReadOnly: session.isParty && session.endedAt != null,
+              ),
+            )
             .toList();
       },
     );
@@ -93,7 +109,12 @@ class DrinkService {
         drink.consumedByUserId == authService.authenticatedUser.uid,
         'Users can only edit their own drinks',
       );
-      return (originalSessionId: session.id, drink: drink);
+      return (
+        originalSessionId: session.id,
+        drink: drink,
+        isParty: session.isParty,
+        isReadOnly: session.isParty && session.endedAt != null,
+      );
     });
   }
 
@@ -107,17 +128,6 @@ class DrinkService {
     DrinkCreate drinkCreate, {
     String? targetSessionId,
   }) async {
-    final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
-    final after6pm = _calculateIsAfter6pm(
-      drinkCreate.consumedAt,
-      effectiveDate,
-    );
-
-    final beers = _beersEquivalent(
-      category: drinkCreate.drinkType.category,
-      volumeInMilliliters: drinkCreate.volumeInMilliliters,
-    );
-
     final drinkId = sessionController.generateId();
     final userId = authService.authenticatedUser.uid;
 
@@ -157,6 +167,26 @@ class DrinkService {
       );
     }
 
+    final automaticallySelectedSession = activeSessions.length == 1
+        ? activeSessions.single
+        : null;
+    final selectedSession = targetSession ?? automaticallySelectedSession;
+    final canAddToExisting = selectedSession?.hasFreeSpace ?? false;
+
+    if (canAddToExisting && selectedSession!.isParty) {
+      await _createPartyDrink(selectedSession.id, drink);
+      return;
+    }
+
+    final effectiveDate = await _effectiveDate(drinkCreate.consumedAt);
+    final after6pm = _calculateIsAfter6pm(
+      drinkCreate.consumedAt,
+      effectiveDate,
+    );
+    final beers = _beersEquivalent(
+      category: drinkCreate.drinkType.category,
+      volumeInMilliliters: drinkCreate.volumeInMilliliters,
+    );
     var user = await userController.currentUser;
     user = user.addDrink(
       year: effectiveDate.year,
@@ -166,17 +196,9 @@ class DrinkService {
       alcoholMl: alcohol,
       after6pm: after6pm,
     );
-
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
-
     final batch = sessionController.batch;
-
-    final automaticallySelectedSession = activeSessions.length == 1
-        ? activeSessions.single
-        : null;
-    final selectedSession = targetSession ?? automaticallySelectedSession;
-    final canAddToExisting = selectedSession?.hasFreeSpace ?? false;
 
     if (canAddToExisting) {
       sessionController.addDrinkInBatch(selectedSession!.id, drink, batch);
@@ -204,6 +226,12 @@ class DrinkService {
       oldDrink.consumedByUserId == authService.authenticatedUser.uid,
       'Users can only edit their own drinks',
     );
+
+    final session = await sessionController.findById(sessionId);
+    if (session.isParty) {
+      await _updatePartyDrink(sessionId, newDrink);
+      return;
+    }
 
     final oldEffectiveDate = await _effectiveDate(oldDrink.consumedAt);
     final oldAfter6pm = _calculateIsAfter6pm(
@@ -251,7 +279,6 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, newEffectiveDate);
 
-    final session = await sessionController.findById(sessionId);
     final batch = sessionController.batch;
 
     // We need to use the arrayRemove and arrayUnion operations, as there is nothing like arrayUpdate
@@ -267,6 +294,12 @@ class DrinkService {
   }
 
   Future<void> deleteDrink(String sessionId, Drink drink) async {
+    final session = await sessionController.findById(sessionId);
+    if (session.isParty) {
+      await _deletePartyDrink(sessionId, drink.id);
+      return;
+    }
+
     final effectiveDate = await _effectiveDate(drink.consumedAt);
     final after6pm = _calculateIsAfter6pm(drink.consumedAt, effectiveDate);
 
@@ -289,7 +322,6 @@ class DrinkService {
     final stats = userStatsService.fromUser(user);
     user = badgeService.evaluateBadges(user, stats, effectiveDate);
 
-    final session = await sessionController.findById(sessionId);
     final batch = sessionController.batch;
 
     _removeDrinkFromSessionInBatch(session, drink, batch);
@@ -323,6 +355,14 @@ class DrinkService {
     String? toSessionId,
   }) async {
     final fromSession = await sessionController.findById(fromSessionId);
+    final toSession = toSessionId == null
+        ? null
+        : await sessionController.findById(toSessionId);
+    if (fromSession.isParty || (toSession?.isParty ?? false)) {
+      throw const PartyDrinkException(
+        'Party drinks cannot be moved between Sessions.',
+      );
+    }
     final batch = sessionController.batch;
 
     _removeDrinkFromSessionInBatch(fromSession, drink, batch);
@@ -358,6 +398,68 @@ class DrinkService {
     final endOfDayBoundary = user.endOfDayBoundary;
 
     return effectiveDate(consumedAt, endOfDayBoundary);
+  }
+
+  Future<void> _createPartyDrink(String sessionId, Drink drink) async {
+    final drinkTypeId = await _drinkTypeId(drink.drinkType);
+    final result = await _runPartyCommand(
+      () => partyController.createPartyDrink(
+        sessionId: sessionId,
+        commandId: partyController.generateCommandId(),
+        drinkTypeId: drinkTypeId,
+        drink: drink,
+      ),
+    );
+    PartyDrinkCommandResult.fromMutation(result);
+  }
+
+  Future<void> _updatePartyDrink(String sessionId, Drink drink) async {
+    final drinkTypeId = await _drinkTypeId(drink.drinkType);
+    final result = await _runPartyCommand(
+      () => partyController.updatePartyDrink(
+        sessionId: sessionId,
+        commandId: partyController.generateCommandId(),
+        drinkTypeId: drinkTypeId,
+        drink: drink,
+      ),
+    );
+    PartyDrinkCommandResult.fromMutation(result);
+  }
+
+  Future<void> _deletePartyDrink(String sessionId, String drinkId) async {
+    final result = await _runPartyCommand(
+      () => partyController.deletePartyDrink(
+        sessionId: sessionId,
+        commandId: partyController.generateCommandId(),
+        drinkId: drinkId,
+      ),
+    );
+    PartyDrinkCommandResult.fromMutation(result);
+  }
+
+  Future<String> _drinkTypeId(DrinkTypeCore drinkType) async {
+    final available =
+        await drinkTypeController.allAvailableDrinkTypesStream.first;
+    for (final candidate in available) {
+      if (candidate.name == drinkType.name &&
+          candidate.category == drinkType.category &&
+          candidate.alcoholPercentage == drinkType.alcoholPercentage) {
+        return candidate.id;
+      }
+    }
+    throw const PartyDrinkException(
+      'The selected drink type is no longer available.',
+    );
+  }
+
+  Future<T> _runPartyCommand<T>(Future<T> Function() command) async {
+    try {
+      return await command();
+    } on FirebaseFunctionsException catch (error) {
+      throw PartyDrinkException(
+        error.message ?? 'The Party drink could not be saved.',
+      );
+    }
   }
 
   void _removeDrinkFromSessionInBatch(
