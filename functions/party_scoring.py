@@ -184,7 +184,7 @@ def create_awards(
     for award in awards:
         count_delta = _validate_award(award)
         event_ref = party_ref.collection("events").document(award.event_id)
-        event_snapshot = transaction.get(event_ref)
+        event_snapshot = event_ref.get(transaction=transaction)
         event = _award_event(award)
         prepared.append((award, event_ref, event_snapshot, event, count_delta))
         if award.recipient_user_id not in member_refs:
@@ -192,7 +192,9 @@ def create_awards(
                 award.recipient_user_id
             )
             member_refs[award.recipient_user_id] = member_ref
-            member_snapshots[award.recipient_user_id] = transaction.get(member_ref)
+            member_snapshots[award.recipient_user_id] = member_ref.get(
+                transaction=transaction
+            )
 
     results: list[EventWriteResult] = []
     score_deltas: dict[str, int] = {}
@@ -311,8 +313,8 @@ def create_reversals(
         award_ref = party_ref.collection("events").document(item.award_event_id)
         reverse_id = reversal_event_id(item.award_event_id)
         reversal_ref = party_ref.collection("events").document(reverse_id)
-        award_snapshot = transaction.get(award_ref)
-        reversal_snapshot = transaction.get(reversal_ref)
+        award_snapshot = award_ref.get(transaction=transaction)
+        reversal_snapshot = reversal_ref.get(transaction=transaction)
         if not award_snapshot.exists:
             raise callable_error(
                 https_fn.FunctionsErrorCode.NOT_FOUND,
@@ -336,7 +338,9 @@ def create_reversals(
         if recipient_user_id not in member_refs:
             member_ref = party_ref.collection("members").document(recipient_user_id)
             member_refs[recipient_user_id] = member_ref
-            member_snapshots[recipient_user_id] = transaction.get(member_ref)
+            member_snapshots[recipient_user_id] = member_ref.get(
+                transaction=transaction
+            )
         payload = {"reversedKind": award.get("kind")}
         if item.reason is not None:
             payload["reason"] = item.reason

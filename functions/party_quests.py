@@ -150,7 +150,7 @@ def create_custom_quest_template_command(
     def operation(transaction: Any) -> Mapping[str, Any]:
         load_party_context(transaction, db, session_id, actor_id, require_admin=True)
         template_ref = _template_ref(db, session_id, template_id)
-        if transaction.get(template_ref).exists:
+        if template_ref.get(transaction=transaction).exists:
             raise callable_error(
                 https_fn.FunctionsErrorCode.ALREADY_EXISTS,
                 "Quest template ID already exists.",
@@ -200,7 +200,7 @@ def update_custom_quest_template_command(
         _require_custom_template(template)
         if context.party.get("activeQuestId") is not None:
             quest_ref = _quest_ref(db, session_id, context.party["activeQuestId"])
-            quest_snapshot = transaction.get(quest_ref)
+            quest_snapshot = quest_ref.get(transaction=transaction)
             if (
                 quest_snapshot.exists
                 and (quest_snapshot.to_dict() or {}).get("templateId") == template_id
@@ -243,9 +243,9 @@ def delete_custom_quest_template_command(
         )
         _require_custom_template(template)
         if context.party.get("activeQuestId") is not None:
-            quest_snapshot = transaction.get(
-                _quest_ref(db, session_id, context.party["activeQuestId"])
-            )
+            quest_snapshot = _quest_ref(
+                db, session_id, context.party["activeQuestId"]
+            ).get(transaction=transaction)
             if (
                 quest_snapshot.exists
                 and (quest_snapshot.to_dict() or {}).get("templateId") == template_id
@@ -330,7 +330,7 @@ def select_quest_partner_command(
                 "Social quests are disabled.",
             )
         quest_ref = _quest_ref(db, session_id, quest_id)
-        quest_snapshot = transaction.get(quest_ref)
+        quest_snapshot = quest_ref.get(transaction=transaction)
         if not quest_snapshot.exists:
             raise callable_error(
                 https_fn.FunctionsErrorCode.NOT_FOUND, "Quest was not found."
@@ -362,8 +362,8 @@ def select_quest_partner_command(
         completed_pairs = _stored_unique_strings(quest, "completedPairKeys")
         selection_ref = quest_ref.collection("selections").document(actor_id)
         reverse_ref = quest_ref.collection("selections").document(selected_id)
-        selection_snapshot = transaction.get(selection_ref)
-        reverse_snapshot = transaction.get(reverse_ref)
+        selection_snapshot = selection_ref.get(transaction=transaction)
+        reverse_snapshot = reverse_ref.get(transaction=transaction)
         existing = selection_snapshot.to_dict() or {}
         reverse = reverse_snapshot.to_dict() or {}
         if (
@@ -548,7 +548,7 @@ def _load_template(
     transaction: Any, db: Any, session_id: str, template_id: str
 ) -> tuple[Any, Mapping[str, Any]]:
     reference = _template_ref(db, session_id, template_id)
-    snapshot = transaction.get(reference)
+    snapshot = reference.get(transaction=transaction)
     if not snapshot.exists:
         raise callable_error(
             https_fn.FunctionsErrorCode.NOT_FOUND, "Quest template was not found."

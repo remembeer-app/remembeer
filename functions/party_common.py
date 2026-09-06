@@ -15,6 +15,10 @@ from firebase_functions import https_fn
 _T = TypeVar("_T")
 _DEFAULT_STRING_MAX_LENGTH = 1_000
 _COMMAND_ID_MAX_LENGTH = 128
+_PROTO_INTEGER_TYPES = {
+    "type.googleapis.com/google.protobuf.Int64Value",
+    "type.googleapis.com/google.protobuf.UInt64Value",
+}
 
 
 @dataclass(frozen=True)
@@ -103,8 +107,18 @@ def require_int(
     maximum: int | None = None,
 ) -> int:
     value = data.get(field_name)
-    if isinstance(value, bool) or not isinstance(value, int):
+    if isinstance(value, Mapping) and value.get("@type") in _PROTO_INTEGER_TYPES:
+        encoded = value.get("value")
+        try:
+            value = int(encoded) if isinstance(encoded, str) else None
+        except ValueError:
+            value = None
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise _invalid_argument(f"{field_name} must be an integer.")
+    if isinstance(value, float):
+        if not value.is_integer():
+            raise _invalid_argument(f"{field_name} must be an integer.")
+        value = int(value)
     if minimum is not None and value < minimum:
         raise _invalid_argument(f"{field_name} must be at least {minimum}.")
     if maximum is not None and value > maximum:
