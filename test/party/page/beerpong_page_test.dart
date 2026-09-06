@@ -27,6 +27,13 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Record winner'));
     await tester.pumpAndSettle();
     expect(beerpongService.recordedWinnerId, 'team-1');
+    expect(
+      find.text(
+        'Placement prizes are team totals split among team members: '
+        '100 / 50 / 25 points.',
+      ),
+      findsOneWidget,
+    );
     await tester.pump(const Duration(seconds: 5));
     await tester.pumpAndSettle();
   });

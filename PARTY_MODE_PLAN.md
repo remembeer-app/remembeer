@@ -35,7 +35,7 @@ Agent-sized implementation tasks, dependencies, and shared-file ownership are in
 | Administration | All Session admins can manage Party Mode |
 | Modules | Drink scoring is core; social quests, admin challenges, and beerpong have independent toggles |
 | Social quests | Cloud-scheduled with admin-controlled duration and random interval range |
-| Quest content | Versioned built-in catalog plus party-specific custom templates |
+| Quest content | Versioned built-in catalog with per-Party enable controls |
 | Quest participants | All active members with a selected class |
 | Custom quests | Admin-defined title, instructions, points, and duration; mutual partner confirmation remains required |
 | Admin challenges | Timed and admin-created; multiple winners may be awarded |
@@ -243,7 +243,7 @@ parties/{sessionId}/events/{eventId}
 
 ```text
 parties/{sessionId}/questTemplates/{templateId}
-  source: builtIn | custom
+  source: builtIn
   builtInKey: string?
   title: string
   instructions: string
@@ -252,7 +252,7 @@ parties/{sessionId}/questTemplates/{templateId}
   eligibilityRule: string
   enabled: bool
   catalogVersion: int
-  createdByUserId: string?
+  createdByUserId: null
   createdAt: timestamp
   updatedAt: timestamp
 ```
@@ -260,7 +260,8 @@ parties/{sessionId}/questTemplates/{templateId}
 - Seed a versioned built-in catalog at activation.
 - Adapt the source concepts around class, same/different accent, interaction history, rank, and beerpong team/finalist state.
 - Generalize class-specific templates across all five Remembeer classes rather than privileging the original four.
-- Custom templates always use `eligibilityRule: allEligibleMembers`; v1 does not include a rule builder.
+- Party admins can enable or disable built-in templates but cannot create custom templates.
+- Admins can trigger one immediate random quest attempt; automatic scheduling continues from a newly randomized interval after a successful start.
 
 ### Active Social Quests
 
@@ -286,7 +287,7 @@ parties/{sessionId}/quests/{questId}/selections/{userId}
 - Only one scheduled social quest is active per Party.
 - Eligible members are active Session members with a selected class who satisfy the template rule at creation time.
 - A member selects one eligible partner.
-- When A selects B and B has selected A, a transaction records the canonical pair key and awards both members exactly once.
+- When A selects B and B has selected A, a transaction records the canonical pair key and creates one award per member. The configured points are the pair's total prize and are split deterministically between them.
 - A quest remains active until its deadline so multiple pairs can complete it.
 - Selection changes are allowed until a member's pair has completed; a completed pair is immutable.
 
@@ -355,7 +356,7 @@ parties/{sessionId}/tournaments/{tournamentId}/matches/{matchId}
 - Generate the next power-of-two bracket and advance byes transactionally.
 - Admins may rename teams before the first result; roster changes require redrawing the tournament.
 - Earlier-result corrections clear dependent unfinalized results.
-- Finalization creates immutable placement events for every team member.
+- Finalization creates one immutable placement event per team member. Each configured placement value is a team prize split deterministically among that team's members.
 - A finalized tournament correction uses reversal events before replacement placement awards.
 
 ### User Profile Additions
@@ -384,7 +385,7 @@ set_beerpong_opt_in
 create_party_drink
 update_party_drink
 delete_party_drink
-create_custom_quest_template
+start_next_party_quest
 set_quest_template_enabled
 select_quest_partner
 create_admin_challenge
@@ -666,7 +667,7 @@ Acceptance criteria:
 ### Milestone 4: Scheduled Social Quests
 
 - Port and generalize the built-in quest catalog.
-- Add custom templates and enable/disable controls.
+- Add built-in template enable/disable controls and an immediate-start action.
 - Add configurable duration and random interval bounds.
 - Implement scheduler claims, eligibility snapshots, mutual selections, awards, expiry, and notifications.
 

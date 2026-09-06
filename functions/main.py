@@ -94,18 +94,8 @@ def set_party_quest_schedule(request: Any) -> Mapping[str, Any]:
 
 
 @https_fn.on_call(region=REGION)
-def create_custom_quest_template(request: Any) -> Mapping[str, Any]:
-    return party_quests.create_custom_quest_template(request)
-
-
-@https_fn.on_call(region=REGION)
-def update_custom_quest_template(request: Any) -> Mapping[str, Any]:
-    return party_quests.update_custom_quest_template(request)
-
-
-@https_fn.on_call(region=REGION)
-def delete_custom_quest_template(request: Any) -> Mapping[str, Any]:
-    return party_quests.delete_custom_quest_template(request)
+def start_next_party_quest(request: Any) -> Mapping[str, Any]:
+    return party_scheduler_module.start_next_party_quest(request)
 
 
 @https_fn.on_call(region=REGION)

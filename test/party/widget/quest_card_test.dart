@@ -20,7 +20,10 @@ void main() {
 
     expect(find.text('ACTIVE'), findsOneWidget);
     expect(find.text('1:30 left'), findsOneWidget);
-    expect(find.text('25 points'), findsOneWidget);
+    expect(
+      find.text('25 points total, split between the pair'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('treats an overdue active quest as expired', (tester) async {

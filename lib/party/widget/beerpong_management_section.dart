@@ -173,7 +173,7 @@ class _TournamentCreationFormState extends State<_TournamentCreationForm> {
                 Expanded(
                   child: form.buildTextField(
                     controller: _firstController,
-                    label: '1st points',
+                    label: '1st prize total',
                     keyboardType: TextInputType.number,
                     validator: _pointsValidator,
                   ),
@@ -182,7 +182,7 @@ class _TournamentCreationFormState extends State<_TournamentCreationForm> {
                 Expanded(
                   child: form.buildTextField(
                     controller: _secondController,
-                    label: '2nd points',
+                    label: '2nd prize total',
                     keyboardType: TextInputType.number,
                     validator: _pointsValidator,
                   ),
@@ -191,7 +191,7 @@ class _TournamentCreationFormState extends State<_TournamentCreationForm> {
                 Expanded(
                   child: form.buildTextField(
                     controller: _thirdController,
-                    label: '3rd points',
+                    label: '3rd prize total',
                     keyboardType: TextInputType.number,
                     isLastField: true,
                     validator: _pointsValidator,
@@ -276,7 +276,8 @@ class _CurrentTournamentPanelState extends State<_CurrentTournamentPanel> {
               ),
             ),
             Text(
-              'Points: ${formatPartyScore(tournament.firstPlacePointsUnits)} / '
+              'Prize totals, split among team members: '
+              '${formatPartyScore(tournament.firstPlacePointsUnits)} / '
               '${formatPartyScore(tournament.secondPlacePointsUnits)} / '
               '${formatPartyScore(tournament.thirdPlacePointsUnits)}',
             ),

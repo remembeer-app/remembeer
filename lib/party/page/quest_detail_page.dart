@@ -223,7 +223,7 @@ class _QuestDetailPageState extends State<QuestDetailPage> {
       );
       showSuccessNotification(
         matched
-            ? 'Mutual match! Both members earned points.'
+            ? 'Mutual match! Both members earned their share of the prize.'
             : 'Selection saved. Waiting for mutual confirmation.',
       );
     } on Exception catch (error) {

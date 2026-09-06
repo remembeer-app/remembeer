@@ -86,7 +86,7 @@ class _QuestCardState extends State<QuestCard> {
                   _Metadata(
                     icon: Icons.stars_outlined,
                     text:
-                        '${formatPartyScore(widget.quest.pointsUnits)} points',
+                        '${formatPartyScore(widget.quest.pointsUnits)} points total, split between the pair',
                   ),
                   _Metadata(
                     icon: Icons.people_outline,

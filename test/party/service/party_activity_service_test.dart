@@ -65,17 +65,21 @@ void main() {
     expect(service.state.filters, filters);
   });
 
-  test('groups shared outcomes and marks original awards reversed', () {
+  test('keeps quest recipient allocations separate and marks reversal', () {
     final questA = _event(
       'quest-a',
       kind: PartyEventKind.socialQuest,
       sourceId: 'quest-1',
+      participantIds: const ['a', 'b'],
+      payload: const {'pairKey': 'a__b', 'allocationVersion': 1},
     );
     final questB = _event(
       'quest-b',
       kind: PartyEventKind.socialQuest,
       sourceId: 'quest-1',
       recipientId: 'b',
+      participantIds: const ['a', 'b'],
+      payload: const {'pairKey': 'a__b', 'allocationVersion': 1},
     );
     final reversal = _event(
       'reversal-a',
@@ -87,10 +91,82 @@ void main() {
 
     final groups = groupPartyEvents([reversal, questA, questB]);
 
-    expect(groups, hasLength(2));
+    expect(groups, hasLength(3));
     expect(groups.first.events.single, reversal);
-    expect(groups.last.events, [questA, questB]);
-    expect(groups.last.isReversed, isTrue);
+    expect(groups[1].events.single, questA);
+    expect(groups[1].isReversed, isTrue);
+    expect(groups.last.events.single, questB);
+    expect(groups.last.isReversed, isFalse);
+  });
+
+  test('separates quest allocation versions for the same recipient', () {
+    final first = _event(
+      'quest-a-v1',
+      kind: PartyEventKind.socialQuest,
+      sourceId: 'quest-1',
+      payload: const {'pairKey': 'a__b', 'allocationVersion': 1},
+    );
+    final second = _event(
+      'quest-a-v2',
+      kind: PartyEventKind.socialQuest,
+      sourceId: 'quest-1',
+      payload: const {'pairKey': 'a__b', 'allocationVersion': 2},
+    );
+
+    expect(groupPartyEvents([first, second]), hasLength(2));
+  });
+
+  test('keeps beerpong team member allocations separate', () {
+    final first = _event(
+      'placement-a',
+      kind: PartyEventKind.beerpongPlacement,
+      sourceId: 'tournament-1',
+      participantIds: const ['a', 'b'],
+      payload: const {
+        'generation': 2,
+        'teamId': 'team-1',
+        'allocationVersion': 1,
+      },
+    );
+    final second = _event(
+      'placement-b',
+      kind: PartyEventKind.beerpongPlacement,
+      sourceId: 'tournament-1',
+      recipientId: 'b',
+      participantIds: const ['a', 'b'],
+      payload: const {
+        'generation': 2,
+        'teamId': 'team-1',
+        'allocationVersion': 1,
+      },
+    );
+
+    final groups = groupPartyEvents([first, second]);
+
+    expect(groups, hasLength(2));
+    expect(groups.map((group) => group.events.single.recipientUserId), [
+      'a',
+      'b',
+    ]);
+  });
+
+  test('still groups active shared challenge awards', () {
+    final first = _event(
+      'challenge-a',
+      kind: PartyEventKind.adminChallenge,
+      sourceId: 'challenge-1',
+    );
+    final second = _event(
+      'challenge-b',
+      kind: PartyEventKind.adminChallenge,
+      sourceId: 'challenge-1',
+      recipientId: 'b',
+    );
+
+    final groups = groupPartyEvents([first, second]);
+
+    expect(groups, hasLength(1));
+    expect(groups.single.events, [first, second]);
   });
 }
 
@@ -100,19 +176,25 @@ PartyEvent _event(
   PartyEventKind kind = PartyEventKind.drink,
   String sourceId = 'drink-1',
   String recipientId = 'a',
+  List<String>? participantIds,
   String? reversesEventId,
   int points = 1000,
+  Map<String, Object?> payload = const {},
 }) => PartyEvent(
   id: id,
   kind: kind,
   recipientUserId: recipientId,
-  participantIds: [recipientId],
+  participantIds: participantIds ?? [recipientId],
   pointsUnits: points,
-  sourceCollection: kind == PartyEventKind.socialQuest
-      ? PartyEventSourceCollection.quests
-      : PartyEventSourceCollection.drinks,
+  sourceCollection: switch (kind) {
+    PartyEventKind.socialQuest => PartyEventSourceCollection.quests,
+    PartyEventKind.adminChallenge => PartyEventSourceCollection.challenges,
+    PartyEventKind.beerpongPlacement => PartyEventSourceCollection.tournaments,
+    _ => PartyEventSourceCollection.drinks,
+  },
   sourceId: sourceId,
   reversesEventId: reversesEventId,
   occurredAt: DateTime.utc(2026, 1, 1, 12, minute),
   createdAt: DateTime.utc(2026, 1, 1, 12, minute),
+  payload: payload,
 );

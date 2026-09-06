@@ -180,29 +180,45 @@ List<PartyEventGroup> groupPartyEvents(List<PartyEvent> events) {
   final groups = <PartyEventGroup>[];
   final groupedIndexes = <String, int>{};
   for (final event in events) {
+    final isReversed = reversedEventIds.contains(event.id);
     final canGroup =
         event.kind != PartyEventKind.drink &&
         event.kind != PartyEventKind.reversal;
-    final key =
-        '${event.kind.name}:${event.sourceCollection.name}:${event.sourceId}';
+    final key = _partyEventGroupKey(event, isReversed: isReversed);
     final existingIndex = canGroup ? groupedIndexes[key] : null;
     if (existingIndex != null) {
       final existing = groups[existingIndex];
       groups[existingIndex] = PartyEventGroup(
         events: [...existing.events, event],
-        isReversed: existing.isReversed || reversedEventIds.contains(event.id),
+        isReversed: existing.isReversed,
       );
       continue;
     }
     if (canGroup) {
       groupedIndexes[key] = groups.length;
     }
-    groups.add(
-      PartyEventGroup(
-        events: [event],
-        isReversed: reversedEventIds.contains(event.id),
-      ),
-    );
+    groups.add(PartyEventGroup(events: [event], isReversed: isReversed));
   }
   return groups;
 }
+
+String _partyEventGroupKey(PartyEvent event, {required bool isReversed}) {
+  final sourceKey =
+      '${event.kind.name}:${event.sourceCollection.name}:${event.sourceId}';
+  final reversalKey = isReversed ? 'reversed' : 'active';
+  return switch (event.kind) {
+    PartyEventKind.socialQuest =>
+      '$sourceKey:${event.payload['pairKey'] ?? _participantKey(event)}:'
+          '${event.payload['allocationVersion']}:$reversalKey:'
+          '${event.recipientUserId}',
+    PartyEventKind.beerpongPlacement =>
+      '$sourceKey:${event.payload['generation']}:'
+          '${event.payload['teamId'] ?? _participantKey(event)}:'
+          '${event.payload['allocationVersion']}:$reversalKey:'
+          '${event.recipientUserId}',
+    _ => '$sourceKey:$reversalKey',
+  };
+}
+
+String _participantKey(PartyEvent event) =>
+    (event.participantIds.toList()..sort()).join(',');

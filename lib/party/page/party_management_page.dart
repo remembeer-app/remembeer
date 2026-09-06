@@ -97,6 +97,8 @@ class PartyManagementPage extends StatelessWidget {
             _challengeService.setModuleSettings(sessionId, settings),
         onSaveSchedule: (schedule) =>
             _questService.setSchedule(sessionId, schedule),
+        hasActiveQuest: state.party.activeQuestId != null,
+        onStartNextQuest: () => _questService.startNextQuest(sessionId),
       ),
       if (state.party.moduleSettings.socialQuestsEnabled) ...[
         const Gap(24),

@@ -242,12 +242,8 @@ def built_in_template_seed_documents(
 
 
 def validate_template_eligibility_rule(source: str, eligibility_rule: str) -> None:
-    """Validate built-in rules and enforce custom templates' v1 restriction."""
+    """Validate an eligibility rule from a built-in template."""
 
-    if source == "custom":
-        if eligibility_rule != ALL_ELIGIBLE_MEMBERS:
-            raise ValueError("Custom templates must use allEligibleMembers")
-        return
     if source != "builtIn":
         raise ValueError(f"Unknown quest template source: {source}")
     if eligibility_rule in _FIXED_BUILT_IN_RULES:

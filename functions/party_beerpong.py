@@ -36,12 +36,14 @@ from party_common import (
 )
 from party_notifications import party_notification_data, send_notification_to_users
 from party_scoring import (
+    POINT_ALLOCATION_VERSION,
     SCORE_UNITS_PER_POINT,
     AwardInput,
     ReversalInput,
     create_awards,
     create_reversals,
     deterministic_event_id,
+    split_points_units,
 )
 
 MAX_TEAM_NAME_LENGTH = 30
@@ -753,7 +755,11 @@ def finalize_beerpong_tournament_command(
             points = points_by_placement.get(placement)
             if points is None:
                 continue
-            for member_id in member_ids:
+            point_allocations = split_points_units(points, member_ids)
+            base_points, remainder_units = divmod(points, len(member_ids))
+            for index, (member_id, allocated_points) in enumerate(
+                point_allocations.items()
+            ):
                 awards.append(
                     AwardInput(
                         event_id=_placement_award_id(
@@ -762,7 +768,7 @@ def finalize_beerpong_tournament_command(
                         kind="beerpongPlacement",
                         recipient_user_id=member_id,
                         participant_ids=member_ids,
-                        points_units=points,
+                        points_units=allocated_points,
                         source_collection="tournaments",
                         source_id=tournament_id,
                         occurred_at=now,
@@ -773,6 +779,14 @@ def finalize_beerpong_tournament_command(
                             "teamName": teams[team_id].get("name"),
                             "placement": placement,
                             "generation": generation,
+                            "allocation": {
+                                "version": POINT_ALLOCATION_VERSION,
+                                "totalPointsUnits": points,
+                                "recipientCount": len(member_ids),
+                                "recipientIndex": index,
+                                "basePointsUnits": base_points,
+                                "remainderUnits": remainder_units,
+                            },
                         },
                     )
                 )
@@ -1071,7 +1085,16 @@ def _session_member_ids(session: Mapping[str, Any]) -> list[str]:
 
 def _placement_award_id(tournament_id: str, generation: int, member_id: str) -> str:
     return deterministic_event_id(
-        "tournament", tournament_id, "placement", "v", str(generation), member_id
+        "tournament",
+        tournament_id,
+        "placement",
+        "v",
+        str(generation),
+        "allocation",
+        "v",
+        str(POINT_ALLOCATION_VERSION),
+        "member",
+        member_id,
     )
 
 

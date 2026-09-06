@@ -11,7 +11,17 @@ from typing import Any
 from urllib.parse import quote
 
 from firebase_admin import firestore
+from firebase_functions import https_fn
 from google.cloud.firestore_v1.base_query import FieldFilter
+from party_common import (
+    callable_error,
+    load_party_context,
+    require_auth,
+    require_command_id,
+    require_object,
+    require_string,
+    run_idempotent_command,
+)
 from party_notifications import party_notification_data, send_notification_to_users
 from party_quest_catalog import validate_template_eligibility_rule
 from party_quest_eligibility import (
@@ -41,6 +51,92 @@ NotificationDispatcher = Callable[..., Any]
 
 def party_quest_scheduler(_event: Any) -> Mapping[str, int]:
     return run_party_scheduler(firestore.client())
+
+
+def start_next_party_quest(request: Any) -> Mapping[str, Any]:
+    return start_next_party_quest_command(request, firestore.client())
+
+
+def start_next_party_quest_command(
+    request: Any,
+    db: Any,
+    *,
+    now_provider: Callable[[], datetime] | None = None,
+    random_source: Random | None = None,
+    notification_dispatcher: NotificationDispatcher = send_notification_to_users,
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
+    | None = None,
+) -> Mapping[str, Any]:
+    actor_id = require_auth(request)
+    data = require_object(getattr(request, "data", None))
+    party_id = require_string(data, "sessionId", max_length=1_500)
+    command_id = require_command_id(data)
+    rng = random_source or Random()
+    did_start = False
+
+    def operation(transaction: Any) -> Mapping[str, Any]:
+        nonlocal did_start
+        did_start = False
+        context = load_party_context(
+            transaction, db, party_id, actor_id, require_admin=True
+        )
+        settings = context.party.get("moduleSettings")
+        if (
+            not isinstance(settings, Mapping)
+            or settings.get("socialQuestsEnabled") is not True
+        ):
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "Social quests are disabled.",
+            )
+        if context.party.get("activeQuestId") is not None:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "A social quest is already active.",
+            )
+        now = _now(now_provider)
+        result = _attempt_quest_start(
+            transaction,
+            db,
+            party_id,
+            context.party,
+            context.session,
+            now,
+            rng,
+            quest_id=_manual_quest_id(command_id),
+            advance_on_failure=False,
+        )
+        did_start = result.get("outcome") == "created"
+        response = {
+            "sessionId": party_id,
+            "started": did_start,
+            **{key: value for key, value in result.items() if key != "outcome"},
+        }
+        return response
+
+    result = run_idempotent_command(
+        db,
+        party_id=party_id,
+        command_id=command_id,
+        command_name="start_next_party_quest",
+        actor_user_id=actor_id,
+        operation=operation,
+        transaction_runner=transaction_runner,
+    )
+    if did_start:
+        notification_dispatcher(
+            db,
+            result["eligibleMemberIds"],
+            actor_user_id=None,
+            title=result["title"],
+            body=result["instructions"],
+            data=party_notification_data(
+                "party_quest_started", party_id, source_id=result["questId"]
+            ),
+        )
+    return result
 
 
 def run_party_scheduler(
@@ -146,26 +242,44 @@ def _claim_due_party(
     ):
         return {"outcome": "skipped"}
 
+    return _attempt_quest_start(
+        transaction,
+        db,
+        party_id,
+        party,
+        session,
+        now,
+        random_source,
+        quest_id=_quest_id(due_at),
+        advance_on_failure=True,
+    )
+
+
+def _attempt_quest_start(
+    transaction: Any,
+    db: Any,
+    party_id: str,
+    party: Mapping[str, Any],
+    session: Mapping[str, Any],
+    now: datetime,
+    random_source: Random,
+    *,
+    quest_id: str,
+    advance_on_failure: bool,
+) -> Mapping[str, Any]:
+    party_ref = db.collection("parties").document(party_id)
+    schedule = _stored_schedule(party)
     templates = [
         (snapshot.id, snapshot.to_dict() or {})
         for snapshot in _transaction_collection(
             transaction, party_ref.collection("questTemplates")
         )
         if (snapshot.to_dict() or {}).get("enabled") is True
+        and (snapshot.to_dict() or {}).get("source") == "builtIn"
     ]
-    interval = random_source.randint(
-        schedule["minIntervalMinutes"], schedule["maxIntervalMinutes"]
-    )
-    next_quest_at = now + timedelta(minutes=interval)
-    updated_schedule = {**schedule, "nextQuestAt": next_quest_at}
     if not templates:
-        transaction.update(
-            party_ref,
-            {
-                "questSchedule": updated_schedule,
-                "updatedAt": firestore.SERVER_TIMESTAMP,
-            },
-        )
+        if advance_on_failure:
+            _advance_schedule(transaction, party_ref, schedule, now, random_source)
         return {"outcome": "advanced", "reason": "noEnabledTemplates"}
 
     template_id, template = random_source.choice(templates)
@@ -202,14 +316,13 @@ def _claim_due_party(
         }
     )
     if len(eligible_ids) < 2:
-        transaction.update(
-            party_ref,
-            {
-                "questSchedule": updated_schedule,
-                "updatedAt": firestore.SERVER_TIMESTAMP,
-            },
-        )
-        return {"outcome": "advanced", "reason": "insufficientEligibility"}
+        if advance_on_failure:
+            _advance_schedule(transaction, party_ref, schedule, now, random_source)
+        return {
+            "outcome": "advanced",
+            "reason": "insufficientEligibility",
+            "templateId": template_id,
+        }
 
     duration = template.get("durationMinutes", schedule["defaultDurationMinutes"])
     if (
@@ -227,7 +340,6 @@ def _claim_due_party(
         raise ValueError("Stored quest template points are invalid")
     title = _stored_text(template, "title")
     instructions = _stored_text(template, "instructions")
-    quest_id = _quest_id(due_at)
     quest_ref = party_ref.collection("quests").document(quest_id)
     if quest_ref.get(transaction=transaction).exists:
         return {"outcome": "skipped"}
@@ -252,17 +364,43 @@ def _claim_due_party(
         party_ref,
         {
             "activeQuestId": quest_id,
-            "questSchedule": updated_schedule,
+            "questSchedule": _next_schedule(schedule, now, random_source),
             "updatedAt": firestore.SERVER_TIMESTAMP,
         },
     )
     return {
         "outcome": "created",
         "questId": quest_id,
+        "templateId": template_id,
         "eligibleMemberIds": eligible_ids,
         "title": title,
         "instructions": instructions,
     }
+
+
+def _advance_schedule(
+    transaction: Any,
+    party_ref: Any,
+    schedule: Mapping[str, Any],
+    now: datetime,
+    random_source: Random,
+) -> None:
+    transaction.update(
+        party_ref,
+        {
+            "questSchedule": _next_schedule(schedule, now, random_source),
+            "updatedAt": firestore.SERVER_TIMESTAMP,
+        },
+    )
+
+
+def _next_schedule(
+    schedule: Mapping[str, Any], now: datetime, random_source: Random
+) -> dict[str, Any]:
+    interval = random_source.randint(
+        schedule["minIntervalMinutes"], schedule["maxIntervalMinutes"]
+    )
+    return {**schedule, "nextQuestAt": now + timedelta(minutes=interval)}
 
 
 def _expire_documents(
@@ -441,6 +579,10 @@ def _transaction_collection(transaction: Any, collection: Any) -> list[Any]:
 def _quest_id(due_at: datetime) -> str:
     timestamp = due_at.astimezone(timezone.utc).isoformat(timespec="microseconds")
     return f"scheduled-{quote(timestamp, safe='-_.~')}"
+
+
+def _manual_quest_id(command_id: str) -> str:
+    return f"manual-{quote(command_id, safe='-_.~')}"
 
 
 def _snapshot_id(snapshot: Any) -> str:

@@ -22,13 +22,14 @@ from party_common import (
     run_idempotent_command,
 )
 from party_notifications import party_notification_data, send_notification_to_users
-from party_quest_catalog import ALL_ELIGIBLE_MEMBERS, CATALOG_VERSION
 from party_scoring import (
+    POINT_ALLOCATION_VERSION,
     SCORE_UNITS_PER_POINT,
     AwardInput,
     canonical_pair_key,
     create_awards,
     deterministic_event_id,
+    split_points_units,
 )
 
 MIN_QUEST_INTERVAL_MINUTES = 5
@@ -37,27 +38,12 @@ MIN_QUEST_DURATION_MINUTES = 1
 MAX_QUEST_DURATION_MINUTES = 60
 MIN_QUEST_POINTS_UNITS = SCORE_UNITS_PER_POINT
 MAX_QUEST_POINTS_UNITS = 500 * SCORE_UNITS_PER_POINT
-MAX_QUEST_TITLE_LENGTH = 120
-MAX_QUEST_INSTRUCTIONS_LENGTH = 1_000
-
 TransactionRunner = Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
 NotificationDispatcher = Callable[..., Any]
 
 
 def set_party_quest_schedule(request: Any) -> Mapping[str, Any]:
     return set_party_quest_schedule_command(request, firestore.client())
-
-
-def create_custom_quest_template(request: Any) -> Mapping[str, Any]:
-    return create_custom_quest_template_command(request, firestore.client())
-
-
-def update_custom_quest_template(request: Any) -> Mapping[str, Any]:
-    return update_custom_quest_template_command(request, firestore.client())
-
-
-def delete_custom_quest_template(request: Any) -> Mapping[str, Any]:
-    return delete_custom_quest_template_command(request, firestore.client())
 
 
 def set_quest_template_enabled(request: Any) -> Mapping[str, Any]:
@@ -137,137 +123,6 @@ def set_party_quest_schedule_command(
     )
 
 
-def create_custom_quest_template_command(
-    request: Any,
-    db: Any,
-    *,
-    transaction_runner: TransactionRunner | None = None,
-) -> Mapping[str, Any]:
-    actor_id, data, session_id, command_id = _command_input(request)
-    template_id = _document_id(data, "templateId")
-    values = _template_input(data)
-
-    def operation(transaction: Any) -> Mapping[str, Any]:
-        load_party_context(transaction, db, session_id, actor_id, require_admin=True)
-        template_ref = _template_ref(db, session_id, template_id)
-        if template_ref.get(transaction=transaction).exists:
-            raise callable_error(
-                https_fn.FunctionsErrorCode.ALREADY_EXISTS,
-                "Quest template ID already exists.",
-            )
-        template = {
-            "source": "custom",
-            "builtInKey": None,
-            **values,
-            "eligibilityRule": ALL_ELIGIBLE_MEMBERS,
-            "enabled": True,
-            "catalogVersion": CATALOG_VERSION,
-            "createdByUserId": actor_id,
-            "createdAt": firestore.SERVER_TIMESTAMP,
-            "updatedAt": firestore.SERVER_TIMESTAMP,
-        }
-        transaction.create(template_ref, template)
-        return {"sessionId": session_id, "templateId": template_id, **template}
-
-    return _run_command(
-        db,
-        session_id,
-        command_id,
-        "create_custom_quest_template",
-        actor_id,
-        operation,
-        transaction_runner,
-    )
-
-
-def update_custom_quest_template_command(
-    request: Any,
-    db: Any,
-    *,
-    transaction_runner: TransactionRunner | None = None,
-) -> Mapping[str, Any]:
-    actor_id, data, session_id, command_id = _command_input(request)
-    template_id = _document_id(data, "templateId")
-    values = _template_input(data)
-
-    def operation(transaction: Any) -> Mapping[str, Any]:
-        context = load_party_context(
-            transaction, db, session_id, actor_id, require_admin=True
-        )
-        template_ref, template = _load_template(
-            transaction, db, session_id, template_id
-        )
-        _require_custom_template(template)
-        if context.party.get("activeQuestId") is not None:
-            quest_ref = _quest_ref(db, session_id, context.party["activeQuestId"])
-            quest_snapshot = quest_ref.get(transaction=transaction)
-            if (
-                quest_snapshot.exists
-                and (quest_snapshot.to_dict() or {}).get("templateId") == template_id
-            ):
-                raise callable_error(
-                    https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                    "A template used by the active quest cannot be changed.",
-                )
-        transaction.update(
-            template_ref, {**values, "updatedAt": firestore.SERVER_TIMESTAMP}
-        )
-        return {"sessionId": session_id, "templateId": template_id, **values}
-
-    return _run_command(
-        db,
-        session_id,
-        command_id,
-        "update_custom_quest_template",
-        actor_id,
-        operation,
-        transaction_runner,
-    )
-
-
-def delete_custom_quest_template_command(
-    request: Any,
-    db: Any,
-    *,
-    transaction_runner: TransactionRunner | None = None,
-) -> Mapping[str, Any]:
-    actor_id, data, session_id, command_id = _command_input(request)
-    template_id = _document_id(data, "templateId")
-
-    def operation(transaction: Any) -> Mapping[str, Any]:
-        context = load_party_context(
-            transaction, db, session_id, actor_id, require_admin=True
-        )
-        template_ref, template = _load_template(
-            transaction, db, session_id, template_id
-        )
-        _require_custom_template(template)
-        if context.party.get("activeQuestId") is not None:
-            quest_snapshot = _quest_ref(
-                db, session_id, context.party["activeQuestId"]
-            ).get(transaction=transaction)
-            if (
-                quest_snapshot.exists
-                and (quest_snapshot.to_dict() or {}).get("templateId") == template_id
-            ):
-                raise callable_error(
-                    https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                    "A template used by the active quest cannot be deleted.",
-                )
-        transaction.delete(template_ref)
-        return {"sessionId": session_id, "templateId": template_id, "deleted": True}
-
-    return _run_command(
-        db,
-        session_id,
-        command_id,
-        "delete_custom_quest_template",
-        actor_id,
-        operation,
-        transaction_runner,
-    )
-
-
 def set_quest_template_enabled_command(
     request: Any,
     db: Any,
@@ -280,7 +135,10 @@ def set_quest_template_enabled_command(
 
     def operation(transaction: Any) -> Mapping[str, Any]:
         load_party_context(transaction, db, session_id, actor_id, require_admin=True)
-        template_ref, _ = _load_template(transaction, db, session_id, template_id)
+        template_ref, template = _load_template(
+            transaction, db, session_id, template_id
+        )
+        _require_built_in_template(template)
         transaction.update(
             template_ref,
             {"enabled": enabled, "updatedAt": firestore.SERVER_TIMESTAMP},
@@ -394,6 +252,8 @@ def select_quest_partner_command(
         if matched:
             points = _stored_points(quest)
             participant_ids = sorted((actor_id, selected_id))
+            point_allocations = split_points_units(points, participant_ids)
+            base_points, remainder_units = divmod(points, len(participant_ids))
             awards = create_awards(
                 transaction,
                 _party_ref(db, session_id),
@@ -403,7 +263,7 @@ def select_quest_partner_command(
                         kind="socialQuest",
                         recipient_user_id=recipient,
                         participant_ids=participant_ids,
-                        points_units=points,
+                        points_units=allocated_points,
                         source_collection="quests",
                         source_id=quest_id,
                         occurred_at=now,
@@ -412,9 +272,19 @@ def select_quest_partner_command(
                             "questId": quest_id,
                             "pairKey": pair_key,
                             "title": quest.get("titleSnapshot"),
+                            "allocation": {
+                                "version": POINT_ALLOCATION_VERSION,
+                                "totalPointsUnits": points,
+                                "recipientCount": len(participant_ids),
+                                "recipientIndex": index,
+                                "basePointsUnits": base_points,
+                                "remainderUnits": remainder_units,
+                            },
                         },
                     )
-                    for recipient in participant_ids
+                    for index, (recipient, allocated_points) in enumerate(
+                        point_allocations.items()
+                    )
                 ],
             )
             if not all(award.created for award in awards):
@@ -472,27 +342,6 @@ def select_quest_partner_command(
             ),
         )
     return result
-
-
-def _template_input(data: Mapping[str, Any]) -> Mapping[str, Any]:
-    return {
-        "title": require_string(data, "title", max_length=MAX_QUEST_TITLE_LENGTH),
-        "instructions": require_string(
-            data, "instructions", max_length=MAX_QUEST_INSTRUCTIONS_LENGTH
-        ),
-        "pointsUnits": require_int(
-            data,
-            "pointsUnits",
-            minimum=MIN_QUEST_POINTS_UNITS,
-            maximum=MAX_QUEST_POINTS_UNITS,
-        ),
-        "durationMinutes": require_int(
-            data,
-            "durationMinutes",
-            minimum=MIN_QUEST_DURATION_MINUTES,
-            maximum=MAX_QUEST_DURATION_MINUTES,
-        ),
-    }
 
 
 def _command_input(request: Any) -> tuple[str, Mapping[str, Any], str, str]:
@@ -556,11 +405,11 @@ def _load_template(
     return reference, snapshot.to_dict() or {}
 
 
-def _require_custom_template(template: Mapping[str, Any]) -> None:
-    if template.get("source") != "custom":
+def _require_built_in_template(template: Mapping[str, Any]) -> None:
+    if template.get("source") != "builtIn":
         raise callable_error(
             https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-            "Built-in quest templates cannot be changed or deleted.",
+            "Only built-in quest templates can be configured.",
         )
 
 
@@ -620,7 +469,15 @@ def _stored_points(quest: Mapping[str, Any]) -> int:
 
 def _quest_award_id(quest_id: str, pair_key: str, recipient: str) -> str:
     return deterministic_event_id(
-        "quest", quest_id, "pair", pair_key, "member", recipient
+        "quest",
+        quest_id,
+        "pair",
+        pair_key,
+        "allocation",
+        "v",
+        str(POINT_ALLOCATION_VERSION),
+        "member",
+        recipient,
     )
 
 

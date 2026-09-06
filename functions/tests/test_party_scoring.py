@@ -1,4 +1,5 @@
 from decimal import Decimal
+from typing import Any
 
 import pytest
 from firebase_functions import https_fn
@@ -10,6 +11,7 @@ from party_scoring import (
     create_awards,
     create_reversal,
     deterministic_event_id,
+    split_points_units,
 )
 
 from tests.fakes import Database, Transaction
@@ -65,6 +67,33 @@ def test_canonical_pair_and_event_ids_are_stable_and_collision_safe() -> None:
     assert deterministic_event_id("drink", "a/b", "v", "1") == "drink:a%2Fb:v:1"
     with pytest.raises(ValueError):
         canonical_pair_key("same", "same")
+
+
+def test_point_split_is_exact_stable_and_lexicographically_allocates_remainder() -> None:
+    assert split_points_units(10, ["user-c", "user-a", "user-b"]) == {
+        "user-a": 4,
+        "user-b": 3,
+        "user-c": 3,
+    }
+    assert sum(split_points_units(25_001, ["b", "a"]).values()) == 25_001
+
+
+@pytest.mark.parametrize(
+    ("total", "recipients", "error_type"),
+    [
+        (True, ["a"], TypeError),
+        (0, ["a"], ValueError),
+        (1, [], ValueError),
+        (1, [""], ValueError),
+        (2, ["a", "a"], ValueError),
+        (1, ["a", "b"], ValueError),
+    ],
+)
+def test_point_split_rejects_invalid_allocations(
+    total: Any, recipients: Any, error_type: type[Exception]
+) -> None:
+    with pytest.raises(error_type):
+        split_points_units(total, recipients)
 
 
 def test_award_and_reversal_are_atomic_immutable_and_exactly_once() -> None:

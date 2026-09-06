@@ -1,12 +1,26 @@
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from party_scheduler import run_party_scheduler
+import pytest
+from firebase_functions import https_fn
+from party_scheduler import run_party_scheduler, start_next_party_quest_command
 from party_scoring import canonical_pair_key
 
 from tests.fakes import Database, Snapshot, Transaction
 
 NOW = datetime(2026, 1, 2, 1, tzinfo=timezone.utc)
+
+
+@dataclass
+class Auth:
+    uid: str
+
+
+@dataclass
+class Request:
+    auth: Auth | None
+    data: dict[str, Any]
 
 
 class PredictableRandom:
@@ -30,6 +44,13 @@ class Notifications:
 
 def _runner(db: Database):  # type: ignore[no-untyped-def]
     return lambda callback: callback(Transaction(db.store))
+
+
+def _request(command_id: str, *, actor: str | None = "a") -> Request:
+    return Request(
+        Auth(actor) if actor is not None else None,
+        {"sessionId": "party-a", "commandId": command_id},
+    )
 
 
 def _party(**overrides: Any) -> dict[str, Any]:
@@ -185,6 +206,124 @@ def test_no_enabled_template_advances_schedule() -> None:
     result = _run(db, Notifications())
     assert result["advancedParties"] == 1
     assert db.store["parties/party-a"]["activeQuestId"] is None
+
+
+def test_scheduler_ignores_enabled_legacy_custom_templates() -> None:
+    store = _base_store()
+    store["parties/party-a/questTemplates/template-a"]["enabled"] = False
+    store["parties/party-a/questTemplates/legacy-custom"] = {
+        "source": "custom",
+        "title": "Legacy",
+        "instructions": "Must not run.",
+        "pointsUnits": 20_000,
+        "durationMinutes": 10,
+        "eligibilityRule": "allEligibleMembers",
+        "enabled": True,
+    }
+    db = Database(store)
+    result = _run(db, Notifications())
+    assert result["advancedParties"] == 1
+    assert db.store["parties/party-a"]["activeQuestId"] is None
+    assert not any(path.startswith("parties/party-a/quests/") for path in db.store)
+
+
+def test_immediate_start_is_successful_idempotent_and_notifies_once() -> None:
+    db = Database(_base_store())
+    notifications = Notifications()
+    request = _request("start-a")
+    transaction = Transaction(db.store)
+    result = start_next_party_quest_command(
+        request,
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=notifications,
+        transaction_runner=lambda callback: callback(transaction),
+    )
+    retry = start_next_party_quest_command(
+        request,
+        db,
+        now_provider=lambda: pytest.fail("retry ran operation"),
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=notifications,
+        transaction_runner=lambda callback: callback(transaction),
+    )
+    assert retry == result
+    assert result["started"] is True
+    assert result["templateId"] == "template-a"
+    assert result["questId"] == "manual-start-a"
+    assert db.store["parties/party-a"]["activeQuestId"] == "manual-start-a"
+    assert db.store["parties/party-a"]["questSchedule"]["nextQuestAt"] == (
+        NOW + timedelta(minutes=5)
+    )
+    assert transaction.created_paths.count("parties/party-a/quests/manual-start-a") == 1
+    assert len(notifications.calls) == 1
+    assert notifications.calls[0]["data"]["type"] == "party_quest_started"
+
+
+def test_immediate_start_requires_authentication_and_admin_access() -> None:
+    db = Database(_base_store())
+    with pytest.raises(https_fn.HttpsError) as unauthenticated:
+        start_next_party_quest_command(_request("missing-auth", actor=None), db)
+    assert unauthenticated.value.code == https_fn.FunctionsErrorCode.UNAUTHENTICATED
+
+    with pytest.raises(https_fn.HttpsError) as forbidden:
+        start_next_party_quest_command(
+            _request("not-admin", actor="b"),
+            db,
+            transaction_runner=_runner(db),
+        )
+    assert forbidden.value.code == https_fn.FunctionsErrorCode.PERMISSION_DENIED
+
+
+@pytest.mark.parametrize("precondition", ["disabled", "active"])
+def test_immediate_start_rejects_party_preconditions(precondition: str) -> None:
+    store = _base_store()
+    if precondition == "disabled":
+        store["parties/party-a"]["moduleSettings"]["socialQuestsEnabled"] = False
+    else:
+        store["parties/party-a"]["activeQuestId"] = "existing"
+    db = Database(store)
+    with pytest.raises(https_fn.HttpsError) as error:
+        start_next_party_quest_command(
+            _request(f"start-{precondition}"),
+            db,
+            transaction_runner=_runner(db),
+        )
+    assert error.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
+
+
+def test_immediate_start_does_not_retry_after_selected_template_is_ineligible() -> None:
+    store = _base_store(selected_b="beer")
+    original_next = store["parties/party-a"]["questSchedule"]["nextQuestAt"]
+    store["parties/party-a/questTemplates/z-eligible-second"] = {
+        "source": "builtIn",
+        "title": "Any pair",
+        "instructions": "Find anyone.",
+        "pointsUnits": 20_000,
+        "durationMinutes": 10,
+        "eligibilityRule": "allEligibleMembers",
+        "enabled": True,
+    }
+    db = Database(store)
+    notifications = Notifications()
+    result = start_next_party_quest_command(
+        _request("ineligible"),
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=notifications,
+        transaction_runner=_runner(db),
+    )
+    assert result == {
+        "sessionId": "party-a",
+        "started": False,
+        "reason": "insufficientEligibility",
+        "templateId": "template-a",
+    }
+    assert db.store["parties/party-a"]["activeQuestId"] is None
+    assert db.store["parties/party-a"]["questSchedule"]["nextQuestAt"] == original_next
+    assert notifications.calls == []
 
 
 def test_disabled_archived_future_and_already_active_parties_are_never_claimed() -> (

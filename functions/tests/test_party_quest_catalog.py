@@ -42,11 +42,9 @@ def test_seed_documents_match_party_template_schema() -> None:
         assert document["durationMinutes"] > 0
 
 
-def test_custom_templates_are_restricted_to_all_eligible_members() -> None:
-    validate_template_eligibility_rule("custom", "allEligibleMembers")
-
-    with pytest.raises(ValueError, match="Custom templates"):
-        validate_template_eligibility_rule("custom", "sameAccent")
+def test_non_builtin_template_sources_are_rejected() -> None:
+    with pytest.raises(ValueError, match="Unknown quest template source"):
+        validate_template_eligibility_rule("custom", "allEligibleMembers")
 
 
 def test_every_catalog_rule_is_valid_for_builtin_templates() -> None:
