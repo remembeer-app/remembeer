@@ -16,6 +16,7 @@ import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
+import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
@@ -103,18 +104,30 @@ class DrinkService {
     required String sessionId,
     required String drinkId,
   }) {
-    return sessionController.streamById(sessionId).map((session) {
+    return sessionController.streamById(sessionId).switchMap((session) {
       final drink = session.drinks.singleWhere((drink) => drink.id == drinkId);
       invariant(
         drink.consumedByUserId == authService.authenticatedUser.uid,
         'Users can only edit their own drinks',
       );
-      return (
+      DrinkWithSessionId result({required bool isReadOnly}) => (
         originalSessionId: session.id,
         drink: drink,
         isParty: session.isParty,
-        isReadOnly: session.isParty && session.endedAt != null,
+        isReadOnly: isReadOnly,
       );
+      if (!session.isParty) {
+        return Stream.value(result(isReadOnly: false));
+      }
+      return partyController
+          .partyStream(sessionId)
+          .map(
+            (party) => result(
+              isReadOnly:
+                  session.endedAt != null ||
+                  party.status == PartyStatus.archived,
+            ),
+          );
     });
   }
 

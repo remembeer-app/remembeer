@@ -19,6 +19,7 @@ abstract class Drink with _$Drink implements Document {
     required DrinkTypeCore drinkType,
     required int volumeInMilliliters,
     @GeoPointConverter() GeoPoint? location,
+    @JsonKey(includeToJson: false) @Default(1) int partyRevision,
   }) = _Drink;
 
   factory Drink.fromJson(Map<String, dynamic> json) => _$DrinkFromJson(json);

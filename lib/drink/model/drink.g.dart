@@ -16,6 +16,7 @@ _Drink _$DrinkFromJson(Map<String, dynamic> json) => _Drink(
     json['location'],
     const GeoPointConverter().fromJson,
   ),
+  partyRevision: (json['partyRevision'] as num?)?.toInt() ?? 1,
 );
 
 Map<String, dynamic> _$DrinkToJson(_Drink instance) => <String, dynamic>{

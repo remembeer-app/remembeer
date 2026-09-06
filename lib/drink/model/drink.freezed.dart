@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Drink {
 
- String get id; String get consumedByUserId; DateTime get consumedAt; DrinkTypeCore get drinkType; int get volumeInMilliliters;@GeoPointConverter() GeoPoint? get location;
+ String get id; String get consumedByUserId; DateTime get consumedAt; DrinkTypeCore get drinkType; int get volumeInMilliliters;@GeoPointConverter() GeoPoint? get location;@JsonKey(includeToJson: false) int get partyRevision;
 /// Create a copy of Drink
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $DrinkCopyWith<Drink> get copyWith => _$DrinkCopyWithImpl<Drink>(this as Drink, 
 @override
 bool operator ==(Object other) {
   final _this = this as Drink;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Drink&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.consumedByUserId, _this.consumedByUserId) || other.consumedByUserId == _this.consumedByUserId)&&(identical(other.consumedAt, _this.consumedAt) || other.consumedAt == _this.consumedAt)&&(identical(other.drinkType, _this.drinkType) || other.drinkType == _this.drinkType)&&(identical(other.volumeInMilliliters, _this.volumeInMilliliters) || other.volumeInMilliliters == _this.volumeInMilliliters)&&(identical(other.location, _this.location) || other.location == _this.location));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Drink&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.consumedByUserId, _this.consumedByUserId) || other.consumedByUserId == _this.consumedByUserId)&&(identical(other.consumedAt, _this.consumedAt) || other.consumedAt == _this.consumedAt)&&(identical(other.drinkType, _this.drinkType) || other.drinkType == _this.drinkType)&&(identical(other.volumeInMilliliters, _this.volumeInMilliliters) || other.volumeInMilliliters == _this.volumeInMilliliters)&&(identical(other.location, _this.location) || other.location == _this.location)&&(identical(other.partyRevision, _this.partyRevision) || other.partyRevision == _this.partyRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Drink;
-  return Object.hash(runtimeType,_this.id,_this.consumedByUserId,_this.consumedAt,_this.drinkType,_this.volumeInMilliliters,_this.location);
+  return Object.hash(runtimeType,_this.id,_this.consumedByUserId,_this.consumedAt,_this.drinkType,_this.volumeInMilliliters,_this.location,_this.partyRevision);
 }
 
 @override
 String toString() {
   final _this = this as Drink;
-  return 'Drink(id: ${_this.id}, consumedByUserId: ${_this.consumedByUserId}, consumedAt: ${_this.consumedAt}, drinkType: ${_this.drinkType}, volumeInMilliliters: ${_this.volumeInMilliliters}, location: ${_this.location})';
+  return 'Drink(id: ${_this.id}, consumedByUserId: ${_this.consumedByUserId}, consumedAt: ${_this.consumedAt}, drinkType: ${_this.drinkType}, volumeInMilliliters: ${_this.volumeInMilliliters}, location: ${_this.location}, partyRevision: ${_this.partyRevision})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $DrinkCopyWith<$Res>  {
   factory $DrinkCopyWith(Drink value, $Res Function(Drink) _then) = _$DrinkCopyWithImpl;
 @useResult
 $Res call({
- String id, String consumedByUserId, DateTime consumedAt, DrinkTypeCore drinkType, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location
+ String id, String consumedByUserId, DateTime consumedAt, DrinkTypeCore drinkType, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location,@JsonKey(includeToJson: false) int partyRevision
 });
 
 
@@ -71,7 +71,7 @@ class _$DrinkCopyWithImpl<$Res>
 
 /// Create a copy of Drink
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? consumedByUserId = null,Object? consumedAt = null,Object? drinkType = null,Object? volumeInMilliliters = null,Object? location = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? consumedByUserId = null,Object? consumedAt = null,Object? drinkType = null,Object? volumeInMilliliters = null,Object? location = freezed,Object? partyRevision = null,}) {
   return _then(Drink(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,consumedByUserId: null == consumedByUserId ? _self.consumedByUserId : consumedByUserId // ignore: cast_nullable_to_non_nullable
@@ -79,7 +79,8 @@ as String,consumedAt: null == consumedAt ? _self.consumedAt : consumedAt // igno
 as DateTime,drinkType: null == drinkType ? _self.drinkType : drinkType // ignore: cast_nullable_to_non_nullable
 as DrinkTypeCore,volumeInMilliliters: null == volumeInMilliliters ? _self.volumeInMilliliters : volumeInMilliliters // ignore: cast_nullable_to_non_nullable
 as int,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
-as GeoPoint?,
+as GeoPoint?,partyRevision: null == partyRevision ? _self.partyRevision : partyRevision // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 /// Create a copy of Drink
@@ -173,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Drink() when $default != null:
-return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location);case _:
+return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location,_that.partyRevision);case _:
   return orElse();
 
 }
@@ -194,10 +195,10 @@ return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)  $default,) {final _that = this;
 switch (_that) {
 case _Drink():
-return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location);case _:
+return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location,_that.partyRevision);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -214,10 +215,10 @@ return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)?  $default,) {final _that = this;
 switch (_that) {
 case _Drink() when $default != null:
-return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location);case _:
+return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.volumeInMilliliters,_that.location,_that.partyRevision);case _:
   return null;
 
 }
@@ -229,7 +230,7 @@ return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType
 @JsonSerializable()
 
 class _Drink extends Drink {
-  const _Drink({required this.id, required this.consumedByUserId, required this.consumedAt, required this.drinkType, required this.volumeInMilliliters, @GeoPointConverter() this.location}): super._();
+  const _Drink({required this.id, required this.consumedByUserId, required this.consumedAt, required this.drinkType, required this.volumeInMilliliters, @GeoPointConverter() this.location, @JsonKey(includeToJson: false) this.partyRevision = 1}): super._();
   factory _Drink.fromJson(Map<String, dynamic> json) => _$DrinkFromJson(json);
 
 @override final  String id;
@@ -238,6 +239,7 @@ class _Drink extends Drink {
 @override final  DrinkTypeCore drinkType;
 @override final  int volumeInMilliliters;
 @override@GeoPointConverter() final  GeoPoint? location;
+@override@JsonKey(includeToJson: false) final  int partyRevision;
 
 /// Create a copy of Drink
 /// with the given fields replaced by the non-null parameter values.
@@ -252,18 +254,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Drink&&(identical(other.id, id) || other.id == id)&&(identical(other.consumedByUserId, consumedByUserId) || other.consumedByUserId == consumedByUserId)&&(identical(other.consumedAt, consumedAt) || other.consumedAt == consumedAt)&&(identical(other.drinkType, drinkType) || other.drinkType == drinkType)&&(identical(other.volumeInMilliliters, volumeInMilliliters) || other.volumeInMilliliters == volumeInMilliliters)&&(identical(other.location, location) || other.location == location));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Drink&&(identical(other.id, id) || other.id == id)&&(identical(other.consumedByUserId, consumedByUserId) || other.consumedByUserId == consumedByUserId)&&(identical(other.consumedAt, consumedAt) || other.consumedAt == consumedAt)&&(identical(other.drinkType, drinkType) || other.drinkType == drinkType)&&(identical(other.volumeInMilliliters, volumeInMilliliters) || other.volumeInMilliliters == volumeInMilliliters)&&(identical(other.location, location) || other.location == location)&&(identical(other.partyRevision, partyRevision) || other.partyRevision == partyRevision));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,consumedByUserId,consumedAt,drinkType,volumeInMilliliters,location);
+    return Object.hash(runtimeType,id,consumedByUserId,consumedAt,drinkType,volumeInMilliliters,location,partyRevision);
 }
 
 @override
 String toString() {
-    return 'Drink(id: $id, consumedByUserId: $consumedByUserId, consumedAt: $consumedAt, drinkType: $drinkType, volumeInMilliliters: $volumeInMilliliters, location: $location)';
+    return 'Drink(id: $id, consumedByUserId: $consumedByUserId, consumedAt: $consumedAt, drinkType: $drinkType, volumeInMilliliters: $volumeInMilliliters, location: $location, partyRevision: $partyRevision)';
 }
 
 
@@ -274,7 +276,7 @@ abstract mixin class _$DrinkCopyWith<$Res> implements $DrinkCopyWith<$Res> {
   factory _$DrinkCopyWith(_Drink value, $Res Function(_Drink) _then) = __$DrinkCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String consumedByUserId, DateTime consumedAt, DrinkTypeCore drinkType, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location
+ String id, String consumedByUserId, DateTime consumedAt, DrinkTypeCore drinkType, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location,@JsonKey(includeToJson: false) int partyRevision
 });
 
 
@@ -291,7 +293,7 @@ class __$DrinkCopyWithImpl<$Res>
 
 /// Create a copy of Drink
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? consumedByUserId = null,Object? consumedAt = null,Object? drinkType = null,Object? volumeInMilliliters = null,Object? location = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? consumedByUserId = null,Object? consumedAt = null,Object? drinkType = null,Object? volumeInMilliliters = null,Object? location = freezed,Object? partyRevision = null,}) {
   return _then(_Drink(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,consumedByUserId: null == consumedByUserId ? _self.consumedByUserId : consumedByUserId // ignore: cast_nullable_to_non_nullable
@@ -299,7 +301,8 @@ as String,consumedAt: null == consumedAt ? _self.consumedAt : consumedAt // igno
 as DateTime,drinkType: null == drinkType ? _self.drinkType : drinkType // ignore: cast_nullable_to_non_nullable
 as DrinkTypeCore,volumeInMilliliters: null == volumeInMilliliters ? _self.volumeInMilliliters : volumeInMilliliters // ignore: cast_nullable_to_non_nullable
 as int,location: freezed == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
-as GeoPoint?,
+as GeoPoint?,partyRevision: null == partyRevision ? _self.partyRevision : partyRevision // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
