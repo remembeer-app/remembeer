@@ -61,8 +61,47 @@ void main() {
     await service.setFilters(filters);
 
     expect(people, {'a', 'b'});
-    expect(selectedKinds, {PartyEventKind.drink, PartyEventKind.socialQuest});
+    expect(selectedKinds, {
+      PartyEventKind.drink,
+      PartyEventKind.socialQuest,
+      PartyEventKind.reversal,
+    });
     expect(service.state.filters, filters);
+  });
+
+  test('hides reversed awards and reversal entries by default', () {
+    final award = _event('drink-award');
+    final activeAward = _event('active-drink', sourceId: 'drink-2');
+    final reversal = _event(
+      'drink-reversal',
+      kind: PartyEventKind.reversal,
+      reversesEventId: award.id,
+      points: -1000,
+    );
+
+    final groups = visiblePartyEventGroups([reversal, activeAward, award]);
+
+    expect(groups, hasLength(1));
+    expect(groups.single.events.single, activeAward);
+  });
+
+  test('shows reversed awards and reversal entries when requested', () {
+    final award = _event('drink-award');
+    final reversal = _event(
+      'drink-reversal',
+      kind: PartyEventKind.reversal,
+      reversesEventId: award.id,
+      points: -1000,
+    );
+
+    final groups = visiblePartyEventGroups([
+      reversal,
+      award,
+    ], showReversed: true);
+
+    expect(groups, hasLength(2));
+    expect(groups.first.events.single, reversal);
+    expect(groups.last.isReversed, isTrue);
   });
 
   test('keeps quest recipient allocations separate and marks reversal', () {

@@ -9,31 +9,37 @@ class PartyActivityFilters {
   const PartyActivityFilters({
     this.participantIds = const {},
     this.kinds = const {},
+    this.showReversed = false,
   });
 
   final Set<String> participantIds;
   final Set<PartyEventKind> kinds;
+  final bool showReversed;
 
-  bool get isEmpty => participantIds.isEmpty && kinds.isEmpty;
+  bool get isEmpty => participantIds.isEmpty && kinds.isEmpty && !showReversed;
 
   PartyActivityFilters copyWith({
     Set<String>? participantIds,
     Set<PartyEventKind>? kinds,
+    bool? showReversed,
   }) => PartyActivityFilters(
     participantIds: participantIds ?? this.participantIds,
     kinds: kinds ?? this.kinds,
+    showReversed: showReversed ?? this.showReversed,
   );
 
   @override
   bool operator ==(Object other) =>
       other is PartyActivityFilters &&
       setEquals(participantIds, other.participantIds) &&
-      setEquals(kinds, other.kinds);
+      setEquals(kinds, other.kinds) &&
+      showReversed == other.showReversed;
 
   @override
   int get hashCode => Object.hash(
     Object.hashAllUnordered(participantIds),
     Object.hashAllUnordered(kinds),
+    showReversed,
   );
 }
 
@@ -123,7 +129,7 @@ class PartyActivityService extends ChangeNotifier {
     try {
       final page = await _fetchPage(
         sessionId: sessionId,
-        kinds: filters.kinds,
+        kinds: _queryKinds(filters.kinds),
         participantIds: filters.participantIds,
         startAfter: replace ? null : _cursor,
       );
@@ -146,6 +152,10 @@ class PartyActivityService extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+Set<PartyEventKind> _queryKinds(Set<PartyEventKind> kinds) => kinds.isEmpty
+    ? kinds
+    : Set.unmodifiable({...kinds, PartyEventKind.reversal});
 
 PartyEventPageFetcher _controllerFetcher(PartyEventController controller) {
   Future<PartyEventPage> fetch({
@@ -201,6 +211,18 @@ List<PartyEventGroup> groupPartyEvents(List<PartyEvent> events) {
   }
   return groups;
 }
+
+List<PartyEventGroup> visiblePartyEventGroups(
+  List<PartyEvent> events, {
+  bool showReversed = false,
+}) => groupPartyEvents(events)
+    .where(
+      (group) =>
+          showReversed ||
+          (!group.isReversed &&
+              group.events.first.kind != PartyEventKind.reversal),
+    )
+    .toList();
 
 String _partyEventGroupKey(PartyEvent event, {required bool isReversed}) {
   final sourceKey =

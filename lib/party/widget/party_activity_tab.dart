@@ -75,7 +75,10 @@ class _PartyActivityTabState extends State<PartyActivityTab> {
   @override
   Widget build(BuildContext context) {
     final state = _service.state;
-    final groups = groupPartyEvents(state.events);
+    final groups = visiblePartyEventGroups(
+      state.events,
+      showReversed: state.filters.showReversed,
+    );
     final membersById = {
       for (final member in widget.members) member.id: member,
     };
@@ -104,10 +107,10 @@ class _PartyActivityTabState extends State<PartyActivityTab> {
     List<PartyEventGroup> groups,
     Map<String, UserModel> membersById,
   ) {
-    if (state.events.isEmpty && state.isLoading) {
+    if (groups.isEmpty && state.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (state.events.isEmpty) {
+    if (groups.isEmpty) {
       return ListView(
         controller: _scrollController,
         physics: const AlwaysScrollableScrollPhysics(),
@@ -119,7 +122,9 @@ class _PartyActivityTabState extends State<PartyActivityTab> {
                 const Icon(Icons.bolt, size: 56),
                 const Gap(12),
                 Text(
-                  state.filters.isEmpty
+                  state.events.isNotEmpty
+                      ? 'Reversed activity is hidden'
+                      : state.filters.isEmpty
                       ? 'No Party activity yet'
                       : 'No activity matches these filters',
                 ),
