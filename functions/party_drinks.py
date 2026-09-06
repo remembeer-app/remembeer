@@ -1,7 +1,7 @@
 """Server-authoritative create, update, and delete commands for Party drinks."""
 
 from collections.abc import Callable, Mapping, Sequence
-from datetime import datetime, timezone
+from datetime import datetime, timezone, tzinfo
 from typing import Any
 
 from firebase_admin import firestore
@@ -420,10 +420,19 @@ def _owned_drink(
 
 
 def _require_session_time(session: Mapping[str, Any], consumed_at: datetime) -> None:
-    started_at = _parse_datetime(session.get("startedAt"), "stored startedAt")
+    session_timezone = consumed_at.tzinfo or timezone.utc
+    started_at = _parse_datetime(
+        session.get("startedAt"),
+        "stored startedAt",
+        default_timezone=session_timezone,
+    )
     ended_value = session.get("endedAt")
     ended_at = (
-        _parse_datetime(ended_value, "stored endedAt")
+        _parse_datetime(
+            ended_value,
+            "stored endedAt",
+            default_timezone=session_timezone,
+        )
         if ended_value is not None
         else None
     )
@@ -592,20 +601,31 @@ def _document_id(data: Mapping[str, Any], field: str) -> str:
     return value
 
 
-def _parse_datetime(value: Any, field: str) -> datetime:
+def _parse_datetime(
+    value: Any,
+    field: str,
+    *,
+    default_timezone: tzinfo = timezone.utc,
+) -> datetime:
     if isinstance(value, datetime):
-        return value
-    if isinstance(value, str):
+        parsed = value
+    elif isinstance(value, str):
         try:
-            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
         except ValueError as error:
             raise callable_error(
                 https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 f"{field} must be an ISO-8601 date-time.",
             ) from error
-    raise callable_error(
-        https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-        f"{field} must be an ISO-8601 date-time.",
+    else:
+        raise callable_error(
+            https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            f"{field} must be an ISO-8601 date-time.",
+        )
+    return (
+        parsed
+        if parsed.tzinfo is not None
+        else parsed.replace(tzinfo=default_timezone)
     )
 
 

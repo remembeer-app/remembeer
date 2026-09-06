@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -127,6 +128,7 @@ def test_admin_activation_creates_complete_party_and_base_awards_once() -> None:
     }
     event = db.store["parties/session-a/events/drink:drink-a:v:1"]
     assert event["pointsUnits"] == 25_000
+    assert isinstance(event["occurredAt"], datetime)
     assert event["payload"]["selectedClass"] is None
     assert event["payload"]["appliedMultiplier"] == 1
     assert db.store["parties/session-a/questTemplates/meet"] == template

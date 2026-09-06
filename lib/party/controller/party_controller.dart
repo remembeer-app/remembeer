@@ -225,7 +225,7 @@ class PartyController {
   }) => {
     'drinkId': drink.id,
     'drinkTypeId': drinkTypeId,
-    'consumedAt': drink.consumedAt.toIso8601String(),
+    'consumedAt': _dateTimeWithOffset(drink.consumedAt),
     'volumeInMilliliters': drink.volumeInMilliliters,
     'location': switch (drink.location) {
       final location? => {
@@ -235,4 +235,15 @@ class PartyController {
       null => null,
     },
   };
+
+  String _dateTimeWithOffset(DateTime value) {
+    if (value.isUtc) {
+      return value.toIso8601String();
+    }
+    final offsetMinutes = value.timeZoneOffset.inMinutes;
+    final sign = offsetMinutes.isNegative ? '-' : '+';
+    final hours = (offsetMinutes.abs() ~/ 60).toString().padLeft(2, '0');
+    final minutes = (offsetMinutes.abs() % 60).toString().padLeft(2, '0');
+    return '${value.toIso8601String()}$sign$hours:$minutes';
+  }
 }

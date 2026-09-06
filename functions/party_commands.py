@@ -548,7 +548,14 @@ def _initial_drink_awards(
         except ValueError as error:
             raise _invalid_stored_drink() from error
         occurred_at = raw_drink.get("consumedAt")
-        if occurred_at is None:
+        if isinstance(occurred_at, str):
+            try:
+                occurred_at = datetime.fromisoformat(
+                    occurred_at.replace("Z", "+00:00")
+                )
+            except ValueError as error:
+                raise _invalid_stored_drink() from error
+        if not isinstance(occurred_at, datetime):
             raise _invalid_stored_drink()
         event_id = deterministic_event_id("drink", drink_id, "v", "1")
         event = {
