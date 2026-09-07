@@ -3,6 +3,18 @@ import 'package:remembeer/notification/model/notification_type.dart';
 import 'package:remembeer/notification/model/party_notification_payload.dart';
 
 void main() {
+  test('only quests use foreground system notifications', () {
+    expect(
+      NotificationType.values.where(
+        (type) => type.showsAsForegroundSystemNotification,
+      ),
+      {
+        NotificationType.partyQuestStarted,
+        NotificationType.partyQuestCompleted,
+      },
+    );
+  });
+
   test('routes every Party event to its typed destination', () {
     const cases = <NotificationType, String>{
       NotificationType.partyActivated: '/drink/parties/party-1',

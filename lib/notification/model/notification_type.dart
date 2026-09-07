@@ -34,4 +34,10 @@ enum NotificationType {
     NotificationType.friendRequestReceived => false,
     _ => true,
   };
+
+  bool get showsAsForegroundSystemNotification => switch (this) {
+    NotificationType.partyQuestStarted ||
+    NotificationType.partyQuestCompleted => true,
+    _ => false,
+  };
 }

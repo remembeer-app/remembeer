@@ -41,6 +41,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_dotenv: ^6.0.1
+  flutter_local_notifications: ^22.3.0
   flutter_map: ^8.3.1
   flutter_svg: ^2.3.0
   freezed_annotation: ^3.1.0
