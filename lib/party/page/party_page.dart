@@ -182,10 +182,16 @@ class _PartyPageState extends State<PartyPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  const PartyActivityTab(),
-                  PartyRankingTab(session: session, members: members),
+                  PartyActivityTab(sessionId: session.id, members: members),
+                  PartyRankingTab(
+                    sessionId: session.id,
+                    members: members,
+                    currentUserId: _partyService.currentUserId,
+                    partyService: _partyService,
+                  ),
                   PartyGamesTab(
                     state: state,
+                    members: members,
                     onSelectClass: (selectedClass) =>
                         _partyService.selectClass(session.id, selectedClass),
                   ),

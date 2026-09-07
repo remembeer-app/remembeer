@@ -89,6 +89,38 @@ service cloud.firestore {
     }
 
     /* =========================
+       PARTY HELPERS
+       ========================= */
+    function sessionPath(sessionId) {
+      return /databases/$(database)/documents/sessions/$(sessionId);
+    }
+
+    function partyPath(sessionId) {
+      return /databases/$(database)/documents/parties/$(sessionId);
+    }
+
+    function isSessionMember(sessionId) {
+      return isSignedIn()
+        && exists(sessionPath(sessionId))
+        && uid() in get(sessionPath(sessionId)).data.memberIds;
+    }
+
+    function isSessionAdmin(sessionId) {
+      return isSessionMember(sessionId)
+        && (
+          get(sessionPath(sessionId)).data.userId == uid()
+          || uid() in get(sessionPath(sessionId)).data.adminIds
+        );
+    }
+
+    function isActiveParty(sessionId) {
+      return isSessionMember(sessionId)
+        && get(sessionPath(sessionId)).data.isParty == true
+        && exists(partyPath(sessionId))
+        && get(partyPath(sessionId)).data.status == "active";
+    }
+
+    /* =========================
        ADMIN HELPERS
        ========================= */
     function isAdmin() {
@@ -101,18 +133,50 @@ service cloud.firestore {
       return isUnchanged('adminIds') || selfRemovedFrom('adminIds');
     }
 
-    function validPartyStateUpdate() {
-      return !request.resource.data.diff(resource.data)
-          .changedKeys().hasAny(["isParty"])
-        || (
-          request.resource.data.isParty == true
-          && (!('isParty' in resource.data) || resource.data.isParty == false)
-          && resource.data.endedAt == null
-          && request.resource.data.endedAt == null
-        )
+    function validPartyFlagUpdate() {
+      return isUnchanged("isParty")
         || (
           !('isParty' in resource.data)
           && request.resource.data.isParty == false
+        );
+    }
+
+    function isPartySession(resourceData) {
+      return 'isParty' in resourceData && resourceData.isParty == true;
+    }
+
+    function validSessionClientUpdate() {
+      return validPartyFlagUpdate()
+        && (
+          !isPartySession(resource.data)
+          || !request.resource.data.diff(resource.data).changedKeys().hasAny([
+            "deletedAt",
+            "drinks",
+            "endedAt",
+            "memberIds",
+            "startedAt"
+          ])
+        );
+    }
+
+    function validAccentColorKey() {
+      return request.resource.data.accentColorKey in [
+        "amber",
+        "rose",
+        "violet",
+        "sky",
+        "emerald",
+        "lime",
+        "orange",
+        "fuchsia"
+      ];
+    }
+
+    function validOwnedUserUpdate() {
+      return isUnchanged("accentColorKey")
+        || (
+          onlyUpdatingFields(["accentColorKey"])
+          && validAccentColorKey()
         );
     }
 
@@ -166,8 +230,10 @@ service cloud.firestore {
         && request.resource.data.isParty == false;
 
       allow update: if ownershipUnchanged()
+        && validSessionClientUpdate()
+        && (!isPartySession(resource.data) || isActiveParty(id))
         && (
-          (isOwner(resource.data) && validPartyStateUpdate())
+          isOwner(resource.data)
           || (isAdmin()
               && onlyUpdatingFields(["name", "description", "startedAt", "endedAt", "drinks", "updatedAt", "pictureUrls"]))
           || (isSignedIn() && isMember() && notBanned()
@@ -185,12 +251,24 @@ service cloud.firestore {
 
       allow create: if true;
 
-      allow update: if isSignedIn() && userId == uid();
+      allow update: if isSignedIn()
+        && userId == uid()
+        && validOwnedUserUpdate();
 
       allow update: if isSignedIn()
         && userId != uid()
         && onlyUpdatingFields(["friends"])
         && onlySelfArrayChange("friends");
+    }
+
+    match /parties/{partyId} {
+      allow read: if isSessionMember(partyId);
+      allow write: if false;
+
+      match /{document=**} {
+        allow read: if isSessionMember(partyId);
+        allow write: if false;
+      }
     }
   }
 }

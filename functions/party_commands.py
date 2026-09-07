@@ -21,9 +21,12 @@ from party_common import (
     require_string,
     run_idempotent_command,
 )
+from party_notifications import party_notification_data, send_notification_to_users
+from party_quest_catalog import built_in_template_seed_documents
 from party_scoring import calculate_drink_score, deterministic_event_id
 
 PARTY_SCHEMA_VERSION = 1
+PARTY_CLASSES = {"beer", "cider", "cocktail", "spirit", "wine"}
 DEFAULT_QUEST_MIN_INTERVAL_MINUTES = 15
 DEFAULT_QUEST_MAX_INTERVAL_MINUTES = 45
 DEFAULT_QUEST_DURATION_MINUTES = 15
@@ -33,10 +36,10 @@ TemplateSeedProvider = Callable[[str], Sequence[TemplateSeed]]
 
 
 def built_in_template_seeds(actor_user_id: str) -> Sequence[TemplateSeed]:
-    """P15 extension point for the versioned built-in quest catalog."""
+    """Adapt P15's pure catalog to P06's transactional activation hook."""
 
     del actor_user_id
-    return ()
+    return built_in_template_seed_documents(firestore.SERVER_TIMESTAMP)
 
 
 def activate_party(request: Any) -> Mapping[str, Any]:
@@ -57,20 +60,39 @@ def sync_party_membership(request: Any) -> Mapping[str, Any]:
     return sync_party_membership_command(request, firestore.client())
 
 
+def select_party_class(request: Any) -> Mapping[str, Any]:
+    """Callable handler for a member's initial Party class selection."""
+
+    return select_party_class_command(request, firestore.client())
+
+
+def set_party_member_class(request: Any) -> Mapping[str, Any]:
+    """Callable handler for an admin changing a Party member's class."""
+
+    return set_party_member_class_command(request, firestore.client())
+
+
 def activate_party_command(
     request: Any,
     db: Any,
     *,
     template_seed_provider: TemplateSeedProvider | None = None,
-    transaction_runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
+    notification_dispatcher: Callable[..., Any] = send_notification_to_users,
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
     | None = None,
 ) -> Mapping[str, Any]:
     actor_user_id = require_auth(request)
     data = require_object(getattr(request, "data", None))
     session_id = require_string(data, "sessionId", max_length=1_500)
     command_id = require_command_id(data)
+    did_activate = False
+    recipients: Sequence[str] = ()
+    session_name = "Party"
 
     def operation(transaction: Any) -> Mapping[str, Any]:
+        nonlocal did_activate, recipients, session_name
         session_ref = db.collection("sessions").document(session_id)
         party_ref = db.collection("parties").document(session_id)
         session_snapshot = transaction.get(session_ref)
@@ -108,6 +130,9 @@ def activate_party_command(
         template_seeds = list(seed_provider(actor_user_id))
         _validate_template_seeds(template_seeds)
         awards, member_totals = _initial_drink_awards(session, member_ids)
+        stored_name = session.get("name")
+        if isinstance(stored_name, str) and stored_name:
+            session_name = stored_name
 
         transaction.update(
             session_ref,
@@ -156,6 +181,8 @@ def activate_party_command(
                 party_ref.collection("events").document(event_id),
                 event,
             )
+        recipients = member_ids
+        did_activate = True
         return {
             "sessionId": session_id,
             "memberCount": len(member_ids),
@@ -163,7 +190,7 @@ def activate_party_command(
             "initialAwardCount": len(awards),
         }
 
-    return run_idempotent_command(
+    result = run_idempotent_command(
         db,
         party_id=session_id,
         command_id=command_id,
@@ -172,13 +199,25 @@ def activate_party_command(
         operation=operation,
         transaction_runner=transaction_runner,
     )
+    if did_activate:
+        notification_dispatcher(
+            db,
+            recipients,
+            actor_user_id=actor_user_id,
+            title="Party started",
+            body=f"{session_name} is now in Party Mode.",
+            data=party_notification_data("party_activated", session_id),
+        )
+    return result
 
 
 def sync_party_membership_command(
     request: Any,
     db: Any,
     *,
-    transaction_runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
     | None = None,
 ) -> Mapping[str, Any]:
     actor_user_id = require_auth(request)
@@ -258,11 +297,139 @@ def sync_party_membership_command(
     )
 
 
+def select_party_class_command(
+    request: Any,
+    db: Any,
+    *,
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
+    | None = None,
+) -> Mapping[str, Any]:
+    actor_user_id, data, session_id, command_id = _class_command_input(request)
+    selected_class = _selected_class(data)
+
+    def operation(transaction: Any) -> Mapping[str, Any]:
+        load_party_context(transaction, db, session_id, actor_user_id)
+        member_ref = (
+            db.collection("parties")
+            .document(session_id)
+            .collection("members")
+            .document(actor_user_id)
+        )
+        member_snapshot = transaction.get(member_ref)
+        member = member_snapshot.to_dict() or {}
+        if not member_snapshot.exists or member.get("isActive") is not True:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "Only active Party members can select a class.",
+            )
+        if member.get("selectedClass") is not None:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "A selected class can only be changed by a Party admin.",
+            )
+        version = _stored_nonnegative_int(member, "classVersion") + 1
+        transaction.update(
+            member_ref,
+            {
+                "selectedClass": selected_class,
+                "classVersion": version,
+                "classChangedAt": firestore.SERVER_TIMESTAMP,
+                "updatedAt": firestore.SERVER_TIMESTAMP,
+            },
+        )
+        return {
+            "sessionId": session_id,
+            "memberId": actor_user_id,
+            "selectedClass": selected_class,
+            "classVersion": version,
+        }
+
+    return run_idempotent_command(
+        db,
+        party_id=session_id,
+        command_id=command_id,
+        command_name="select_party_class",
+        actor_user_id=actor_user_id,
+        operation=operation,
+        transaction_runner=transaction_runner,
+    )
+
+
+def set_party_member_class_command(
+    request: Any,
+    db: Any,
+    *,
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
+    | None = None,
+) -> Mapping[str, Any]:
+    actor_user_id, data, session_id, command_id = _class_command_input(request)
+    member_id = require_string(data, "memberId", max_length=1_500)
+    selected_class = _selected_class(data)
+
+    def operation(transaction: Any) -> Mapping[str, Any]:
+        load_party_context(
+            transaction,
+            db,
+            session_id,
+            actor_user_id,
+            require_admin=True,
+        )
+        member_ref = (
+            db.collection("parties")
+            .document(session_id)
+            .collection("members")
+            .document(member_id)
+        )
+        member_snapshot = transaction.get(member_ref)
+        member = member_snapshot.to_dict() or {}
+        if not member_snapshot.exists or member.get("isActive") is not True:
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "Only active Party members can be assigned a class.",
+            )
+        current_class = member.get("selectedClass")
+        version = _stored_nonnegative_int(member, "classVersion")
+        if current_class != selected_class:
+            version += 1
+            transaction.update(
+                member_ref,
+                {
+                    "selectedClass": selected_class,
+                    "classVersion": version,
+                    "classChangedAt": firestore.SERVER_TIMESTAMP,
+                    "updatedAt": firestore.SERVER_TIMESTAMP,
+                },
+            )
+        return {
+            "sessionId": session_id,
+            "memberId": member_id,
+            "selectedClass": selected_class,
+            "classVersion": version,
+        }
+
+    return run_idempotent_command(
+        db,
+        party_id=session_id,
+        command_id=command_id,
+        command_name="set_party_member_class",
+        actor_user_id=actor_user_id,
+        operation=operation,
+        transaction_runner=transaction_runner,
+    )
+
+
 def archive_party_command(
     request: Any,
     db: Any,
     *,
-    transaction_runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
+    notification_dispatcher: Callable[..., Any] = send_notification_to_users,
+    transaction_runner: Callable[
+        [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
+    ]
     | None = None,
 ) -> Mapping[str, Any]:
     actor_user_id = require_auth(request)
@@ -275,8 +442,11 @@ def archive_party_command(
             https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
             "endedAt must be an ISO-8601 string.",
         )
+    did_archive = False
+    recipients: Sequence[str] = ()
 
     def operation(transaction: Any) -> Mapping[str, Any]:
+        nonlocal did_archive, recipients
         context = load_party_context(
             transaction,
             db,
@@ -313,9 +483,11 @@ def archive_party_command(
                 "updatedAt": firestore.SERVER_TIMESTAMP,
             },
         )
+        recipients = _stored_string_list(context.session, "memberIds")
+        did_archive = True
         return {"sessionId": session_id, "status": "archived", "endedAt": ended_at}
 
-    return run_idempotent_command(
+    result = run_idempotent_command(
         db,
         party_id=session_id,
         command_id=command_id,
@@ -324,6 +496,16 @@ def archive_party_command(
         operation=operation,
         transaction_runner=transaction_runner,
     )
+    if did_archive:
+        notification_dispatcher(
+            db,
+            recipients,
+            actor_user_id=actor_user_id,
+            title="Party archived",
+            body="The final Party results are ready.",
+            data=party_notification_data("party_archived", session_id),
+        )
+    return result
 
 
 def _initial_drink_awards(
@@ -441,6 +623,39 @@ def _stored_string_list(document: Mapping[str, Any], field_name: str) -> list[st
             f"Stored {field_name} is invalid.",
         )
     return list(dict.fromkeys(value))
+
+
+def _class_command_input(
+    request: Any,
+) -> tuple[str, Mapping[str, Any], str, str]:
+    actor_user_id = require_auth(request)
+    data = require_object(getattr(request, "data", None))
+    return (
+        actor_user_id,
+        data,
+        require_string(data, "sessionId", max_length=1_500),
+        require_command_id(data),
+    )
+
+
+def _selected_class(data: Mapping[str, Any]) -> str:
+    selected_class = require_string(data, "selectedClass", max_length=16)
+    if selected_class not in PARTY_CLASSES:
+        raise callable_error(
+            https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            "selectedClass is not a supported Party class.",
+        )
+    return selected_class
+
+
+def _stored_nonnegative_int(document: Mapping[str, Any], field_name: str) -> int:
+    value = document.get(field_name)
+    if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+        raise callable_error(
+            https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+            f"Stored {field_name} is invalid.",
+        )
+    return value
 
 
 def _stored_string(document: Mapping[str, Any], field_name: str) -> str:

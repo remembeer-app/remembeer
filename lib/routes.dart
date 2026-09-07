@@ -424,7 +424,7 @@ class PartyQuestRoute extends GoRouteData with $PartyQuestRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return QuestDetailPage(questId: questId);
+    return QuestDetailPage(sessionId: sessionId, questId: questId);
   }
 }
 
@@ -441,7 +441,7 @@ class PartyChallengeRoute extends GoRouteData with $PartyChallengeRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ChallengeDetailPage(challengeId: challengeId);
+    return ChallengeDetailPage(sessionId: sessionId, challengeId: challengeId);
   }
 }
 
@@ -458,7 +458,7 @@ class PartyTournamentRoute extends GoRouteData with $PartyTournamentRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return BeerpongPage(tournamentId: tournamentId);
+    return BeerpongPage(sessionId: sessionId, tournamentId: tournamentId);
   }
 }
 

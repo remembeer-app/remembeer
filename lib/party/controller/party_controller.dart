@@ -159,12 +159,18 @@ class PartyController {
   Future<PartyCommandResult> setBeerpongOptIn({
     required String sessionId,
     required String commandId,
+    required String tournamentId,
+    required int expectedRevision,
     required bool optedIn,
   }) => invokeCommand(
     commandName: 'set_beerpong_opt_in',
     sessionId: sessionId,
     commandId: commandId,
-    data: {'optedIn': optedIn},
+    data: {
+      'tournamentId': tournamentId,
+      'expectedRevision': expectedRevision,
+      'optedIn': optedIn,
+    },
   );
 
   Future<PartyCommandResult> createPartyDrink({

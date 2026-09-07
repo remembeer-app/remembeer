@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/party/controller/party_event_controller.dart';
 import 'package:remembeer/party/model/party.dart';
+import 'package:remembeer/party/model/party_event.dart';
+import 'package:remembeer/party/model/party_event_page.dart';
 import 'package:remembeer/party/model/party_member.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
@@ -49,6 +53,7 @@ void _registerServices(PartyState state) {
   get
     ..registerSingleton<DrinkService>(_FakeDrinkService())
     ..registerSingleton<PartyService>(_FakePartyService(state))
+    ..registerSingleton<PartyEventController>(_FakePartyEventController())
     ..registerSingleton<SessionService>(_FakeSessionService());
 }
 
@@ -103,7 +108,28 @@ class _FakePartyService implements PartyService {
   final PartyState state;
 
   @override
+  String get currentUserId => 'user-1';
+
+  @override
+  Stream<List<PartyMember>> membersStream(String sessionId) =>
+      Stream.value([state.currentMember!]);
+
+  @override
   Stream<PartyState> stateStream(String sessionId) => Stream.value(state);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakePartyEventController implements PartyEventController {
+  @override
+  Future<PartyEventPage> fetchEventPage({
+    required String sessionId,
+    Set<PartyEventKind> kinds = const {},
+    Set<String> participantIds = const {},
+    DocumentSnapshot<PartyEvent>? startAfter,
+    int pageSize = 25,
+  }) async => const PartyEventPage(events: [], hasMore: false);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
