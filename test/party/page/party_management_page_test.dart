@@ -49,15 +49,17 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.byType(SwitchListTile), findsNWidgets(3));
-    expect(find.text('Social quest schedule'), findsOneWidget);
-    expect(find.text('Start next quest now'), findsOneWidget);
+    expect(find.text('Admin challenges'), findsOneWidget);
+    expect(find.text('Start challenge'), findsWidgets);
+    expect(find.text('Game modules'), findsNothing);
     await tester.scrollUntilVisible(
-      find.text('Start challenge'),
+      find.text('Game modules'),
       500,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Start challenge'), findsWidgets);
+    expect(find.byType(SwitchListTile), findsNWidgets(3));
+    expect(find.text('Social quest schedule'), findsOneWidget);
+    expect(find.text('Start next quest now'), findsOneWidget);
   });
 }
 

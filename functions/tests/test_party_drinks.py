@@ -135,6 +135,7 @@ def test_create_snapshots_class_scores_stats_and_is_idempotent() -> None:
     assert result["awardedScoreUnits"] == 27_500
     drink = db.store["sessions/party-a"]["drinks"][0]
     assert drink["partyRevision"] == 1
+    assert drink["drinkTypeId"] == "beer-type"
     assert drink["drinkType"] == {
         "name": "Beer",
         "category": "beer",
@@ -241,6 +242,7 @@ def test_update_reverses_active_revision_and_replaces_stats_and_award() -> None:
     assert result["awardedScoreUnits"] == 24_000
     drink = db.store["sessions/party-a"]["drinks"][0]
     assert drink["partyRevision"] == 2
+    assert drink["drinkTypeId"] == "wine-type"
     assert drink["drinkType"]["category"] == "wine"
     reversal = db.store["parties/party-a/events/reversal:drink%3Adrink-a%3Av%3A1"]
     assert reversal["pointsUnits"] == -27_500

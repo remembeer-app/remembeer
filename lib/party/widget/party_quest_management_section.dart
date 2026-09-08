@@ -66,9 +66,10 @@ class _PartyQuestManagementSectionState
     final isPending = _pendingTemplateId == template.id;
     return Card(
       child: SwitchListTile(
-        secondary: const Icon(Icons.auto_awesome_outlined),
+        secondary: const Icon(Icons.handshake_outlined),
         title: Text(template.title),
         subtitle: Text(
+          '${template.instructions}\n'
           '${formatPartyScore(template.pointsUnits)} points · '
           '${template.durationMinutes} minutes',
         ),
@@ -82,9 +83,6 @@ class _PartyQuestManagementSectionState
                   template.id,
                   enabled,
                 ),
-                enabled
-                    ? 'Quest template enabled.'
-                    : 'Quest template disabled.',
               ),
       ),
     );
@@ -93,12 +91,10 @@ class _PartyQuestManagementSectionState
   Future<void> _runTemplateAction(
     String templateId,
     Future<void> Function() action,
-    String successMessage,
   ) async {
     setState(() => _pendingTemplateId = templateId);
     try {
       await action();
-      showSuccessNotification(successMessage);
     } on Exception catch (error) {
       showErrorNotification(error.toString());
     } finally {

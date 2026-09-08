@@ -90,6 +90,14 @@ class PartyManagementPage extends StatelessWidget {
     List<UserModel> users,
   ) => ListView(
     children: [
+      if (state.party.moduleSettings.adminChallengesEnabled) ...[
+        _ChallengeManagementSection(
+          sessionId: sessionId,
+          state: state,
+          service: _challengeService,
+        ),
+        const Gap(24),
+      ],
       PartyModuleSettingsPanel(
         settings: state.party.moduleSettings,
         schedule: state.party.questSchedule,
@@ -107,14 +115,6 @@ class PartyManagementPage extends StatelessWidget {
               sessionId: sessionId,
               service: _questService,
             ),
-      ],
-      if (state.party.moduleSettings.adminChallengesEnabled) ...[
-        const Gap(24),
-        _ChallengeManagementSection(
-          sessionId: sessionId,
-          state: state,
-          service: _challengeService,
-        ),
       ],
       if (state.party.moduleSettings.beerpongEnabled) ...[
         const Gap(24),

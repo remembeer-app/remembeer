@@ -238,6 +238,8 @@ String _partyEventGroupKey(PartyEvent event, {required bool isReversed}) {
           '${event.payload['teamId'] ?? _participantKey(event)}:'
           '${event.payload['allocationVersion']}:$reversalKey:'
           '${event.recipientUserId}',
+    PartyEventKind.adminChallenge =>
+      '$sourceKey:$reversalKey:${event.recipientUserId}',
     _ => '$sourceKey:$reversalKey',
   };
 }

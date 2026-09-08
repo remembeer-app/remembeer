@@ -189,7 +189,7 @@ void main() {
     ]);
   });
 
-  test('still groups active shared challenge awards', () {
+  test('keeps challenge winner awards separate', () {
     final first = _event(
       'challenge-a',
       kind: PartyEventKind.adminChallenge,
@@ -204,8 +204,11 @@ void main() {
 
     final groups = groupPartyEvents([first, second]);
 
-    expect(groups, hasLength(1));
-    expect(groups.single.events, [first, second]);
+    expect(groups, hasLength(2));
+    expect(groups.map((group) => group.events.single.recipientUserId), [
+      'a',
+      'b',
+    ]);
   });
 }
 

@@ -11,6 +11,50 @@ import 'package:remembeer/party/widget/party_activity_tab.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 void main() {
+  testWidgets('refreshes when the session drinks change', (tester) async {
+    var fetches = 0;
+    final drinks = ValueNotifier<List<Drink>>([_drink('first')]);
+    addTearDown(drinks.dispose);
+    final service = PartyActivityService(
+      sessionId: 'party-1',
+      fetchPage:
+          ({
+            required sessionId,
+            required kinds,
+            required participantIds,
+            startAfter,
+          }) async {
+            fetches += 1;
+            return const PartyEventPage(events: [], hasMore: false);
+          },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ValueListenableBuilder(
+            valueListenable: drinks,
+            builder: (context, value, child) => PartyActivityTab(
+              sessionId: 'party-1',
+              members: const [_user],
+              drinks: value,
+              currentUserId: 'user-1',
+              isPartyActive: true,
+              service: service,
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(fetches, 1);
+
+    drinks.value = [_drink('first'), _drink('second')];
+    await tester.pumpAndSettle();
+
+    expect(fetches, 2);
+  });
+
   testWidgets(
     'only current own drink revision edits and refreshes on success',
     (tester) async {

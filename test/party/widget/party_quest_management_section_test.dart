@@ -47,6 +47,9 @@ void main() {
     );
     expect(find.byType(SwitchListTile), findsOneWidget);
     expect(find.text('Built-in quest'), findsOneWidget);
+    expect(find.textContaining('Choose a partner.'), findsOneWidget);
+    expect(find.byIcon(Icons.handshake_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.auto_awesome_outlined), findsNothing);
     expect(find.text('Custom quest'), findsNothing);
     expect(find.text('Edit'), findsNothing);
     expect(find.text('Delete'), findsNothing);
@@ -57,7 +60,7 @@ void main() {
 
     expect(service.enabledTemplateId, 'built-in');
     expect(service.enabledValue, isFalse);
-    await tester.pump(const Duration(seconds: 5));
+    expect(find.text('Quest template disabled.'), findsNothing);
   });
 
   testWidgets('shows an empty state when no built-in templates exist', (

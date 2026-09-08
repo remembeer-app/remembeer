@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/drink/model/drink.dart';
@@ -48,6 +49,14 @@ class _PartyActivityTabState extends State<PartyActivityTab> {
       ..addListener(_onServiceChanged)
       ..loadInitial();
     _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void didUpdateWidget(covariant PartyActivityTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!listEquals(oldWidget.drinks, widget.drinks)) {
+      _service.loadInitial();
+    }
   }
 
   @override

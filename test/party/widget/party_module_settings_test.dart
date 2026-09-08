@@ -8,6 +8,22 @@ import 'package:remembeer/party/widget/party_module_settings.dart';
 import 'package:toastification/toastification.dart';
 
 void main() {
+  testWidgets('shows module priority and schedule limits', (tester) async {
+    await tester.pumpWidget(
+      _panel(
+        onStartNextQuest: () async =>
+            const PartyQuestStartResult(started: true),
+      ),
+    );
+
+    final challenges = tester.getTopLeft(find.text('Admin challenges'));
+    final quests = tester.getTopLeft(find.text('Social quests'));
+    expect(challenges.dy, lessThan(quests.dy));
+    expect(find.text('5-180 minutes; no greater than maximum'), findsOneWidget);
+    expect(find.text('5-180 minutes'), findsOneWidget);
+    expect(find.text('1-60 minutes'), findsOneWidget);
+  });
+
   testWidgets('starts the next quest and disables the button while pending', (
     tester,
   ) async {

@@ -90,19 +90,6 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
           child: Column(
             children: [
               SwitchListTile(
-                secondary: const Icon(Icons.group_work_outlined),
-                title: const Text('Social quests'),
-                subtitle: const Text('Scheduled partner quests'),
-                value: _settings.socialQuestsEnabled,
-                onChanged: _savingSettings
-                    ? null
-                    : (value) => setState(
-                        () => _settings = _settings.copyWith(
-                          socialQuestsEnabled: value,
-                        ),
-                      ),
-              ),
-              SwitchListTile(
                 secondary: const Icon(Icons.flag_outlined),
                 title: const Text('Admin challenges'),
                 subtitle: const Text('Timed challenges with chosen winners'),
@@ -112,6 +99,19 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
                     : (value) => setState(
                         () => _settings = _settings.copyWith(
                           adminChallengesEnabled: value,
+                        ),
+                      ),
+              ),
+              SwitchListTile(
+                secondary: const Icon(Icons.group_work_outlined),
+                title: const Text('Social quests'),
+                subtitle: const Text('Scheduled partner quests'),
+                value: _settings.socialQuestsEnabled,
+                onChanged: _savingSettings
+                    ? null
+                    : (value) => setState(
+                        () => _settings = _settings.copyWith(
+                          socialQuestsEnabled: value,
                         ),
                       ),
               ),
@@ -167,16 +167,22 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
                     _numberField(
                       controller: _minIntervalController,
                       label: 'Minimum interval (minutes)',
+                      helperText:
+                          '$minPartyQuestIntervalMinutes-$maxPartyQuestIntervalMinutes minutes; no greater than maximum',
                     ),
                     const Gap(12),
                     _numberField(
                       controller: _maxIntervalController,
                       label: 'Maximum interval (minutes)',
+                      helperText:
+                          '$minPartyQuestIntervalMinutes-$maxPartyQuestIntervalMinutes minutes',
                     ),
                     const Gap(12),
                     _numberField(
                       controller: _durationController,
                       label: 'Default duration (minutes)',
+                      helperText:
+                          '$minPartyQuestDurationMinutes-$maxPartyQuestDurationMinutes minutes',
                     ),
                     const Gap(16),
                     FilledButton.tonal(
@@ -210,6 +216,7 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
   Widget _numberField({
     required TextEditingController controller,
     required String label,
+    required String helperText,
   }) => TextField(
     controller: controller,
     enabled: !_savingSchedule,
@@ -217,6 +224,7 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
     decoration: InputDecoration(
       labelText: label,
+      helperText: helperText,
       border: const OutlineInputBorder(),
     ),
   );

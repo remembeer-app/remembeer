@@ -28,6 +28,15 @@ void main() {
     final drink = Drink.fromJson(baseJson);
 
     expect(drink.partyRevision, 1);
+    expect(drink.drinkTypeId, isNull);
+    expect(drink.toJson(), isNot(contains('drinkTypeId')));
     expect(drink.toJson(), isNot(contains('partyRevision')));
+  });
+
+  test('reads and writes the persisted drink type identity', () {
+    final drink = Drink.fromJson({...baseJson, 'drinkTypeId': 'type-1'});
+
+    expect(drink.drinkTypeId, 'type-1');
+    expect(drink.toJson()['drinkTypeId'], 'type-1');
   });
 }

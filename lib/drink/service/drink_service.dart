@@ -242,7 +242,7 @@ class DrinkService {
 
     final session = await sessionController.findById(sessionId);
     if (session.isParty) {
-      await _updatePartyDrink(sessionId, newDrink);
+      await _updatePartyDrink(sessionId, oldDrink, newDrink);
       return;
     }
 
@@ -414,7 +414,8 @@ class DrinkService {
   }
 
   Future<void> _createPartyDrink(String sessionId, Drink drink) async {
-    final drinkTypeId = await _drinkTypeId(drink.drinkType);
+    final drinkTypeId =
+        drink.drinkTypeId ?? await _drinkTypeId(drink.drinkType);
     final result = await _runPartyCommand(
       () => partyController.createPartyDrink(
         sessionId: sessionId,
@@ -426,14 +427,20 @@ class DrinkService {
     PartyDrinkCommandResult.fromMutation(result);
   }
 
-  Future<void> _updatePartyDrink(String sessionId, Drink drink) async {
-    final drinkTypeId = await _drinkTypeId(drink.drinkType);
+  Future<void> _updatePartyDrink(
+    String sessionId,
+    Drink oldDrink,
+    Drink newDrink,
+  ) async {
+    final drinkTypeId = oldDrink.drinkType == newDrink.drinkType
+        ? oldDrink.drinkTypeId ?? await _drinkTypeId(newDrink.drinkType)
+        : await _drinkTypeId(newDrink.drinkType);
     final result = await _runPartyCommand(
       () => partyController.updatePartyDrink(
         sessionId: sessionId,
         commandId: partyController.generateCommandId(),
         drinkTypeId: drinkTypeId,
-        drink: drink,
+        drink: newDrink,
       ),
     );
     PartyDrinkCommandResult.fromMutation(result);
