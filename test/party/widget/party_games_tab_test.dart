@@ -54,7 +54,10 @@ void main() {
       endsAt: now.subtract(const Duration(minutes: 5)),
     );
     final state = _state(
-      settings: const PartyModuleSettings(adminChallengesEnabled: true),
+      settings: const PartyModuleSettings(
+        adminChallengesEnabled: true,
+        beerpongEnabled: true,
+      ),
       activeChallengeId: active.id,
     );
 
@@ -66,6 +69,7 @@ void main() {
             members: const [_user],
             challengeService: _FakeChallengeService([active, completed]),
             onSelectClass: (_) async {},
+            beerpongSectionBuilder: (_, _, _) => const Text('Beerpong slot'),
           ),
         ),
       ),
@@ -74,8 +78,16 @@ void main() {
 
     expect(find.text('Admin challenges'), findsOneWidget);
     expect(find.text('Challenge active'), findsOneWidget);
+    await tester.drag(find.byType(ListView), const Offset(0, -600));
+    await tester.pump();
+
+    expect(find.text('Beerpong slot'), findsOneWidget);
     expect(find.text('Recent results'), findsOneWidget);
     expect(find.text('Challenge completed'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Beerpong slot')).dy,
+      lessThan(tester.getTopLeft(find.text('Recent results')).dy),
+    );
 
     await tester.pumpWidget(const SizedBox.shrink());
   });

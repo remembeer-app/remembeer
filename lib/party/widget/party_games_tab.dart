@@ -4,6 +4,7 @@ import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/constants.dart';
+import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
@@ -49,6 +50,21 @@ class PartyGamesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = state.party.moduleSettings;
+    if (settings.adminChallengesEnabled) {
+      return AsyncBuilder<List<PartyChallenge>>(
+        stream: _challengeService.challengesStream(state.session.id),
+        builder: (context, challenges) =>
+            _buildContent(context, settings, challenges),
+      );
+    }
+    return _buildContent(context, settings, const []);
+  }
+
+  Widget _buildContent(
+    BuildContext context,
+    PartyModuleSettings settings,
+    List<PartyChallenge> challenges,
+  ) {
     final sections = <Widget>[
       ..._classSection(),
       if (settings.socialQuestsEnabled)
@@ -58,7 +74,8 @@ class PartyGamesTab extends StatelessWidget {
               members: members,
               service: _questService,
             ),
-      if (settings.adminChallengesEnabled) _buildChallenges(context),
+      if (settings.adminChallengesEnabled)
+        _buildActiveChallenge(context, challenges),
       if (settings.beerpongEnabled)
         beerpongSectionBuilder?.call(context, state, members) ??
             BeerpongGamesSection(
@@ -70,6 +87,11 @@ class PartyGamesTab extends StatelessWidget {
               service: _beerpongService,
             ),
     ];
+    final activeId = state.party.activeChallengeId;
+    final recentChallenges = challenges
+        .where((challenge) => challenge.id != activeId)
+        .take(partyChallengeRecentResultCount)
+        .toList();
     final disabledCount = [
       settings.socialQuestsEnabled,
       settings.adminChallengesEnabled,
@@ -94,7 +116,15 @@ class PartyGamesTab extends StatelessWidget {
             ),
           ),
         ],
-        if (sections.isEmpty && !(state.isAdmin && state.isActive))
+        if (recentChallenges.isNotEmpty) ...[
+          if (sections.isNotEmpty ||
+              (disabledCount > 0 && state.isAdmin && state.isActive))
+            const Gap(24),
+          _buildRecentChallengeResults(context, recentChallenges),
+        ],
+        if (sections.isEmpty &&
+            recentChallenges.isEmpty &&
+            !(state.isAdmin && state.isActive))
           _EmptyGames(isArchived: state.isArchived),
       ],
     );
@@ -128,70 +158,68 @@ class PartyGamesTab extends StatelessWidget {
     ];
   }
 
-  Widget _buildChallenges(BuildContext context) =>
-      AsyncBuilder<List<PartyChallenge>>(
-        stream: _challengeService.challengesStream(state.session.id),
-        builder: (context, challenges) {
-          final activeId = state.party.activeChallengeId;
-          final active = challenges
-              .where((challenge) => challenge.id == activeId)
-              .firstOrNull;
-          final recent = challenges
-              .where((challenge) => challenge.id != activeId)
-              .take(partyChallengeRecentResultCount)
-              .toList();
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Admin challenges',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                  if (state.isAdmin && state.isActive)
-                    TextButton.icon(
-                      onPressed: () => PartyManagementRoute(
-                        sessionId: state.session.id,
-                        tab: PartyTab.games,
-                      ).push<void>(context),
-                      icon: const Icon(Icons.tune),
-                      label: Text(active == null ? 'Create' : 'Manage'),
-                    ),
-                ],
+  Widget _buildActiveChallenge(
+    BuildContext context,
+    List<PartyChallenge> challenges,
+  ) {
+    final activeId = state.party.activeChallengeId;
+    final active = challenges
+        .where((challenge) => challenge.id == activeId)
+        .firstOrNull;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Admin challenges',
+                style: Theme.of(context).textTheme.titleLarge,
               ),
-              const Gap(8),
-              if (active != null)
-                ChallengeCard(
-                  challenge: active,
-                  onTap: () => _openChallenge(context, active.id),
-                )
-              else
-                const _ModulePlaceholder(
-                  icon: Icons.flag_outlined,
-                  title: 'No active challenge',
-                  text: 'An admin can start the next timed challenge.',
-                ),
-              if (recent.isNotEmpty) ...[
-                const Gap(16),
-                Text(
-                  'Recent results',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const Gap(4),
-                for (final challenge in recent)
-                  ChallengeCard(
-                    challenge: challenge,
-                    compact: true,
-                    onTap: () => _openChallenge(context, challenge.id),
-                  ),
-              ],
-            ],
-          );
-        },
-      );
+            ),
+            if (state.isAdmin && state.isActive)
+              TextButton.icon(
+                onPressed: () => PartyManagementRoute(
+                  sessionId: state.session.id,
+                  tab: PartyTab.games,
+                ).push<void>(context),
+                icon: const Icon(Icons.tune),
+                label: Text(active == null ? 'Create' : 'Manage'),
+              ),
+          ],
+        ),
+        const Gap(8),
+        if (active != null)
+          ChallengeCard(
+            challenge: active,
+            onTap: () => _openChallenge(context, active.id),
+          )
+        else
+          const _ModulePlaceholder(
+            icon: Icons.flag_outlined,
+            title: 'No active challenge',
+            text: 'An admin can start the next timed challenge.',
+          ),
+      ],
+    );
+  }
+
+  Widget _buildRecentChallengeResults(
+    BuildContext context,
+    List<PartyChallenge> challenges,
+  ) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      Text('Recent results', style: Theme.of(context).textTheme.titleMedium),
+      const Gap(4),
+      for (final challenge in challenges)
+        ChallengeCard(
+          challenge: challenge,
+          compact: true,
+          onTap: () => _openChallenge(context, challenge.id),
+        ),
+    ],
+  );
 
   void _openChallenge(BuildContext context, String challengeId) {
     PartyChallengeRoute(
