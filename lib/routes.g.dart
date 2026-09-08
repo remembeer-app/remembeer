@@ -656,8 +656,8 @@ mixin $PartyRoute on GoRouteData {
 }
 
 const _$PartyTabEnumMap = {
-  PartyTab.activity: 'activity',
   PartyTab.ranking: 'ranking',
+  PartyTab.activity: 'activity',
   PartyTab.games: 'games',
 };
 

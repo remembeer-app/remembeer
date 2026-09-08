@@ -58,7 +58,7 @@ class NotificationService {
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
         >()
-        ?.createNotificationChannel(_partyQuestChannel);
+        ?.createNotificationChannel(_partyUpdatesChannel);
 
     final localLaunch = await _localNotifications
         .getNotificationAppLaunchDetails();
@@ -142,7 +142,7 @@ class NotificationService {
       rawType is String ? rawType : null,
     );
     if (type?.showsAsForegroundSystemNotification ?? false) {
-      unawaited(_showForegroundQuestNotification(message));
+      unawaited(_showForegroundPartyNotification(message));
       return;
     }
 
@@ -171,8 +171,8 @@ class NotificationService {
     }
   }
 
-  Future<void> _showForegroundQuestNotification(RemoteMessage message) async {
-    final body = message.notification?.body ?? 'There is new quest activity.';
+  Future<void> _showForegroundPartyNotification(RemoteMessage message) async {
+    final body = message.notification?.body ?? 'There is new Party activity.';
     try {
       await _localNotifications.show(
         id: Object.hash(message.messageId, message.data['type']) & 0x7fffffff,
@@ -180,9 +180,9 @@ class NotificationService {
         body: body,
         notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
-            _partyQuestChannelId,
-            'Party quests',
-            channelDescription: 'Quest starts and completions',
+            _partyUpdatesChannelId,
+            'Party updates',
+            channelDescription: 'Quest and challenge updates',
             importance: Importance.high,
             priority: Priority.high,
             category: AndroidNotificationCategory.social,
@@ -196,7 +196,7 @@ class NotificationService {
         payload: jsonEncode(message.data),
       );
     } on Object catch (error) {
-      debugPrint('Could not show foreground quest notification: $error');
+      debugPrint('Could not show foreground Party notification: $error');
       showNotification(body);
     }
   }
@@ -262,10 +262,10 @@ class NotificationService {
   }
 }
 
-const _partyQuestChannelId = 'party_quests';
-const _partyQuestChannel = AndroidNotificationChannel(
-  _partyQuestChannelId,
-  'Party quests',
-  description: 'Quest starts and completions',
+const _partyUpdatesChannelId = 'party_updates';
+const _partyUpdatesChannel = AndroidNotificationChannel(
+  _partyUpdatesChannelId,
+  'Party updates',
+  description: 'Quest and challenge updates',
   importance: Importance.high,
 );

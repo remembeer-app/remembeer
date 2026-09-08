@@ -37,7 +37,9 @@ enum NotificationType {
 
   bool get showsAsForegroundSystemNotification => switch (this) {
     NotificationType.partyQuestStarted ||
-    NotificationType.partyQuestCompleted => true,
+    NotificationType.partyQuestCompleted ||
+    NotificationType.partyChallengeStarted ||
+    NotificationType.partyChallengeWinner => true,
     _ => false,
   };
 }

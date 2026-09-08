@@ -170,8 +170,8 @@ class _PartyPageState extends State<PartyPage>
                 alpha: 0.7,
               ),
               tabs: const [
-                Tab(icon: Icon(Icons.bolt), text: 'Activity'),
                 Tab(icon: Icon(Icons.emoji_events), text: 'Ranking'),
+                Tab(icon: Icon(Icons.bolt), text: 'Activity'),
                 Tab(icon: Icon(Icons.casino), text: 'Games'),
               ],
             ),
@@ -182,18 +182,18 @@ class _PartyPageState extends State<PartyPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
+                  PartyRankingTab(
+                    sessionId: session.id,
+                    members: members,
+                    currentUserId: _partyService.currentUserId,
+                    partyService: _partyService,
+                  ),
                   PartyActivityTab(
                     sessionId: session.id,
                     members: members,
                     drinks: session.drinks,
                     currentUserId: _partyService.currentUserId,
                     isPartyActive: state.isActive,
-                  ),
-                  PartyRankingTab(
-                    sessionId: session.id,
-                    members: members,
-                    currentUserId: _partyService.currentUserId,
-                    partyService: _partyService,
                   ),
                   PartyGamesTab(
                     state: state,

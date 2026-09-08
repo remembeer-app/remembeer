@@ -3,7 +3,7 @@ import 'package:remembeer/notification/model/notification_type.dart';
 import 'package:remembeer/notification/model/party_notification_payload.dart';
 
 void main() {
-  test('only quests use foreground system notifications', () {
+  test('quests and challenges use foreground system notifications', () {
     expect(
       NotificationType.values.where(
         (type) => type.showsAsForegroundSystemNotification,
@@ -11,6 +11,8 @@ void main() {
       {
         NotificationType.partyQuestStarted,
         NotificationType.partyQuestCompleted,
+        NotificationType.partyChallengeStarted,
+        NotificationType.partyChallengeWinner,
       },
     );
   });

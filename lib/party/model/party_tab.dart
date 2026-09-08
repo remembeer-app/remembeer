@@ -1,6 +1,6 @@
 enum PartyTab {
-  activity,
   ranking,
+  activity,
   games;
 
   static PartyTab? tryFromString(String? value) {

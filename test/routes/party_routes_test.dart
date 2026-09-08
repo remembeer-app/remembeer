@@ -5,6 +5,11 @@ import 'package:remembeer/routes.dart';
 
 void main() {
   test('Party route defaults to activity and restores another tab', () {
+    expect(PartyTab.values, [
+      PartyTab.ranking,
+      PartyTab.activity,
+      PartyTab.games,
+    ]);
     expect(
       const PartyRoute(sessionId: 'session-1').location,
       '/drink/parties/session-1',
