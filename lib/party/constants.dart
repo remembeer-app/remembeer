@@ -1,7 +1,6 @@
 import 'package:remembeer/drink_type/model/drink_category.dart';
 
 const partySchemaVersion = 1;
-const minPartyMemberCount = 2;
 
 const partyFunctionsRegion = 'europe-west4';
 const partiesCollection = 'parties';

@@ -27,6 +27,19 @@ class Request:
 def test_require_auth_and_validated_integer() -> None:
     assert require_auth(Request(Auth("user-a"))) == "user-a"
     assert require_int({"points": 10}, "points", minimum=1, maximum=10) == 10
+    assert require_int({"points": 10.0}, "points") == 10
+    assert (
+        require_int(
+            {
+                "points": {
+                    "@type": "type.googleapis.com/google.protobuf.Int64Value",
+                    "value": "10",
+                }
+            },
+            "points",
+        )
+        == 10
+    )
 
     with pytest.raises(https_fn.HttpsError) as auth_error:
         require_auth(Request(None))
@@ -35,6 +48,20 @@ def test_require_auth_and_validated_integer() -> None:
     with pytest.raises(https_fn.HttpsError) as integer_error:
         require_int({"points": True}, "points")
     assert integer_error.value.code == https_fn.FunctionsErrorCode.INVALID_ARGUMENT
+
+    with pytest.raises(https_fn.HttpsError):
+        require_int({"points": 1.5}, "points")
+
+    with pytest.raises(https_fn.HttpsError):
+        require_int(
+            {
+                "points": {
+                    "@type": "type.googleapis.com/google.protobuf.Int64Value",
+                    "value": "invalid",
+                }
+            },
+            "points",
+        )
 
     with pytest.raises(https_fn.HttpsError):
         require_command_id({"commandId": "invalid/path"})

@@ -104,7 +104,7 @@ def set_beerpong_opt_in_command(
         _require_status(tournament, "enrollment")
         revision = _require_revision(tournament, expected_revision)
         member_ref = _party_ref(db, session_id).collection("members").document(actor_id)
-        member_snapshot = transaction.get(member_ref)
+        member_snapshot = member_ref.get(transaction=transaction)
         if (
             not member_snapshot.exists
             or (member_snapshot.to_dict() or {}).get("isActive") is not True
@@ -163,7 +163,7 @@ def create_beerpong_tournament_command(
                 "A beerpong tournament is already current.",
             )
         tournament_ref = _tournament_ref(db, session_id, tournament_id)
-        if transaction.get(tournament_ref).exists:
+        if tournament_ref.get(transaction=transaction).exists:
             raise callable_error(
                 https_fn.FunctionsErrorCode.ALREADY_EXISTS,
                 "Tournament ID already exists.",
@@ -464,7 +464,7 @@ def rename_beerpong_team_command(
         if any(value.get("status") == "completed" for _, value in match_rows):
             raise _failed("Teams can only be renamed before the first result.")
         team_ref = tournament_ref.collection("teams").document(team_id)
-        if not transaction.get(team_ref).exists:
+        if not team_ref.get(transaction=transaction).exists:
             raise callable_error(
                 https_fn.FunctionsErrorCode.NOT_FOUND, "Beerpong team was not found."
             )
@@ -929,8 +929,11 @@ def _opted_in_member_ids(
 ) -> list[str]:
     result: list[str] = []
     for member_id in _session_member_ids(session):
-        snapshot = transaction.get(
-            _party_ref(db, session_id).collection("members").document(member_id)
+        snapshot = (
+            _party_ref(db, session_id)
+            .collection("members")
+            .document(member_id)
+            .get(transaction=transaction)
         )
         member = snapshot.to_dict() or {}
         if (
@@ -957,7 +960,7 @@ def _collection_documents(
 ) -> list[tuple[Any, Mapping[str, Any]]]:
     return [
         (snapshot.reference, snapshot.to_dict() or {})
-        for snapshot in transaction.get(collection)
+        for snapshot in collection.stream(transaction=transaction)
     ]
 
 
@@ -969,7 +972,7 @@ def _load_tournament(
     transaction: Any, db: Any, session_id: str, tournament_id: str
 ) -> tuple[Any, Mapping[str, Any]]:
     reference = _tournament_ref(db, session_id, tournament_id)
-    snapshot = transaction.get(reference)
+    snapshot = reference.get(transaction=transaction)
     if not snapshot.exists:
         raise callable_error(
             https_fn.FunctionsErrorCode.NOT_FOUND, "Beerpong tournament was not found."

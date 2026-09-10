@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
 import pytest
@@ -23,6 +24,13 @@ class Auth:
 class Request:
     auth: Auth | None
     data: dict[str, Any]
+
+
+class ProductionLikeTransaction(Transaction):
+    def get(self, reference):  # type: ignore[no-untyped-def]
+        if hasattr(reference, "collection"):
+            return iter((super().get(reference),))
+        return super().get(reference)
 
 
 def _runner(transaction: Transaction):  # type: ignore[no-untyped-def]
@@ -120,6 +128,7 @@ def test_admin_activation_creates_complete_party_and_base_awards_once() -> None:
     }
     event = db.store["parties/session-a/events/drink:drink-a:v:1"]
     assert event["pointsUnits"] == 25_000
+    assert isinstance(event["occurredAt"], datetime)
     assert event["payload"]["selectedClass"] is None
     assert event["payload"]["appliedMultiplier"] == 1
     assert db.store["parties/session-a/questTemplates/meet"] == template
@@ -138,7 +147,7 @@ def test_activation_uses_versioned_builtin_catalog_by_default() -> None:
             {"sessionId": "session-a", "commandId": "activate-a"},
         ),
         db,
-        transaction_runner=_runner(Transaction(db.store)),
+        transaction_runner=_runner(ProductionLikeTransaction(db.store)),
     )
 
     assert result["templateCount"] == 18
@@ -147,6 +156,31 @@ def test_activation_uses_versioned_builtin_catalog_by_default() -> None:
     assert template["builtInKey"] == "toast-with-beer"
     assert template["catalogVersion"] == 1
     assert template["eligibilityRule"] == "oneMemberClass:beer"
+
+
+def test_single_member_session_can_activate_party() -> None:
+    db = Database(
+        {
+            "sessions/session-a": _session(
+                memberIds=["owner"],
+                adminIds=["owner"],
+            )
+        }
+    )
+
+    result = activate_party_command(
+        Request(
+            Auth("owner"),
+            {"sessionId": "session-a", "commandId": "activate-solo-party"},
+        ),
+        db,
+        notification_dispatcher=lambda *args, **kwargs: None,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+
+    assert result["memberCount"] == 1
+    assert db.store["sessions/session-a"]["isParty"] is True
+    assert db.store["parties/session-a/members/owner"]["isActive"] is True
 
 
 @pytest.mark.parametrize(

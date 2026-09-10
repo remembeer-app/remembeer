@@ -1,7 +1,7 @@
 """Server-authoritative create, update, and delete commands for Party drinks."""
 
 from collections.abc import Callable, Mapping, Sequence
-from datetime import datetime, timezone
+from datetime import datetime, timezone, tzinfo
 from typing import Any
 
 from firebase_admin import firestore
@@ -71,8 +71,8 @@ def create_party_drink_command(
         party_ref = db.collection("parties").document(session_id)
         member_ref = party_ref.collection("members").document(actor_id)
         user_ref = db.collection("users").document(actor_id)
-        member_snapshot = transaction.get(member_ref)
-        user_snapshot = transaction.get(user_ref)
+        member_snapshot = member_ref.get(transaction=transaction)
+        user_snapshot = user_ref.get(transaction=transaction)
         member = _active_member(member_snapshot)
         user = _existing_user(user_snapshot)
         now = _now(now_provider, consumed_at)
@@ -86,7 +86,7 @@ def create_party_drink_command(
         )
         event_id = deterministic_event_id("drink", drink_id, "v", str(revision))
         event_ref = party_ref.collection("events").document(event_id)
-        if transaction.get(event_ref).exists:
+        if event_ref.get(transaction=transaction).exists:
             raise callable_error(
                 https_fn.FunctionsErrorCode.ALREADY_EXISTS,
                 "Drink award already exists.",
@@ -164,11 +164,11 @@ def update_party_drink_command(
         reversal_ref = party_ref.collection("events").document(reverse_id)
         new_event_id = deterministic_event_id("drink", drink_id, "v", str(revision))
         new_event_ref = party_ref.collection("events").document(new_event_id)
-        member_snapshot = transaction.get(member_ref)
-        user_snapshot = transaction.get(user_ref)
-        old_event_snapshot = transaction.get(old_event_ref)
-        reversal_snapshot = transaction.get(reversal_ref)
-        new_event_snapshot = transaction.get(new_event_ref)
+        member_snapshot = member_ref.get(transaction=transaction)
+        user_snapshot = user_ref.get(transaction=transaction)
+        old_event_snapshot = old_event_ref.get(transaction=transaction)
+        reversal_snapshot = reversal_ref.get(transaction=transaction)
+        new_event_snapshot = new_event_ref.get(transaction=transaction)
         member = _active_member(member_snapshot)
         user = _existing_user(user_snapshot)
         old_event = _active_award(old_event_snapshot, old_event_id)
@@ -259,10 +259,10 @@ def delete_party_drink_command(
         event_ref = party_ref.collection("events").document(event_id)
         reverse_id = reversal_event_id(event_id)
         reversal_ref = party_ref.collection("events").document(reverse_id)
-        member_snapshot = transaction.get(member_ref)
-        user_snapshot = transaction.get(user_ref)
-        event_snapshot = transaction.get(event_ref)
-        reversal_snapshot = transaction.get(reversal_ref)
+        member_snapshot = member_ref.get(transaction=transaction)
+        user_snapshot = user_ref.get(transaction=transaction)
+        event_snapshot = event_ref.get(transaction=transaction)
+        reversal_snapshot = reversal_ref.get(transaction=transaction)
         member = _active_member(member_snapshot)
         user = _existing_user(user_snapshot)
         event = _active_award(event_snapshot, event_id)
@@ -350,7 +350,9 @@ def _load_drink_type(
     actor_id: str,
 ) -> Mapping[str, Any]:
     drink_type_id = _document_id(data, "drinkTypeId")
-    snapshot = transaction.get(db.collection("drink_types").document(drink_type_id))
+    snapshot = db.collection("drink_types").document(drink_type_id).get(
+        transaction=transaction
+    )
     if not snapshot.exists:
         raise callable_error(
             https_fn.FunctionsErrorCode.NOT_FOUND,
@@ -418,10 +420,19 @@ def _owned_drink(
 
 
 def _require_session_time(session: Mapping[str, Any], consumed_at: datetime) -> None:
-    started_at = _parse_datetime(session.get("startedAt"), "stored startedAt")
+    session_timezone = consumed_at.tzinfo or timezone.utc
+    started_at = _parse_datetime(
+        session.get("startedAt"),
+        "stored startedAt",
+        default_timezone=session_timezone,
+    )
     ended_value = session.get("endedAt")
     ended_at = (
-        _parse_datetime(ended_value, "stored endedAt")
+        _parse_datetime(
+            ended_value,
+            "stored endedAt",
+            default_timezone=session_timezone,
+        )
         if ended_value is not None
         else None
     )
@@ -590,20 +601,31 @@ def _document_id(data: Mapping[str, Any], field: str) -> str:
     return value
 
 
-def _parse_datetime(value: Any, field: str) -> datetime:
+def _parse_datetime(
+    value: Any,
+    field: str,
+    *,
+    default_timezone: tzinfo = timezone.utc,
+) -> datetime:
     if isinstance(value, datetime):
-        return value
-    if isinstance(value, str):
+        parsed = value
+    elif isinstance(value, str):
         try:
-            return datetime.fromisoformat(value.replace("Z", "+00:00"))
+            parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
         except ValueError as error:
             raise callable_error(
                 https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
                 f"{field} must be an ISO-8601 date-time.",
             ) from error
-    raise callable_error(
-        https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
-        f"{field} must be an ISO-8601 date-time.",
+    else:
+        raise callable_error(
+            https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
+            f"{field} must be an ISO-8601 date-time.",
+        )
+    return (
+        parsed
+        if parsed.tzinfo is not None
+        else parsed.replace(tzinfo=default_timezone)
     )
 
 

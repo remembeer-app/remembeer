@@ -30,7 +30,8 @@ class DocumentReference:
     def collection(self, name: str) -> "CollectionReference":
         return CollectionReference(self.store, f"{self.path}/{name}")
 
-    def get(self) -> Snapshot:
+    def get(self, *, transaction: Any = None) -> Snapshot:
+        del transaction
         return Snapshot(self.store.get(self.path), self)
 
     @property
@@ -45,6 +46,16 @@ class CollectionReference:
 
     def document(self, document_id: str) -> DocumentReference:
         return DocumentReference(self.store, f"{self.path}/{document_id}")
+
+    def stream(self, *, transaction: Any = None) -> list[Snapshot]:
+        del transaction
+        prefix = f"{self.path}/"
+        depth = prefix.count("/")
+        return [
+            Snapshot(value, DocumentReference(self.store, path))
+            for path, value in sorted(self.store.items())
+            if path.startswith(prefix) and path.count("/") == depth
+        ]
 
     @property
     def parent(self) -> DocumentReference | None:
@@ -67,15 +78,7 @@ class Transaction:
         self.created_paths: list[str] = []
         self.updated_paths: list[str] = []
 
-    def get(self, reference: DocumentReference | CollectionReference):  # type: ignore[no-untyped-def]
-        if isinstance(reference, CollectionReference):
-            prefix = f"{reference.path}/"
-            depth = prefix.count("/")
-            return [
-                Snapshot(value, DocumentReference(self.store, path))
-                for path, value in sorted(self.store.items())
-                if path.startswith(prefix) and path.count("/") == depth
-            ]
+    def get(self, reference: DocumentReference):  # type: ignore[no-untyped-def]
         return Snapshot(self.store.get(reference.path), reference)
 
     def create(self, reference: DocumentReference, value: dict[str, Any]) -> None:

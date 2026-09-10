@@ -127,8 +127,8 @@ def _claim_due_party(
 ) -> Mapping[str, Any]:
     party_ref = db.collection("parties").document(party_id)
     session_ref = db.collection("sessions").document(party_id)
-    party_snapshot = transaction.get(party_ref)
-    session_snapshot = transaction.get(session_ref)
+    party_snapshot = party_ref.get(transaction=transaction)
+    session_snapshot = session_ref.get(transaction=transaction)
     if not party_snapshot.exists or not session_snapshot.exists:
         return {"outcome": "skipped"}
     party = party_snapshot.to_dict() or {}
@@ -229,7 +229,7 @@ def _claim_due_party(
     instructions = _stored_text(template, "instructions")
     quest_id = _quest_id(due_at)
     quest_ref = party_ref.collection("quests").document(quest_id)
-    if transaction.get(quest_ref).exists:
+    if quest_ref.get(transaction=transaction).exists:
         return {"outcome": "skipped"}
     ends_at = now + timedelta(minutes=duration)
     transaction.create(
@@ -289,8 +289,8 @@ def _expire_documents(
             root_ref: Any = party_ref,
             claimed_content_id: str = content_id,
         ) -> Mapping[str, Any]:
-            content_snapshot = transaction.get(content_ref)
-            party_snapshot = transaction.get(root_ref)
+            content_snapshot = content_ref.get(transaction=transaction)
+            party_snapshot = root_ref.get(transaction=transaction)
             if not content_snapshot.exists or not party_snapshot.exists:
                 return {"expired": False}
             content = content_snapshot.to_dict() or {}
@@ -327,10 +327,14 @@ def _load_members(
     member_ids = _stored_strings(session, "memberIds")
     members: list[QuestMember] = []
     for user_id in member_ids:
-        member_snapshot = transaction.get(
-            party_ref.collection("members").document(user_id)
+        member_snapshot = (
+            party_ref.collection("members")
+            .document(user_id)
+            .get(transaction=transaction)
         )
-        user_snapshot = transaction.get(db.collection("users").document(user_id))
+        user_snapshot = db.collection("users").document(user_id).get(
+            transaction=transaction
+        )
         if not member_snapshot.exists:
             continue
         member = member_snapshot.to_dict() or {}
@@ -431,7 +435,7 @@ def _stored_optional_strings(document: Mapping[str, Any], field: str) -> set[str
 
 
 def _transaction_collection(transaction: Any, collection: Any) -> list[Any]:
-    return list(transaction.get(collection))
+    return list(collection.stream(transaction=transaction))
 
 
 def _quest_id(due_at: datetime) -> str:

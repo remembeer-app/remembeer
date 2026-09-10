@@ -95,8 +95,8 @@ def activate_party_command(
         nonlocal did_activate, recipients, session_name
         session_ref = db.collection("sessions").document(session_id)
         party_ref = db.collection("parties").document(session_id)
-        session_snapshot = transaction.get(session_ref)
-        party_snapshot = transaction.get(party_ref)
+        session_snapshot = session_ref.get(transaction=transaction)
+        party_snapshot = party_ref.get(transaction=transaction)
         if not session_snapshot.exists:
             raise callable_error(
                 https_fn.FunctionsErrorCode.NOT_FOUND,
@@ -121,11 +121,6 @@ def activate_party_command(
             )
 
         member_ids = _stored_string_list(session, "memberIds")
-        if len(member_ids) < 2:
-            raise callable_error(
-                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-                "Party activation requires at least two Session members.",
-            )
         seed_provider = template_seed_provider or built_in_template_seeds
         template_seeds = list(seed_provider(actor_user_id))
         _validate_template_seeds(template_seeds)
@@ -237,7 +232,7 @@ def sync_party_membership_command(
         session_ref = db.collection("sessions").document(session_id)
         party_ref = db.collection("parties").document(session_id)
         member_ref = party_ref.collection("members").document(member_id)
-        member_snapshot = transaction.get(member_ref)
+        member_snapshot = member_ref.get(transaction=transaction)
         member_ids = _stored_string_list(context.session, "memberIds")
         admin_ids = _stored_string_list(context.session, "adminIds")
 
@@ -317,7 +312,7 @@ def select_party_class_command(
             .collection("members")
             .document(actor_user_id)
         )
-        member_snapshot = transaction.get(member_ref)
+        member_snapshot = member_ref.get(transaction=transaction)
         member = member_snapshot.to_dict() or {}
         if not member_snapshot.exists or member.get("isActive") is not True:
             raise callable_error(
@@ -384,7 +379,7 @@ def set_party_member_class_command(
             .collection("members")
             .document(member_id)
         )
-        member_snapshot = transaction.get(member_ref)
+        member_snapshot = member_ref.get(transaction=transaction)
         member = member_snapshot.to_dict() or {}
         if not member_snapshot.exists or member.get("isActive") is not True:
             raise callable_error(
@@ -553,7 +548,14 @@ def _initial_drink_awards(
         except ValueError as error:
             raise _invalid_stored_drink() from error
         occurred_at = raw_drink.get("consumedAt")
-        if occurred_at is None:
+        if isinstance(occurred_at, str):
+            try:
+                occurred_at = datetime.fromisoformat(
+                    occurred_at.replace("Z", "+00:00")
+                )
+            except ValueError as error:
+                raise _invalid_stored_drink() from error
+        if not isinstance(occurred_at, datetime):
             raise _invalid_stored_drink()
         event_id = deterministic_event_id("drink", drink_id, "v", "1")
         event = {

@@ -80,11 +80,15 @@ void main() {
       drink: drink,
     );
 
+    final consumedAt = invokedData?['consumedAt'];
+    expect(consumedAt, isA<String>());
+    expect(consumedAt, matches(RegExp(r'(Z|[+-]\d{2}:\d{2})$')));
+    expect(DateTime.parse(consumedAt! as String), drink.consumedAt.toUtc());
     expect(invokedName, 'create_party_drink');
     expect(invokedData, {
       'drinkId': 'drink-1',
       'drinkTypeId': 'type-1',
-      'consumedAt': drink.consumedAt.toUtc().toIso8601String(),
+      'consumedAt': consumedAt,
       'volumeInMilliliters': 200,
       'location': {'latitude': 49.2, 'longitude': 16.6},
       'sessionId': 'party-1',

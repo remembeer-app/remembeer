@@ -15,6 +15,10 @@ from firebase_functions import https_fn
 _T = TypeVar("_T")
 _DEFAULT_STRING_MAX_LENGTH = 1_000
 _COMMAND_ID_MAX_LENGTH = 128
+_PROTO_INTEGER_TYPES = {
+    "type.googleapis.com/google.protobuf.Int64Value",
+    "type.googleapis.com/google.protobuf.UInt64Value",
+}
 
 
 @dataclass(frozen=True)
@@ -103,8 +107,18 @@ def require_int(
     maximum: int | None = None,
 ) -> int:
     value = data.get(field_name)
-    if isinstance(value, bool) or not isinstance(value, int):
+    if isinstance(value, Mapping) and value.get("@type") in _PROTO_INTEGER_TYPES:
+        encoded = value.get("value")
+        try:
+            value = int(encoded) if isinstance(encoded, str) else None
+        except ValueError:
+            value = None
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise _invalid_argument(f"{field_name} must be an integer.")
+    if isinstance(value, float):
+        if not value.is_integer():
+            raise _invalid_argument(f"{field_name} must be an integer.")
+        value = int(value)
     if minimum is not None and value < minimum:
         raise _invalid_argument(f"{field_name} must be at least {minimum}.")
     if maximum is not None and value > maximum:
@@ -182,8 +196,12 @@ def load_party_context(
 ) -> PartyCommandContext:
     """Read and authorize a Session-backed Party inside ``transaction``."""
 
-    session_snapshot = transaction.get(db.collection("sessions").document(party_id))
-    party_snapshot = transaction.get(db.collection("parties").document(party_id))
+    session_snapshot = db.collection("sessions").document(party_id).get(
+        transaction=transaction
+    )
+    party_snapshot = db.collection("parties").document(party_id).get(
+        transaction=transaction
+    )
     if not session_snapshot.exists or not party_snapshot.exists:
         raise callable_error(
             https_fn.FunctionsErrorCode.NOT_FOUND,
@@ -216,7 +234,7 @@ def read_command_receipt(
     command_name: str,
     actor_user_id: str,
 ) -> Mapping[str, Any] | None:
-    snapshot = transaction.get(receipt_ref)
+    snapshot = receipt_ref.get(transaction=transaction)
     if not snapshot.exists:
         return None
     receipt = snapshot.to_dict() or {}

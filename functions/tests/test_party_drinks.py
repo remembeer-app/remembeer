@@ -155,6 +155,24 @@ def test_create_snapshots_class_scores_stats_and_is_idempotent() -> None:
     )
 
 
+def test_create_interprets_naive_session_times_in_drink_timezone() -> None:
+    store = _base_store()
+    store["sessions/party-a"].update(
+        startedAt="2026-01-02T03:00:00",
+        endedAt="2026-01-02T05:00:00",
+    )
+    db = Database(store)
+
+    result = create_party_drink_command(
+        _request("create-local-time", consumedAt="2026-01-02T04:00:00+02:00"),
+        db,
+        now_provider=lambda: NOW,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+
+    assert result["drink"]["id"] == "drink-a"
+
+
 def test_missing_or_mismatched_class_gets_base_only() -> None:
     for selected_class in (None, "wine"):
         store = _base_store()

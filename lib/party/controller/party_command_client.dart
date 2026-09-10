@@ -56,7 +56,20 @@ class PartyCommandClient {
     );
     final result = await functions
         .httpsCallable(commandName)
-        .call<Object?>(data);
+        .call<Object?>(_encodeFirebaseData(data));
     return result.data;
   }
+
+  static Map<String, Object?> _encodeFirebaseData(Map<String, Object?> data) =>
+      {
+        for (final entry in data.entries)
+          entry.key: _encodeFirebaseValue(entry.value),
+      };
+
+  static Object? _encodeFirebaseValue(Object? value) => switch (value) {
+    int() => value.toDouble(),
+    Map<String, Object?>() => _encodeFirebaseData(value),
+    Iterable<Object?>() => value.map(_encodeFirebaseValue).toList(),
+    _ => value,
+  };
 }

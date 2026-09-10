@@ -101,11 +101,12 @@ def set_party_module_settings_command(
             )
         active_tournament_id = context.party.get("activeTournamentId")
         if not settings["beerpongEnabled"] and isinstance(active_tournament_id, str):
-            tournament_snapshot = transaction.get(
+            tournament_snapshot = (
                 db.collection("parties")
                 .document(session_id)
                 .collection("tournaments")
                 .document(active_tournament_id)
+                .get(transaction=transaction)
             )
             tournament = tournament_snapshot.to_dict() or {}
             if tournament_snapshot.exists and tournament.get("status") in {
@@ -199,7 +200,7 @@ def create_admin_challenge_command(
                 "A challenge is already active.",
             )
         challenge_ref = _challenge_ref(db, session_id, challenge_id)
-        if transaction.get(challenge_ref).exists:
+        if challenge_ref.get(transaction=transaction).exists:
             raise callable_error(
                 https_fn.FunctionsErrorCode.ALREADY_EXISTS,
                 "Challenge ID already exists.",
@@ -294,11 +295,12 @@ def award_admin_challenge_winner_command(
                 https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
                 "Challenge winners must be active Session members.",
             )
-        member_snapshot = transaction.get(
+        member_snapshot = (
             db.collection("parties")
             .document(session_id)
             .collection("members")
             .document(winner_user_id)
+            .get(transaction=transaction)
         )
         if (
             not member_snapshot.exists
@@ -581,7 +583,7 @@ def _load_challenge(
     challenge_id: str,
 ) -> tuple[Any, Mapping[str, Any]]:
     challenge_ref = _challenge_ref(db, session_id, challenge_id)
-    snapshot = transaction.get(challenge_ref)
+    snapshot = challenge_ref.get(transaction=transaction)
     if not snapshot.exists:
         raise callable_error(
             https_fn.FunctionsErrorCode.NOT_FOUND, "Challenge was not found."
