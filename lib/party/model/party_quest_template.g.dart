@@ -16,6 +16,10 @@ _PartyQuestTemplate _$PartyQuestTemplateFromJson(Map<String, dynamic> json) =>
       pointsUnits: (json['pointsUnits'] as num).toInt(),
       durationMinutes: (json['durationMinutes'] as num).toInt(),
       eligibilityRule: json['eligibilityRule'] as String,
+      availability: $enumDecode(
+        _$PartyQuestAvailabilityEnumMap,
+        json['availability'],
+      ),
       enabled: json['enabled'] as bool? ?? true,
       catalogVersion: (json['catalogVersion'] as num).toInt(),
       createdByUserId: json['createdByUserId'] as String?,
@@ -37,6 +41,7 @@ Map<String, dynamic> _$PartyQuestTemplateToJson(_PartyQuestTemplate instance) =>
       'pointsUnits': instance.pointsUnits,
       'durationMinutes': instance.durationMinutes,
       'eligibilityRule': instance.eligibilityRule,
+      'availability': _$PartyQuestAvailabilityEnumMap[instance.availability]!,
       'enabled': instance.enabled,
       'catalogVersion': instance.catalogVersion,
       'createdByUserId': instance.createdByUserId,
@@ -47,4 +52,10 @@ Map<String, dynamic> _$PartyQuestTemplateToJson(_PartyQuestTemplate instance) =>
 const _$PartyQuestTemplateSourceEnumMap = {
   PartyQuestTemplateSource.builtIn: 'builtIn',
   PartyQuestTemplateSource.custom: 'custom',
+};
+
+const _$PartyQuestAvailabilityEnumMap = {
+  PartyQuestAvailability.early: 'early',
+  PartyQuestAvailability.regular: 'regular',
+  PartyQuestAvailability.finalStage: 'final',
 };

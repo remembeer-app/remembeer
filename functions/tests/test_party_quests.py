@@ -6,6 +6,7 @@ import pytest
 from firebase_functions import https_fn
 from party_challenges import set_party_module_settings_command
 from party_quests import (
+    QUEST_ALLOCATION_VERSION,
     select_quest_partner_command,
     set_party_quest_schedule_command,
     set_quest_template_enabled_command,
@@ -227,6 +228,12 @@ def test_only_built_in_templates_can_be_enabled_or_disabled() -> None:
     db = Database(_base_store(active_quest=False))
     db.store["parties/party-a/questTemplates/builtin"] = {
         "source": "builtIn",
+        "availability": "early",
+        "enabled": True,
+    }
+    db.store["parties/party-a/questTemplates/other-early"] = {
+        "source": "builtIn",
+        "availability": "early",
         "enabled": True,
     }
     set_quest_template_enabled_command(
@@ -247,6 +254,31 @@ def test_only_built_in_templates_can_be_enabled_or_disabled() -> None:
             transaction_runner=_runner(Transaction(db.store)),
         )
     assert error.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
+
+
+def test_last_enabled_early_template_cannot_be_disabled() -> None:
+    store = _base_store(active_quest=False)
+    store["parties/party-a/questTemplates/only-early"] = {
+        "source": "builtIn",
+        "availability": "early",
+        "enabled": True,
+    }
+    store["parties/party-a/questTemplates/regular"] = {
+        "source": "builtIn",
+        "availability": "regular",
+        "enabled": True,
+    }
+    db = Database(store)
+
+    with pytest.raises(https_fn.HttpsError) as error:
+        set_quest_template_enabled_command(
+            _request("disable-last-early", templateId="only-early", enabled=False),
+            db,
+            transaction_runner=_runner(Transaction(db.store)),
+        )
+
+    assert error.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
+    assert "At least one early quest" in error.value.message
 
 
 def test_pending_selection_can_change_then_reciprocal_pair_awards_once() -> None:
@@ -288,26 +320,56 @@ def test_pending_selection_can_change_then_reciprocal_pair_awards_once() -> None
     )
     assert retry == matched
     assert matched["matched"] is True
-    assert db.store["parties/party-a/members/a"]["scoreUnits"] == 12_501
-    assert db.store["parties/party-a/members/b"]["scoreUnits"] == 12_500
+    assert db.store["parties/party-a/members/a"]["scoreUnits"] == 25_001
+    assert db.store["parties/party-a/members/b"]["scoreUnits"] == 25_001
     assert len(matched["awardEventIds"]) == 2
-    assert all(":allocation:v:2:member:" in value for value in matched["awardEventIds"])
+    assert all(
+        f":quest-allocation:v:{QUEST_ALLOCATION_VERSION}:member:" in value
+        for value in matched["awardEventIds"]
+    )
     events = [
         db.store[f"parties/party-a/events/{event_id}"]
         for event_id in matched["awardEventIds"]
     ]
     assert all(event["participantIds"] == ["a", "b"] for event in events)
-    assert [event["pointsUnits"] for event in events] == [12_501, 12_500]
+    assert [event["pointsUnits"] for event in events] == [25_001, 25_001]
     assert events[0]["payload"]["allocation"] == {
-        "version": 2,
-        "totalPointsUnits": 25_001,
+        "version": QUEST_ALLOCATION_VERSION,
+        "strategy": "fullPerRecipient",
+        "configuredPointsUnits": 25_001,
         "recipientCount": 2,
         "recipientIndex": 0,
-        "basePointsUnits": 12_500,
-        "remainderUnits": 1,
+        "totalAwardedPointsUnits": 50_002,
     }
     assert len(notifications.calls) == 1
     assert notifications.calls[0]["data"]["type"] == "party_quest_completed"
+    assert notifications.calls[0]["body"] == (
+        "You each earned the configured quest points."
+    )
+    assert len(
+        [path for path in db.store if path.startswith("parties/party-a/events/")]
+    ) == 2
+
+
+def test_completion_notification_formats_clean_per_recipient_points() -> None:
+    db = Database(_base_store())
+    notifications = Notifications()
+    select_quest_partner_command(
+        _request("clean-a", actor="a", questId="quest-a", selectedUserId="b"),
+        db,
+        now_provider=lambda: NOW,
+        notification_dispatcher=notifications,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+    select_quest_partner_command(
+        _request("clean-b", actor="b", questId="quest-a", selectedUserId="a"),
+        db,
+        now_provider=lambda: NOW,
+        notification_dispatcher=notifications,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+
+    assert notifications.calls[0]["body"] == "You each earned 25 points."
 
 
 def test_completed_pair_is_immutable_and_competing_completion_cannot_award() -> None:
@@ -328,7 +390,7 @@ def test_completed_pair_is_immutable_and_competing_completion_cannot_award() -> 
             transaction_runner=_runner(Transaction(db.store)),
         )
     assert error.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
-    assert db.store["parties/party-a/members/a"]["scoreUnits"] == 12_500
+    assert db.store["parties/party-a/members/a"]["scoreUnits"] == 25_000
 
 
 @pytest.mark.parametrize(

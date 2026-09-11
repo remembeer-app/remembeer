@@ -56,7 +56,29 @@ class _PartyQuestManagementSectionState
                 title: Text('No built-in quest templates'),
               ),
             ),
-          for (final template in builtInTemplates) _buildTemplate(template),
+          for (final availability in PartyQuestAvailability.values) ...[
+            if (builtInTemplates.any(
+              (template) => template.availability == availability,
+            )) ...[
+              const Gap(12),
+              Text(
+                _availabilityTitle(availability),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const Gap(2),
+              Text(
+                _availabilityDescription(availability),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const Gap(4),
+              for (final template in builtInTemplates.where(
+                (template) => template.availability == availability,
+              ))
+                _buildTemplate(template),
+            ],
+          ],
         ],
       );
     },
@@ -70,7 +92,7 @@ class _PartyQuestManagementSectionState
         title: Text(template.title),
         subtitle: Text(
           '${template.instructions}\n'
-          '${formatPartyScore(template.pointsUnits)} points · '
+          '${formatPartyScore(template.pointsUnits)} points each · '
           '${template.durationMinutes} minutes',
         ),
         value: template.enabled,
@@ -104,3 +126,17 @@ class _PartyQuestManagementSectionState
     }
   }
 }
+
+String _availabilityTitle(PartyQuestAvailability availability) =>
+    switch (availability) {
+      PartyQuestAvailability.early => 'Early quests',
+      PartyQuestAvailability.regular => 'Regular quests',
+      PartyQuestAvailability.finalStage => 'Final quests',
+    };
+
+String _availabilityDescription(PartyQuestAvailability availability) =>
+    switch (availability) {
+      PartyQuestAvailability.early => 'Available from the first quest attempt.',
+      PartyQuestAvailability.regular => 'Unlocks after 5 quest attempts.',
+      PartyQuestAvailability.finalStage => 'Unlocks after 10 quest attempts.',
+    };

@@ -23,7 +23,14 @@ from party_common import (
     run_idempotent_command,
 )
 from party_notifications import party_notification_data, send_notification_to_users
-from party_quest_catalog import validate_template_eligibility_rule
+from party_quest_catalog import (
+    EARLY_AVAILABILITY,
+    FINAL_AVAILABILITY,
+    QUEST_AVAILABILITIES,
+    REGULAR_AVAILABILITY,
+    TARGET_CLASS_PREFIX,
+    validate_template_eligibility_rule,
+)
 from party_quest_eligibility import (
     QuestMember,
     build_eligibility_context,
@@ -41,6 +48,7 @@ from party_quests import (
 )
 
 MAX_SCHEDULER_BATCH_SIZE = 100
+QUEST_CYCLE_STARTS = 18
 
 TransactionRunnerFactory = Callable[
     [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
@@ -269,7 +277,7 @@ def _attempt_quest_start(
 ) -> Mapping[str, Any]:
     party_ref = db.collection("parties").document(party_id)
     schedule = _stored_schedule(party)
-    templates = [
+    enabled_templates = [
         (snapshot.id, snapshot.to_dict() or {})
         for snapshot in _transaction_collection(
             transaction, party_ref.collection("questTemplates")
@@ -277,12 +285,22 @@ def _attempt_quest_start(
         if (snapshot.to_dict() or {}).get("enabled") is True
         and (snapshot.to_dict() or {}).get("source") == "builtIn"
     ]
+    history = _stored_string_list(party, "questCycleHistory")
+    if len(history) >= QUEST_CYCLE_STARTS:
+        raise ValueError("Stored Party questCycleHistory is invalid")
+    unlocked_availabilities = _unlocked_availabilities(len(history) + 1)
+    templates = [
+        (template_id, template)
+        for template_id, template in enabled_templates
+        if _stored_availability(template) in unlocked_availabilities
+    ]
     if not templates:
         if advance_on_failure:
             _advance_schedule(transaction, party_ref, schedule, now, random_source)
         return {"outcome": "advanced", "reason": "noEnabledTemplates"}
 
-    template_id, template = random_source.choice(templates)
+    unused_templates = [item for item in templates if item[0] not in history]
+    template_id, template = random_source.choice(unused_templates or templates)
     source = _stored_text(template, "source")
     rule = _stored_text(template, "eligibilityRule")
     try:
@@ -315,9 +333,30 @@ def _attempt_quest_start(
             )
         }
     )
+    target_class = (
+        rule.removeprefix(TARGET_CLASS_PREFIX)
+        if rule.startswith(TARGET_CLASS_PREFIX)
+        else None
+    )
+    target_class_member_ids = (
+        sorted(
+            member.user_id
+            for member in candidates
+            if member.selected_class == target_class
+        )
+        if target_class is not None
+        else []
+    )
     if len(eligible_ids) < 2:
         if advance_on_failure:
-            _advance_schedule(transaction, party_ref, schedule, now, random_source)
+            _advance_schedule(
+                transaction,
+                party_ref,
+                schedule,
+                now,
+                random_source,
+                quest_cycle_history=_next_cycle_history(history, template_id),
+            )
         return {
             "outcome": "advanced",
             "reason": "insufficientEligibility",
@@ -350,6 +389,8 @@ def _attempt_quest_start(
             "templateId": template_id,
             "titleSnapshot": title,
             "instructionsSnapshot": instructions,
+            "eligibilityRuleSnapshot": rule,
+            "targetClassMemberIds": target_class_member_ids,
             "pointsUnits": points,
             "startsAt": now,
             "endsAt": ends_at,
@@ -364,6 +405,7 @@ def _attempt_quest_start(
         party_ref,
         {
             "activeQuestId": quest_id,
+            "questCycleHistory": _next_cycle_history(history, template_id),
             "questSchedule": _next_schedule(schedule, now, random_source),
             "updatedAt": firestore.SERVER_TIMESTAMP,
         },
@@ -384,13 +426,18 @@ def _advance_schedule(
     schedule: Mapping[str, Any],
     now: datetime,
     random_source: Random,
+    *,
+    quest_cycle_history: Sequence[str] | None = None,
 ) -> None:
+    updates: dict[str, Any] = {
+        "questSchedule": _next_schedule(schedule, now, random_source),
+        "updatedAt": firestore.SERVER_TIMESTAMP,
+    }
+    if quest_cycle_history is not None:
+        updates["questCycleHistory"] = list(quest_cycle_history)
     transaction.update(
         party_ref,
-        {
-            "questSchedule": _next_schedule(schedule, now, random_source),
-            "updatedAt": firestore.SERVER_TIMESTAMP,
-        },
+        updates,
     )
 
 
@@ -556,6 +603,10 @@ def _stored_text(document: Mapping[str, Any], field: str) -> str:
 
 
 def _stored_strings(document: Mapping[str, Any], field: str) -> list[str]:
+    return list(dict.fromkeys(_stored_string_list(document, field)))
+
+
+def _stored_string_list(document: Mapping[str, Any], field: str) -> list[str]:
     value = document.get(field, [])
     if (
         not isinstance(value, Sequence)
@@ -563,13 +614,33 @@ def _stored_strings(document: Mapping[str, Any], field: str) -> list[str]:
         or any(not isinstance(item, str) or not item for item in value)
     ):
         raise ValueError(f"Stored {field} is invalid")
-    return list(dict.fromkeys(value))
+    return list(value)
 
 
 def _stored_optional_strings(document: Mapping[str, Any], field: str) -> set[str]:
     if field not in document:
         return set()
     return set(_stored_strings(document, field))
+
+
+def _stored_availability(template: Mapping[str, Any]) -> str:
+    availability = _stored_text(template, "availability")
+    if availability not in QUEST_AVAILABILITIES:
+        raise ValueError("Stored quest template availability is invalid")
+    return availability
+
+
+def _unlocked_availabilities(start_number: int) -> frozenset[str]:
+    if start_number <= 5:
+        return frozenset({EARLY_AVAILABILITY})
+    if start_number <= 10:
+        return frozenset({EARLY_AVAILABILITY, REGULAR_AVAILABILITY})
+    return frozenset({EARLY_AVAILABILITY, REGULAR_AVAILABILITY, FINAL_AVAILABILITY})
+
+
+def _next_cycle_history(history: Sequence[str], template_id: str) -> list[str]:
+    next_history = [*history, template_id]
+    return [] if len(next_history) == QUEST_CYCLE_STARTS else next_history
 
 
 def _transaction_collection(transaction: Any, collection: Any) -> list[Any]:

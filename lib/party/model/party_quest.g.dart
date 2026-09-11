@@ -11,6 +11,10 @@ _PartyQuest _$PartyQuestFromJson(Map<String, dynamic> json) => _PartyQuest(
   templateId: json['templateId'] as String,
   titleSnapshot: json['titleSnapshot'] as String,
   instructionsSnapshot: json['instructionsSnapshot'] as String,
+  eligibilityRuleSnapshot: json['eligibilityRuleSnapshot'] as String,
+  targetClassMemberIds: (json['targetClassMemberIds'] as List<dynamic>)
+      .map((e) => e as String)
+      .toList(),
   pointsUnits: (json['pointsUnits'] as num).toInt(),
   startsAt: const TimestampConverter().fromJson(json['startsAt'] as Timestamp),
   endsAt: const TimestampConverter().fromJson(json['endsAt'] as Timestamp),
@@ -42,6 +46,8 @@ Map<String, dynamic> _$PartyQuestToJson(
   'templateId': instance.templateId,
   'titleSnapshot': instance.titleSnapshot,
   'instructionsSnapshot': instance.instructionsSnapshot,
+  'eligibilityRuleSnapshot': instance.eligibilityRuleSnapshot,
+  'targetClassMemberIds': instance.targetClassMemberIds,
   'pointsUnits': instance.pointsUnits,
   'startsAt': const TimestampConverter().toJson(instance.startsAt),
   'endsAt': const TimestampConverter().toJson(instance.endsAt),

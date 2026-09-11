@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PartyQuestTemplate {
 
- String get id; PartyQuestTemplateSource get source; String? get builtInKey; String get title; String get instructions; int get pointsUnits; int get durationMinutes; String get eligibilityRule; bool get enabled; int get catalogVersion; String? get createdByUserId;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
+ String get id; PartyQuestTemplateSource get source; String? get builtInKey; String get title; String get instructions; int get pointsUnits; int get durationMinutes; String get eligibilityRule; PartyQuestAvailability get availability; bool get enabled; int get catalogVersion; String? get createdByUserId;@TimestampConverter() DateTime get createdAt;@TimestampConverter() DateTime get updatedAt;
 /// Create a copy of PartyQuestTemplate
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $PartyQuestTemplateCopyWith<PartyQuestTemplate> get copyWith => _$PartyQuestTemp
 @override
 bool operator ==(Object other) {
   final _this = this as PartyQuestTemplate;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PartyQuestTemplate&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.builtInKey, _this.builtInKey) || other.builtInKey == _this.builtInKey)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.instructions, _this.instructions) || other.instructions == _this.instructions)&&(identical(other.pointsUnits, _this.pointsUnits) || other.pointsUnits == _this.pointsUnits)&&(identical(other.durationMinutes, _this.durationMinutes) || other.durationMinutes == _this.durationMinutes)&&(identical(other.eligibilityRule, _this.eligibilityRule) || other.eligibilityRule == _this.eligibilityRule)&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.catalogVersion, _this.catalogVersion) || other.catalogVersion == _this.catalogVersion)&&(identical(other.createdByUserId, _this.createdByUserId) || other.createdByUserId == _this.createdByUserId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PartyQuestTemplate&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.source, _this.source) || other.source == _this.source)&&(identical(other.builtInKey, _this.builtInKey) || other.builtInKey == _this.builtInKey)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.instructions, _this.instructions) || other.instructions == _this.instructions)&&(identical(other.pointsUnits, _this.pointsUnits) || other.pointsUnits == _this.pointsUnits)&&(identical(other.durationMinutes, _this.durationMinutes) || other.durationMinutes == _this.durationMinutes)&&(identical(other.eligibilityRule, _this.eligibilityRule) || other.eligibilityRule == _this.eligibilityRule)&&(identical(other.availability, _this.availability) || other.availability == _this.availability)&&(identical(other.enabled, _this.enabled) || other.enabled == _this.enabled)&&(identical(other.catalogVersion, _this.catalogVersion) || other.catalogVersion == _this.catalogVersion)&&(identical(other.createdByUserId, _this.createdByUserId) || other.createdByUserId == _this.createdByUserId)&&(identical(other.createdAt, _this.createdAt) || other.createdAt == _this.createdAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PartyQuestTemplate;
-  return Object.hash(runtimeType,_this.id,_this.source,_this.builtInKey,_this.title,_this.instructions,_this.pointsUnits,_this.durationMinutes,_this.eligibilityRule,_this.enabled,_this.catalogVersion,_this.createdByUserId,_this.createdAt,_this.updatedAt);
+  return Object.hash(runtimeType,_this.id,_this.source,_this.builtInKey,_this.title,_this.instructions,_this.pointsUnits,_this.durationMinutes,_this.eligibilityRule,_this.availability,_this.enabled,_this.catalogVersion,_this.createdByUserId,_this.createdAt,_this.updatedAt);
 }
 
 @override
 String toString() {
   final _this = this as PartyQuestTemplate;
-  return 'PartyQuestTemplate(id: ${_this.id}, source: ${_this.source}, builtInKey: ${_this.builtInKey}, title: ${_this.title}, instructions: ${_this.instructions}, pointsUnits: ${_this.pointsUnits}, durationMinutes: ${_this.durationMinutes}, eligibilityRule: ${_this.eligibilityRule}, enabled: ${_this.enabled}, catalogVersion: ${_this.catalogVersion}, createdByUserId: ${_this.createdByUserId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt})';
+  return 'PartyQuestTemplate(id: ${_this.id}, source: ${_this.source}, builtInKey: ${_this.builtInKey}, title: ${_this.title}, instructions: ${_this.instructions}, pointsUnits: ${_this.pointsUnits}, durationMinutes: ${_this.durationMinutes}, eligibilityRule: ${_this.eligibilityRule}, availability: ${_this.availability}, enabled: ${_this.enabled}, catalogVersion: ${_this.catalogVersion}, createdByUserId: ${_this.createdByUserId}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $PartyQuestTemplateCopyWith<$Res>  {
   factory $PartyQuestTemplateCopyWith(PartyQuestTemplate value, $Res Function(PartyQuestTemplate) _then) = _$PartyQuestTemplateCopyWithImpl;
 @useResult
 $Res call({
- String id, PartyQuestTemplateSource source, String? builtInKey, String title, String instructions, int pointsUnits, int durationMinutes, String eligibilityRule, bool enabled, int catalogVersion, String? createdByUserId,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id, PartyQuestTemplateSource source, String? builtInKey, String title, String instructions, int pointsUnits, int durationMinutes, String eligibilityRule, PartyQuestAvailability availability, bool enabled, int catalogVersion, String? createdByUserId,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -71,7 +71,7 @@ class _$PartyQuestTemplateCopyWithImpl<$Res>
 
 /// Create a copy of PartyQuestTemplate
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? source = null,Object? builtInKey = freezed,Object? title = null,Object? instructions = null,Object? pointsUnits = null,Object? durationMinutes = null,Object? eligibilityRule = null,Object? enabled = null,Object? catalogVersion = null,Object? createdByUserId = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? source = null,Object? builtInKey = freezed,Object? title = null,Object? instructions = null,Object? pointsUnits = null,Object? durationMinutes = null,Object? eligibilityRule = null,Object? availability = null,Object? enabled = null,Object? catalogVersion = null,Object? createdByUserId = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(PartyQuestTemplate(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
@@ -81,7 +81,8 @@ as String,instructions: null == instructions ? _self.instructions : instructions
 as String,pointsUnits: null == pointsUnits ? _self.pointsUnits : pointsUnits // ignore: cast_nullable_to_non_nullable
 as int,durationMinutes: null == durationMinutes ? _self.durationMinutes : durationMinutes // ignore: cast_nullable_to_non_nullable
 as int,eligibilityRule: null == eligibilityRule ? _self.eligibilityRule : eligibilityRule // ignore: cast_nullable_to_non_nullable
-as String,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as String,availability: null == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
+as PartyQuestAvailability,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,catalogVersion: null == catalogVersion ? _self.catalogVersion : catalogVersion // ignore: cast_nullable_to_non_nullable
 as int,createdByUserId: freezed == createdByUserId ? _self.createdByUserId : createdByUserId // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -171,10 +172,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  PartyQuestTemplateSource source,  String? builtInKey,  String title,  String instructions,  int pointsUnits,  int durationMinutes,  String eligibilityRule,  bool enabled,  int catalogVersion,  String? createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  PartyQuestTemplateSource source,  String? builtInKey,  String title,  String instructions,  int pointsUnits,  int durationMinutes,  String eligibilityRule,  PartyQuestAvailability availability,  bool enabled,  int catalogVersion,  String? createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PartyQuestTemplate() when $default != null:
-return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instructions,_that.pointsUnits,_that.durationMinutes,_that.eligibilityRule,_that.enabled,_that.catalogVersion,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instructions,_that.pointsUnits,_that.durationMinutes,_that.eligibilityRule,_that.availability,_that.enabled,_that.catalogVersion,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -192,10 +193,10 @@ return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instruc
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  PartyQuestTemplateSource source,  String? builtInKey,  String title,  String instructions,  int pointsUnits,  int durationMinutes,  String eligibilityRule,  bool enabled,  int catalogVersion,  String? createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  PartyQuestTemplateSource source,  String? builtInKey,  String title,  String instructions,  int pointsUnits,  int durationMinutes,  String eligibilityRule,  PartyQuestAvailability availability,  bool enabled,  int catalogVersion,  String? createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _PartyQuestTemplate():
-return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instructions,_that.pointsUnits,_that.durationMinutes,_that.eligibilityRule,_that.enabled,_that.catalogVersion,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instructions,_that.pointsUnits,_that.durationMinutes,_that.eligibilityRule,_that.availability,_that.enabled,_that.catalogVersion,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -212,10 +213,10 @@ return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instruc
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  PartyQuestTemplateSource source,  String? builtInKey,  String title,  String instructions,  int pointsUnits,  int durationMinutes,  String eligibilityRule,  bool enabled,  int catalogVersion,  String? createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  PartyQuestTemplateSource source,  String? builtInKey,  String title,  String instructions,  int pointsUnits,  int durationMinutes,  String eligibilityRule,  PartyQuestAvailability availability,  bool enabled,  int catalogVersion,  String? createdByUserId, @TimestampConverter()  DateTime createdAt, @TimestampConverter()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _PartyQuestTemplate() when $default != null:
-return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instructions,_that.pointsUnits,_that.durationMinutes,_that.eligibilityRule,_that.enabled,_that.catalogVersion,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
+return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instructions,_that.pointsUnits,_that.durationMinutes,_that.eligibilityRule,_that.availability,_that.enabled,_that.catalogVersion,_that.createdByUserId,_that.createdAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -227,7 +228,7 @@ return $default(_that.id,_that.source,_that.builtInKey,_that.title,_that.instruc
 @JsonSerializable()
 
 class _PartyQuestTemplate implements PartyQuestTemplate {
-  const _PartyQuestTemplate({required this.id, required this.source, this.builtInKey, required this.title, required this.instructions, required this.pointsUnits, required this.durationMinutes, required this.eligibilityRule, this.enabled = true, required this.catalogVersion, this.createdByUserId, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt});
+  const _PartyQuestTemplate({required this.id, required this.source, this.builtInKey, required this.title, required this.instructions, required this.pointsUnits, required this.durationMinutes, required this.eligibilityRule, required this.availability, this.enabled = true, required this.catalogVersion, this.createdByUserId, @TimestampConverter() required this.createdAt, @TimestampConverter() required this.updatedAt});
   factory _PartyQuestTemplate.fromJson(Map<String, dynamic> json) => _$PartyQuestTemplateFromJson(json);
 
 @override final  String id;
@@ -238,6 +239,7 @@ class _PartyQuestTemplate implements PartyQuestTemplate {
 @override final  int pointsUnits;
 @override final  int durationMinutes;
 @override final  String eligibilityRule;
+@override final  PartyQuestAvailability availability;
 @override@JsonKey() final  bool enabled;
 @override final  int catalogVersion;
 @override final  String? createdByUserId;
@@ -257,18 +259,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PartyQuestTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.source, source) || other.source == source)&&(identical(other.builtInKey, builtInKey) || other.builtInKey == builtInKey)&&(identical(other.title, title) || other.title == title)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.pointsUnits, pointsUnits) || other.pointsUnits == pointsUnits)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.eligibilityRule, eligibilityRule) || other.eligibilityRule == eligibilityRule)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.catalogVersion, catalogVersion) || other.catalogVersion == catalogVersion)&&(identical(other.createdByUserId, createdByUserId) || other.createdByUserId == createdByUserId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PartyQuestTemplate&&(identical(other.id, id) || other.id == id)&&(identical(other.source, source) || other.source == source)&&(identical(other.builtInKey, builtInKey) || other.builtInKey == builtInKey)&&(identical(other.title, title) || other.title == title)&&(identical(other.instructions, instructions) || other.instructions == instructions)&&(identical(other.pointsUnits, pointsUnits) || other.pointsUnits == pointsUnits)&&(identical(other.durationMinutes, durationMinutes) || other.durationMinutes == durationMinutes)&&(identical(other.eligibilityRule, eligibilityRule) || other.eligibilityRule == eligibilityRule)&&(identical(other.availability, availability) || other.availability == availability)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.catalogVersion, catalogVersion) || other.catalogVersion == catalogVersion)&&(identical(other.createdByUserId, createdByUserId) || other.createdByUserId == createdByUserId)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,source,builtInKey,title,instructions,pointsUnits,durationMinutes,eligibilityRule,enabled,catalogVersion,createdByUserId,createdAt,updatedAt);
+    return Object.hash(runtimeType,id,source,builtInKey,title,instructions,pointsUnits,durationMinutes,eligibilityRule,availability,enabled,catalogVersion,createdByUserId,createdAt,updatedAt);
 }
 
 @override
 String toString() {
-    return 'PartyQuestTemplate(id: $id, source: $source, builtInKey: $builtInKey, title: $title, instructions: $instructions, pointsUnits: $pointsUnits, durationMinutes: $durationMinutes, eligibilityRule: $eligibilityRule, enabled: $enabled, catalogVersion: $catalogVersion, createdByUserId: $createdByUserId, createdAt: $createdAt, updatedAt: $updatedAt)';
+    return 'PartyQuestTemplate(id: $id, source: $source, builtInKey: $builtInKey, title: $title, instructions: $instructions, pointsUnits: $pointsUnits, durationMinutes: $durationMinutes, eligibilityRule: $eligibilityRule, availability: $availability, enabled: $enabled, catalogVersion: $catalogVersion, createdByUserId: $createdByUserId, createdAt: $createdAt, updatedAt: $updatedAt)';
 }
 
 
@@ -279,7 +281,7 @@ abstract mixin class _$PartyQuestTemplateCopyWith<$Res> implements $PartyQuestTe
   factory _$PartyQuestTemplateCopyWith(_PartyQuestTemplate value, $Res Function(_PartyQuestTemplate) _then) = __$PartyQuestTemplateCopyWithImpl;
 @override @useResult
 $Res call({
- String id, PartyQuestTemplateSource source, String? builtInKey, String title, String instructions, int pointsUnits, int durationMinutes, String eligibilityRule, bool enabled, int catalogVersion, String? createdByUserId,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
+ String id, PartyQuestTemplateSource source, String? builtInKey, String title, String instructions, int pointsUnits, int durationMinutes, String eligibilityRule, PartyQuestAvailability availability, bool enabled, int catalogVersion, String? createdByUserId,@TimestampConverter() DateTime createdAt,@TimestampConverter() DateTime updatedAt
 });
 
 
@@ -296,7 +298,7 @@ class __$PartyQuestTemplateCopyWithImpl<$Res>
 
 /// Create a copy of PartyQuestTemplate
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? source = null,Object? builtInKey = freezed,Object? title = null,Object? instructions = null,Object? pointsUnits = null,Object? durationMinutes = null,Object? eligibilityRule = null,Object? enabled = null,Object? catalogVersion = null,Object? createdByUserId = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? source = null,Object? builtInKey = freezed,Object? title = null,Object? instructions = null,Object? pointsUnits = null,Object? durationMinutes = null,Object? eligibilityRule = null,Object? availability = null,Object? enabled = null,Object? catalogVersion = null,Object? createdByUserId = freezed,Object? createdAt = null,Object? updatedAt = null,}) {
   return _then(_PartyQuestTemplate(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,source: null == source ? _self.source : source // ignore: cast_nullable_to_non_nullable
@@ -306,7 +308,8 @@ as String,instructions: null == instructions ? _self.instructions : instructions
 as String,pointsUnits: null == pointsUnits ? _self.pointsUnits : pointsUnits // ignore: cast_nullable_to_non_nullable
 as int,durationMinutes: null == durationMinutes ? _self.durationMinutes : durationMinutes // ignore: cast_nullable_to_non_nullable
 as int,eligibilityRule: null == eligibilityRule ? _self.eligibilityRule : eligibilityRule // ignore: cast_nullable_to_non_nullable
-as String,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as String,availability: null == availability ? _self.availability : availability // ignore: cast_nullable_to_non_nullable
+as PartyQuestAvailability,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
 as bool,catalogVersion: null == catalogVersion ? _self.catalogVersion : catalogVersion // ignore: cast_nullable_to_non_nullable
 as int,createdByUserId: freezed == createdByUserId ? _self.createdByUserId : createdByUserId // ignore: cast_nullable_to_non_nullable
 as String?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable

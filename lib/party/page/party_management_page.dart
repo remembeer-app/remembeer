@@ -17,7 +17,6 @@ import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/party/widget/beerpong_management_section.dart';
 import 'package:remembeer/party/widget/challenge_card.dart';
 import 'package:remembeer/party/widget/party_module_settings.dart';
-import 'package:remembeer/party/widget/party_quest_management_section.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/user/model/user_model.dart';
@@ -30,12 +29,12 @@ class PartyManagementPage extends StatelessWidget {
   PartyManagementPage({
     super.key,
     required this.sessionId,
+    this.tab = PartyTab.activity,
     PartyService? partyService,
     SessionService? sessionService,
     PartyChallengeService? challengeService,
     PartyQuestService? questService,
     this.beerpongService,
-    this.socialQuestSectionBuilder,
     this.beerpongSectionBuilder,
   }) : _partyService = partyService ?? get<PartyService>(),
        _sessionService = sessionService ?? get<SessionService>(),
@@ -43,12 +42,12 @@ class PartyManagementPage extends StatelessWidget {
        _questService = questService ?? get<PartyQuestService>();
 
   final String sessionId;
+  final PartyTab tab;
   final PartyService _partyService;
   final SessionService _sessionService;
   final PartyChallengeService _challengeService;
   final PartyQuestService _questService;
   final BeerpongService? beerpongService;
-  final PartyManagementSectionBuilder? socialQuestSectionBuilder;
   final PartyManagementSectionBuilder? beerpongSectionBuilder;
 
   @override
@@ -110,11 +109,18 @@ class PartyManagementPage extends StatelessWidget {
       ),
       if (state.party.moduleSettings.socialQuestsEnabled) ...[
         const Gap(24),
-        socialQuestSectionBuilder?.call(context, state) ??
-            PartyQuestManagementSection(
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.handshake_outlined),
+            title: const Text('Quest catalog'),
+            subtitle: const Text('Review and enable built-in quest templates.'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => PartyQuestManagementRoute(
               sessionId: sessionId,
-              service: _questService,
-            ),
+              tab: tab,
+            ).push<void>(context),
+          ),
+        ),
       ],
       if (state.party.moduleSettings.beerpongEnabled) ...[
         const Gap(24),

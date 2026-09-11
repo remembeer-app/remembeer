@@ -47,6 +47,12 @@ void main() {
     );
     expect(find.byType(SwitchListTile), findsOneWidget);
     expect(find.text('Built-in quest'), findsOneWidget);
+    expect(find.text('Early quests'), findsOneWidget);
+    expect(
+      find.text('Available from the first quest attempt.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('25 points each'), findsOneWidget);
     expect(find.textContaining('Choose a partner.'), findsOneWidget);
     expect(find.byIcon(Icons.handshake_outlined), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome_outlined), findsNothing);
@@ -108,6 +114,7 @@ PartyQuestTemplate _template({
   pointsUnits: 25000,
   durationMinutes: 10,
   eligibilityRule: 'allEligibleMembers',
+  availability: PartyQuestAvailability.early,
   catalogVersion: 1,
   createdAt: now,
   updatedAt: now,

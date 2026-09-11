@@ -187,6 +187,7 @@ parties/{sessionId}
     defaultDurationMinutes: int
     nextQuestAt: timestamp?
   activeQuestId: string?
+  questCycleHistory: string[]
   activeChallengeId: string?
   activeTournamentId: string?
   schemaVersion: int
@@ -250,6 +251,7 @@ parties/{sessionId}/questTemplates/{templateId}
   pointsUnits: int
   durationMinutes: int
   eligibilityRule: string
+  availability: early | regular | final
   enabled: bool
   catalogVersion: int
   createdByUserId: null
@@ -260,6 +262,8 @@ parties/{sessionId}/questTemplates/{templateId}
 - Seed a versioned built-in catalog at activation.
 - Adapt the source concepts around class, same/different accent, interaction history, rank, and beerpong team/finalist state.
 - Generalize class-specific templates across all five Remembeer classes rather than privileging the original four.
+- Seed ten early templates (the five target-class variants, same/different accent, new ally, and same/different class), seven regular rank/beerpong-team templates, and one final finalist template.
+- Every instruction tells members to have a toast and select each other. Target-class copy states that exactly one member has the target class.
 - Party admins can enable or disable built-in templates but cannot create custom templates.
 - Admins can trigger one immediate random quest attempt; automatic scheduling continues from a newly randomized interval after a successful start.
 
@@ -270,11 +274,14 @@ parties/{sessionId}/quests/{questId}
   templateId: string
   titleSnapshot: string
   instructionsSnapshot: string
+  eligibilityRuleSnapshot: string
+  targetClassMemberIds: string[]
   pointsUnits: int
   startsAt: timestamp
   endsAt: timestamp
   status: active | expired | cancelled
   eligibleMemberIds: string[]
+  eligiblePairKeys: string[]
   completedPairKeys: string[]
   createdAt: timestamp
 
@@ -287,7 +294,7 @@ parties/{sessionId}/quests/{questId}/selections/{userId}
 - Only one scheduled social quest is active per Party.
 - Eligible members are active Session members with a selected class who satisfy the template rule at creation time.
 - A member selects one eligible partner.
-- When A selects B and B has selected A, a transaction records the canonical pair key and creates one award per member. The configured points are the pair's total prize and are split deterministically between them.
+- When A selects B and B has selected A, a transaction records the canonical pair key and creates one award per member. Each member receives the full configured points using the quest-specific allocation version; quest event IDs and payloads audit that version and strategy independently from global/beer-pong splits.
 - A quest remains active until its deadline so multiple pairs can complete it.
 - Selection changes are allowed until a member's pair has completed; a completed pair is immutable.
 
@@ -434,7 +441,9 @@ Add Python scheduled functions in `europe-west4`:
 
 - Run every minute.
 - Query active Parties with social quests enabled and `nextQuestAt <= now`.
-- Transactionally verify no active quest, select an enabled template, calculate eligible members, create the quest, and set the next random interval.
+- Transactionally verify no active quest, select an enabled template from the unlocked availability groups, calculate eligible members, create the quest, append its template ID to `questCycleHistory`, and set the next random interval.
+- Unlock attempts 1-5 as early, 6-10 as early plus regular, and 11-18 as all groups. Prefer templates not yet attempted in the cycle. If admin-disabled templates exhaust the unlocked unused pool, allow an unlocked enabled repeat.
+- Reset `questCycleHistory` after the 18th recorded attempt. Automatic attempts with insufficient eligibility advance the cycle without rerolling, preventing an ineligible early template from blocking later groups. Failed manual attempts do not change the cycle.
 - Clamp admin settings to constants, for example duration 1-60 minutes and delay range 5-180 minutes.
 - If fewer than two members are eligible, advance `nextQuestAt` without creating a quest.
 - Send a push to eligible members after the transaction commits.

@@ -114,6 +114,7 @@ def test_admin_activation_creates_complete_party_and_base_awards_once() -> None:
     }
     assert db.store["sessions/session-a"]["isParty"] is True
     assert db.store["parties/session-a"]["status"] == "active"
+    assert db.store["parties/session-a"]["questCycleHistory"] == []
     assert db.store["parties/session-a/members/member"] == {
         "userId": "member",
         "selectedClass": None,
@@ -156,6 +157,7 @@ def test_activation_uses_versioned_builtin_catalog_by_default() -> None:
     assert template["builtInKey"] == "toast-with-beer"
     assert template["catalogVersion"] == 1
     assert template["eligibilityRule"] == "oneMemberClass:beer"
+    assert template["availability"] == "early"
 
 
 def test_single_member_session_can_activate_party() -> None:

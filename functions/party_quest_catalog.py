@@ -15,6 +15,15 @@ DEFAULT_DURATION_MINUTES = 15
 POINT_UNITS_PER_POINT = 1_000
 PARTY_CLASSES = ("beer", "cider", "cocktail", "spirit", "wine")
 
+EARLY_AVAILABILITY = "early"
+REGULAR_AVAILABILITY = "regular"
+FINAL_AVAILABILITY = "final"
+QUEST_AVAILABILITIES = (
+    EARLY_AVAILABILITY,
+    REGULAR_AVAILABILITY,
+    FINAL_AVAILABILITY,
+)
+
 ALL_ELIGIBLE_MEMBERS = "allEligibleMembers"
 SAME_ACCENT = "sameAccent"
 DIFFERENT_ACCENT = "differentAccent"
@@ -60,6 +69,7 @@ class BuiltInQuestTemplate:
     points_units: int
     duration_minutes: int
     eligibility_rule: str
+    availability: str
 
     @property
     def template_id(self) -> str:
@@ -74,6 +84,7 @@ class BuiltInQuestTemplate:
             "pointsUnits": self.points_units,
             "durationMinutes": self.duration_minutes,
             "eligibilityRule": self.eligibility_rule,
+            "availability": self.availability,
             "enabled": True,
             "catalogVersion": CATALOG_VERSION,
             "createdByUserId": None,
@@ -101,13 +112,14 @@ def _class_templates() -> list[BuiltInQuestTemplate]:
             key=f"toast-with-{party_class}",
             title=f"Toast with a {_CLASS_TITLES[party_class]}",
             instructions=(
-                f"Find a {_CLASS_TITLES[party_class]}, share a toast, and select "
-                "each other before time runs out. Exactly one partner must have "
-                "that class."
+                "Have a toast together and select each other before time runs "
+                "out. Exactly one of you must be a "
+                f"{_CLASS_TITLES[party_class]}."
             ),
             points_units=_points(30),
             duration_minutes=DEFAULT_DURATION_MINUTES,
             eligibility_rule=f"{TARGET_CLASS_PREFIX}{party_class}",
+            availability=EARLY_AVAILABILITY,
         )
         for party_class in PARTY_CLASSES
     ]
@@ -119,106 +131,158 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
         BuiltInQuestTemplate(
             "same-accent",
             "Color Alliance",
-            "Find someone with the same profile accent and select each other.",
+            (
+                "Have a toast with someone with the same profile accent and select "
+                "each other."
+            ),
             _points(25),
             DEFAULT_DURATION_MINUTES,
             SAME_ACCENT,
+            EARLY_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "different-accent",
             "Color Contrast",
-            "Find someone with a different profile accent and select each other.",
+            (
+                "Have a toast with someone with a different profile accent and "
+                "select each other."
+            ),
             _points(20),
             DEFAULT_DURATION_MINUTES,
             DIFFERENT_ACCENT,
+            EARLY_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "new-ally",
             "New Ally",
-            "Find someone you have not completed a social quest with before.",
+            (
+                "Have a toast with someone you have not completed a social quest "
+                "with before and select each other."
+            ),
             _points(30),
             DEFAULT_DURATION_MINUTES,
             NEW_ALLY,
+            EARLY_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "different-class",
             "Cross-Class Alliance",
-            "Find someone from a different Party class and select each other.",
+            (
+                "Have a toast with someone from a different Party class and select "
+                "each other."
+            ),
             _points(25),
             DEFAULT_DURATION_MINUTES,
             DIFFERENT_CLASS,
+            EARLY_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "same-class",
             "Class Fellowship",
-            "Find someone from your Party class and select each other.",
+            (
+                "Have a toast with someone from your Party class and select each "
+                "other."
+            ),
             _points(25),
             DEFAULT_DURATION_MINUTES,
             SAME_CLASS,
+            EARLY_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "rescue-last",
             "Rescue the Underdog",
-            "Exactly one partner must be in the bottom quarter of the ranking.",
+            (
+                "Have a toast and select each other. Exactly one of you must be in "
+                "the bottom quarter of the ranking."
+            ),
             _points(30),
             DEFAULT_DURATION_MINUTES,
             BOTTOM_QUARTER,
+            REGULAR_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "champion-challenger",
             "Challenge the Champion",
-            "Exactly one partner must currently share first place.",
+            (
+                "Have a toast and select each other. Exactly one of you must "
+                "currently share first place."
+            ),
             _points(30),
             DEFAULT_DURATION_MINUTES,
             LEADER,
+            REGULAR_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "medalist-hunt",
             "Medalist Hunt",
-            "Exactly one partner must currently hold a top-three rank.",
+            (
+                "Have a toast and select each other. Exactly one of you must "
+                "currently hold a top-three rank."
+            ),
             _points(30),
             DEFAULT_DURATION_MINUTES,
             TOP_THREE,
+            REGULAR_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "helping-hand",
             "Helping Hand",
-            "Pair one member from the top half with one from the bottom half.",
+            (
+                "Have a toast across the ranking halves and select each other. One "
+                "of you must be in the top half and the other in the bottom half."
+            ),
             _points(30),
             DEFAULT_DURATION_MINUTES,
             OPPOSITE_HALVES,
+            REGULAR_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "middle-table",
             "Close Rivals",
-            "Find someone no more than three shared ranks away from you.",
+            (
+                "Have a toast with someone no more than three shared ranks away and "
+                "select each other."
+            ),
             _points(25),
             DEFAULT_DURATION_MINUTES,
             NEARBY_RANK,
+            REGULAR_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "beerpong-diplomat",
             "Beerpong Diplomat",
-            "Find someone assigned to a different beerpong team.",
+            (
+                "Have a toast with someone assigned to a different beerpong team "
+                "and select each other."
+            ),
             _points(25),
             DEFAULT_DURATION_MINUTES,
             DIFFERENT_BEERPONG_TEAM,
+            REGULAR_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "team-morale",
             "Team Morale",
-            "Find a member of your beerpong team and select each other.",
+            (
+                "Have a toast with a member of your beerpong team and select each "
+                "other."
+            ),
             _points(25),
             DEFAULT_DURATION_MINUTES,
             SAME_BEERPONG_TEAM,
+            REGULAR_AVAILABILITY,
         ),
         BuiltInQuestTemplate(
             "final-aura",
             "Finalist Aura",
-            "At least one partner must belong to a beerpong finalist team.",
+            (
+                "Have a toast and select each other. At least one of you must belong "
+                "to a beerpong finalist team."
+            ),
             _points(30),
             DEFAULT_DURATION_MINUTES,
             FINALIST_TEAM,
+            FINAL_AVAILABILITY,
         ),
     ]
 )

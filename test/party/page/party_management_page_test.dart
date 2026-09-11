@@ -60,6 +60,16 @@ void main() {
     expect(find.byType(SwitchListTile), findsNWidgets(3));
     expect(find.text('Social quest schedule'), findsOneWidget);
     expect(find.text('Start next quest now'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Quest catalog'),
+      500,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(
+      find.text('Review and enable built-in quest templates.'),
+      findsOneWidget,
+    );
+    expect(find.byIcon(Icons.chevron_right), findsWidgets);
   });
 }
 

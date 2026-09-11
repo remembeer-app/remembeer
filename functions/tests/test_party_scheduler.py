@@ -64,6 +64,7 @@ def _party(**overrides: Any) -> dict[str, Any]:
             "nextQuestAt": NOW - timedelta(minutes=1),
         },
         "activeQuestId": None,
+        "questCycleHistory": [],
         "activeChallengeId": None,
     }
     value.update(overrides)
@@ -85,6 +86,7 @@ def _base_store(*, selected_b: str | None = "wine") -> dict[str, dict[str, Any]]
             "pointsUnits": 20_000,
             "durationMinutes": 10,
             "eligibilityRule": "differentClass",
+            "availability": "early",
             "enabled": True,
         },
         "parties/party-a/questTemplates/disabled": {
@@ -158,6 +160,8 @@ def test_due_party_claim_creates_snapshot_advances_schedule_and_notifies() -> No
     assert quest["templateId"] == "template-a"
     assert quest["eligibleMemberIds"] == ["a", "b"]
     assert quest["eligiblePairKeys"] == [canonical_pair_key("a", "b")]
+    assert quest["eligibilityRuleSnapshot"] == "differentClass"
+    assert quest["targetClassMemberIds"] == []
     assert quest["endsAt"] == NOW + timedelta(minutes=10)
     assert party["questSchedule"]["nextQuestAt"] == NOW + timedelta(minutes=5)
     assert len(notifications.calls) == 1
@@ -197,6 +201,7 @@ def test_insufficient_eligibility_advances_without_creating_or_notifying() -> No
         NOW + timedelta(minutes=5)
     )
     assert notifications.calls == []
+    assert db.store["parties/party-a"]["questCycleHistory"] == ["template-a"]
 
 
 def test_no_enabled_template_advances_schedule() -> None:
@@ -218,6 +223,7 @@ def test_scheduler_ignores_enabled_legacy_custom_templates() -> None:
         "pointsUnits": 20_000,
         "durationMinutes": 10,
         "eligibilityRule": "allEligibleMembers",
+        "availability": "early",
         "enabled": True,
     }
     db = Database(store)
@@ -303,6 +309,7 @@ def test_immediate_start_does_not_retry_after_selected_template_is_ineligible() 
         "pointsUnits": 20_000,
         "durationMinutes": 10,
         "eligibilityRule": "allEligibleMembers",
+        "availability": "early",
         "enabled": True,
     }
     db = Database(store)
@@ -324,6 +331,164 @@ def test_immediate_start_does_not_retry_after_selected_template_is_ineligible() 
     assert db.store["parties/party-a"]["activeQuestId"] is None
     assert db.store["parties/party-a"]["questSchedule"]["nextQuestAt"] == original_next
     assert notifications.calls == []
+    assert db.store["parties/party-a"]["questCycleHistory"] == []
+
+
+def _add_template(
+    store: dict[str, dict[str, Any]],
+    template_id: str,
+    availability: str,
+    *,
+    enabled: bool = True,
+    rule: str = "differentClass",
+) -> None:
+    store[f"parties/party-a/questTemplates/{template_id}"] = {
+        "source": "builtIn",
+        "title": template_id,
+        "instructions": "Have a toast and select each other.",
+        "pointsUnits": 20_000,
+        "durationMinutes": 10,
+        "eligibilityRule": rule,
+        "availability": availability,
+        "enabled": enabled,
+    }
+
+
+@pytest.mark.parametrize(
+    ("history_size", "expected_template"),
+    [(4, "z-early"), (5, "a-regular"), (10, "a-final")],
+)
+def test_successful_start_count_filters_availability_phase(
+    history_size: int,
+    expected_template: str,
+) -> None:
+    store = _base_store()
+    del store["parties/party-a/questTemplates/template-a"]
+    store["parties/party-a"]["questCycleHistory"] = [
+        f"used-{index}" for index in range(history_size)
+    ]
+    _add_template(store, "z-early", "early")
+    _add_template(store, "a-regular", "regular")
+    _add_template(store, "a-final", "final")
+    db = Database(store)
+
+    result = start_next_party_quest_command(
+        _request(f"phase-{history_size}"),
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=Notifications(),
+        transaction_runner=_runner(db),
+    )
+
+    assert result["templateId"] == expected_template
+
+
+def test_repeated_history_entries_still_unlock_the_regular_phase() -> None:
+    store = _base_store()
+    del store["parties/party-a/questTemplates/template-a"]
+    store["parties/party-a"]["questCycleHistory"] = ["same-template"] * 5
+    _add_template(store, "z-early", "early")
+    _add_template(store, "a-regular", "regular")
+    db = Database(store)
+
+    result = start_next_party_quest_command(
+        _request("repeated-history"),
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=Notifications(),
+        transaction_runner=_runner(db),
+    )
+
+    assert result["templateId"] == "a-regular"
+
+
+def test_cycle_prefers_unused_unlocked_template() -> None:
+    store = _base_store()
+    store["parties/party-a"]["questCycleHistory"] = ["template-a"]
+    _add_template(store, "z-unused", "early")
+    db = Database(store)
+
+    result = start_next_party_quest_command(
+        _request("unused"),
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=Notifications(),
+        transaction_runner=_runner(db),
+    )
+
+    assert result["templateId"] == "z-unused"
+    assert db.store["parties/party-a"]["questCycleHistory"] == [
+        "template-a",
+        "z-unused",
+    ]
+
+
+def test_disabled_unused_pool_falls_back_to_repeat_and_advances_history() -> None:
+    store = _base_store()
+    store["parties/party-a"]["questCycleHistory"] = ["template-a"]
+    _add_template(store, "unused-disabled", "early", enabled=False)
+    db = Database(store)
+
+    result = start_next_party_quest_command(
+        _request("repeat"),
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=Notifications(),
+        transaction_runner=_runner(db),
+    )
+
+    assert result["templateId"] == "template-a"
+    assert db.store["parties/party-a"]["questCycleHistory"] == [
+        "template-a",
+        "template-a",
+    ]
+
+
+def test_eighteenth_successful_start_resets_cycle_history() -> None:
+    store = _base_store()
+    store["parties/party-a"]["questCycleHistory"] = [
+        f"used-{index}" for index in range(17)
+    ]
+    store["parties/party-a/questTemplates/template-a"]["enabled"] = False
+    _add_template(store, "final-start", "final")
+    db = Database(store)
+
+    result = start_next_party_quest_command(
+        _request("cycle-reset"),
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=Notifications(),
+        transaction_runner=_runner(db),
+    )
+
+    assert result["started"] is True
+    assert result["templateId"] == "final-start"
+    assert db.store["parties/party-a"]["questCycleHistory"] == []
+
+
+def test_target_class_members_are_snapshotted_from_creation_candidates() -> None:
+    store = _base_store()
+    template = store["parties/party-a/questTemplates/template-a"]
+    template["eligibilityRule"] = "oneMemberClass:wine"
+    db = Database(store)
+
+    result = start_next_party_quest_command(
+        _request("target-snapshot"),
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=Notifications(),
+        transaction_runner=_runner(db),
+    )
+    quest = db.store[f"parties/party-a/quests/{result['questId']}"]
+
+    assert quest["eligibilityRuleSnapshot"] == "oneMemberClass:wine"
+    assert quest["targetClassMemberIds"] == ["b"]
 
 
 def test_disabled_archived_future_and_already_active_parties_are_never_claimed() -> (

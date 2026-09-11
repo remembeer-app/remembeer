@@ -38,6 +38,7 @@ class PartyQuestGamesSection extends StatelessWidget {
           if (visibleQuest != null)
             QuestCard(
               quest: visibleQuest,
+              currentUserId: state.currentMember?.userId,
               onTap: () => PartyQuestRoute(
                 sessionId: state.session.id,
                 questId: visibleQuest.id,

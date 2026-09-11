@@ -6,6 +6,7 @@ import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/party_quest.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/service/party_quest_service.dart';
@@ -116,7 +117,7 @@ class _QuestDetailPageState extends State<QuestDetailPage> {
 
     return ListView(
       children: [
-        QuestCard(quest: quest),
+        QuestCard(quest: quest, currentUserId: currentUserId),
         const Gap(20),
         if (completedPartnerId != null)
           _StateCard(
@@ -223,7 +224,8 @@ class _QuestDetailPageState extends State<QuestDetailPage> {
       );
       showSuccessNotification(
         matched
-            ? 'Mutual match! Both members earned their share of the prize.'
+            ? 'Quest completed! You each earned '
+                  '${formatPartyScore(quest.pointsUnits)} points.'
             : 'Selection saved. Waiting for mutual confirmation.',
       );
     } on Exception catch (error) {

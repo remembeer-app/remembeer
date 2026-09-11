@@ -8,6 +8,13 @@ part 'party_quest_template.g.dart';
 
 enum PartyQuestTemplateSource { builtIn, custom }
 
+enum PartyQuestAvailability {
+  early,
+  regular,
+  @JsonValue('final')
+  finalStage,
+}
+
 @freezed
 abstract class PartyQuestTemplate
     with _$PartyQuestTemplate
@@ -21,6 +28,7 @@ abstract class PartyQuestTemplate
     required int pointsUnits,
     required int durationMinutes,
     required String eligibilityRule,
+    required PartyQuestAvailability availability,
     @Default(true) bool enabled,
     required int catalogVersion,
     String? createdByUserId,

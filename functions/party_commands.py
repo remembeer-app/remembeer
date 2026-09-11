@@ -153,6 +153,7 @@ def activate_party_command(
                     "nextQuestAt": None,
                 },
                 "activeQuestId": None,
+                "questCycleHistory": [],
                 "activeChallengeId": None,
                 "activeTournamentId": None,
                 "schemaVersion": PARTY_SCHEMA_VERSION,

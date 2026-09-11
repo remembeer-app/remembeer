@@ -97,6 +97,8 @@ PartyQuest _quest(DateTime now, {List<String> completedPairKeys = const []}) =>
       templateId: 'template-1',
       titleSnapshot: 'Quest',
       instructionsSnapshot: 'Choose.',
+      eligibilityRuleSnapshot: 'allEligibleMembers',
+      targetClassMemberIds: const [],
       pointsUnits: 25000,
       startsAt: now,
       endsAt: now.add(const Duration(minutes: 5)),

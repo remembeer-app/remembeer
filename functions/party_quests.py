@@ -22,14 +22,13 @@ from party_common import (
     run_idempotent_command,
 )
 from party_notifications import party_notification_data, send_notification_to_users
+from party_quest_catalog import EARLY_AVAILABILITY
 from party_scoring import (
-    POINT_ALLOCATION_VERSION,
     SCORE_UNITS_PER_POINT,
     AwardInput,
     canonical_pair_key,
     create_awards,
     deterministic_event_id,
-    split_points_units,
 )
 
 MIN_QUEST_INTERVAL_MINUTES = 5
@@ -38,6 +37,7 @@ MIN_QUEST_DURATION_MINUTES = 1
 MAX_QUEST_DURATION_MINUTES = 60
 MIN_QUEST_POINTS_UNITS = SCORE_UNITS_PER_POINT
 MAX_QUEST_POINTS_UNITS = 500 * SCORE_UNITS_PER_POINT
+QUEST_ALLOCATION_VERSION = 1
 TransactionRunner = Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]]
 NotificationDispatcher = Callable[..., Any]
 
@@ -139,6 +139,17 @@ def set_quest_template_enabled_command(
             transaction, db, session_id, template_id
         )
         _require_built_in_template(template)
+        if (
+            not enabled
+            and template.get("availability") == EARLY_AVAILABILITY
+            and not _other_enabled_early_template(
+                transaction, db, session_id, template_id
+            )
+        ):
+            raise callable_error(
+                https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
+                "At least one early quest must remain enabled.",
+            )
         transaction.update(
             template_ref,
             {"enabled": enabled, "updatedAt": firestore.SERVER_TIMESTAMP},
@@ -252,8 +263,6 @@ def select_quest_partner_command(
         if matched:
             points = _stored_points(quest)
             participant_ids = sorted((actor_id, selected_id))
-            point_allocations = split_points_units(points, participant_ids)
-            base_points, remainder_units = divmod(points, len(participant_ids))
             awards = create_awards(
                 transaction,
                 _party_ref(db, session_id),
@@ -263,7 +272,7 @@ def select_quest_partner_command(
                         kind="socialQuest",
                         recipient_user_id=recipient,
                         participant_ids=participant_ids,
-                        points_units=allocated_points,
+                        points_units=points,
                         source_collection="quests",
                         source_id=quest_id,
                         occurred_at=now,
@@ -273,18 +282,17 @@ def select_quest_partner_command(
                             "pairKey": pair_key,
                             "title": quest.get("titleSnapshot"),
                             "allocation": {
-                                "version": POINT_ALLOCATION_VERSION,
-                                "totalPointsUnits": points,
+                                "version": QUEST_ALLOCATION_VERSION,
+                                "strategy": "fullPerRecipient",
+                                "configuredPointsUnits": points,
                                 "recipientCount": len(participant_ids),
                                 "recipientIndex": index,
-                                "basePointsUnits": base_points,
-                                "remainderUnits": remainder_units,
+                                "totalAwardedPointsUnits": points
+                                * len(participant_ids),
                             },
                         },
                     )
-                    for index, (recipient, allocated_points) in enumerate(
-                        point_allocations.items()
-                    )
+                    for index, recipient in enumerate(participant_ids)
                 ],
             )
             if not all(award.created for award in awards):
@@ -311,6 +319,7 @@ def select_quest_partner_command(
             "selectedUserId": selected_id,
             "matched": matched,
             "pairKey": pair_key if matched else None,
+            "pointsUnits": _stored_points(quest) if matched else None,
             "awardEventIds": (
                 [
                     _quest_award_id(quest_id, pair_key, recipient)
@@ -336,7 +345,7 @@ def select_quest_partner_command(
             [actor_id, selected_id],
             actor_user_id=actor_id,
             title="Social quest completed",
-            body="Your mutual selection earned points.",
+            body=_quest_completion_body(result["pointsUnits"]),
             data=party_notification_data(
                 "party_quest_completed", session_id, source_id=quest_id
             ),
@@ -391,6 +400,22 @@ def _template_ref(db: Any, session_id: str, template_id: str) -> Any:
 
 def _quest_ref(db: Any, session_id: str, quest_id: str) -> Any:
     return _party_ref(db, session_id).collection("quests").document(quest_id)
+
+
+def _other_enabled_early_template(
+    transaction: Any,
+    db: Any,
+    session_id: str,
+    template_id: str,
+) -> bool:
+    templates = _party_ref(db, session_id).collection("questTemplates")
+    return any(
+        snapshot.id != template_id
+        and (snapshot.to_dict() or {}).get("source") == "builtIn"
+        and (snapshot.to_dict() or {}).get("availability") == EARLY_AVAILABILITY
+        and (snapshot.to_dict() or {}).get("enabled") is True
+        for snapshot in templates.stream(transaction=transaction)
+    )
 
 
 def _load_template(
@@ -473,12 +498,20 @@ def _quest_award_id(quest_id: str, pair_key: str, recipient: str) -> str:
         quest_id,
         "pair",
         pair_key,
-        "allocation",
+        "quest-allocation",
         "v",
-        str(POINT_ALLOCATION_VERSION),
+        str(QUEST_ALLOCATION_VERSION),
         "member",
         recipient,
     )
+
+
+def _quest_completion_body(points_units: Any) -> str:
+    if isinstance(points_units, bool) or not isinstance(points_units, int):
+        raise TypeError("Quest completion pointsUnits must be an integer")
+    if points_units % SCORE_UNITS_PER_POINT == 0:
+        return f"You each earned {points_units // SCORE_UNITS_PER_POINT} points."
+    return "You each earned the configured quest points."
 
 
 def _now(provider: Callable[[], datetime] | None) -> datetime:
