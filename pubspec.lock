@@ -225,6 +225,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  connectivity_plus:
+    dependency: transitive
+    description:
+      name: connectivity_plus
+      sha256: b5e72753cf63becce2c61fd04dfe0f1c430cc5278b53a1342dc5ad839eab29ec
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.1.5"
+  connectivity_plus_platform_interface:
+    dependency: transitive
+    description:
+      name: connectivity_plus_platform_interface
+      sha256: "3c09627c536d22fd24691a905cdd8b14520de69da52c7a97499c8be5284a32ed"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.1.0"
   convert:
     dependency: transitive
     description:
@@ -249,6 +265,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.7"
+  cupertino_http:
+    dependency: transitive
+    description:
+      name: cupertino_http
+      sha256: "82cbec60c90bf785a047a9525688b6dacac444e177e1d5a5876963d3c50369e8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.0"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -289,6 +313,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.1.13"
+  dartvex:
+    dependency: "direct main"
+    description:
+      name: dartvex
+      sha256: "7a343c5853f25a1a136051d2d37002a0e1e3f6c230b6f24560797880de33b5d8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  dartvex_codegen:
+    dependency: "direct dev"
+    description:
+      name: dartvex_codegen
+      sha256: "07f81e4b16460eeb58673f6e514911df92ba5b38513d9207a4211a92646512a7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  dartvex_flutter:
+    dependency: "direct main"
+    description:
+      name: dartvex_flutter
+      sha256: "644374d9eedba2b24229eff1ed2d0797a043bc1212af1fc79d25c38bbccf4a5c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   dbus:
     dependency: transitive
     description:
@@ -805,6 +853,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.1.2"
+  http_profile:
+    dependency: transitive
+    description:
+      name: http_profile
+      sha256: "7e679e355b09aaee2ab5010915c932cce3f2d1c11c3b2dc177891687014ffa78"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   image_cropper:
     dependency: "direct main"
     description:
@@ -1045,6 +1101,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  nm:
+    dependency: transitive
+    description:
+      name: nm
+      sha256: "2c9aae4127bdc8993206464fcc063611e0e36e72018696cd9631023a31b24254"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   objective_c:
     dependency: transitive
     description:
