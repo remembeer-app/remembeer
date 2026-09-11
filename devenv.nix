@@ -1,4 +1,4 @@
-{ ... }:
+{ pkgs, ... }:
 
 {
   android = {
@@ -14,6 +14,20 @@
     cmdLineTools.version = "22.0";
     abis = [ "x86_64" ];
   };
+
+  languages.javascript = {
+    enable = true;
+    package = pkgs.nodejs_24;
+    npm.enable = true;
+  };
+
+  packages = with pkgs; [
+    docker-client
+    docker-compose
+    openssl
+    curl
+    jq
+  ];
 
   scripts.createm.exec = ''
     set -euo pipefail
