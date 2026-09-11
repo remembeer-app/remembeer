@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "convex dev",
     "codegen": "convex codegen",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc -p convex/tsconfig.json"
   },
   "dependencies": {
     "@convex-dev/better-auth": "0.12.3",
