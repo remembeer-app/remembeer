@@ -1,0 +1,22 @@
+{
+  "name": "remembeer-backend",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "convex dev",
+    "codegen": "convex codegen",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@convex-dev/better-auth": "0.12.3",
+    "better-auth": "1.6.17",
+    "convex": "1.41.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "typescript": "5.9.2"
+  }
+}
