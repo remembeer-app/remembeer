@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/party/model/party_member.dart';
 import 'package:remembeer/party/service/party_ranking_service.dart';
 import 'package:remembeer/party/widget/party_ranking.dart';
+import 'package:remembeer/user/constants.dart';
+import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 void main() {
@@ -22,6 +24,7 @@ void main() {
       email: 'user@example.com',
       username: 'User',
       searchableUsername: 'user',
+      accentColorKey: AccentColorKey.rose,
     );
     final semantics = tester.ensureSemantics();
 
@@ -47,6 +50,8 @@ void main() {
       find.bySemanticsLabel('Rank 1, User, 5.25 points, 2 drinks, you'),
       findsOneWidget,
     );
+    final card = tester.widget<Card>(find.byType(Card));
+    expect(card.color, accentColorPalette[AccentColorKey.rose]!.softColor);
     semantics.dispose();
   });
 }

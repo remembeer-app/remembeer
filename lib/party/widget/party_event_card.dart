@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/common/widget/drink_icon.dart';
+import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/service/party_activity_service.dart';
@@ -24,6 +26,7 @@ class PartyEventCard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isReversal = event.kind == PartyEventKind.reversal;
     final isReversed = group.isReversed;
+    final accent = membersById[event.recipientUserId]?.accentColor;
     final names = group.events
         .map(
           (item) =>
@@ -51,8 +54,16 @@ class PartyEventCard extends StatelessWidget {
           '${onEdit == null ? '' : ' Editable. Tap to edit.'}',
       child: Card(
         clipBehavior: Clip.antiAlias,
-        color: isReversal || isReversed ? colorScheme.errorContainer : null,
+        color: isReversal || isReversed
+            ? colorScheme.errorContainer
+            : accent?.softColor,
         margin: EdgeInsets.zero,
+        shape: accent == null || isReversal || isReversed
+            ? null
+            : RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(color: accent.color),
+              ),
         child: InkWell(
           excludeFromSemantics: true,
           onTap: onEdit,
@@ -68,7 +79,7 @@ class PartyEventCard extends StatelessWidget {
                   foregroundColor: isReversal || isReversed
                       ? colorScheme.onError
                       : colorScheme.onPrimaryContainer,
-                  child: Icon(_icon(event.kind)),
+                  child: _eventIcon(event),
                 ),
                 const Gap(12),
                 Expanded(
@@ -164,6 +175,24 @@ class PartyEventCard extends StatelessWidget {
     return reason is String && reason.isNotEmpty
         ? 'Reason: $reason'
         : 'This immutable entry reverses an earlier award.';
+  }
+
+  Widget _eventIcon(PartyEvent event) {
+    final category = _drinkCategory(event);
+    if (category != null) {
+      return DrinkIcon(category: category, color: Colors.black, size: 24);
+    }
+    return Icon(_icon(event.kind));
+  }
+
+  DrinkCategory? _drinkCategory(PartyEvent event) {
+    if (event.kind != PartyEventKind.drink) {
+      return null;
+    }
+    final category = event.payload['category'];
+    return category is String
+        ? DrinkCategory.values.asNameMap()[category]
+        : null;
   }
 
   IconData _icon(PartyEventKind kind) => switch (kind) {

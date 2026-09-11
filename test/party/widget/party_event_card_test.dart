@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:remembeer/common/widget/drink_icon.dart';
+import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/service/party_activity_service.dart';
 import 'package:remembeer/party/widget/party_event_card.dart';
+import 'package:remembeer/user/constants.dart';
+import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 void main() {
@@ -26,6 +30,11 @@ void main() {
 
     expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
     expect(find.text('Edit'), findsOneWidget);
+    final drinkIcon = tester.widget<DrinkIcon>(find.byType(DrinkIcon));
+    expect(drinkIcon.category, DrinkCategory.beer);
+    expect(drinkIcon.color, Colors.black);
+    final card = tester.widget<Card>(find.byType(Card));
+    expect(card.color, accentColorPalette[AccentColorKey.amber]!.softColor);
     expect(
       find.bySemanticsLabel(RegExp('Editable. Tap to edit.')),
       findsOneWidget,
@@ -76,7 +85,7 @@ PartyEvent _drinkEvent() => PartyEvent(
   sourceId: 'drink-1',
   occurredAt: DateTime.utc(2026),
   createdAt: DateTime.utc(2026),
-  payload: const {'drinkName': 'Beer', 'revision': 1},
+  payload: const {'drinkName': 'Beer', 'category': 'beer', 'revision': 1},
 );
 
 PartyEvent _questEvent(String id, String recipientUserId, int pointsUnits) =>
@@ -103,11 +112,13 @@ const _membersById = {
     email: 'alice@example.com',
     username: 'Alice',
     searchableUsername: 'alice',
+    accentColorKey: AccentColorKey.amber,
   ),
   'b': UserModel(
     id: 'b',
     email: 'bob@example.com',
     username: 'Bob',
     searchableUsername: 'bob',
+    accentColorKey: AccentColorKey.violet,
   ),
 };
