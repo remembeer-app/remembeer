@@ -11,11 +11,13 @@ _Drink _$DrinkFromJson(Map<String, dynamic> json) => _Drink(
   consumedByUserId: json['consumedByUserId'] as String,
   consumedAt: DateTime.parse(json['consumedAt'] as String),
   drinkType: DrinkTypeCore.fromJson(json['drinkType'] as Map<String, dynamic>),
+  drinkTypeId: json['drinkTypeId'] as String?,
   volumeInMilliliters: (json['volumeInMilliliters'] as num).toInt(),
   location: _$JsonConverterFromJson<GeoPoint, GeoPoint>(
     json['location'],
     const GeoPointConverter().fromJson,
   ),
+  partyRevision: (json['partyRevision'] as num?)?.toInt() ?? 1,
 );
 
 Map<String, dynamic> _$DrinkToJson(_Drink instance) => <String, dynamic>{
@@ -23,6 +25,7 @@ Map<String, dynamic> _$DrinkToJson(_Drink instance) => <String, dynamic>{
   'consumedByUserId': instance.consumedByUserId,
   'consumedAt': instance.consumedAt.toIso8601String(),
   'drinkType': instance.drinkType.toJson(),
+  'drinkTypeId': ?instance.drinkTypeId,
   'volumeInMilliliters': instance.volumeInMilliliters,
   'location': _$JsonConverterToJson<GeoPoint, GeoPoint>(
     instance.location,

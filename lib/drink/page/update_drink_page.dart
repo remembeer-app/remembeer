@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
@@ -10,10 +10,14 @@ import 'package:remembeer/ioc/ioc_container.dart';
 class UpdateDrinkPage extends StatelessWidget {
   final String sessionId;
   final String drinkId;
+  final DrinkService _drinkService;
 
-  UpdateDrinkPage({super.key, required this.sessionId, required this.drinkId});
-
-  final _drinkService = get<DrinkService>();
+  UpdateDrinkPage({
+    super.key,
+    required this.sessionId,
+    required this.drinkId,
+    DrinkService? drinkService,
+  }) : _drinkService = drinkService ?? get<DrinkService>();
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +35,23 @@ class UpdateDrinkPage extends StatelessWidget {
     DrinkWithSessionId drinkWithSessionId,
   ) {
     final drink = drinkWithSessionId.drink;
+
+    if (drinkWithSessionId.isReadOnly) {
+      return const PageTemplate(
+        title: Text('Update Drink'),
+        child: Center(
+          child: Card(
+            child: ListTile(
+              leading: Icon(Icons.archive_outlined),
+              title: Text('Archived Party'),
+              subtitle: Text(
+                'This drink is read-only because the Party has ended.',
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return PageTemplate(
       title: const Text('Update Drink'),
@@ -51,7 +72,7 @@ class UpdateDrinkPage extends StatelessWidget {
             sessionId: drinkWithSessionId.originalSessionId,
           );
           if (context.mounted) {
-            context.pop();
+            context.pop(true);
           }
         },
       ),

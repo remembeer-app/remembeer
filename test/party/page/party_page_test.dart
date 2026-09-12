@@ -15,6 +15,8 @@ import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/party/widget/party_class_selector.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/service/session_service.dart';
+import 'package:remembeer/user/constants.dart';
+import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 void main() {
@@ -31,6 +33,11 @@ void main() {
 
     expect(find.text('User'), findsOneWidget);
     expect(find.byTooltip('Manage Party'), findsOneWidget);
+    final appBar = tester.widget<AppBar>(find.byType(AppBar));
+    expect(
+      appBar.backgroundColor,
+      accentColorPalette[AccentColorKey.sky]!.softColor,
+    );
   });
 
   testWidgets('archived Party removes mutation controls', (tester) async {
@@ -144,6 +151,7 @@ class _FakeSessionService implements SessionService {
           email: 'user@example.com',
           username: 'User',
           searchableUsername: 'user',
+          accentColorKey: AccentColorKey.sky,
         ),
       ]);
 

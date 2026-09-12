@@ -98,12 +98,20 @@ class _PartyPageState extends State<PartyPage>
   ) {
     final colorScheme = Theme.of(context).colorScheme;
     final session = state.session;
+    final currentUser = members
+        .where((member) => member.id == _partyService.currentUserId)
+        .firstOrNull;
+    final accent = currentUser?.accentColor;
+    final headerBackgroundColor =
+        accent?.softColor ?? colorScheme.errorContainer;
+    final headerForegroundColor =
+        accent?.textColor ?? colorScheme.onErrorContainer;
 
     return PageTemplate(
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.celebration),
+          Icon(Icons.celebration, color: accent?.color),
           const Gap(8),
           Flexible(child: Text(session.name, overflow: TextOverflow.ellipsis)),
         ],
@@ -120,8 +128,8 @@ class _PartyPageState extends State<PartyPage>
               ),
             ]
           : null,
-      appBarBackgroundColor: colorScheme.errorContainer,
-      appBarForegroundColor: colorScheme.onErrorContainer,
+      appBarBackgroundColor: headerBackgroundColor,
+      appBarForegroundColor: headerForegroundColor,
       padding: EdgeInsets.zero,
       floatingActionButton: state.isActive && session.hasFreeSpace
           ? GestureDetector(
@@ -140,13 +148,13 @@ class _PartyPageState extends State<PartyPage>
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            color: colorScheme.errorContainer,
+            color: headerBackgroundColor,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: Row(
               children: [
                 Icon(
                   state.isActive ? Icons.local_fire_department : Icons.archive,
-                  color: colorScheme.onErrorContainer,
+                  color: accent?.color ?? headerForegroundColor,
                 ),
                 const Gap(12),
                 Expanded(
@@ -154,24 +162,24 @@ class _PartyPageState extends State<PartyPage>
                     state.isActive
                         ? '${members.length} participants · Party in progress'
                         : '${members.length} participants · Archived Party',
-                    style: TextStyle(color: colorScheme.onErrorContainer),
+                    style: TextStyle(color: headerForegroundColor),
                   ),
                 ),
               ],
             ),
           ),
           Material(
-            color: colorScheme.errorContainer,
+            color: headerBackgroundColor,
             child: TabBar(
               controller: _tabController,
-              indicatorColor: colorScheme.onErrorContainer,
-              labelColor: colorScheme.onErrorContainer,
-              unselectedLabelColor: colorScheme.onErrorContainer.withValues(
+              indicatorColor: accent?.color ?? headerForegroundColor,
+              labelColor: headerForegroundColor,
+              unselectedLabelColor: headerForegroundColor.withValues(
                 alpha: 0.7,
               ),
               tabs: const [
-                Tab(icon: Icon(Icons.bolt), text: 'Activity'),
                 Tab(icon: Icon(Icons.emoji_events), text: 'Ranking'),
+                Tab(icon: Icon(Icons.bolt), text: 'Activity'),
                 Tab(icon: Icon(Icons.casino), text: 'Games'),
               ],
             ),
@@ -182,12 +190,18 @@ class _PartyPageState extends State<PartyPage>
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  PartyActivityTab(sessionId: session.id, members: members),
                   PartyRankingTab(
                     sessionId: session.id,
                     members: members,
                     currentUserId: _partyService.currentUserId,
                     partyService: _partyService,
+                  ),
+                  PartyActivityTab(
+                    sessionId: session.id,
+                    members: members,
+                    drinks: session.drinks,
+                    currentUserId: _partyService.currentUserId,
+                    isPartyActive: state.isActive,
                   ),
                   PartyGamesTab(
                     state: state,

@@ -35,7 +35,7 @@ Agent-sized implementation tasks, dependencies, and shared-file ownership are in
 | Administration | All Session admins can manage Party Mode |
 | Modules | Drink scoring is core; social quests, admin challenges, and beerpong have independent toggles |
 | Social quests | Cloud-scheduled with admin-controlled duration and random interval range |
-| Quest content | Versioned built-in catalog plus party-specific custom templates |
+| Quest content | Versioned built-in catalog with per-Party enable controls |
 | Quest participants | All active members with a selected class |
 | Custom quests | Admin-defined title, instructions, points, and duration; mutual partner confirmation remains required |
 | Admin challenges | Timed and admin-created; multiple winners may be awarded |
@@ -187,6 +187,7 @@ parties/{sessionId}
     defaultDurationMinutes: int
     nextQuestAt: timestamp?
   activeQuestId: string?
+  questCycleHistory: string[]
   activeChallengeId: string?
   activeTournamentId: string?
   schemaVersion: int
@@ -243,16 +244,17 @@ parties/{sessionId}/events/{eventId}
 
 ```text
 parties/{sessionId}/questTemplates/{templateId}
-  source: builtIn | custom
+  source: builtIn
   builtInKey: string?
   title: string
   instructions: string
   pointsUnits: int
   durationMinutes: int
   eligibilityRule: string
+  availability: early | regular | final
   enabled: bool
   catalogVersion: int
-  createdByUserId: string?
+  createdByUserId: null
   createdAt: timestamp
   updatedAt: timestamp
 ```
@@ -260,7 +262,10 @@ parties/{sessionId}/questTemplates/{templateId}
 - Seed a versioned built-in catalog at activation.
 - Adapt the source concepts around class, same/different accent, interaction history, rank, and beerpong team/finalist state.
 - Generalize class-specific templates across all five Remembeer classes rather than privileging the original four.
-- Custom templates always use `eligibilityRule: allEligibleMembers`; v1 does not include a rule builder.
+- Seed ten early templates (the five target-class variants, same/different accent, new ally, and same/different class), seven regular rank/beerpong-team templates, and one final finalist template.
+- Every instruction tells members to have a toast and select each other. Target-class copy states that exactly one member has the target class.
+- Party admins can enable or disable built-in templates but cannot create custom templates.
+- Admins can trigger one immediate random quest attempt; automatic scheduling continues from a newly randomized interval after a successful start.
 
 ### Active Social Quests
 
@@ -269,11 +274,14 @@ parties/{sessionId}/quests/{questId}
   templateId: string
   titleSnapshot: string
   instructionsSnapshot: string
+  eligibilityRuleSnapshot: string
+  targetClassMemberIds: string[]
   pointsUnits: int
   startsAt: timestamp
   endsAt: timestamp
   status: active | expired | cancelled
   eligibleMemberIds: string[]
+  eligiblePairKeys: string[]
   completedPairKeys: string[]
   createdAt: timestamp
 
@@ -286,7 +294,7 @@ parties/{sessionId}/quests/{questId}/selections/{userId}
 - Only one scheduled social quest is active per Party.
 - Eligible members are active Session members with a selected class who satisfy the template rule at creation time.
 - A member selects one eligible partner.
-- When A selects B and B has selected A, a transaction records the canonical pair key and awards both members exactly once.
+- When A selects B and B has selected A, a transaction records the canonical pair key and creates one award per member. Each member receives the full configured points using the quest-specific allocation version; quest event IDs and payloads audit that version and strategy independently from global/beer-pong splits.
 - A quest remains active until its deadline so multiple pairs can complete it.
 - Selection changes are allowed until a member's pair has completed; a completed pair is immutable.
 
@@ -355,7 +363,7 @@ parties/{sessionId}/tournaments/{tournamentId}/matches/{matchId}
 - Generate the next power-of-two bracket and advance byes transactionally.
 - Admins may rename teams before the first result; roster changes require redrawing the tournament.
 - Earlier-result corrections clear dependent unfinalized results.
-- Finalization creates immutable placement events for every team member.
+- Finalization creates one immutable placement event per team member. Each configured placement value is a team prize split deterministically among that team's members.
 - A finalized tournament correction uses reversal events before replacement placement awards.
 
 ### User Profile Additions
@@ -384,7 +392,7 @@ set_beerpong_opt_in
 create_party_drink
 update_party_drink
 delete_party_drink
-create_custom_quest_template
+start_next_party_quest
 set_quest_template_enabled
 select_quest_partner
 create_admin_challenge
@@ -433,7 +441,9 @@ Add Python scheduled functions in `europe-west4`:
 
 - Run every minute.
 - Query active Parties with social quests enabled and `nextQuestAt <= now`.
-- Transactionally verify no active quest, select an enabled template, calculate eligible members, create the quest, and set the next random interval.
+- Transactionally verify no active quest, select an enabled template from the unlocked availability groups, calculate eligible members, create the quest, append its template ID to `questCycleHistory`, and set the next random interval.
+- Unlock attempts 1-5 as early, 6-10 as early plus regular, and 11-18 as all groups. Prefer templates not yet attempted in the cycle. If admin-disabled templates exhaust the unlocked unused pool, allow an unlocked enabled repeat.
+- Reset `questCycleHistory` after the 18th recorded attempt. Automatic attempts with insufficient eligibility advance the cycle without rerolling, preventing an ineligible early template from blocking later groups. Failed manual attempts do not change the cycle.
 - Clamp admin settings to constants, for example duration 1-60 minutes and delay range 5-180 minutes.
 - If fewer than two members are eligible, advance `nextQuestAt` without creating a quest.
 - Send a push to eligible members after the transaction commits.
@@ -666,7 +676,7 @@ Acceptance criteria:
 ### Milestone 4: Scheduled Social Quests
 
 - Port and generalize the built-in quest catalog.
-- Add custom templates and enable/disable controls.
+- Add built-in template enable/disable controls and an immediate-start action.
 - Add configurable duration and random interval bounds.
 - Implement scheduler claims, eligibility snapshots, mutual selections, awards, expiry, and notifications.
 

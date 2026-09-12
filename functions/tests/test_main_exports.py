@@ -17,9 +17,7 @@ CALLABLE_EXPORTS = {
     "cancel_admin_challenge",
     "reverse_admin_challenge_winner",
     "set_party_quest_schedule",
-    "create_custom_quest_template",
-    "update_custom_quest_template",
-    "delete_custom_quest_template",
+    "start_next_party_quest",
     "set_quest_template_enabled",
     "select_quest_partner",
     "set_beerpong_opt_in",
@@ -52,6 +50,15 @@ def test_all_party_functions_are_exported_in_europe_west4() -> None:
             and keyword.value.id == "REGION"
             for keyword in decorator.keywords
         )
+
+    assert (
+        not {
+            "create_custom_quest_template",
+            "update_custom_quest_template",
+            "delete_custom_quest_template",
+        }
+        & functions.keys()
+    )
 
     scheduler = functions["party_quest_scheduler"].decorator_list[0]
     assert isinstance(scheduler, ast.Call)

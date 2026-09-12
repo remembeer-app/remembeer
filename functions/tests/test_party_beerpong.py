@@ -63,8 +63,8 @@ def _party(**overrides: Any) -> dict[str, Any]:
     return value
 
 
-def _store() -> dict[str, dict[str, Any]]:
-    members = ["owner", "admin", "member-a", "member-b"]
+def _store(members: list[str] | None = None) -> dict[str, dict[str, Any]]:
+    members = members or ["owner", "admin", "member-a", "member-b"]
     store = {
         "sessions/party-a": {
             "userId": "owner",
@@ -125,7 +125,8 @@ def _create_and_enroll(db: Database, notifications: Notifications) -> int:
         transaction_runner=_runner(Transaction(db.store)),
     )
     revision = result["revision"]
-    for index, member_id in enumerate(("owner", "admin", "member-a", "member-b")):
+    member_ids = db.store["sessions/party-a"]["memberIds"]
+    for index, member_id in enumerate(member_ids):
         result = set_beerpong_opt_in_command(
             _request(
                 f"opt-{index}",
@@ -464,6 +465,85 @@ def test_finalize_is_exactly_once_and_final_correction_reverses_then_replaces() 
     assert len(replacement["awardEventIds"]) == 3
     assert all(":v:2:" in event_id for event_id in replacement["awardEventIds"])
     assert len([path for path in db.store if "/events/tournament:" in path]) == 6
+
+
+def test_placement_prizes_are_split_once_across_multi_member_teams() -> None:
+    members = ["owner", "admin", "member-a", "member-b", "member-c", "member-d"]
+    db = Database(_store(members))
+    notifications = Notifications()
+    create_request = _create_request()
+    create_request.data.update(
+        firstPlacePointsUnits=200_001,
+        secondPlacePointsUnits=100_001,
+        thirdPlacePointsUnits=50_001,
+    )
+    created = create_beerpong_tournament_command(
+        create_request,
+        db,
+        notification_dispatcher=notifications,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+    revision = created["revision"]
+    for index, member_id in enumerate(members):
+        opted_in = set_beerpong_opt_in_command(
+            _request(
+                f"multi-opt-{index}",
+                user_id=member_id,
+                optedIn=True,
+                expectedRevision=revision,
+            ),
+            db,
+            transaction_runner=_runner(Transaction(db.store)),
+        )
+        revision = opted_in["revision"]
+    revision = _draw(db, notifications, revision)
+    revision = _play_all(db, notifications, revision)
+
+    finalized = _command(
+        finalize_beerpong_tournament_command,
+        _request("multi-finalize", expectedRevision=revision),
+        db,
+        notification_dispatcher=notifications,
+    )
+
+    teams = {
+        path.rsplit("/", 1)[-1]: value
+        for path, value in db.store.items()
+        if "/teams/" in path
+    }
+    expected_totals = {1: 200_001, 2: 100_001, 3: 50_001}
+    expected_award_count = sum(
+        len(team["memberIds"])
+        for team in teams.values()
+        if team["placement"] in expected_totals
+    )
+    assert len(finalized["awardEventIds"]) == expected_award_count
+    assert all(
+        ":allocation:v:2:member:" in event_id
+        for event_id in finalized["awardEventIds"]
+    )
+    events = [
+        db.store[f"parties/party-a/events/{event_id}"]
+        for event_id in finalized["awardEventIds"]
+    ]
+    for team_id, team in teams.items():
+        placement = team["placement"]
+        team_events = [
+            event for event in events if event["payload"]["teamId"] == team_id
+        ]
+        if placement not in expected_totals:
+            assert team_events == []
+            continue
+        assert len(team_events) == len(team["memberIds"])
+        assert sum(event["pointsUnits"] for event in team_events) == expected_totals[
+            placement
+        ]
+        assert all(event["participantIds"] == team["memberIds"] for event in team_events)
+        assert all(
+            event["payload"]["allocation"]["totalPointsUnits"]
+            == expected_totals[placement]
+            for event in team_events
+        )
 
 
 @pytest.mark.parametrize(

@@ -9,31 +9,37 @@ class PartyActivityFilters {
   const PartyActivityFilters({
     this.participantIds = const {},
     this.kinds = const {},
+    this.showReversed = false,
   });
 
   final Set<String> participantIds;
   final Set<PartyEventKind> kinds;
+  final bool showReversed;
 
-  bool get isEmpty => participantIds.isEmpty && kinds.isEmpty;
+  bool get isEmpty => participantIds.isEmpty && kinds.isEmpty && !showReversed;
 
   PartyActivityFilters copyWith({
     Set<String>? participantIds,
     Set<PartyEventKind>? kinds,
+    bool? showReversed,
   }) => PartyActivityFilters(
     participantIds: participantIds ?? this.participantIds,
     kinds: kinds ?? this.kinds,
+    showReversed: showReversed ?? this.showReversed,
   );
 
   @override
   bool operator ==(Object other) =>
       other is PartyActivityFilters &&
       setEquals(participantIds, other.participantIds) &&
-      setEquals(kinds, other.kinds);
+      setEquals(kinds, other.kinds) &&
+      showReversed == other.showReversed;
 
   @override
   int get hashCode => Object.hash(
     Object.hashAllUnordered(participantIds),
     Object.hashAllUnordered(kinds),
+    showReversed,
   );
 }
 
@@ -123,7 +129,7 @@ class PartyActivityService extends ChangeNotifier {
     try {
       final page = await _fetchPage(
         sessionId: sessionId,
-        kinds: filters.kinds,
+        kinds: _queryKinds(filters.kinds),
         participantIds: filters.participantIds,
         startAfter: replace ? null : _cursor,
       );
@@ -146,6 +152,10 @@ class PartyActivityService extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+Set<PartyEventKind> _queryKinds(Set<PartyEventKind> kinds) => kinds.isEmpty
+    ? kinds
+    : Set.unmodifiable({...kinds, PartyEventKind.reversal});
 
 PartyEventPageFetcher _controllerFetcher(PartyEventController controller) {
   Future<PartyEventPage> fetch({
@@ -180,29 +190,59 @@ List<PartyEventGroup> groupPartyEvents(List<PartyEvent> events) {
   final groups = <PartyEventGroup>[];
   final groupedIndexes = <String, int>{};
   for (final event in events) {
+    final isReversed = reversedEventIds.contains(event.id);
     final canGroup =
         event.kind != PartyEventKind.drink &&
         event.kind != PartyEventKind.reversal;
-    final key =
-        '${event.kind.name}:${event.sourceCollection.name}:${event.sourceId}';
+    final key = _partyEventGroupKey(event, isReversed: isReversed);
     final existingIndex = canGroup ? groupedIndexes[key] : null;
     if (existingIndex != null) {
       final existing = groups[existingIndex];
       groups[existingIndex] = PartyEventGroup(
         events: [...existing.events, event],
-        isReversed: existing.isReversed || reversedEventIds.contains(event.id),
+        isReversed: existing.isReversed,
       );
       continue;
     }
     if (canGroup) {
       groupedIndexes[key] = groups.length;
     }
-    groups.add(
-      PartyEventGroup(
-        events: [event],
-        isReversed: reversedEventIds.contains(event.id),
-      ),
-    );
+    groups.add(PartyEventGroup(events: [event], isReversed: isReversed));
   }
   return groups;
 }
+
+List<PartyEventGroup> visiblePartyEventGroups(
+  List<PartyEvent> events, {
+  bool showReversed = false,
+}) => groupPartyEvents(events)
+    .where(
+      (group) =>
+          showReversed ||
+          (!group.isReversed &&
+              group.events.first.kind != PartyEventKind.reversal),
+    )
+    .toList();
+
+String _partyEventGroupKey(PartyEvent event, {required bool isReversed}) {
+  final sourceKey =
+      '${event.kind.name}:${event.sourceCollection.name}:${event.sourceId}';
+  final reversalKey = isReversed ? 'reversed' : 'active';
+  return switch (event.kind) {
+    PartyEventKind.socialQuest =>
+      '$sourceKey:${event.payload['pairKey'] ?? _participantKey(event)}:'
+          '${event.payload['allocationVersion']}:$reversalKey:'
+          '${event.recipientUserId}',
+    PartyEventKind.beerpongPlacement =>
+      '$sourceKey:${event.payload['generation']}:'
+          '${event.payload['teamId'] ?? _participantKey(event)}:'
+          '${event.payload['allocationVersion']}:$reversalKey:'
+          '${event.recipientUserId}',
+    PartyEventKind.adminChallenge =>
+      '$sourceKey:$reversalKey:${event.recipientUserId}',
+    _ => '$sourceKey:$reversalKey',
+  };
+}
+
+String _participantKey(PartyEvent event) =>
+    (event.participantIds.toList()..sort()).join(',');

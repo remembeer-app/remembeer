@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/party.dart';
+import 'package:remembeer/party/service/party_quest_service.dart';
 
 class PartyModuleSettingsPanel extends StatefulWidget {
   const PartyModuleSettingsPanel({
@@ -12,12 +13,16 @@ class PartyModuleSettingsPanel extends StatefulWidget {
     required this.schedule,
     required this.onSaveSettings,
     required this.onSaveSchedule,
+    required this.hasActiveQuest,
+    required this.onStartNextQuest,
   });
 
   final PartyModuleSettings settings;
   final PartyQuestSchedule schedule;
   final Future<void> Function(PartyModuleSettings settings) onSaveSettings;
   final Future<void> Function(PartyQuestSchedule schedule) onSaveSchedule;
+  final bool hasActiveQuest;
+  final Future<PartyQuestStartResult> Function() onStartNextQuest;
 
   @override
   State<PartyModuleSettingsPanel> createState() =>
@@ -31,6 +36,7 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
   late final TextEditingController _durationController;
   var _savingSettings = false;
   var _savingSchedule = false;
+  var _startingQuest = false;
 
   @override
   void initState() {
@@ -84,19 +90,6 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
           child: Column(
             children: [
               SwitchListTile(
-                secondary: const Icon(Icons.group_work_outlined),
-                title: const Text('Social quests'),
-                subtitle: const Text('Scheduled partner quests'),
-                value: _settings.socialQuestsEnabled,
-                onChanged: _savingSettings
-                    ? null
-                    : (value) => setState(
-                        () => _settings = _settings.copyWith(
-                          socialQuestsEnabled: value,
-                        ),
-                      ),
-              ),
-              SwitchListTile(
                 secondary: const Icon(Icons.flag_outlined),
                 title: const Text('Admin challenges'),
                 subtitle: const Text('Timed challenges with chosen winners'),
@@ -106,6 +99,19 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
                     : (value) => setState(
                         () => _settings = _settings.copyWith(
                           adminChallengesEnabled: value,
+                        ),
+                      ),
+              ),
+              SwitchListTile(
+                secondary: const Icon(Icons.group_work_outlined),
+                title: const Text('Social quests'),
+                subtitle: const Text('Scheduled partner quests'),
+                value: _settings.socialQuestsEnabled,
+                onChanged: _savingSettings
+                    ? null
+                    : (value) => setState(
+                        () => _settings = _settings.copyWith(
+                          socialQuestsEnabled: value,
                         ),
                       ),
               ),
@@ -161,22 +167,40 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
                     _numberField(
                       controller: _minIntervalController,
                       label: 'Minimum interval (minutes)',
+                      helperText:
+                          '$minPartyQuestIntervalMinutes-$maxPartyQuestIntervalMinutes minutes; no greater than maximum',
                     ),
                     const Gap(12),
                     _numberField(
                       controller: _maxIntervalController,
                       label: 'Maximum interval (minutes)',
+                      helperText:
+                          '$minPartyQuestIntervalMinutes-$maxPartyQuestIntervalMinutes minutes',
                     ),
                     const Gap(12),
                     _numberField(
                       controller: _durationController,
                       label: 'Default duration (minutes)',
+                      helperText:
+                          '$minPartyQuestDurationMinutes-$maxPartyQuestDurationMinutes minutes',
                     ),
                     const Gap(16),
                     FilledButton.tonal(
                       onPressed: _savingSchedule ? null : _saveSchedule,
                       child: Text(
                         _savingSchedule ? 'Saving...' : 'Save schedule',
+                      ),
+                    ),
+                    const Gap(12),
+                    OutlinedButton.icon(
+                      onPressed: widget.hasActiveQuest || _startingQuest
+                          ? null
+                          : _startNextQuest,
+                      icon: const Icon(Icons.skip_next_outlined),
+                      label: Text(
+                        _startingQuest
+                            ? 'Starting quest...'
+                            : 'Start next quest now',
                       ),
                     ),
                   ],
@@ -192,6 +216,7 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
   Widget _numberField({
     required TextEditingController controller,
     required String label,
+    required String helperText,
   }) => TextField(
     controller: controller,
     enabled: !_savingSchedule,
@@ -199,6 +224,7 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
     decoration: InputDecoration(
       labelText: label,
+      helperText: helperText,
       border: const OutlineInputBorder(),
     ),
   );
@@ -258,9 +284,37 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
     }
   }
 
+  Future<void> _startNextQuest() async {
+    setState(() => _startingQuest = true);
+    try {
+      final result = await widget.onStartNextQuest();
+      if (result.started) {
+        showSuccessNotification('Quest started.');
+      } else {
+        showNotification(_noQuestStartedMessage(result.reason));
+      }
+    } on Exception catch (error) {
+      showErrorNotification(error.toString());
+    } finally {
+      if (mounted) {
+        setState(() => _startingQuest = false);
+      }
+    }
+  }
+
   void _setScheduleText(PartyQuestSchedule schedule) {
     _minIntervalController.text = schedule.minIntervalMinutes.toString();
     _maxIntervalController.text = schedule.maxIntervalMinutes.toString();
     _durationController.text = schedule.defaultDurationMinutes.toString();
   }
 }
+
+String _noQuestStartedMessage(String? reason) => switch (reason) {
+  'noEnabledTemplates' =>
+    'No quest started. Enable at least one quest template first.',
+  'insufficientEligibility' =>
+    'No quest started. At least two eligible members are required.',
+  'activeQuestExists' => 'No quest started. A quest is already active.',
+  final reason? when reason.isNotEmpty => 'No quest started: $reason.',
+  _ => 'No quest was started.',
+};

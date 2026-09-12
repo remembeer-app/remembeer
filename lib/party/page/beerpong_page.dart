@@ -5,6 +5,7 @@ import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/beerpong_match.dart';
 import 'package:remembeer/party/model/beerpong_team.dart';
 import 'package:remembeer/party/model/beerpong_tournament.dart';
@@ -331,6 +332,14 @@ class _TournamentHeader extends StatelessWidget {
               ],
             ),
           ],
+          const Gap(12),
+          Text(
+            'Placement prizes are team totals split among team members: '
+            '${formatPartyScore(tournament.firstPlacePointsUnits)} / '
+            '${formatPartyScore(tournament.secondPlacePointsUnits)} / '
+            '${formatPartyScore(tournament.thirdPlacePointsUnits)} points.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ],
       ),
     ),

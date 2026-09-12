@@ -32,11 +32,8 @@ class _PartyStandingCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isPodium = standing.rank <= 3;
-    final color = standing.isCurrentUser
-        ? theme.colorScheme.secondaryContainer
-        : isPodium
-        ? theme.colorScheme.primaryContainer
-        : null;
+    final accent = standing.user?.accentColor;
+    final color = accent?.softColor;
     final points = formatPartyScore(standing.member.scoreUnits);
     final drinks = standing.member.drinkCount;
 
@@ -51,7 +48,12 @@ class _PartyStandingCard extends StatelessWidget {
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: isPodium
+          side: accent != null
+              ? BorderSide(
+                  color: accent.color,
+                  width: isPodium || standing.isCurrentUser ? 2 : 1,
+                )
+              : isPodium
               ? BorderSide(color: theme.colorScheme.primary, width: 2)
               : BorderSide.none,
         ),
@@ -65,6 +67,7 @@ class _PartyStandingCard extends StatelessWidget {
                   '#${standing.rank}',
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: accent?.textColor,
                   ),
                 ),
               ),
@@ -82,6 +85,7 @@ class _PartyStandingCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
+                        color: accent?.textColor,
                       ),
                     ),
                     Text('$drinks ${drinks == 1 ? 'drink' : 'drinks'}'),
@@ -96,6 +100,7 @@ class _PartyStandingCard extends StatelessWidget {
                     points,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: accent?.textColor,
                     ),
                   ),
                   const Text('points'),

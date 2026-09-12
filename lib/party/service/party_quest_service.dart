@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/controller/party_game_controller.dart';
 import 'package:remembeer/party/model/party.dart';
@@ -33,6 +32,14 @@ class PartyQuestDetailState {
         false;
     return isMutual && isComplete ? selection.selectedUserId : null;
   }
+}
+
+@immutable
+class PartyQuestStartResult {
+  const PartyQuestStartResult({required this.started, this.reason});
+
+  final bool started;
+  final String? reason;
 }
 
 class PartyQuestService {
@@ -92,38 +99,26 @@ class PartyQuestService {
     );
   }
 
-  Future<void> createTemplate({
-    required String sessionId,
-    required String title,
-    required String instructions,
-    required int points,
-    required int durationMinutes,
-  }) => _saveTemplate(
-    commandName: 'create_custom_quest_template',
-    sessionId: sessionId,
-    templateId: partyController.generateCommandId(),
-    title: title,
-    instructions: instructions,
-    points: points,
-    durationMinutes: durationMinutes,
-  );
-
-  Future<void> updateTemplate({
-    required String sessionId,
-    required String templateId,
-    required String title,
-    required String instructions,
-    required int points,
-    required int durationMinutes,
-  }) => _saveTemplate(
-    commandName: 'update_custom_quest_template',
-    sessionId: sessionId,
-    templateId: templateId,
-    title: title,
-    instructions: instructions,
-    points: points,
-    durationMinutes: durationMinutes,
-  );
+  Future<PartyQuestStartResult> startNextQuest(String sessionId) async {
+    final result = await gameController.invokeCommand(
+      commandName: 'start_next_party_quest',
+      sessionId: sessionId,
+      commandId: partyController.generateCommandId(),
+    );
+    final started = result.data['started'];
+    if (started is! bool) {
+      throw const FormatException(
+        'The server returned an invalid start quest result.',
+      );
+    }
+    final reason = result.data['reason'];
+    if (reason != null && reason is! String) {
+      throw const FormatException(
+        'The server returned an invalid start quest reason.',
+      );
+    }
+    return PartyQuestStartResult(started: started, reason: reason as String?);
+  }
 
   Future<void> setTemplateEnabled(
     String sessionId,
@@ -134,29 +129,6 @@ class PartyQuestService {
     sessionId,
     templateId,
     data: {'enabled': enabled},
-  );
-
-  Future<void> deleteTemplate(String sessionId, String templateId) =>
-      _templateCommand('delete_custom_quest_template', sessionId, templateId);
-
-  Future<void> _saveTemplate({
-    required String commandName,
-    required String sessionId,
-    required String templateId,
-    required String title,
-    required String instructions,
-    required int points,
-    required int durationMinutes,
-  }) => _templateCommand(
-    commandName,
-    sessionId,
-    templateId,
-    data: {
-      'title': title.trim(),
-      'instructions': instructions.trim(),
-      'pointsUnits': points * partyScoreUnitsPerPoint,
-      'durationMinutes': durationMinutes,
-    },
   );
 
   Future<void> _templateCommand(

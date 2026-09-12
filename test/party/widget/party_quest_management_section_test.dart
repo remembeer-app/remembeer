@@ -6,7 +6,7 @@ import 'package:remembeer/party/widget/party_quest_management_section.dart';
 import 'package:toastification/toastification.dart';
 
 void main() {
-  testWidgets('administers built-in and custom templates independently', (
+  testWidgets('shows enable toggles for built-in templates only', (
     tester,
   ) async {
     final now = DateTime.utc(2026);
@@ -45,20 +45,33 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.byType(SwitchListTile), findsNWidgets(2));
-    expect(find.text('Edit'), findsOneWidget);
-    expect(find.text('Delete'), findsOneWidget);
-    expect(find.text('Create custom template'), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsOneWidget);
+    expect(find.text('Built-in quest'), findsOneWidget);
+    expect(find.text('Early quests'), findsOneWidget);
+    expect(
+      find.text('Available from the first quest attempt.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('25 points each'), findsOneWidget);
+    expect(find.textContaining('Choose a partner.'), findsOneWidget);
+    expect(find.byIcon(Icons.handshake_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.auto_awesome_outlined), findsNothing);
+    expect(find.text('Custom quest'), findsNothing);
+    expect(find.text('Edit'), findsNothing);
+    expect(find.text('Delete'), findsNothing);
+    expect(find.text('Create custom template'), findsNothing);
 
     await tester.tap(find.byType(SwitchListTile).first);
     await tester.pump();
 
     expect(service.enabledTemplateId, 'built-in');
     expect(service.enabledValue, isFalse);
-    await tester.pump(const Duration(seconds: 5));
+    expect(find.text('Quest template disabled.'), findsNothing);
   });
 
-  testWidgets('custom form enforces point and duration limits', (tester) async {
+  testWidgets('shows an empty state when no built-in templates exist', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       ToastificationWrapper(
         child: MaterialApp(
@@ -66,7 +79,13 @@ void main() {
             body: SingleChildScrollView(
               child: PartyQuestManagementSection(
                 sessionId: 'session-1',
-                service: _FakeQuestService(const []),
+                service: _FakeQuestService([
+                  _template(
+                    id: 'custom',
+                    source: PartyQuestTemplateSource.custom,
+                    now: DateTime.utc(2026),
+                  ),
+                ]),
               ),
             ),
           ),
@@ -75,22 +94,8 @@ void main() {
     );
     await tester.pump();
 
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Quest title'),
-      'Quest',
-    );
-    await tester.enterText(
-      find.widgetWithText(TextFormField, 'Instructions'),
-      'Choose each other.',
-    );
-    await tester.enterText(find.widgetWithText(TextFormField, 'Points'), '0');
-    await tester.enterText(find.widgetWithText(TextFormField, 'Minutes'), '61');
-    await tester.ensureVisible(find.text('Create template'));
-    await tester.tap(find.text('Create template'));
-    await tester.pump();
-
-    expect(find.text('Use 1-500.'), findsOneWidget);
-    expect(find.text('Use 1-60.'), findsOneWidget);
+    expect(find.text('No built-in quest templates'), findsOneWidget);
+    expect(find.byType(SwitchListTile), findsNothing);
   });
 }
 
@@ -109,6 +114,7 @@ PartyQuestTemplate _template({
   pointsUnits: 25000,
   durationMinutes: 10,
   eligibilityRule: 'allEligibleMembers',
+  availability: PartyQuestAvailability.early,
   catalogVersion: 1,
   createdAt: now,
   updatedAt: now,

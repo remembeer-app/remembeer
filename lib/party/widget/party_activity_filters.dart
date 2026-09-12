@@ -18,7 +18,10 @@ class PartyActivityFiltersButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final count = filters.participantIds.length + filters.kinds.length;
+    final count =
+        filters.participantIds.length +
+        filters.kinds.length +
+        (filters.showReversed ? 1 : 0);
     return Row(
       children: [
         Expanded(
@@ -73,6 +76,7 @@ class _PartyActivityFiltersSheetState
     ...widget.initialFilters.participantIds,
   };
   late final Set<PartyEventKind> _kinds = {...widget.initialFilters.kinds};
+  late bool _showReversed = widget.initialFilters.showReversed;
 
   @override
   Widget build(BuildContext context) {
@@ -131,14 +135,25 @@ class _PartyActivityFiltersSheetState
                 runSpacing: 4,
                 children: [
                   for (final kind in PartyEventKind.values)
-                    FilterChip(
-                      label: Text(kind.activityLabel),
-                      selected: _kinds.contains(kind),
-                      onSelected: (selected) => setState(() {
-                        selected ? _kinds.add(kind) : _kinds.remove(kind);
-                      }),
-                    ),
+                    if (kind != PartyEventKind.reversal)
+                      FilterChip(
+                        label: Text(kind.activityLabel),
+                        selected: _kinds.contains(kind),
+                        onSelected: (selected) => setState(() {
+                          selected ? _kinds.add(kind) : _kinds.remove(kind);
+                        }),
+                      ),
                 ],
+              ),
+              const Gap(20),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Show reversed activity'),
+                subtitle: const Text(
+                  'Include reversed awards and their reversal records.',
+                ),
+                value: _showReversed,
+                onChanged: (value) => setState(() => _showReversed = value),
               ),
               const Gap(24),
               FilledButton(
@@ -147,6 +162,7 @@ class _PartyActivityFiltersSheetState
                   PartyActivityFilters(
                     participantIds: Set.unmodifiable(_participantIds),
                     kinds: Set.unmodifiable(_kinds),
+                    showReversed: _showReversed,
                   ),
                 ),
                 child: const Text('Apply filters'),

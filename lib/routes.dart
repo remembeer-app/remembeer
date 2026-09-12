@@ -30,6 +30,7 @@ import 'package:remembeer/party/page/beerpong_page.dart';
 import 'package:remembeer/party/page/challenge_detail_page.dart';
 import 'package:remembeer/party/page/party_management_page.dart';
 import 'package:remembeer/party/page/party_page.dart';
+import 'package:remembeer/party/page/party_quest_management_page.dart';
 import 'package:remembeer/party/page/quest_detail_page.dart';
 import 'package:remembeer/session/page/add_friends_to_session_page.dart';
 import 'package:remembeer/session/page/create_session_page.dart';
@@ -134,7 +135,12 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             TypedGoRoute<PartyRoute>(
               path: 'parties/:sessionId',
               routes: [
-                TypedGoRoute<PartyManagementRoute>(path: 'manage'),
+                TypedGoRoute<PartyManagementRoute>(
+                  path: 'manage',
+                  routes: [
+                    TypedGoRoute<PartyQuestManagementRoute>(path: 'quests'),
+                  ],
+                ),
                 TypedGoRoute<PartyQuestRoute>(path: 'quests/:questId'),
                 TypedGoRoute<PartyChallengeRoute>(
                   path: 'challenges/:challengeId',
@@ -407,7 +413,23 @@ class PartyManagementRoute extends GoRouteData with $PartyManagementRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return PartyManagementPage(sessionId: sessionId);
+    return PartyManagementPage(sessionId: sessionId, tab: tab);
+  }
+}
+
+class PartyQuestManagementRoute extends GoRouteData
+    with $PartyQuestManagementRoute {
+  const PartyQuestManagementRoute({
+    required this.sessionId,
+    this.tab = PartyTab.activity,
+  });
+
+  final String sessionId;
+  final PartyTab tab;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PartyQuestManagementPage(sessionId: sessionId);
   }
 }
 

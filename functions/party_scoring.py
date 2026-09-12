@@ -12,6 +12,7 @@ from party_common import callable_error
 
 SCORE_UNITS_PER_POINT = 1_000
 CLASS_BONUS_PERCENT = 10
+POINT_ALLOCATION_VERSION = 2
 _AWARD_KINDS = {
     "drink",
     "socialQuest",
@@ -114,6 +115,34 @@ def deterministic_event_id(*parts: str) -> str:
     if not parts or any(not part for part in parts):
         raise ValueError("Event ID parts must not be empty")
     return ":".join(_id_part(part) for part in parts)
+
+
+def split_points_units(
+    total_points_units: int, recipient_user_ids: Sequence[str]
+) -> dict[str, int]:
+    """Split a positive total with remainder units going to lexical-first IDs."""
+
+    if isinstance(total_points_units, bool) or not isinstance(total_points_units, int):
+        raise TypeError("total_points_units must be an integer")
+    if total_points_units <= 0:
+        raise ValueError("total_points_units must be positive")
+    if isinstance(recipient_user_ids, (str, bytes)) or not recipient_user_ids:
+        raise ValueError("recipient_user_ids must not be empty")
+    if any(not isinstance(user_id, str) or not user_id for user_id in recipient_user_ids):
+        raise ValueError("recipient_user_ids must contain non-empty strings")
+    if len(set(recipient_user_ids)) != len(recipient_user_ids):
+        raise ValueError("recipient_user_ids must be unique")
+
+    sorted_recipient_ids = sorted(recipient_user_ids)
+    base_units, remainder_units = divmod(
+        total_points_units, len(sorted_recipient_ids)
+    )
+    if base_units == 0:
+        raise ValueError("total_points_units must award every recipient")
+    return {
+        user_id: base_units + (index < remainder_units)
+        for index, user_id in enumerate(sorted_recipient_ids)
+    }
 
 
 def reversal_event_id(award_event_id: str) -> str:

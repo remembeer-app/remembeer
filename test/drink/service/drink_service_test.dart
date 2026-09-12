@@ -94,11 +94,37 @@ void main() {
     expect(partyController.updatedDrink, updatedDrink);
     expect(partyController.deletedDrinkId, 'drink-1');
   });
+
+  test('Party update reuses a persisted drink type ID', () async {
+    final partyController = _FakePartyController();
+    final service = _service(
+      sessionController: _FakeSessionController(_partySession(consumedAt)),
+      partyController: partyController,
+      drinkTypeController: _FakeDrinkTypeController(shouldFail: true),
+    );
+    final oldDrink = Drink(
+      id: 'drink-1',
+      consumedByUserId: 'user-1',
+      consumedAt: consumedAt,
+      drinkType: drinkType,
+      drinkTypeId: 'persisted-type',
+      volumeInMilliliters: 500,
+    );
+
+    await service.updateDrink(
+      oldDrink: oldDrink,
+      newDrink: oldDrink.copyWith(volumeInMilliliters: 300),
+      sessionId: 'party-1',
+    );
+
+    expect(partyController.updatedDrinkTypeId, 'persisted-type');
+  });
 }
 
 DrinkService _service({
   required _FakeSessionController sessionController,
   required _FakePartyController partyController,
+  DrinkTypeController? drinkTypeController,
 }) => DrinkService(
   authService: _FakeAuthService(),
   userSettingsController: _UnusedUserSettingsController(),
@@ -108,7 +134,7 @@ DrinkService _service({
   locationService: _UnusedLocationService(),
   userStatsService: UserStatsService(),
   badgeService: BadgeService(),
-  drinkTypeController: _FakeDrinkTypeController(),
+  drinkTypeController: drinkTypeController ?? _FakeDrinkTypeController(),
   partyController: partyController,
 );
 
@@ -149,6 +175,7 @@ class _FakePartyController implements PartyController {
   String? createdDrinkTypeId;
   String? createdCommandId;
   Drink? updatedDrink;
+  String? updatedDrinkTypeId;
   String? deletedDrinkId;
 
   @override
@@ -175,6 +202,7 @@ class _FakePartyController implements PartyController {
     required Drink drink,
   }) async {
     updatedDrink = drink;
+    updatedDrinkTypeId = drinkTypeId;
     return _result(drink.id);
   }
 
@@ -206,18 +234,24 @@ class _FakePartyController implements PartyController {
 }
 
 class _FakeDrinkTypeController implements DrinkTypeController {
+  _FakeDrinkTypeController({this.shouldFail = false});
+
+  final bool shouldFail;
+
   @override
-  Stream<List<DrinkType>> get allAvailableDrinkTypesStream => Stream.value([
-    DrinkType(
-      id: 'type-1',
-      userId: 'global',
-      createdAt: DateTime.utc(2026),
-      updatedAt: DateTime.utc(2026),
-      name: 'Lager',
-      category: DrinkCategory.beer,
-      alcoholPercentage: 4.5,
-    ),
-  ]);
+  Stream<List<DrinkType>> get allAvailableDrinkTypesStream => shouldFail
+      ? Stream.error(StateError('Drink types should not be loaded.'))
+      : Stream.value([
+          DrinkType(
+            id: 'type-1',
+            userId: 'global',
+            createdAt: DateTime.utc(2026),
+            updatedAt: DateTime.utc(2026),
+            name: 'Lager',
+            category: DrinkCategory.beer,
+            alcoholPercentage: 4.5,
+          ),
+        ]);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -6,6 +7,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/firebase_options.dart';
 import 'package:remembeer/notification/model/notification_type.dart';
@@ -30,6 +32,7 @@ class NotificationService {
     region: 'europe-west4',
   );
   final _firebaseMessaging = FirebaseMessaging.instance;
+  final _localNotifications = FlutterLocalNotificationsPlugin();
   final FirebaseAuth _firebaseAuth;
   final void Function(String location) _navigate;
   final PartyNotificationRouter _partyRouter;
@@ -38,6 +41,32 @@ class NotificationService {
 
   Future<void> initialize() async {
     await _firebaseMessaging.requestPermission();
+    await _localNotifications.initialize(
+      settings: const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        iOS: DarwinInitializationSettings(
+          requestAlertPermission: false,
+          requestBadgePermission: false,
+          requestSoundPermission: false,
+        ),
+      ),
+      onDidReceiveNotificationResponse: (response) {
+        unawaited(_handleLocalNotificationTap(response));
+      },
+    );
+    await _localNotifications
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >()
+        ?.createNotificationChannel(_partyUpdatesChannel);
+
+    final localLaunch = await _localNotifications
+        .getNotificationAppLaunchDetails();
+    final localResponse = localLaunch?.notificationResponse;
+    if ((localLaunch?.didNotificationLaunchApp ?? false) &&
+        localResponse != null) {
+      unawaited(_handleLocalNotificationTap(localResponse));
+    }
 
     FirebaseMessaging.onMessage.listen(_handleForegroundNotification);
 
@@ -112,6 +141,10 @@ class NotificationService {
     final type = NotificationType.fromString(
       rawType is String ? rawType : null,
     );
+    if (type?.showsAsForegroundSystemNotification ?? false) {
+      unawaited(_showForegroundPartyNotification(message));
+      return;
+    }
 
     switch (type) {
       case NotificationType.friendRequestReceived:
@@ -135,6 +168,64 @@ class NotificationService {
         );
       case null:
         debugPrint('Unknown notification type: ${message.data['type']}');
+    }
+  }
+
+  Future<void> _showForegroundPartyNotification(RemoteMessage message) async {
+    final body = message.notification?.body ?? 'There is new Party activity.';
+    try {
+      await _localNotifications.show(
+        id: Object.hash(message.messageId, message.data['type']) & 0x7fffffff,
+        title: message.notification?.title ?? 'Party quest',
+        body: body,
+        notificationDetails: const NotificationDetails(
+          android: AndroidNotificationDetails(
+            _partyUpdatesChannelId,
+            'Party updates',
+            channelDescription: 'Quest and challenge updates',
+            importance: Importance.high,
+            priority: Priority.high,
+            category: AndroidNotificationCategory.social,
+          ),
+          iOS: DarwinNotificationDetails(
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: jsonEncode(message.data),
+      );
+    } on Object catch (error) {
+      debugPrint('Could not show foreground Party notification: $error');
+      showNotification(body);
+    }
+  }
+
+  Future<void> _handleLocalNotificationTap(
+    NotificationResponse response,
+  ) async {
+    final payload = response.payload;
+    if (payload == null) {
+      return;
+    }
+    try {
+      final decoded = jsonDecode(payload);
+      if (decoded is! Map<String, dynamic>) {
+        return;
+      }
+      if (_firebaseAuth.currentUser == null) {
+        await _firebaseAuth.authStateChanges().firstWhere(
+          (user) => user != null,
+        );
+      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        handlePartyNotificationData(
+          decoded,
+          messageId: response.id == null ? null : 'local:${response.id}',
+        );
+      });
+    } on FormatException catch (error) {
+      debugPrint('Malformed local notification payload: $error');
     }
   }
 
@@ -170,3 +261,11 @@ class NotificationService {
         });
   }
 }
+
+const _partyUpdatesChannelId = 'party_updates';
+const _partyUpdatesChannel = AndroidNotificationChannel(
+  _partyUpdatesChannelId,
+  'Party updates',
+  description: 'Quest and challenge updates',
+  importance: Importance.high,
+);

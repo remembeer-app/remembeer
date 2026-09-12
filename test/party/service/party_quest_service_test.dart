@@ -28,13 +28,11 @@ void main() {
         defaultDurationMinutes: 10,
       ),
     );
-    await service.createTemplate(
-      sessionId: 'session-1',
-      title: '  Toast  ',
-      instructions: '  Find a partner.  ',
-      points: 25,
-      durationMinutes: 10,
-    );
+    gameController.result = const PartyCommandResult({
+      'started': false,
+      'reason': 'noEnabledTemplates',
+    });
+    final startResult = await service.startNextQuest('session-1');
 
     expect(matched, isTrue);
     expect(gameController.calls[0], {
@@ -51,17 +49,28 @@ void main() {
         'defaultDurationMinutes': 10,
       },
     });
-    expect(
-      gameController.calls[2]['commandName'],
-      'create_custom_quest_template',
-    );
-    expect(gameController.calls[2]['data'], {
-      'title': 'Toast',
-      'instructions': 'Find a partner.',
-      'pointsUnits': 25000,
-      'durationMinutes': 10,
-      'templateId': 'command-3',
+    expect(gameController.calls[2], {
+      'commandName': 'start_next_party_quest',
+      'sessionId': 'session-1',
+      'commandId': 'command-3',
+      'data': <String, Object?>{},
     });
+    expect(startResult.started, isFalse);
+    expect(startResult.reason, 'noEnabledTemplates');
+  });
+
+  test('rejects malformed start quest results', () async {
+    final gameController = _FakeGameController()
+      ..result = const PartyCommandResult({'reason': 'noEnabledTemplates'});
+    final service = PartyQuestService(
+      partyController: _FakePartyController(),
+      gameController: gameController,
+    );
+
+    await expectLater(
+      service.startNextQuest('session-1'),
+      throwsA(isA<FormatException>()),
+    );
   });
 
   test('derives pending and completed mutual selection states', () {
@@ -88,6 +97,8 @@ PartyQuest _quest(DateTime now, {List<String> completedPairKeys = const []}) =>
       templateId: 'template-1',
       titleSnapshot: 'Quest',
       instructionsSnapshot: 'Choose.',
+      eligibilityRuleSnapshot: 'allEligibleMembers',
+      targetClassMemberIds: const [],
       pointsUnits: 25000,
       startsAt: now,
       endsAt: now.add(const Duration(minutes: 5)),
@@ -120,6 +131,7 @@ class _FakePartyController implements PartyController {
 
 class _FakeGameController implements PartyGameController {
   final calls = <Map<String, Object?>>[];
+  var result = const PartyCommandResult({'matched': true});
 
   @override
   Future<PartyCommandResult> invokeCommand({
@@ -134,7 +146,7 @@ class _FakeGameController implements PartyGameController {
       'commandId': commandId,
       'data': data,
     });
-    return const PartyCommandResult({'matched': true});
+    return result;
   }
 
   @override

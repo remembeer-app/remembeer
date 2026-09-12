@@ -163,6 +163,8 @@ PartyQuest _quest(
   templateId: 'template-1',
   titleSnapshot: 'Find your match',
   instructionsSnapshot: 'Choose a partner.',
+  eligibilityRuleSnapshot: 'allEligibleMembers',
+  targetClassMemberIds: const [],
   pointsUnits: 25000,
   startsAt: now.subtract(const Duration(minutes: 1)),
   endsAt: now.add(const Duration(minutes: 5)),

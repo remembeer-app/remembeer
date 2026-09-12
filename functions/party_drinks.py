@@ -65,8 +65,12 @@ def create_party_drink_command(
                 "Drink already exists.",
             )
 
-        drink_type = _load_drink_type(transaction, db, data, actor_id)
-        drink, consumed_at = _new_drink(data, drink_id, actor_id, drink_type)
+        drink_type_id, drink_type = _load_drink_type(
+            transaction, db, data, actor_id
+        )
+        drink, consumed_at = _new_drink(
+            data, drink_id, actor_id, drink_type_id, drink_type
+        )
         _require_session_time(context.session, consumed_at)
         party_ref = db.collection("parties").document(session_id)
         member_ref = party_ref.collection("members").document(actor_id)
@@ -148,8 +152,12 @@ def update_party_drink_command(
         context = load_party_context(transaction, db, session_id, actor_id)
         drinks = _stored_drinks(context.session)
         index, old_drink = _owned_drink(drinks, drink_id, actor_id)
-        drink_type = _load_drink_type(transaction, db, data, actor_id)
-        new_drink, consumed_at = _new_drink(data, drink_id, actor_id, drink_type)
+        drink_type_id, drink_type = _load_drink_type(
+            transaction, db, data, actor_id
+        )
+        new_drink, consumed_at = _new_drink(
+            data, drink_id, actor_id, drink_type_id, drink_type
+        )
         _require_session_time(context.session, consumed_at)
         old_revision = _stored_revision(old_drink)
         revision = old_revision + 1
@@ -327,6 +335,7 @@ def _new_drink(
     data: Mapping[str, Any],
     drink_id: str,
     actor_id: str,
+    drink_type_id: str,
     drink_type: Mapping[str, Any],
 ) -> tuple[dict[str, Any], datetime]:
     consumed_at = _parse_datetime(data.get("consumedAt"), "consumedAt")
@@ -337,6 +346,7 @@ def _new_drink(
         "consumedByUserId": actor_id,
         "consumedAt": consumed_at.isoformat(),
         "drinkType": dict(drink_type),
+        "drinkTypeId": drink_type_id,
         "volumeInMilliliters": volume,
         "location": location,
     }
@@ -348,7 +358,7 @@ def _load_drink_type(
     db: Any,
     data: Mapping[str, Any],
     actor_id: str,
-) -> Mapping[str, Any]:
+) -> tuple[str, Mapping[str, Any]]:
     drink_type_id = _document_id(data, "drinkTypeId")
     snapshot = db.collection("drink_types").document(drink_type_id).get(
         transaction=transaction
@@ -379,11 +389,14 @@ def _load_drink_type(
         or not 0 < percentage <= 100
     ):
         raise _failed_precondition("Stored drink type is invalid.")
-    return {
-        "name": name,
-        "category": category,
-        "alcoholPercentage": float(percentage),
-    }
+    return (
+        drink_type_id,
+        {
+            "name": name,
+            "category": category,
+            "alcoholPercentage": float(percentage),
+        },
+    )
 
 
 def _stored_drinks(session: Mapping[str, Any]) -> list[Mapping[str, Any]]:

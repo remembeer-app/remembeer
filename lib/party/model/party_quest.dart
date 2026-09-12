@@ -15,6 +15,8 @@ abstract class PartyQuest with _$PartyQuest implements Document {
     required String templateId,
     required String titleSnapshot,
     required String instructionsSnapshot,
+    required String eligibilityRuleSnapshot,
+    required List<String> targetClassMemberIds,
     required int pointsUnits,
     @TimestampConverter() required DateTime startsAt,
     @TimestampConverter() required DateTime endsAt,
