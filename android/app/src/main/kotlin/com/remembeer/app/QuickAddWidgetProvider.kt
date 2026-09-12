@@ -1,4 +1,4 @@
-package com.example.remembeer
+package com.remembeer.app
 
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
