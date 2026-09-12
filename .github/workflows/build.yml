@@ -169,7 +169,7 @@ jobs:
         run: npm ci
 
       - name: Run Firestore Emulator tests
-        run: npx firebase emulators:exec --only firestore "npm test"
+        run: npx -y firebase-tools@15 emulators:exec --only firestore "npm test"
 
   ios_build:
     name: Build iOS
