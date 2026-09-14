@@ -33,6 +33,7 @@ class SettingsPage extends StatelessWidget {
                   const Gap(8),
                   const Spacer(),
                   _buildSignOutButton(context),
+                  _buildDeleteAccountButton(context),
                 ],
               ),
             ),
@@ -62,6 +63,18 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildDeleteAccountButton(BuildContext context) {
+    return Center(
+      child: TextButton(
+        onPressed: () => const DeleteAccountRoute().push<void>(context),
+        style: TextButton.styleFrom(
+          foregroundColor: Theme.of(context).colorScheme.error,
+        ),
+        child: const Text('Delete account'),
       ),
     );
   }
