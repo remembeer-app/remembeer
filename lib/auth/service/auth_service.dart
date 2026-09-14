@@ -79,6 +79,43 @@ class AuthService {
     await user.updatePassword(newPassword);
   }
 
+  Future<void> reauthenticateWithPassword(String password) async {
+    final user = authenticatedUser;
+    final email = user.email ?? never('User does not have an email.');
+
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+    await user.reauthenticateWithCredential(credential);
+  }
+
+  Future<bool> reauthenticateWithGoogle() async {
+    try {
+      final googleUser = await GoogleSignIn.instance.authenticate();
+
+      final credential = GoogleAuthProvider.credential(
+        idToken: googleUser.authentication.idToken,
+      );
+      await authenticatedUser.reauthenticateWithCredential(credential);
+      return true;
+    } on GoogleSignInException catch (e) {
+      if (e.code == GoogleSignInExceptionCode.canceled) {
+        return false;
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> deleteAuthUser() async {
+    await authenticatedUser.delete();
+    try {
+      await GoogleSignIn.instance.disconnect();
+    } on Exception {
+      // Best effort: the Firebase account is already gone.
+    }
+  }
+
   Future<({UserCredential credential, bool isNewUser})?>
   signInWithGoogle() async {
     try {
