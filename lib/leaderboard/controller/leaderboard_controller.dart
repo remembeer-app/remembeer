@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/controller/members_crud_controller.dart';
+import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_create.dart';
@@ -22,5 +24,17 @@ class LeaderboardController
       return null;
     }
     return snapshot.docs.first.data();
+  }
+
+  Future<void> handOver({
+    required String leaderboardId,
+    required String userId,
+    required String newOwnerId,
+  }) {
+    return writeCollection.doc(leaderboardId).update({
+      userIdField: newOwnerId,
+      memberIdsField: FieldValue.arrayRemove([userId]),
+      updatedAtField: FieldValue.serverTimestamp(),
+    });
   }
 }

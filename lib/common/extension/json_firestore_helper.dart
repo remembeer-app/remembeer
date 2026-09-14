@@ -12,6 +12,8 @@ const adminIdsField = 'adminIds';
 const pictureUrlsFields = 'pictureUrls';
 const isPartyField = 'isParty';
 const accentColorKeyField = 'accentColorKey';
+const friendsField = 'friends';
+const drinksField = 'drinks';
 
 extension JsonFirestoreHelper on Map<String, dynamic> {
   Map<String, dynamic> withId(String id) {

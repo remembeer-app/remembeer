@@ -24,6 +24,13 @@ abstract class MembersCrudController<
           )
           .mapToStreamList();
 
+  Future<List<T>> allWithMember(String userId) async {
+    final snapshot = await readCollection
+        .where(memberIdsField, arrayContains: userId)
+        .get();
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
+
   Future<void> addMemberAtomic(String entityId, String memberId) {
     return writeCollection.doc(entityId).update({
       memberIdsField: FieldValue.arrayUnion([memberId]),

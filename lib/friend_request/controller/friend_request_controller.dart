@@ -48,4 +48,16 @@ class FriendRequestController
           return snapshot.docs.first.data();
         });
   }
+
+  Future<List<FriendRequest>> allInvolving(String userId) async {
+    final snapshot = await readCollection
+        .where(
+          Filter.or(
+            Filter(userIdField, isEqualTo: userId),
+            Filter(toUserIdField, isEqualTo: userId),
+          ),
+        )
+        .get();
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
 }

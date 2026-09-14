@@ -25,4 +25,8 @@ class UserSettingsController extends Controller<UserSettings> {
 
     return writeCollection.doc(userSettingsId).set(userSettings.toJson());
   }
+
+  Future<void> deleteCurrentUserSettings() {
+    return writeCollection.doc(authService.authenticatedUser.uid).delete();
+  }
 }

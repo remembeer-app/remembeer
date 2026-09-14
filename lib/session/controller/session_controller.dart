@@ -150,6 +150,33 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
     });
   }
 
+  Future<void> stripMemberAndHandOver({
+    required String sessionId,
+    required String userId,
+    String? newOwnerId,
+  }) {
+    return FirebaseFirestore.instance.runTransaction((transaction) async {
+      final snapshot = await transaction.get(readCollection.doc(sessionId));
+      final session = snapshot.data();
+      if (session == null) {
+        return;
+      }
+
+      final remainingDrinks = session.drinks
+          .where((drink) => drink.consumedByUserId != userId)
+          .map((drink) => drink.toJson())
+          .toList();
+
+      transaction.update(writeCollection.doc(sessionId), {
+        drinksField: remainingDrinks,
+        memberIdsField: FieldValue.arrayRemove([userId]),
+        adminIdsField: FieldValue.arrayRemove([userId]),
+        userIdField: ?newOwnerId,
+        updatedAtField: FieldValue.serverTimestamp(),
+      });
+    });
+  }
+
   Future<void> addAdminsAtomic(String sessionId, List<String> userIds) {
     return writeCollection.doc(sessionId).update({
       adminIdsField: FieldValue.arrayUnion(userIds),
