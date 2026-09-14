@@ -133,6 +133,18 @@ service cloud.firestore {
       return isUnchanged('adminIds') || selfRemovedFrom('adminIds');
     }
 
+    /* =========================
+       ACCOUNT DELETION HELPERS
+       ========================= */
+    // Owner leaves and hands the entity to a current member in one write.
+    function isOwnerHandOver(allowedFields) {
+      return isOwner(resource.data)
+        && onlyUpdatingFields(allowedFields)
+        && request.resource.data.userId != uid()
+        && request.resource.data.userId in resource.data.memberIds
+        && selfRemovedFrom("memberIds");
+    }
+
     function validPartyFlagUpdate() {
       return isUnchanged("isParty")
         || (
@@ -191,6 +203,8 @@ service cloud.firestore {
 
       allow update: if isOwner(resource.data)
         && ownershipUnchanged();
+
+      allow delete: if isOwner(resource.data);
     }
 
     match /friend_requests/{id} {
@@ -203,6 +217,9 @@ service cloud.firestore {
         && (resource.data.userId == uid() || resource.data.toUserId == uid())
         && resource.data.userId == request.resource.data.userId
         && resource.data.toUserId == request.resource.data.toUserId;
+
+      allow delete: if isSignedIn()
+        && (resource.data.userId == uid() || resource.data.toUserId == uid());
     }
 
     match /leaderboards/{id} {
@@ -221,6 +238,10 @@ service cloud.firestore {
             && onlySelfArrayChange("memberIds")
           )
         );
+
+      allow update: if isOwnerHandOver(["memberIds", "userId", "updatedAt"]);
+
+      allow delete: if isOwner(resource.data);
     }
 
     match /sessions/{id} {
@@ -240,6 +261,12 @@ service cloud.firestore {
               && onlyUpdatingFields(["memberIds", "adminIds", "drinks", "updatedAt"])
               && adminIdsSelfRemovalOnly())
         );
+
+      allow update: if !isPartySession(resource.data)
+        && isOwnerHandOver(["memberIds", "adminIds", "drinks", "userId", "updatedAt"]);
+
+      allow delete: if isOwner(resource.data)
+        && !isPartySession(resource.data);
     }
 
     match /user_settings/{userId} {

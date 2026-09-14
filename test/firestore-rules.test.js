@@ -6,6 +6,9 @@ const {
   assertSucceeds,
   initializeTestEnvironment,
 } = require('@firebase/rules-unit-testing');
+const firebase = require('firebase/compat/app');
+require('firebase/compat/firestore');
+const { arrayRemove } = firebase.firestore.FieldValue;
 
 const projectId = 'remembeer-rules-test';
 const partyId = 'party-active';
@@ -408,5 +411,233 @@ describe('user accent palette', () => {
     await assertSucceeds(otherRef.update({ friends: ['member'] }));
     await assertSucceeds(otherRef.update({ friends: [] }));
     await assertFails(otherRef.update({ friends: ['someone-else'] }));
+  });
+});
+
+describe('account deletion', () => {
+  const memberDb = () => testEnv.authenticatedContext('member').firestore();
+  const otherDb = () => testEnv.authenticatedContext('other').firestore();
+  const thirdDb = () => testEnv.authenticatedContext('third').firestore();
+
+  const drink = (id, consumedByUserId) => ({
+    id,
+    consumedByUserId,
+    consumedAt: '2026-09-04T19:00:00.000Z',
+    drinkType: { name: 'Beer', category: 'beer', alcoholPercentage: 4.5 },
+    volumeInMilliliters: 500,
+  });
+
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db.doc('drink_types/own').set({
+        userId: 'member',
+        name: 'IPA',
+        category: 'beer',
+        alcoholPercentage: 6,
+        deletedAt: null,
+      });
+      await db.doc('friend_requests/request').set({
+        userId: 'member',
+        toUserId: 'other',
+        senderUsername: 'Member',
+        deletedAt: null,
+      });
+      await db.doc('leaderboards/board').set({
+        userId: 'member',
+        memberIds: ['member', 'other'],
+        bannedMemberIds: [],
+        name: 'Board',
+        iconName: 'beer',
+        inviteCode: 'ABC123',
+        deletedAt: null,
+        updatedAt: 'before',
+      });
+      await db.doc('sessions/solo').set(
+        session({
+          userId: 'member',
+          memberIds: ['member'],
+          adminIds: ['member'],
+          isSoloSession: true,
+          isParty: false,
+        }),
+      );
+      await db.doc('sessions/shared').set(
+        session({
+          userId: 'member',
+          memberIds: ['member', 'other', 'third'],
+          adminIds: ['member', 'other'],
+          isParty: false,
+          drinks: [drink('d1', 'member'), drink('d2', 'other')],
+        }),
+      );
+      await db.doc('sessions/party-owned').set(
+        session({
+          userId: 'member',
+          memberIds: ['member', 'other'],
+          adminIds: ['member'],
+          isParty: true,
+        }),
+      );
+      await db.doc('user_settings/member').set({
+        defaultDrinkSize: 500,
+        notificationToken: 'token',
+      });
+    });
+  });
+
+  test('owner can hard-delete own drink type, leaderboard and non-party session', async () => {
+    await assertSucceeds(memberDb().doc('drink_types/own').delete());
+    await assertSucceeds(memberDb().doc('leaderboards/board').delete());
+    await assertSucceeds(memberDb().doc('sessions/solo').delete());
+    await assertSucceeds(memberDb().doc('sessions/shared').delete());
+  });
+
+  test('non-owner cannot hard-delete drink type, leaderboard or session', async () => {
+    await assertFails(otherDb().doc('drink_types/own').delete());
+    await assertFails(otherDb().doc('leaderboards/board').delete());
+    await assertFails(otherDb().doc('sessions/shared').delete());
+  });
+
+  test('owner cannot hard-delete a Party session', async () => {
+    await assertFails(memberDb().doc('sessions/party-owned').delete());
+  });
+
+  test('owner can hand a shared session over while leaving', async () => {
+    await assertSucceeds(
+      memberDb().doc('sessions/shared').update({
+        userId: 'other',
+        memberIds: ['other', 'third'],
+        adminIds: ['other'],
+        drinks: [drink('d2', 'other')],
+        updatedAt: 'after',
+      }),
+    );
+    const snapshot = await otherDb().doc('sessions/shared').get();
+    assert.equal(snapshot.data().userId, 'other');
+    assert.deepEqual(snapshot.data().memberIds, ['other', 'third']);
+    assert.equal(snapshot.data().drinks.length, 1);
+  });
+
+  test('owner can hand a leaderboard over while leaving', async () => {
+    await assertSucceeds(
+      memberDb().doc('leaderboards/board').update({
+        userId: 'other',
+        memberIds: ['other'],
+        updatedAt: 'after',
+      }),
+    );
+    const snapshot = await otherDb().doc('leaderboards/board').get();
+    assert.equal(snapshot.data().userId, 'other');
+  });
+
+  test('hand-over is denied for non-members, staying owners, extra fields, non-owners and Parties', async () => {
+    await assertFails(
+      memberDb().doc('leaderboards/board').update({
+        userId: 'stranger',
+        memberIds: ['other'],
+        updatedAt: 'after',
+      }),
+    );
+    await assertFails(
+      memberDb().doc('leaderboards/board').update({
+        userId: 'other',
+        memberIds: ['member', 'other'],
+        updatedAt: 'after',
+      }),
+    );
+    await assertFails(
+      memberDb().doc('leaderboards/board').update({
+        userId: 'other',
+        memberIds: ['other'],
+        name: 'Renamed',
+        updatedAt: 'after',
+      }),
+    );
+    await assertFails(
+      otherDb().doc('leaderboards/board').update({
+        userId: 'other',
+        memberIds: ['other'],
+        updatedAt: 'after',
+      }),
+    );
+    await assertFails(
+      memberDb().doc('sessions/party-owned').update({
+        userId: 'other',
+        memberIds: ['other'],
+        adminIds: [],
+        drinks: [],
+        updatedAt: 'after',
+      }),
+    );
+  });
+
+  test('an admin member can strip own drinks and leave, removing self from admins', async () => {
+    await assertSucceeds(
+      otherDb().doc('sessions/shared').update({
+        drinks: [drink('d1', 'member')],
+        memberIds: arrayRemove('other'),
+        adminIds: arrayRemove('other'),
+        updatedAt: 'after',
+      }),
+    );
+    const snapshot = await memberDb().doc('sessions/shared').get();
+    assert.deepEqual(snapshot.data().memberIds, ['member', 'third']);
+    assert.deepEqual(snapshot.data().adminIds, ['member']);
+    assert.equal(snapshot.data().drinks.length, 1);
+  });
+
+  test('a plain member can strip own drinks and leave although not an admin', async () => {
+    await assertSucceeds(
+      thirdDb().doc('sessions/shared').update({
+        drinks: [drink('d1', 'member'), drink('d2', 'other')],
+        memberIds: arrayRemove('third'),
+        adminIds: arrayRemove('third'),
+        updatedAt: 'after',
+      }),
+    );
+    const snapshot = await memberDb().doc('sessions/shared').get();
+    assert.deepEqual(snapshot.data().memberIds, ['member', 'other']);
+    assert.deepEqual(snapshot.data().adminIds, ['member', 'other']);
+  });
+
+  test('sender and recipient can delete a friend request, a third user cannot', async () => {
+    await assertFails(thirdDb().doc('friend_requests/request').delete());
+    await assertSucceeds(otherDb().doc('friend_requests/request').delete());
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc('friend_requests/request').set({
+        userId: 'member',
+        toUserId: 'other',
+        senderUsername: 'Member',
+        deletedAt: null,
+      });
+    });
+    await assertSucceeds(memberDb().doc('friend_requests/request').delete());
+  });
+
+  test('owner can write the anonymized profile, another user cannot', async () => {
+    const anonymized = {
+      email: '',
+      username: 'Deleted user',
+      searchableUsername: '',
+      accentColorKey: 'amber',
+      avatarUrl: null,
+      friends: [],
+      monthlyStats: {},
+      unlockedBadges: {},
+      endOfDayBoundary: { hour: 6, minute: 0 },
+      deletedAt: 'now',
+      updatedAt: 'now',
+    };
+    await assertFails(otherDb().doc('users/member').set(anonymized));
+    await assertSucceeds(memberDb().doc('users/member').set(anonymized));
+    const snapshot = await otherDb().doc('users/member').get();
+    assert.equal(snapshot.data().username, 'Deleted user');
+    assert.equal(snapshot.data().email, '');
+  });
+
+  test('owner can delete own user settings, another user cannot', async () => {
+    await assertFails(otherDb().doc('user_settings/member').delete());
+    await assertSucceeds(memberDb().doc('user_settings/member').delete());
   });
 });
