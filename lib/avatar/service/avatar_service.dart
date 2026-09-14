@@ -42,6 +42,11 @@ class AvatarService {
   }
 
   Future<void> deleteAvatar() async {
+    await deleteAvatarFile();
+    await _updateUserAvatar(null);
+  }
+
+  Future<void> deleteAvatarFile() async {
     try {
       await _storage.ref().child(_avatarPath).delete();
     } on FirebaseException catch (e) {
@@ -49,8 +54,6 @@ class AvatarService {
         rethrow;
       }
     }
-
-    await _updateUserAvatar(null);
   }
 
   Future<File?> _pickImage(ImageSource source) async {
