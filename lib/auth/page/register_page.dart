@@ -9,6 +9,7 @@ import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/legal/widget/privacy_policy_notice.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/service/user_service.dart';
@@ -72,6 +73,8 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const Gap(16),
               _buildLoginLink(context, form),
+              const Gap(8),
+              const PrivacyPolicyNotice(),
             ],
           ),
         ),

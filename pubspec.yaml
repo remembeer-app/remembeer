@@ -58,6 +58,7 @@ dependencies:
   persistent_bottom_nav_bar_v2: ^6.4.0
   rxdart: ^0.28.0
   toastification: ^3.2.0
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   build_runner: ^2.15.1

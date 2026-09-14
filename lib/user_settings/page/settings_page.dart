@@ -3,6 +3,8 @@ import 'package:gap/gap.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/legal/constants.dart';
+import 'package:remembeer/legal/util/legal_links.dart';
 import 'package:remembeer/routes.dart';
 
 const _divider = Divider(height: 1);
@@ -30,6 +32,8 @@ class SettingsPage extends StatelessWidget {
                   _buildDrinkSettingsBox(context),
                   _buildHeading('Experience'),
                   _buildExperienceSettingsBox(context),
+                  _buildHeading('About'),
+                  _buildAboutBox(context),
                   const Gap(8),
                   const Spacer(),
                   _buildSignOutButton(context),
@@ -97,9 +101,11 @@ class SettingsPage extends StatelessWidget {
   Widget _buildSettingsCard({
     required String title,
     required VoidCallback onTap,
+    String? subtitle,
   }) {
     return ListTile(
       title: Text(title),
+      subtitle: subtitle != null ? Text(subtitle) : null,
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
     );
@@ -170,6 +176,21 @@ class SettingsPage extends StatelessWidget {
         _buildSettingsCard(
           title: 'End of day boundary',
           onTap: () => const EndOfDaySettingsRoute().push<void>(context),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAboutBox(BuildContext context) {
+    return _buildSettingsBox(
+      context: context,
+      children: [
+        _buildSettingsCard(title: 'Privacy policy', onTap: openPrivacyPolicy),
+        _divider,
+        _buildSettingsCard(
+          title: 'Contact support',
+          subtitle: supportEmail,
+          onTap: contactSupport,
         ),
       ],
     );
