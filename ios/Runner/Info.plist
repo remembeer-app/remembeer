@@ -27,11 +27,11 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
-	<string>Remembeer needs access to your camera to let you take a photo for your custom avatar.</string>
+	<string>Remembeer uses the camera so you can take a photo for your avatar or add photos to a shared session.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Remembeer uses your location to tag where you logged your drinks.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Remembeer needs access to your photo library to let you choose your custom avatar.</string>
+	<string>Remembeer uses your photo library so you can choose an avatar or add photos to a shared session.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
