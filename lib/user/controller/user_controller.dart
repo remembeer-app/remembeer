@@ -4,6 +4,7 @@ import 'package:remembeer/common/controller/controller.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/extension/searchable.dart';
 import 'package:remembeer/common/util/invariant.dart';
+import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
@@ -77,5 +78,35 @@ class UserController extends Controller<UserModel> {
   }) {
     final docRef = writeCollection.doc(user.id);
     batch.set(docRef, user.toJson());
+  }
+
+  Future<List<UserModel>> usersWithFriend(String userId) async {
+    final snapshot = await readCollection
+        .where(friendsField, arrayContains: userId)
+        .get();
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
+
+  Future<void> removeFriendFrom({
+    required String userId,
+    required String friendId,
+  }) {
+    return writeCollection.doc(userId).update({
+      friendsField: FieldValue.arrayRemove([friendId]),
+    });
+  }
+
+  Future<void> anonymizeCurrentUser() async {
+    final current = await currentUser;
+    final placeholder = UserModel(
+      id: current.id,
+      email: '',
+      username: deletedUserUsername,
+      searchableUsername: '',
+      accentColorKey: current.accentColorKey,
+    );
+    await writeCollection
+        .doc(current.id)
+        .set(placeholder.toJson().withServerDeleteTimestamps());
   }
 }

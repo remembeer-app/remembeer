@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:remembeer/account_deletion/service/account_deletion_service.dart';
 import 'package:remembeer/activity/service/activity_service.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
@@ -161,6 +162,20 @@ class IoCContainer {
         SessionPictureService(
           authService: get<AuthService>(),
           sessionController: get<SessionController>(),
+        ),
+      )
+      ..registerSingleton(
+        AccountDeletionService(
+          authService: get<AuthService>(),
+          drinkTypeController: get<DrinkTypeController>(),
+          sessionController: get<SessionController>(),
+          leaderboardController: get<LeaderboardController>(),
+          friendRequestController: get<FriendRequestController>(),
+          userController: get<UserController>(),
+          userSettingsController: get<UserSettingsController>(),
+          avatarService: get<AvatarService>(),
+          sessionPictureService: get<SessionPictureService>(),
+          partyController: get<PartyController>(),
         ),
       );
   }

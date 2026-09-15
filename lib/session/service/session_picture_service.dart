@@ -97,6 +97,11 @@ class SessionPictureService {
       'Only session admin can remove pictures',
     );
 
+    await deletePictureFile(url);
+    await sessionController.removePictureAtomic(session.id, url);
+  }
+
+  Future<void> deletePictureFile(String url) async {
     try {
       await _storage.refFromURL(url).delete();
     } on FirebaseException catch (e) {
@@ -104,8 +109,6 @@ class SessionPictureService {
         rethrow;
       }
     }
-
-    await sessionController.removePictureAtomic(session.id, url);
   }
 
   Future<String> _upload(String sessionId, File file) async {

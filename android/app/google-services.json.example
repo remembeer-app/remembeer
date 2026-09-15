@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "YOUR_MOBILE_SDK_APP_ID",
         "android_client_info": {
-          "package_name": "com.example.remembeer"
+          "package_name": "com.remembeer.app"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "YOUR_OAUTH_CLIENT_ID.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.remembeer",
+            "package_name": "com.remembeer.app",
             "certificate_hash": "YOUR_CERTIFICATE_HASH"
           }
         },
@@ -42,7 +42,7 @@
               "client_id": "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.remembeer"
+                "bundle_id": "com.remembeer.app"
               }
             }
           ]

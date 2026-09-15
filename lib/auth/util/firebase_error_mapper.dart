@@ -9,6 +9,9 @@ String mapFirebaseAuthError(String? code) {
     'email-already-in-use' => 'This email is already registered.',
     'weak-password' => 'Password is too weak.',
     'network-request-failed' => 'Network error. Check your connection.',
+    'requires-recent-login' => 'Please confirm your identity again and retry.',
+    'user-mismatch' =>
+      'Please confirm with the same account you are signed in with.',
     _ => 'An error occurred. Please try again.',
   };
 }

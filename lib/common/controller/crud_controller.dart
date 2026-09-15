@@ -61,6 +61,18 @@ abstract class CrudController<T extends Entity, U extends ValueObject>
         .set(entity.toJson().withServerDeleteTimestamps());
   }
 
+  Future<void> hardDeleteSingle(T entity) {
+    _assertNotGlobal(entity);
+    return writeCollection.doc(entity.id).delete();
+  }
+
+  Future<List<T>> allOwnedBy(String userId) async {
+    final snapshot = await readCollection
+        .where(userIdField, isEqualTo: userId)
+        .get();
+    return snapshot.docs.map((doc) => doc.data()).toList();
+  }
+
   void createSingleInBatch(U dto, WriteBatch batch) {
     final docRef = writeCollection.doc();
     batch.set(

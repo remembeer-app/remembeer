@@ -44,7 +44,7 @@ class _LocationPageState extends State<LocationPage> {
                 urlTemplate:
                     'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',
                 subdomains: const ['mt0', 'mt1', 'mt2', 'mt3'],
-                userAgentPackageName: 'com.example.remembeer',
+                userAgentPackageName: 'com.remembeer.app',
               ),
             ],
           ),

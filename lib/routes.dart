@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:remembeer/account_deletion/page/delete_account_page.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
 import 'package:remembeer/activity/page/session_detail_page.dart';
 import 'package:remembeer/activity/widget/session_photo_viewer.dart';
@@ -203,6 +204,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             TypedGoRoute<BadgeVisibilityRoute>(path: 'badge-visibility'),
             TypedGoRoute<ChangePasswordRoute>(path: 'password'),
             TypedGoRoute<EndOfDaySettingsRoute>(path: 'end-of-day'),
+            TypedGoRoute<DeleteAccountRoute>(path: 'delete-account'),
           ],
         ),
       ],
@@ -687,6 +689,15 @@ class ChangePasswordRoute extends GoRouteData with $ChangePasswordRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const ChangePasswordPage();
+  }
+}
+
+class DeleteAccountRoute extends GoRouteData with $DeleteAccountRoute {
+  const DeleteAccountRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const DeleteAccountPage();
   }
 }
 

@@ -10,6 +10,7 @@ import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/legal/widget/privacy_policy_notice.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
@@ -59,6 +60,8 @@ class _LoginPageState extends State<LoginPage> {
               _buildDivider(theme),
               const Gap(24),
               _buildGoogleSignIn(form),
+              const Gap(12),
+              const PrivacyPolicyNotice(),
               const Gap(16),
               _buildRegisterLink(context, form),
             ],
