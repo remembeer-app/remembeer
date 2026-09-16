@@ -103,6 +103,7 @@ class _FakePartyController implements PartyController {
   Future<PartyCommandResult> activateParty({
     required String sessionId,
     required String commandId,
+    int? timeZoneOffsetMinutes,
   }) async {
     activatedSessionId = sessionId;
     lastCommandId = commandId;

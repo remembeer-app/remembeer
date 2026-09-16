@@ -90,13 +90,23 @@ class PartyController {
     data: data,
   );
 
+  /// Activates a Party for [sessionId].
+  ///
+  /// Drinks already logged in the Session are stored as local date-times
+  /// without a UTC offset, so the device offset is sent along and the backend
+  /// uses it to place the initial drink awards at the right instant.
   Future<PartyCommandResult> activateParty({
     required String sessionId,
     required String commandId,
+    int? timeZoneOffsetMinutes,
   }) => invokeCommand(
     commandName: 'activate_party',
     sessionId: sessionId,
     commandId: commandId,
+    data: {
+      'timeZoneOffsetMinutes':
+          timeZoneOffsetMinutes ?? DateTime.now().timeZoneOffset.inMinutes,
+    },
   );
 
   Future<PartyCommandResult> syncMembership({

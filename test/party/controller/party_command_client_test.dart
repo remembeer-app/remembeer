@@ -48,6 +48,44 @@ void main() {
     );
   });
 
+  test(
+    'Party activation sends the device UTC offset for stored drinks',
+    () async {
+      Map<String, Object?>? invokedData;
+      final controller = PartyController(
+        commandClient: PartyCommandClient(
+          invoker: (commandName, data) async {
+            invokedData = data;
+            return <String, Object?>{};
+          },
+        ),
+      );
+
+      await controller.activateParty(
+        sessionId: 'party-1',
+        commandId: 'command-1',
+      );
+
+      expect(invokedData, {
+        'timeZoneOffsetMinutes': DateTime.now().timeZoneOffset.inMinutes,
+        'sessionId': 'party-1',
+        'commandId': 'command-1',
+      });
+
+      await controller.activateParty(
+        sessionId: 'party-1',
+        commandId: 'command-2',
+        timeZoneOffsetMinutes: 120,
+      );
+
+      expect(invokedData, {
+        'timeZoneOffsetMinutes': 120,
+        'sessionId': 'party-1',
+        'commandId': 'command-2',
+      });
+    },
+  );
+
   test('Party drink wrapper maps the backend payload', () async {
     String? invokedName;
     Map<String, Object?>? invokedData;
