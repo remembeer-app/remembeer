@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/drink_type/model/drink_type_core.dart';
@@ -14,6 +15,7 @@ const _defaultDrinkType = DrinkTypeCore(
   alcoholPercentage: 4.5,
 );
 const _defaultDrinkSize = 500;
+const _apnsTokenNotSetCode = 'apns-token-not-set';
 
 class UserSettingsService {
   final AuthService authService;
@@ -111,7 +113,17 @@ class UserSettingsService {
   }
 
   Future<void> _syncToken() async {
-    final token = await notificationService.getToken();
+    final String? token;
+    try {
+      token = await notificationService.getToken();
+    } on FirebaseException catch (e) {
+      // On iOS the FCM token cannot be fetched until Apple has delivered the
+      // APNs token. `onTokenRefresh` writes it once it arrives.
+      if (e.code == _apnsTokenNotSetCode) {
+        return;
+      }
+      rethrow;
+    }
 
     if (token != null) {
       await _updateToken(token);
