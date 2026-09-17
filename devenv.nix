@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 {
+  dotenv.disableHint = true;
+
   android = {
     enable = true;
     flutter.enable = true;
