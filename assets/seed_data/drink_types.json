@@ -1,142 +1,1087 @@
 [
   {
-    "id": "global-beer",
-    "userId": "global",
-    "name": "Beer",
-    "category": "beer",
-    "alcoholPercentage": 4.5
-  },
-  {
-    "id": "global-plzinka",
+    "id": "global-beer-pilsner-urquell",
     "userId": "global",
     "name": "Pilsner Urquell",
     "category": "beer",
     "alcoholPercentage": 4.4
   },
   {
-    "id": "global-radegast-10",
+    "id": "global-beer-pilsner-urquell-nefiltrovany",
     "userId": "global",
-    "name": "Radegast 10",
+    "name": "Pilsner Urquell nefiltrovaný",
+    "category": "beer",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-beer-gambrinus-original-10",
+    "userId": "global",
+    "name": "Gambrinus Originál 10",
+    "category": "beer",
+    "alcoholPercentage": 4.3
+  },
+  {
+    "id": "global-beer-gambrinus-12",
+    "userId": "global",
+    "name": "Gambrinus 12",
+    "category": "beer",
+    "alcoholPercentage": 5.2
+  },
+  {
+    "id": "global-beer-gambrinus-nefiltrovany",
+    "userId": "global",
+    "name": "Gambrinus nefiltrovaný",
+    "category": "beer",
+    "alcoholPercentage": 4.9
+  },
+  {
+    "id": "global-beer-excelent-11",
+    "userId": "global",
+    "name": "Excelent 11",
+    "category": "beer",
+    "alcoholPercentage": 4.7
+  },
+  {
+    "id": "global-beer-radegast-razna-10",
+    "userId": "global",
+    "name": "Radegast Rázná 10",
     "category": "beer",
     "alcoholPercentage": 4.1
   },
   {
-    "id": "global-radegast-12",
+    "id": "global-beer-radegast-ryze-horka-12",
     "userId": "global",
-    "name": "Radegast 12",
+    "name": "Radegast Ryze hořká 12",
     "category": "beer",
     "alcoholPercentage": 5.1
   },
   {
-    "id": "global-starobrno-statl",
+    "id": "global-beer-radegast-nefiltrovany",
     "userId": "global",
-    "name": "Starobrno Statl",
+    "name": "Radegast nefiltrovaný",
     "category": "beer",
-    "alcoholPercentage": 5.0
+    "alcoholPercentage": 4.8
   },
   {
-    "id": "global-kozel-11",
+    "id": "global-beer-velkopopovicky-kozel-svetly",
     "userId": "global",
-    "name": "Kozel 11",
+    "name": "Velkopopovický Kozel světlý",
+    "category": "beer",
+    "alcoholPercentage": 4.0
+  },
+  {
+    "id": "global-beer-velkopopovicky-kozel-11",
+    "userId": "global",
+    "name": "Velkopopovický Kozel 11",
     "category": "beer",
     "alcoholPercentage": 4.6
   },
   {
-    "id": "global-svijany-11",
+    "id": "global-beer-velkopopovicky-kozel-12",
     "userId": "global",
-    "name": "Svijany 11",
+    "name": "Velkopopovický Kozel 12",
     "category": "beer",
-    "alcoholPercentage": 4.8
+    "alcoholPercentage": 5.1
   },
   {
-    "id": "global-putnik",
+    "id": "global-beer-velkopopovicky-kozel-cerny",
     "userId": "global",
-    "name": "Putnik",
+    "name": "Velkopopovický Kozel Černý",
+    "category": "beer",
+    "alcoholPercentage": 3.8
+  },
+  {
+    "id": "global-beer-master-polotmavy-13",
+    "userId": "global",
+    "name": "Master polotmavý 13",
+    "category": "beer",
+    "alcoholPercentage": 5.3
+  },
+  {
+    "id": "global-beer-master-tmavy-18",
+    "userId": "global",
+    "name": "Master tmavý 18",
+    "category": "beer",
+    "alcoholPercentage": 7.0
+  },
+  {
+    "id": "global-beer-birell",
+    "userId": "global",
+    "name": "Birell",
+    "category": "beer",
+    "alcoholPercentage": 0.5
+  },
+  {
+    "id": "global-beer-budweiser-budvar-12",
+    "userId": "global",
+    "name": "Budweiser Budvar 12",
     "category": "beer",
     "alcoholPercentage": 5.0
   },
   {
-    "id": "global-branik-11",
+    "id": "global-beer-budweiser-budvar-33",
     "userId": "global",
-    "name": "Brankar 11",
+    "name": "Budweiser Budvar 33",
+    "category": "beer",
+    "alcoholPercentage": 4.6
+  },
+  {
+    "id": "global-beer-budweiser-budvar-tmavy-lezak",
+    "userId": "global",
+    "name": "Budweiser Budvar tmavý ležák",
+    "category": "beer",
+    "alcoholPercentage": 4.7
+  },
+  {
+    "id": "global-beer-staropramen-10",
+    "userId": "global",
+    "name": "Staropramen 10",
+    "category": "beer",
+    "alcoholPercentage": 4.3
+  },
+  {
+    "id": "global-beer-staropramen-11",
+    "userId": "global",
+    "name": "Staropramen 11",
+    "category": "beer",
+    "alcoholPercentage": 4.7
+  },
+  {
+    "id": "global-beer-staropramen-lezak-12",
+    "userId": "global",
+    "name": "Staropramen ležák 12",
+    "category": "beer",
+    "alcoholPercentage": 5.2
+  },
+  {
+    "id": "global-beer-branik-11",
+    "userId": "global",
+    "name": "Braník 11",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-branik-lezak",
+    "userId": "global",
+    "name": "Braník ležák",
+    "category": "beer",
+    "alcoholPercentage": 5.2
+  },
+  {
+    "id": "global-beer-velvet",
+    "userId": "global",
+    "name": "Velvet",
+    "category": "beer",
+    "alcoholPercentage": 5.3
+  },
+  {
+    "id": "global-beer-svijany-450",
+    "userId": "global",
+    "name": "Svijany 450",
+    "category": "beer",
+    "alcoholPercentage": 4.6
+  },
+  {
+    "id": "global-beer-svijansky-maz-11",
+    "userId": "global",
+    "name": "Svijanský Máz 11",
     "category": "beer",
     "alcoholPercentage": 4.8
   },
   {
-    "id": "global-strongbow",
+    "id": "global-beer-svijansky-knize-13",
+    "userId": "global",
+    "name": "Svijanský Kníže 13",
+    "category": "beer",
+    "alcoholPercentage": 5.6
+  },
+  {
+    "id": "global-beer-bernard-11",
+    "userId": "global",
+    "name": "Bernard 11",
+    "category": "beer",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-beer-bernard-svetly-lezak-12",
+    "userId": "global",
+    "name": "Bernard světlý ležák 12",
+    "category": "beer",
+    "alcoholPercentage": 4.9
+  },
+  {
+    "id": "global-beer-bernard-nefiltrovana-12",
+    "userId": "global",
+    "name": "Bernard nefiltrovaná 12",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-bernard-cerny-lezak-12",
+    "userId": "global",
+    "name": "Bernard černý ležák 12",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-krusovice-10",
+    "userId": "global",
+    "name": "Krušovice 10",
+    "category": "beer",
+    "alcoholPercentage": 4.2
+  },
+  {
+    "id": "global-beer-krusovice-12",
+    "userId": "global",
+    "name": "Krušovice 12",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-krusovice-cerne",
+    "userId": "global",
+    "name": "Krušovice černé",
+    "category": "beer",
+    "alcoholPercentage": 3.8
+  },
+  {
+    "id": "global-beer-krusovice-musketyr",
+    "userId": "global",
+    "name": "Krušovice Mušketýr 11",
+    "category": "beer",
+    "alcoholPercentage": 4.6
+  },
+  {
+    "id": "global-beer-starobrno-tradicni",
+    "userId": "global",
+    "name": "Starobrno Tradiční",
+    "category": "beer",
+    "alcoholPercentage": 4.0
+  },
+  {
+    "id": "global-beer-starobrno-medium",
+    "userId": "global",
+    "name": "Starobrno Medium",
+    "category": "beer",
+    "alcoholPercentage": 4.7
+  },
+  {
+    "id": "global-beer-starobrno-lezak",
+    "userId": "global",
+    "name": "Starobrno ležák",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-starobrno-drak",
+    "userId": "global",
+    "name": "Starobrno Drak",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-starobrno-cerne",
+    "userId": "global",
+    "name": "Starobrno Černé",
+    "category": "beer",
+    "alcoholPercentage": 3.8
+  },
+  {
+    "id": "global-beer-poutnik-12",
+    "userId": "global",
+    "name": "Poutník 12",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-holba-serak-11",
+    "userId": "global",
+    "name": "Holba Šerák 11",
+    "category": "beer",
+    "alcoholPercentage": 4.7
+  },
+  {
+    "id": "global-beer-litovel-moravan-11",
+    "userId": "global",
+    "name": "Litovel Moravan 11",
+    "category": "beer",
+    "alcoholPercentage": 4.6
+  },
+  {
+    "id": "global-beer-zubr-grand-11",
+    "userId": "global",
+    "name": "Zubr Grand 11",
+    "category": "beer",
+    "alcoholPercentage": 4.8
+  },
+  {
+    "id": "global-beer-uneticke-pivo-12",
+    "userId": "global",
+    "name": "Únětické pivo 12",
+    "category": "beer",
+    "alcoholPercentage": 5.1
+  },
+  {
+    "id": "global-beer-matuska-zlata-raketa",
+    "userId": "global",
+    "name": "Matuška Zlatá raketa",
+    "category": "beer",
+    "alcoholPercentage": 7.0
+  },
+  {
+    "id": "global-beer-heineken",
+    "userId": "global",
+    "name": "Heineken",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-stella-artois",
+    "userId": "global",
+    "name": "Stella Artois",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-corona-extra",
+    "userId": "global",
+    "name": "Corona Extra",
+    "category": "beer",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-beer-guinness-draught",
+    "userId": "global",
+    "name": "Guinness Draught",
+    "category": "beer",
+    "alcoholPercentage": 4.2
+  },
+  {
+    "id": "global-beer-kilkenny",
+    "userId": "global",
+    "name": "Kilkenny",
+    "category": "beer",
+    "alcoholPercentage": 4.3
+  },
+  {
+    "id": "global-beer-paulaner-hefe-weissbier",
+    "userId": "global",
+    "name": "Paulaner Hefe-Weissbier",
+    "category": "beer",
+    "alcoholPercentage": 5.5
+  },
+  {
+    "id": "global-beer-erdinger-weissbier",
+    "userId": "global",
+    "name": "Erdinger Weissbier",
+    "category": "beer",
+    "alcoholPercentage": 5.3
+  },
+  {
+    "id": "global-beer-hoegaarden",
+    "userId": "global",
+    "name": "Hoegaarden",
+    "category": "beer",
+    "alcoholPercentage": 4.9
+  },
+  {
+    "id": "global-beer-leffe-blonde",
+    "userId": "global",
+    "name": "Leffe Blonde",
+    "category": "beer",
+    "alcoholPercentage": 6.6
+  },
+  {
+    "id": "global-beer-peroni-nastro-azzurro",
+    "userId": "global",
+    "name": "Peroni Nastro Azzurro",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-estrella-damm",
+    "userId": "global",
+    "name": "Estrella Damm",
+    "category": "beer",
+    "alcoholPercentage": 5.4
+  },
+  {
+    "id": "global-beer-asahi-super-dry",
+    "userId": "global",
+    "name": "Asahi Super Dry",
+    "category": "beer",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-beer-birra-moretti",
+    "userId": "global",
+    "name": "Birra Moretti L’Autentica",
+    "category": "beer",
+    "alcoholPercentage": 4.6
+  },
+  {
+    "id": "global-beer-desperados",
+    "userId": "global",
+    "name": "Desperados Original",
+    "category": "beer",
+    "alcoholPercentage": 5.9
+  },
+  {
+    "id": "global-beer-tyskie",
+    "userId": "global",
+    "name": "Tyskie Gronie",
+    "category": "beer",
+    "alcoholPercentage": 5.2
+  },
+  {
+    "id": "global-cider-lisacke-jablko",
+    "userId": "global",
+    "name": "Lišácké jablko",
+    "category": "cider",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-cider-lisacke-jablko-hruska",
+    "userId": "global",
+    "name": "Lišácké jablko Hruška",
+    "category": "cider",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-cider-strongbow",
     "userId": "global",
     "name": "Strongbow",
     "category": "cider",
     "alcoholPercentage": 4.5
   },
   {
-    "id": "global-skinny-bitch",
+    "id": "global-cider-kingswood-original",
     "userId": "global",
-    "name": "Skinny Bitch",
-    "category": "cocktail",
-    "alcoholPercentage": 15.0
+    "name": "Kingswood Original",
+    "category": "cider",
+    "alcoholPercentage": 4.5
   },
   {
-    "id": "global-mojito",
+    "id": "global-cider-kingswood-dry",
     "userId": "global",
-    "name": "Mojito",
-    "category": "cocktail",
+    "name": "Kingswood Dry",
+    "category": "cider",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-cider-frisco",
+    "userId": "global",
+    "name": "Frisco",
+    "category": "cider",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-cider-somersby",
+    "userId": "global",
+    "name": "Somersby",
+    "category": "cider",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-cider-magners",
+    "userId": "global",
+    "name": "Magners",
+    "category": "cider",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-cider-rekorderlig",
+    "userId": "global",
+    "name": "Rekorderlig",
+    "category": "cider",
+    "alcoholPercentage": 4.5
+  },
+  {
+    "id": "global-cider-kopparberg",
+    "userId": "global",
+    "name": "Kopparberg",
+    "category": "cider",
+    "alcoholPercentage": 4.0
+  },
+  {
+    "id": "global-cider-savanna-dry",
+    "userId": "global",
+    "name": "Savanna Dry",
+    "category": "cider",
+    "alcoholPercentage": 6.0
+  },
+  {
+    "id": "global-wine-dry-white-wine",
+    "userId": "global",
+    "name": "Dry White Wine",
+    "category": "wine",
     "alcoholPercentage": 12.0
   },
   {
-    "id": "global-long-island-iced-tea",
+    "id": "global-wine-semi-dry-white-wine",
     "userId": "global",
-    "name": "Long Island Iced Tea",
-    "category": "cocktail",
-    "alcoholPercentage": 22.0
+    "name": "Semi-dry White Wine",
+    "category": "wine",
+    "alcoholPercentage": 11.5
   },
   {
-    "id": "global-alpsky-ryzlink",
+    "id": "global-wine-dry-red-wine",
     "userId": "global",
-    "name": "Alpský Ryzlink",
-    "category": "cocktail",
-    "alcoholPercentage": 69.0
+    "name": "Dry Red Wine",
+    "category": "wine",
+    "alcoholPercentage": 13.0
   },
   {
-    "id": "global-whiskey",
+    "id": "global-wine-rose-wine",
     "userId": "global",
-    "name": "Whiskey",
-    "category": "spirit",
-    "alcoholPercentage": 40.0
+    "name": "Rosé Wine",
+    "category": "wine",
+    "alcoholPercentage": 12.0
   },
   {
-    "id": "global-vodka",
+    "id": "global-wine-ryzlink-rynsky",
+    "userId": "global",
+    "name": "Ryzlink rýnský",
+    "category": "wine",
+    "alcoholPercentage": 12.0
+  },
+  {
+    "id": "global-wine-veltlinske-zelene",
+    "userId": "global",
+    "name": "Veltlínské zelené",
+    "category": "wine",
+    "alcoholPercentage": 12.0
+  },
+  {
+    "id": "global-wine-muller-thurgau",
+    "userId": "global",
+    "name": "Müller Thurgau",
+    "category": "wine",
+    "alcoholPercentage": 11.5
+  },
+  {
+    "id": "global-wine-sauvignon",
+    "userId": "global",
+    "name": "Sauvignon",
+    "category": "wine",
+    "alcoholPercentage": 12.5
+  },
+  {
+    "id": "global-wine-chardonnay",
+    "userId": "global",
+    "name": "Chardonnay",
+    "category": "wine",
+    "alcoholPercentage": 13.0
+  },
+  {
+    "id": "global-wine-rulandske-sede",
+    "userId": "global",
+    "name": "Rulandské šedé",
+    "category": "wine",
+    "alcoholPercentage": 12.5
+  },
+  {
+    "id": "global-wine-frankovka",
+    "userId": "global",
+    "name": "Frankovka",
+    "category": "wine",
+    "alcoholPercentage": 12.5
+  },
+  {
+    "id": "global-wine-svatovavrinecke",
+    "userId": "global",
+    "name": "Svatovavřinecké",
+    "category": "wine",
+    "alcoholPercentage": 12.5
+  },
+  {
+    "id": "global-wine-rulandske-modre",
+    "userId": "global",
+    "name": "Rulandské modré",
+    "category": "wine",
+    "alcoholPercentage": 13.0
+  },
+  {
+    "id": "global-wine-merlot",
+    "userId": "global",
+    "name": "Merlot",
+    "category": "wine",
+    "alcoholPercentage": 13.5
+  },
+  {
+    "id": "global-wine-cabernet-sauvignon",
+    "userId": "global",
+    "name": "Cabernet Sauvignon",
+    "category": "wine",
+    "alcoholPercentage": 13.5
+  },
+  {
+    "id": "global-wine-prosecco",
+    "userId": "global",
+    "name": "Prosecco",
+    "category": "wine",
+    "alcoholPercentage": 11.0
+  },
+  {
+    "id": "global-wine-champagne-brut",
+    "userId": "global",
+    "name": "Champagne Brut",
+    "category": "wine",
+    "alcoholPercentage": 12.0
+  },
+  {
+    "id": "global-wine-bohemia-sekt-brut",
+    "userId": "global",
+    "name": "Bohemia Sekt Brut",
+    "category": "wine",
+    "alcoholPercentage": 12.0
+  },
+  {
+    "id": "global-wine-bohemia-sekt-demi-sec",
+    "userId": "global",
+    "name": "Bohemia Sekt Demi Sec",
+    "category": "wine",
+    "alcoholPercentage": 11.0
+  },
+  {
+    "id": "global-wine-burcak",
+    "userId": "global",
+    "name": "Burčák",
+    "category": "wine",
+    "alcoholPercentage": 5.0
+  },
+  {
+    "id": "global-wine-portske-vino",
+    "userId": "global",
+    "name": "Portské víno",
+    "category": "wine",
+    "alcoholPercentage": 20.0
+  },
+  {
+    "id": "global-wine-vermut",
+    "userId": "global",
+    "name": "Vermut",
+    "category": "wine",
+    "alcoholPercentage": 15.0
+  },
+  {
+    "id": "global-spirit-vodka",
     "userId": "global",
     "name": "Vodka",
     "category": "spirit",
     "alcoholPercentage": 40.0
   },
   {
-    "id": "global-tequila",
+    "id": "global-spirit-gin",
+    "userId": "global",
+    "name": "Gin",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-white-rum",
+    "userId": "global",
+    "name": "White Rum",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-dark-rum",
+    "userId": "global",
+    "name": "Dark Rum",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-spiced-rum",
+    "userId": "global",
+    "name": "Spiced Rum",
+    "category": "spirit",
+    "alcoholPercentage": 35.0
+  },
+  {
+    "id": "global-spirit-bacardi-carta-blanca",
+    "userId": "global",
+    "name": "Bacardi Carta Blanca",
+    "category": "spirit",
+    "alcoholPercentage": 37.5
+  },
+  {
+    "id": "global-spirit-havana-club-3-anos",
+    "userId": "global",
+    "name": "Havana Club 3 Años",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-captain-morgan-spiced-gold",
+    "userId": "global",
+    "name": "Captain Morgan Spiced Gold",
+    "category": "spirit",
+    "alcoholPercentage": 35.0
+  },
+  {
+    "id": "global-spirit-bozkov-tuzemsky",
+    "userId": "global",
+    "name": "Božkov Tuzemský",
+    "category": "spirit",
+    "alcoholPercentage": 37.5
+  },
+  {
+    "id": "global-spirit-whisky",
+    "userId": "global",
+    "name": "Whisky",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-bourbon",
+    "userId": "global",
+    "name": "Bourbon",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-tequila",
     "userId": "global",
     "name": "Tequila",
     "category": "spirit",
     "alcoholPercentage": 38.0
   },
   {
-    "id": "global-slivovice",
+    "id": "global-spirit-cognac",
+    "userId": "global",
+    "name": "Cognac",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-brandy",
+    "userId": "global",
+    "name": "Brandy",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-slivovice",
     "userId": "global",
     "name": "Slivovice",
     "category": "spirit",
     "alcoholPercentage": 50.0
   },
   {
-    "id": "global-wine",
+    "id": "global-spirit-hruskovice",
     "userId": "global",
-    "name": "Wine",
-    "category": "wine",
+    "name": "Hruškovice",
+    "category": "spirit",
+    "alcoholPercentage": 42.0
+  },
+  {
+    "id": "global-spirit-merunkovice",
+    "userId": "global",
+    "name": "Meruňkovice",
+    "category": "spirit",
+    "alcoholPercentage": 42.0
+  },
+  {
+    "id": "global-spirit-jablkovice",
+    "userId": "global",
+    "name": "Jablkovice",
+    "category": "spirit",
+    "alcoholPercentage": 45.0
+  },
+  {
+    "id": "global-spirit-borovicka",
+    "userId": "global",
+    "name": "Borovička",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-becherovka",
+    "userId": "global",
+    "name": "Becherovka",
+    "category": "spirit",
+    "alcoholPercentage": 38.0
+  },
+  {
+    "id": "global-spirit-fernet-stock",
+    "userId": "global",
+    "name": "Fernet Stock",
+    "category": "spirit",
+    "alcoholPercentage": 38.0
+  },
+  {
+    "id": "global-spirit-jagermeister",
+    "userId": "global",
+    "name": "Jägermeister",
+    "category": "spirit",
+    "alcoholPercentage": 35.0
+  },
+  {
+    "id": "global-spirit-absinth",
+    "userId": "global",
+    "name": "Absinth",
+    "category": "spirit",
+    "alcoholPercentage": 70.0
+  },
+  {
+    "id": "global-spirit-baileys",
+    "userId": "global",
+    "name": "Baileys",
+    "category": "spirit",
+    "alcoholPercentage": 17.0
+  },
+  {
+    "id": "global-spirit-malibu",
+    "userId": "global",
+    "name": "Malibu",
+    "category": "spirit",
+    "alcoholPercentage": 21.0
+  },
+  {
+    "id": "global-spirit-sambuca",
+    "userId": "global",
+    "name": "Sambuca",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-limoncello",
+    "userId": "global",
+    "name": "Limoncello",
+    "category": "spirit",
+    "alcoholPercentage": 28.0
+  },
+  {
+    "id": "global-spirit-ouzo",
+    "userId": "global",
+    "name": "Ouzo",
+    "category": "spirit",
+    "alcoholPercentage": 38.0
+  },
+  {
+    "id": "global-spirit-grappa",
+    "userId": "global",
+    "name": "Grappa",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-aperol",
+    "userId": "global",
+    "name": "Aperol",
+    "category": "spirit",
+    "alcoholPercentage": 11.0
+  },
+  {
+    "id": "global-spirit-campari",
+    "userId": "global",
+    "name": "Campari",
+    "category": "spirit",
+    "alcoholPercentage": 25.0
+  },
+  {
+    "id": "global-spirit-kahlua",
+    "userId": "global",
+    "name": "Kahlúa",
+    "category": "spirit",
+    "alcoholPercentage": 16.0
+  },
+  {
+    "id": "global-spirit-cointreau",
+    "userId": "global",
+    "name": "Cointreau",
+    "category": "spirit",
+    "alcoholPercentage": 40.0
+  },
+  {
+    "id": "global-spirit-peach-schnapps",
+    "userId": "global",
+    "name": "Peach Schnapps",
+    "category": "spirit",
+    "alcoholPercentage": 18.0
+  },
+  {
+    "id": "global-cocktail-mojito",
+    "userId": "global",
+    "name": "Mojito",
+    "category": "cocktail",
     "alcoholPercentage": 12.0
   },
   {
-    "id": "global-sklepmistr",
+    "id": "global-cocktail-cuba-libre",
     "userId": "global",
-    "name": "Sklepmistr",
-    "category": "wine",
+    "name": "Cuba Libre",
+    "category": "cocktail",
     "alcoholPercentage": 11.0
+  },
+  {
+    "id": "global-cocktail-daiquiri",
+    "userId": "global",
+    "name": "Daiquiri",
+    "category": "cocktail",
+    "alcoholPercentage": 22.0
+  },
+  {
+    "id": "global-cocktail-margarita",
+    "userId": "global",
+    "name": "Margarita",
+    "category": "cocktail",
+    "alcoholPercentage": 25.0
+  },
+  {
+    "id": "global-cocktail-negroni",
+    "userId": "global",
+    "name": "Negroni",
+    "category": "cocktail",
+    "alcoholPercentage": 22.0
+  },
+  {
+    "id": "global-cocktail-pina-colada",
+    "userId": "global",
+    "name": "Piña Colada",
+    "category": "cocktail",
+    "alcoholPercentage": 11.0
+  },
+  {
+    "id": "global-cocktail-moscow-mule",
+    "userId": "global",
+    "name": "Moscow Mule",
+    "category": "cocktail",
+    "alcoholPercentage": 10.0
+  },
+  {
+    "id": "global-cocktail-espresso-martini",
+    "userId": "global",
+    "name": "Espresso Martini",
+    "category": "cocktail",
+    "alcoholPercentage": 17.0
+  },
+  {
+    "id": "global-cocktail-old-fashioned",
+    "userId": "global",
+    "name": "Old Fashioned",
+    "category": "cocktail",
+    "alcoholPercentage": 29.0
+  },
+  {
+    "id": "global-cocktail-long-island-iced-tea",
+    "userId": "global",
+    "name": "Long Island Iced Tea",
+    "category": "cocktail",
+    "alcoholPercentage": 16.5
+  },
+  {
+    "id": "global-cocktail-sex-on-the-beach",
+    "userId": "global",
+    "name": "Sex on the Beach",
+    "category": "cocktail",
+    "alcoholPercentage": 14.0
+  },
+  {
+    "id": "global-cocktail-tequila-sunrise",
+    "userId": "global",
+    "name": "Tequila Sunrise",
+    "category": "cocktail",
+    "alcoholPercentage": 11.0
+  },
+  {
+    "id": "global-cocktail-caipirinha",
+    "userId": "global",
+    "name": "Caipirinha",
+    "category": "cocktail",
+    "alcoholPercentage": 21.0
+  },
+  {
+    "id": "global-cocktail-mai-tai",
+    "userId": "global",
+    "name": "Mai Tai",
+    "category": "cocktail",
+    "alcoholPercentage": 20.0
+  },
+  {
+    "id": "global-cocktail-bloody-mary",
+    "userId": "global",
+    "name": "Bloody Mary",
+    "category": "cocktail",
+    "alcoholPercentage": 12.0
+  },
+  {
+    "id": "global-cocktail-cosmopolitan",
+    "userId": "global",
+    "name": "Cosmopolitan",
+    "category": "cocktail",
+    "alcoholPercentage": 17.5
+  },
+  {
+    "id": "global-cocktail-aperol-spritz",
+    "userId": "global",
+    "name": "Aperol Spritz",
+    "category": "cocktail",
+    "alcoholPercentage": 9.5
+  },
+  {
+    "id": "global-cocktail-whiskey-sour",
+    "userId": "global",
+    "name": "Whiskey Sour",
+    "category": "cocktail",
+    "alcoholPercentage": 16.0
+  },
+  {
+    "id": "global-cocktail-hugo",
+    "userId": "global",
+    "name": "Hugo",
+    "category": "cocktail",
+    "alcoholPercentage": 5.5
+  },
+  {
+    "id": "global-cocktail-gin-and-tonic",
+    "userId": "global",
+    "name": "Gin & Tonic",
+    "category": "cocktail",
+    "alcoholPercentage": 10.0
+  },
+  {
+    "id": "global-cocktail-screwdriver",
+    "userId": "global",
+    "name": "Screwdriver",
+    "category": "cocktail",
+    "alcoholPercentage": 13.0
+  },
+  {
+    "id": "global-cocktail-mimosa",
+    "userId": "global",
+    "name": "Mimosa",
+    "category": "cocktail",
+    "alcoholPercentage": 5.5
+  },
+  {
+    "id": "global-cocktail-whisky-cola",
+    "userId": "global",
+    "name": "Whisky Cola",
+    "category": "cocktail",
+    "alcoholPercentage": 6.5
+  },
+  {
+    "id": "global-cocktail-vodka-red-bull",
+    "userId": "global",
+    "name": "Vodka Red Bull",
+    "category": "cocktail",
+    "alcoholPercentage": 5.5
+  },
+  {
+    "id": "global-cocktail-beton",
+    "userId": "global",
+    "name": "Beton",
+    "category": "cocktail",
+    "alcoholPercentage": 6.5
+  },
+  {
+    "id": "global-cocktail-skinny-bitch",
+    "userId": "global",
+    "name": "Skinny Bitch",
+    "category": "cocktail",
+    "alcoholPercentage": 10.0
   }
 ]

@@ -2,10 +2,12 @@
   "name": "remembeer-firestore-rules",
   "private": true,
   "scripts": {
-    "test": "node --test test/firestore-rules.test.js"
+    "test": "node --test test/firestore-rules.test.js",
+    "seed": "node scripts/seed_drink_types.mjs"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.0",
-    "firebase": "^12.2.1"
+    "firebase": "^12.2.1",
+    "firebase-admin": "^13.0.0"
   }
 }

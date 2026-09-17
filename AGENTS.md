@@ -79,6 +79,24 @@ When working with dates in this codebase, always account for the boundary — ne
 
 Python 3.13 functions in `functions/main.py` — push notification triggers for friend requests and session invites.
 
+### Seeding Global Drink Types
+
+`assets/seed_data/drink_types.json` holds the global drink types. Firestore rules forbid *every* client from writing documents with `userId: "global"`, so seeding runs through the Admin SDK instead:
+
+```bash
+# Against production (service account key from the Firebase console, keep it out of the repo)
+GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json npm run seed
+
+# Against the emulator, no credentials needed
+firebase emulators:start --only firestore
+FIRESTORE_EMULATOR_HOST=localhost:8080 npm run seed
+
+# Preview without writing
+npm run seed -- --dry-run
+```
+
+The script is idempotent: it upserts every entry (preserving `createdAt`) and soft-deletes global drink types that are no longer in the seed file. Logged drinks embed their own copy of the name, category and alcohol percentage, so retiring a drink type never changes anyone's history. `test/seed_data/drink_types_seed_test.dart` validates the JSON before it can be seeded.
+
 ## UI Patterns
 
 ### Page Structure
