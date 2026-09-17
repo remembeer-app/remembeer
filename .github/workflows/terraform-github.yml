@@ -1,4 +1,4 @@
-name: Terraform GitHub
+name: Terraform Check
 
 on:
   workflow_dispatch:
@@ -17,8 +17,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: terraform-github-${{ github.ref }}
-  cancel-in-progress: false
+  group: terraform-check-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   TF_IN_AUTOMATION: true
@@ -49,39 +49,3 @@ jobs:
 
       - name: Validate Terraform
         run: terraform validate
-
-  plan:
-    name: Plan Terraform
-    if: >-
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event.pull_request.head.repo.full_name == github.repository &&
-      github.actor != 'dependabot[bot]')
-    needs: validate
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: infra/github
-    env:
-      TF_CLOUD_ORGANIZATION: ${{ vars.HCP_TERRAFORM_ORGANIZATION }}
-      TF_TOKEN_app_terraform_io: ${{ secrets.TF_API_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.TERRAFORM_GITHUB_TOKEN }}
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v4
-        with:
-          terraform_version: 1.16.3
-
-      - name: Initialize Terraform
-        run: terraform init
-
-      - name: Plan Terraform
-        run: terraform plan -out=tfplan
-
-      - name: Apply Terraform
-        if: github.event_name == 'push'
-        run: terraform apply -auto-approve tfplan
