@@ -13,29 +13,36 @@ The stack intentionally does not manage collaborators or Actions secrets.
 Workflow and Dependabot YAML files remain normal source-controlled files under
 `.github`.
 
-## HCP Terraform setup
+## HCP Terraform workspace
 
-Configure the `remembeer-app-repo` workspace as follows:
+The stack runs from the `remembeer-app-repo` workspace with this configuration:
 
-1. Connect the workspace to the `remembeer-app/remembeer` repository through
-   the HCP Terraform GitHub App.
-2. Set the Terraform working directory to `infra/github`.
-3. Keep the execution mode set to **Remote**.
-4. Select Terraform version `1.16.3`.
-5. Enable automatic speculative plans for pull requests.
-6. Enable auto-apply if changes merged to `main` should be applied without a
-   manual confirmation in HCP Terraform.
-7. Add a sensitive **environment variable** named `GITHUB_TOKEN`. Its value must
-   be a fine-grained GitHub token scoped only to this repository with
-   **Administration: write** and **Issues: write** permissions.
+- VCS repository: `remembeer-app/remembeer`
+- VCS branch: `main`
+- Terraform working directory: `infra/github`
+- Execution mode: **Remote**
+- Terraform version: `1.16.3`
+- Auto-apply API, UI, and VCS runs: enabled
+- Auto-apply run triggers: disabled
+- Automatic speculative plans: enabled by default
 
 The GitHub App connection lets HCP Terraform read the repository, but it does
 not authenticate the GitHub Terraform provider. The `GITHUB_TOKEN` environment
-variable provides that separate authentication.
+variable provides that separate authentication. It is configured as a
+sensitive workspace environment variable and contains a fine-grained token
+scoped to this repository with **Administration: write** and **Issues: write**
+permissions.
 
-The first non-speculative apply uses the import blocks in `imports.tf` to adopt
-the existing GitHub resources. Subsequent applies treat those imports as
-no-ops.
+## First run
+
+After this configuration reaches `main`, manually queue **New run > Plan and
+apply** once. A new VCS workspace does not process repository webhooks until it
+has completed an initial run.
+
+The first apply uses the import blocks in `imports.tf` to adopt the existing
+GitHub resources. The expected initial plan is 16 imports with no additions,
+changes, or deletions. Subsequent applies treat the imports as no-ops and are
+started automatically by changes under `infra/github`.
 
 ## Local commands
 
