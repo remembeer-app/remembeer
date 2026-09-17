@@ -43,7 +43,8 @@
   '';
 
   scripts.startem.exec = ''
-    exec env -u LD_LIBRARY_PATH \
-      emulator -avd remembeer-pixel-9-api-36 -gpu host "$@"
+    # Work around https://github.com/cachix/devenv/issues/2782 by preventing the emulator from loading an incompatible libc++.so.
+        exec env -u LD_LIBRARY_PATH \
+          emulator -avd remembeer-pixel-9-api-36 -gpu host "$@"
   '';
 }
