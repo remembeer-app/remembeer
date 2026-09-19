@@ -34,6 +34,7 @@ dependencies:
   crypto: ^3.0.7
   cupertino_icons: ^1.0.9
   dartvex: ^0.2.0
+  dartvex_auth_better: ^0.2.0
   dartvex_flutter: ^0.2.0
 
   diacritic: ^0.1.6

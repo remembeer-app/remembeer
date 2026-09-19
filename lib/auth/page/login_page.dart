@@ -1,3 +1,4 @@
+import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -24,6 +25,7 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   final _authService = get<AuthService>();
+  final _betterAuthClient = get<BetterAuthClient>();
   final _userService = get<UserService>();
   final _userSettingsService = get<UserSettingsService>();
 
@@ -46,9 +48,11 @@ class _LoginPageState extends State<LoginPage> {
     return PageTemplate(
       padding: const EdgeInsets.all(24),
       child: LoadingForm(
-        errorMapper: (e) => e is FirebaseAuthException
-            ? mapFirebaseAuthError(e.code)
-            : e.toString(),
+        errorMapper: (e) => switch (e) {
+          FirebaseAuthException(:final code) => mapFirebaseAuthError(code),
+          BetterAuthException(:final message) => message,
+          _ => e.toString(),
+        },
         builder: (form) => SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -197,10 +201,11 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> _login() async {
-    await _authService.signInWithEmailAndPassword(
+    await _betterAuthClient.signIn(
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
+    showSuccessNotification('Logged in with Better Auth.');
   }
 
   Future<void> _signInWithGoogle() async {

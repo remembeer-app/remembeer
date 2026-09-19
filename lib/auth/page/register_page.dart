@@ -1,19 +1,15 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
 import 'package:remembeer/auth/constants.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/auth/util/firebase_error_mapper.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
+import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/legal/widget/privacy_policy_notice.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/constants.dart';
-import 'package:remembeer/user/service/user_service.dart';
-import 'package:remembeer/user_settings/service/user_settings_service.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -23,9 +19,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _authService = get<AuthService>();
-  final _userService = get<UserService>();
-  final _userSettingsService = get<UserSettingsService>();
+  final _betterAuthClient = get<BetterAuthClient>();
 
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -49,9 +43,10 @@ class _RegisterPageState extends State<RegisterPage> {
       title: const Text('Create Account'),
       padding: const EdgeInsets.all(24),
       child: LoadingForm(
-        errorMapper: (e) => e is FirebaseAuthException
-            ? mapFirebaseAuthError(e.code)
-            : e.toString(),
+        errorMapper: (e) => switch (e) {
+          BetterAuthException(:final message) => message,
+          _ => e.toString(),
+        },
         builder: (form) => SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -69,7 +64,7 @@ class _RegisterPageState extends State<RegisterPage> {
               const Gap(24),
               form.buildSubmitButton(
                 text: 'Create Account',
-                onSubmit: () => _register(context),
+                onSubmit: _register,
               ),
               const Gap(16),
               _buildLoginLink(context, form),
@@ -129,7 +124,7 @@ class _RegisterPageState extends State<RegisterPage> {
       onToggleVisibility: () =>
           setState(() => _obscurePassword = !_obscurePassword),
       isLastField: true,
-      onFieldSubmitted: () => _register(context),
+      onFieldSubmitted: _register,
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please confirm your password.';
@@ -168,19 +163,12 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Future<void> _register(BuildContext context) async {
-    await _authService.createUserWithEmailAndPassword(
+  Future<void> _register() async {
+    await _betterAuthClient.signUp(
+      name: _usernameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,
     );
-
-    await _userSettingsService.createDefaultUserSettings();
-    await _userService.createDefaultUser(
-      username: _usernameController.text.trim(),
-    );
-
-    if (context.mounted) {
-      context.pop();
-    }
+    showSuccessNotification('Account created with Better Auth.');
   }
 }
