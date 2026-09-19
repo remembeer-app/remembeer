@@ -1,4 +1,6 @@
+import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
 import 'package:remembeer/account_deletion/service/account_deletion_service.dart';
 import 'package:remembeer/activity/service/activity_service.dart';
@@ -38,6 +40,9 @@ class IoCContainer {
   static void initialize() {
     get
       ..registerSingleton(FirebaseAuth.instance)
+      ..registerSingleton(
+        BetterAuthClient(baseUrl: dotenv.get('CONVEX_SITE_URL')),
+      )
       ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
       ..registerSingleton(NotificationService())
       ..registerSingleton(MonthService())

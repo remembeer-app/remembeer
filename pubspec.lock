@@ -321,6 +321,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.0"
+  dartvex_auth_better:
+    dependency: "direct main"
+    description:
+      name: dartvex_auth_better
+      sha256: "315b1d525f909725154ec5a421d347aaf0c8a7cdab7a3035a40dbdc94a406345"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   dartvex_codegen:
     dependency: "direct dev"
     description:
