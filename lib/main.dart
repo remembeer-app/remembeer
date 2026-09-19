@@ -16,7 +16,7 @@ const _quickAddChannel = MethodChannel('quick_add_action');
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await dotenv.load();
+  await dotenv.load(fileName: '.env.client');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 

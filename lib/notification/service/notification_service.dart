@@ -15,7 +15,7 @@ import 'package:remembeer/notification/model/party_notification_payload.dart';
 import 'package:remembeer/routes.dart';
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await dotenv.load();
+  await dotenv.load(fileName: '.env.client');
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 }
