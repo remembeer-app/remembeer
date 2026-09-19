@@ -16,7 +16,7 @@ jobs:
   checks:
     name: Format Check, Lint & Test
     if: >-
-      !startsWith(github.head_ref, 'convex/') || github.base_ref == 'convex'
+      !startsWith(github.head_ref, 'convex-') || github.base_ref == 'convex'
     runs-on: ubuntu-latest
 
     steps:
@@ -131,7 +131,7 @@ jobs:
   python_checks:
     name: Python Functions
     if: >-
-      !startsWith(github.head_ref, 'convex/') || github.base_ref == 'convex'
+      !startsWith(github.head_ref, 'convex-') || github.base_ref == 'convex'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -159,7 +159,7 @@ jobs:
   firestore_rules:
     name: Firestore Rules
     if: >-
-      !startsWith(github.head_ref, 'convex/') || github.base_ref == 'convex'
+      !startsWith(github.head_ref, 'convex-') || github.base_ref == 'convex'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -228,7 +228,7 @@ jobs:
     steps:
       - name: Require convex base for migration branches
         if: >-
-          startsWith(github.head_ref, 'convex/') && github.base_ref != 'convex'
+          startsWith(github.head_ref, 'convex-') && github.base_ref != 'convex'
         run: exit 1
 
       - name: Decide whether the needed jobs succeeded or failed

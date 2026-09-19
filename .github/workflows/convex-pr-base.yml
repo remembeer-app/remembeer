@@ -16,7 +16,7 @@ jobs:
     name: Retarget to convex
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
-      startsWith(github.event.pull_request.head.ref, 'convex/') &&
+      startsWith(github.event.pull_request.head.ref, 'convex-') &&
       github.event.pull_request.base.ref != 'convex'
     runs-on: ubuntu-latest
 
