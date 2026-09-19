@@ -59,6 +59,7 @@ jobs:
           echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env.client
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env.client
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
+
           echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
 
       - name: Create google-services.json
@@ -101,6 +102,7 @@ jobs:
           echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env.client
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env.client
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
+
           echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
 
       - name: Create google-services.json
@@ -213,6 +215,7 @@ jobs:
           echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env.client
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env.client
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
+
           echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
 
       - name: Build iOS
