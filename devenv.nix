@@ -1,50 +1,50 @@
-{ lib, ... }:
+{ pkgs, ... }:
 
 {
   dotenv.disableHint = true;
-
-  env.ANDROID_AVD_HOME = lib.mkForce "${builtins.getEnv "HOME"}/.android/avd";
 
   android = {
     enable = true;
     flutter.enable = true;
 
     platforms.version = [
-      "34"
-      "35"
+      "34" # needed for firestore
+      "35" # needed for jni (cached network image)
       "36"
     ];
     buildTools.version = [ "36.0.0" ];
-    ndk.version = [ "28.2.13676358" ];
+    cmdLineTools.version = "22.0";
     abis = [ "x86_64" ];
-    systemImageTypes = [ "google_apis_playstore" ];
   };
 
-  enterShell = ''
-    export ANDROID_AVD_HOME="$HOME/.android/avd"
-    mkdir -p "$ANDROID_AVD_HOME"
-    unset LD_LIBRARY_PATH
-  '';
+  languages.javascript = {
+    enable = true;
+    package = pkgs.nodejs_24;
+    npm.enable = true;
+  };
 
-  scripts.setup.exec = "flutter pub get --enforce-lockfile";
+  packages = with pkgs; [
+    docker-client
+    docker-compose
+    openssl
+    curl
+    jq
+  ];
 
-  scripts.create-emulator.exec = ''
+  scripts.createm.exec = ''
     set -euo pipefail
 
-    export ANDROID_AVD_HOME="$HOME/.android/avd"
-    mkdir -p "$ANDROID_AVD_HOME"
-
     printf 'no\n' | avdmanager create avd \
-      --name pixel-6-pro-api-36 \
+      --name remembeer-pixel-9-api-36 \
       --package 'system-images;android-36;google_apis_playstore;x86_64' \
-      --device pixel_6_pro
+      --device pixel_9
     sed -i 's/^hw.keyboard=no$/hw.keyboard=yes/' \
-      "$ANDROID_AVD_HOME/pixel-6-pro-api-36.avd/config.ini"
+      "$ANDROID_AVD_HOME/remembeer-pixel-9-api-36.avd/config.ini"
   '';
 
-  scripts.start-emulator.exec = ''
-    exec env -u LD_LIBRARY_PATH \
-      ANDROID_AVD_HOME="$HOME/.android/avd" \
-      emulator -avd pixel-6-pro-api-36 -gpu host "$@"
+  scripts.startem.exec = ''
+    # Work around https://github.com/cachix/devenv/issues/2782 by preventing the emulator from loading an incompatible libc++.so.
+        exec env -u LD_LIBRARY_PATH \
+          emulator -avd remembeer-pixel-9-api-36 -gpu host "$@"
   '';
 }
