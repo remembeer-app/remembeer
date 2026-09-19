@@ -3,7 +3,7 @@
 This stack manages the GitHub configuration for `remembeer-app/remembeer`:
 
 - repository features and merge settings
-- the `main` repository ruleset
+- the `main` and `convex` repository rulesets
 - GitHub Actions and workflow token permissions
 - Dependabot vulnerability alerts and security updates
 - issue labels

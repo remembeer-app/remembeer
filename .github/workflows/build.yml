@@ -4,11 +4,19 @@ on:
   push:
     branches:
       - main
+      - convex
   pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - edited
 
 jobs:
   checks:
     name: Format Check, Lint & Test
+    if: >-
+      !startsWith(github.head_ref, 'convex/') || github.base_ref == 'convex'
     runs-on: ubuntu-latest
 
     steps:
@@ -122,6 +130,8 @@ jobs:
 
   python_checks:
     name: Python Functions
+    if: >-
+      !startsWith(github.head_ref, 'convex/') || github.base_ref == 'convex'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -148,6 +158,8 @@ jobs:
 
   firestore_rules:
     name: Firestore Rules
+    if: >-
+      !startsWith(github.head_ref, 'convex/') || github.base_ref == 'convex'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -214,6 +226,11 @@ jobs:
       - android_build
       - ios_build
     steps:
+      - name: Require convex base for migration branches
+        if: >-
+          startsWith(github.head_ref, 'convex/') && github.base_ref != 'convex'
+        run: exit 1
+
       - name: Decide whether the needed jobs succeeded or failed
         uses: re-actors/alls-green@release/v1
         with:
