@@ -59,6 +59,7 @@ jobs:
           echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env.client
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env.client
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
+          echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
 
       - name: Create google-services.json
         env:
@@ -100,6 +101,7 @@ jobs:
           echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env.client
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env.client
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
+          echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
 
       - name: Create google-services.json
         env:
@@ -168,7 +170,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - name: Set up Java
@@ -211,6 +213,7 @@ jobs:
           echo "FIREBASE_MESSAGING_SENDER_ID=${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}" >> .env.client
           echo "FIREBASE_PROJECT_ID=${{ secrets.FIREBASE_PROJECT_ID }}" >> .env.client
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
+          echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
 
       - name: Build iOS
         run: flutter build ios --release --no-codesign

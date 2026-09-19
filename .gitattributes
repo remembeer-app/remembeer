@@ -1,1 +1,2 @@
-backend/convex/_generated/** linguist-generated=true
+/convex/_generated/** linguist-generated=true
+/lib/convex_api/** linguist-generated=true

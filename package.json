@@ -1,13 +1,27 @@
 {
-  "name": "remembeer-firestore-rules",
+  "name": "remembeer",
   "private": true,
+  "engines": {
+    "node": ">=24 <25"
+  },
   "scripts": {
+    "convex:codegen": "convex codegen",
+    "convex:dev": "convex dev",
+    "convex:typecheck": "tsc -p convex/tsconfig.json",
+    "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api",
     "test": "node --test test/firestore-rules.test.js",
     "seed": "node scripts/seed_drink_types.mjs"
   },
+  "dependencies": {
+    "@convex-dev/better-auth": "0.12.3",
+    "better-auth": "1.6.17",
+    "convex": "1.41.0"
+  },
   "devDependencies": {
+    "@types/node": "^24",
     "@firebase/rules-unit-testing": "^5.0.0",
     "firebase": "^12.2.1",
-    "firebase-admin": "^13.0.0"
+    "firebase-admin": "^13.0.0",
+    "typescript": "5.9.2"
   }
 }

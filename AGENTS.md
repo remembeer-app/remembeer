@@ -1,5 +1,8 @@
 # AGENTS.md
 
+Improtant note:
+This branch is a full backend rewrite. Do not care about preserving data, breaking changes or preserving app behavior. The goal is to incrementally migrate to a new architecture using Convex. The changes can break existing flows and features and that is fine.
+
 This file provides guidance to AI agents when working with code in this repository.
 
 ## Project Overview

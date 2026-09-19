@@ -1,0 +1,8 @@
+{
+  "files": [
+    "api.dart",
+    "modules/auth.dart",
+    "runtime.dart",
+    "schema.dart"
+  ]
+}
