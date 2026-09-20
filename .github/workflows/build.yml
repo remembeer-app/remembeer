@@ -59,6 +59,7 @@ jobs:
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
 
           echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
+          echo "CONVEX_URL=${{ secrets.CONVEX_URL }}" >> .env.client
 
       - name: Create google-services.json
         env:
@@ -102,6 +103,7 @@ jobs:
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
 
           echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
+          echo "CONVEX_URL=${{ secrets.CONVEX_URL }}" >> .env.client
 
       - name: Create google-services.json
         env:
@@ -211,6 +213,7 @@ jobs:
           echo "FIREBASE_STORAGE_BUCKET=${{ secrets.FIREBASE_STORAGE_BUCKET }}" >> .env.client
 
           echo "CONVEX_SITE_URL=${{ secrets.CONVEX_SITE_URL }}" >> .env.client
+          echo "CONVEX_URL=${{ secrets.CONVEX_URL }}" >> .env.client
 
       - name: Build iOS
         run: flutter build ios --release --no-codesign

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/legal/constants.dart';
@@ -12,7 +12,7 @@ const _divider = Divider(height: 1);
 class SettingsPage extends StatelessWidget {
   SettingsPage({super.key});
 
-  final _authService = get<AuthService>();
+  final _convexAuthService = get<ConvexAuthService>();
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class SettingsPage extends StatelessWidget {
             backgroundColor: Theme.of(context).colorScheme.error,
             foregroundColor: Theme.of(context).colorScheme.onError,
           ),
-          onPressed: _authService.signOut,
+          onPressed: _signOut,
           label: const Text(
             'SIGN OUT',
             style: TextStyle(
@@ -134,8 +134,6 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildProfileSettingsBox(BuildContext context) {
-    final hasPassword = _authService.hasPasswordProvider;
-
     return _buildSettingsBox(
       context: context,
       children: [
@@ -158,13 +156,11 @@ class SettingsPage extends StatelessWidget {
           title: 'Badge visibility',
           onTap: () => const BadgeVisibilityRoute().push<void>(context),
         ),
-        if (hasPassword) ...[
-          _divider,
-          _buildSettingsCard(
-            title: 'Change password',
-            onTap: () => const ChangePasswordRoute().push<void>(context),
-          ),
-        ],
+        _divider,
+        _buildSettingsCard(
+          title: 'Change password',
+          onTap: () => const ChangePasswordRoute().push<void>(context),
+        ),
       ],
     );
   }
@@ -208,4 +204,6 @@ class SettingsPage extends StatelessWidget {
       child: Column(children: children),
     );
   }
+
+  Future<void> _signOut() => _convexAuthService.signOut();
 }

@@ -2,6 +2,7 @@ import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/auth/constants.dart';
+import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
@@ -19,7 +20,7 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
-  final _betterAuthClient = get<BetterAuthClient>();
+  final _convexAuthService = get<ConvexAuthService>();
 
   final _emailController = TextEditingController();
   final _usernameController = TextEditingController();
@@ -164,7 +165,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _register() async {
-    await _betterAuthClient.signUp(
+    await _convexAuthService.signUp(
       name: _usernameController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,
