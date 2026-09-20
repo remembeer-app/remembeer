@@ -2,6 +2,7 @@
 // ignore_for_file: type=lint, unused_element, unused_import, unused_local_variable
 
 import './modules/auth.dart';
+import './modules/users.dart';
 import './runtime.dart';
 import './schema.dart';
 
@@ -16,4 +17,5 @@ class ConvexApi {
   final ConvexFunctionCaller _client;
 
   AuthApi get auth => AuthApi(_client);
+  UsersApi get users => UsersApi(_client);
 }

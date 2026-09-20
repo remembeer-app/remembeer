@@ -28,6 +28,15 @@ The Convex project lives in `convex/` at the repository root.
 
 ```bash
 npm run convex:dev
+npm run convex:generate
 npm run convex:typecheck
-npm run dartvex:codegen
 ```
+
+`convex:generate` regenerates the Convex TypeScript bindings, generates the
+type-safe Dart client in `lib/convex_api/`, and formats the generated Dart
+files. Run it after changing the Convex schema or any public query, mutation,
+or action.
+
+The Flutter client includes the complete Dartvex stack: the core client,
+Flutter widgets, Better Auth integration, generated API bindings, and optional
+SQLite-backed offline support through `dartvex_local`.

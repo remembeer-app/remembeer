@@ -2,6 +2,7 @@
   "files": [
     "api.dart",
     "modules/auth.dart",
+    "modules/users.dart",
     "runtime.dart",
     "schema.dart"
   ]
