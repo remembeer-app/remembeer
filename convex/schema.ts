@@ -18,5 +18,5 @@ export default defineSchema({
     alcoholPercentage: v.number(),
     updatedAt: v.number(),
     deletedAt: v.nullable(v.number()),
-  }).index("by_onwerId_and_deletedAt", ["ownerId", "deletedAt"]),
+  }).index("by_ownerId_and_deletedAt", ["ownerId", "deletedAt"]),
 });

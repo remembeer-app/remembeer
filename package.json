@@ -7,6 +7,7 @@
   "scripts": {
     "convex:codegen": "convex codegen",
     "convex:dev": "convex dev",
+    "convex:generate": "npm run convex:codegen && npm run dartvex:codegen && dart format lib/convex_api",
     "convex:typecheck": "tsc -p convex/tsconfig.json",
     "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api",
     "test": "node --test test/firestore-rules.test.js",
@@ -14,14 +15,15 @@
   },
   "dependencies": {
     "@convex-dev/better-auth": "0.12.3",
-    "better-auth": "1.6.17",
-    "convex": "1.41.0"
+    "better-auth": "1.6.33",
+    "convex": "^1.46.0",
+    "fluent-convex": "^0.13.0"
   },
   "devDependencies": {
-    "@types/node": "^24",
     "@firebase/rules-unit-testing": "^5.0.0",
+    "@types/node": "^24",
     "firebase": "^12.2.1",
-    "firebase-admin": "^13.0.0",
+    "firebase-admin": "^14.4.0",
     "typescript": "5.9.2"
   }
 }
