@@ -9,6 +9,7 @@ import 'package:remembeer/auth/page/change_password_page.dart';
 import 'package:remembeer/auth/page/login_page.dart';
 import 'package:remembeer/auth/page/register_page.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/common/widget/nav_bar.dart';
 import 'package:remembeer/drink/page/add_drink_page.dart';
@@ -52,27 +53,24 @@ import 'package:remembeer/user_settings/page/username_page.dart';
 
 part 'routes.g.dart';
 
-final _authService = get<AuthService>();
+final _convexAuthService = get<ConvexAuthService>();
 
 final router = GoRouter(
-  initialLocation: const DrinkRoute().location,
-  redirect: (context, state) {
-    final isOnAuthPage = {
-      const LoginRoute().location,
-      const RegisterRoute().location,
-    }.contains(state.matchedLocation);
-    return switch ((_authService.isAuthenticated, isOnAuthPage)) {
-      (true, true) => const DrinkRoute().location,
-      (false, false) => const LoginRoute().location,
-      _ => null,
-    };
-  },
+  initialLocation: const LoginRoute().location,
+  refreshListenable: _convexAuthService,
   routes: $appRoutes,
 );
 
 @TypedGoRoute<LoginRoute>(path: '/login')
 class LoginRoute extends GoRouteData with $LoginRoute {
   const LoginRoute();
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    return _convexAuthService.isAuthenticated
+        ? const SettingsRoute().location
+        : null;
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -83,6 +81,13 @@ class LoginRoute extends GoRouteData with $LoginRoute {
 @TypedGoRoute<RegisterRoute>(path: '/register')
 class RegisterRoute extends GoRouteData with $RegisterRoute {
   const RegisterRoute();
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    return _convexAuthService.isAuthenticated
+        ? const SettingsRoute().location
+        : null;
+  }
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
@@ -215,6 +220,13 @@ class NavbarShellRouteData extends StatefulShellRouteData {
   const NavbarShellRouteData();
 
   @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    return _convexAuthService.isAuthenticated
+        ? null
+        : const LoginRoute().location;
+  }
+
+  @override
   Widget builder(
     BuildContext context,
     GoRouterState state,
@@ -250,7 +262,7 @@ class ProfileRoute extends GoRouteData with $ProfileRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return ProfilePage(
-      userId: _authService.authenticatedUser.uid,
+      userId: get<AuthService>().authenticatedUser.uid,
       showTitle: false,
     );
   }

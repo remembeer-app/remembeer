@@ -1,4 +1,6 @@
+import 'package:dartvex/dartvex.dart';
 import 'package:dartvex_auth_better/dartvex_auth_better.dart';
+import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
@@ -6,8 +8,10 @@ import 'package:remembeer/account_deletion/service/account_deletion_service.dart
 import 'package:remembeer/activity/service/activity_service.dart';
 import 'package:remembeer/app_icon/service/app_icon_service.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
+import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
@@ -39,11 +43,10 @@ class IoCContainer {
   IoCContainer._();
 
   static void initialize() {
+    _registerConvex();
+
     get
       ..registerSingleton(FirebaseAuth.instance)
-      ..registerSingleton(
-        BetterAuthClient(baseUrl: dotenv.get('CONVEX_SITE_URL')),
-      )
       ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
       ..registerSingleton(NotificationService())
       ..registerSingleton(MonthService())
@@ -53,6 +56,37 @@ class IoCContainer {
 
     _registerControllers();
     _registerServices();
+  }
+
+  static void _registerConvex() {
+    get
+      ..registerSingleton(
+        BetterAuthClient(baseUrl: dotenv.get('CONVEX_SITE_URL')),
+      )
+      ..registerSingleton(
+        ConvexClient(
+          dotenv.get('CONVEX_URL'),
+          config: ConvexClientConfig(
+            connectivitySignal: ConnectivityPlusSignal(),
+          ),
+        ),
+      )
+      ..registerSingleton(
+        ConvexBetterAuthProvider(client: get<BetterAuthClient>()),
+      )
+      ..registerSingleton(
+        get<ConvexClient>().withAuth(get<ConvexBetterAuthProvider>()),
+      )
+      ..registerSingleton(
+        ConvexApi(get<ConvexClientWithAuth<BetterAuthSession>>()),
+      )
+      ..registerSingleton(
+        ConvexAuthService(
+          authProvider: get<ConvexBetterAuthProvider>(),
+          client: get<ConvexClientWithAuth<BetterAuthSession>>(),
+          api: get<ConvexApi>(),
+        ),
+      );
   }
 
   static void _registerControllers() {
