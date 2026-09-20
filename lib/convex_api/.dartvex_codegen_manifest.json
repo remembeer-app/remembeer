@@ -1,7 +1,7 @@
 {
   "files": [
     "api.dart",
-    "modules/auth.dart",
+    "modules/drinks.dart",
     "modules/users.dart",
     "runtime.dart",
     "schema.dart"
