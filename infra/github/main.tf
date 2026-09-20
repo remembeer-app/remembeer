@@ -116,6 +116,44 @@ resource "github_repository_ruleset" "protect_main" {
   }
 }
 
+resource "github_repository_ruleset" "protect_convex" {
+  name        = "Protect convex"
+  repository  = github_repository.remembeer.name
+  target      = "branch"
+  enforcement = "active"
+
+  conditions {
+    ref_name {
+      exclude = []
+      include = ["refs/heads/convex"]
+    }
+  }
+
+  rules {
+    deletion         = true
+    non_fast_forward = true
+
+    pull_request {
+      allowed_merge_methods             = ["rebase", "squash", "merge"]
+      dismiss_stale_reviews_on_push     = false
+      require_code_owner_review         = false
+      require_last_push_approval        = false
+      required_approving_review_count   = 0
+      required_review_thread_resolution = false
+    }
+
+    required_status_checks {
+      strict_required_status_checks_policy = false
+      do_not_enforce_on_create             = false
+
+      required_check {
+        context        = "Ready to merge"
+        integration_id = 15368
+      }
+    }
+  }
+}
+
 resource "github_actions_repository_permissions" "remembeer" {
   repository           = github_repository.remembeer.name
   enabled              = true

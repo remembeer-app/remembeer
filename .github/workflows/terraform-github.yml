@@ -6,12 +6,6 @@ on:
     paths:
       - .github/workflows/terraform-github.yml
       - infra/github/**
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/terraform-github.yml
-      - infra/github/**
 
 permissions:
   contents: read

@@ -1,0 +1,62 @@
+name: Sync Main to Convex
+
+on:
+  push:
+    branches:
+      - main
+      - convex
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: sync-main-to-convex
+  cancel-in-progress: true
+
+jobs:
+  open-sync-pr:
+    name: Open sync pull request
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Open or update pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_TITLE: 'chore: sync main into convex'
+          PR_BODY: |
+            `main` contains commits that are not yet in `convex`.
+
+            Merge this pull request with a merge commit to preserve the existing `main` commit ancestry. Rebasing or squashing this pull request would duplicate those commits when `convex` is eventually merged back into `main`.
+
+            This pull request is maintained automatically as `main` advances.
+        run: |
+          ahead_by="$(gh api "repos/${GITHUB_REPOSITORY}/compare/convex...main" --jq '.ahead_by')"
+          existing_pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls?state=open&base=convex&head=remembeer-app:main" --jq '.[0].number // empty')"
+
+          if [ "$ahead_by" -eq 0 ]; then
+            if [ -n "$existing_pr" ]; then
+              gh api --method PATCH "repos/${GITHUB_REPOSITORY}/pulls/${existing_pr}" \
+                --field state=closed
+              echo "Closed pull request #${existing_pr}; convex is up to date"
+              exit 0
+            fi
+
+            echo "convex already contains all commits from main"
+            exit 0
+          fi
+
+          if [ -n "$existing_pr" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/pulls/${existing_pr}" \
+              --field title="$PR_TITLE" \
+              --field body="$PR_BODY"
+            echo "Updated pull request #${existing_pr}"
+            exit 0
+          fi
+
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/pulls" \
+            --field title="$PR_TITLE" \
+            --field body="$PR_BODY" \
+            --field head=main \
+            --field base=convex
