@@ -74,6 +74,18 @@ def _is_masti_to_jak_drak(drink: Mapping[str, Any]) -> bool:
     return name.strip().casefold() == MASTI_TO_JAK_DRAK_DRINK_TYPE_NAME.casefold()
 
 
+def newly_unlocked_badge_ids(
+    before: Mapping[str, Any], after: Mapping[str, Any]
+) -> list[str]:
+    """Return the badge ids present on ``after`` but not on ``before``, sorted."""
+
+    previous = before.get("unlockedBadges", {})
+    current = after.get("unlockedBadges", {})
+    if not isinstance(previous, Mapping) or not isinstance(current, Mapping):
+        raise TypeError("Stored unlockedBadges is invalid")
+    return sorted(str(badge_id) for badge_id in current if badge_id not in previous)
+
+
 def _unlock(user: dict[str, Any], badge_id: str, now: datetime) -> None:
     unlocked: dict[str, Any] = user["unlockedBadges"]
     if badge_id in unlocked:

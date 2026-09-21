@@ -51,6 +51,31 @@ void main() {
     },
   );
 
+  test('Party create announces badges unlocked by the server', () async {
+    final partyController = _FakePartyController(
+      unlockedBadgeIds: const ['masti_to_jak_drak'],
+    );
+    final badgeService = _RecordingBadgeService();
+    final service = _service(
+      sessionController: _FakeSessionController(_partySession(consumedAt)),
+      partyController: partyController,
+      badgeService: badgeService,
+    );
+
+    await service.createDrink(
+      DrinkCreate(
+        consumedAt: consumedAt,
+        drinkType: drinkType,
+        volumeInMilliliters: 500,
+      ),
+      targetSessionId: 'party-1',
+    );
+
+    expect(badgeService.announced, [
+      ['masti_to_jak_drak'],
+    ]);
+  });
+
   test('automatically selected Party also uses the callable path', () async {
     final partyController = _FakePartyController();
     final service = _service(
@@ -125,6 +150,7 @@ DrinkService _service({
   required _FakeSessionController sessionController,
   required _FakePartyController partyController,
   DrinkTypeController? drinkTypeController,
+  BadgeService? badgeService,
 }) => DrinkService(
   authService: _FakeAuthService(),
   userSettingsController: _UnusedUserSettingsController(),
@@ -133,7 +159,7 @@ DrinkService _service({
   dateService: _UnusedDateService(),
   locationService: _UnusedLocationService(),
   userStatsService: UserStatsService(),
-  badgeService: BadgeService(),
+  badgeService: badgeService ?? BadgeService(),
   drinkTypeController: drinkTypeController ?? _FakeDrinkTypeController(),
   partyController: partyController,
 );
@@ -170,7 +196,21 @@ class _FakeSessionController implements SessionController {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
+/// Captures announced badge ids instead of showing toasts, which need a
+/// widget tree.
+class _RecordingBadgeService extends BadgeService {
+  final announced = <List<String>>[];
+
+  @override
+  void notifyUnlockedBadges(Iterable<String> badgeIds) {
+    announced.add(badgeIds.toList());
+  }
+}
+
 class _FakePartyController implements PartyController {
+  _FakePartyController({this.unlockedBadgeIds = const []});
+
+  final List<String> unlockedBadgeIds;
   Drink? createdDrink;
   String? createdDrinkTypeId;
   String? createdCommandId;
@@ -217,6 +257,7 @@ class _FakePartyController implements PartyController {
       'sessionId': sessionId,
       'drinkId': drinkId,
       'reversalEventId': 'reversal-1',
+      'unlockedBadgeIds': <String>[],
     });
   }
 
@@ -227,6 +268,7 @@ class _FakePartyController implements PartyController {
     'baseScoreUnits': 22500,
     'classBonusUnits': 2250,
     'awardedScoreUnits': 24750,
+    'unlockedBadgeIds': unlockedBadgeIds,
   });
 
   @override

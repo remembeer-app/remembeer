@@ -9,6 +9,7 @@ class PartyDrinkCommandResult {
     this.baseScoreUnits,
     this.classBonusUnits,
     this.awardedScoreUnits,
+    required this.unlockedBadgeIds,
   });
 
   final String sessionId;
@@ -18,6 +19,9 @@ class PartyDrinkCommandResult {
   final int? baseScoreUnits;
   final int? classBonusUnits;
   final int? awardedScoreUnits;
+
+  /// Badges the server unlocked while processing this command.
+  final List<String> unlockedBadgeIds;
 
   factory PartyDrinkCommandResult.fromMutation(PartyCommandResult result) {
     final data = result.data;
@@ -34,6 +38,7 @@ class PartyDrinkCommandResult {
       baseScoreUnits: _optionalInt(data, 'baseScoreUnits'),
       classBonusUnits: _optionalInt(data, 'classBonusUnits'),
       awardedScoreUnits: _optionalInt(data, 'awardedScoreUnits'),
+      unlockedBadgeIds: _requiredStringList(data, 'unlockedBadgeIds'),
     );
   }
 
@@ -54,6 +59,23 @@ class PartyDrinkCommandResult {
       throw StateError('Party drink command returned an invalid $key.');
     }
     return value;
+  }
+
+  static List<String> _requiredStringList(
+    Map<String, Object?> data,
+    String key,
+  ) {
+    final value = data[key];
+    if (value is! List<Object?>) {
+      throw StateError('Party drink command returned an invalid $key.');
+    }
+    return [
+      for (final item in value)
+        if (item is String && item.isNotEmpty)
+          item
+        else
+          throw StateError('Party drink command returned an invalid $key.'),
+    ];
   }
 
   static int? _optionalInt(Map<String, Object?> data, String key) {

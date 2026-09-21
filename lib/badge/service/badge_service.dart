@@ -137,9 +137,19 @@ class BadgeService {
         mastiToJakDrakDrinkTypeName.toLowerCase();
   }
 
+  void notifyUnlockedBadges(Iterable<String> badgeIds) {
+    for (final badgeId in badgeIds) {
+      _notifyUnlocked(getBadgeById(badgeId));
+    }
+  }
+
   UserModel _unlockIfNew(UserModel user, BadgeDefinition badgeDefinition) {
     if (user.isBadgeUnlocked(badgeDefinition.id)) return user;
-    showSuccessNotification('${badgeDefinition.name} badge unlocked!');
+    _notifyUnlocked(badgeDefinition);
     return user.unlockBadge(badgeDefinition.id);
+  }
+
+  void _notifyUnlocked(BadgeDefinition badgeDefinition) {
+    showSuccessNotification('${badgeDefinition.name} badge unlocked!');
   }
 }

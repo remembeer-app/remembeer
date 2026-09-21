@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
-from party_badges import evaluate_badges
+from party_badges import evaluate_badges, newly_unlocked_badge_ids
 from party_user_stats import apply_drink_stats
 
 NOW = datetime(2026, 1, 10, 12, tzinfo=timezone.utc)
@@ -111,3 +111,18 @@ def test_other_drinks_and_deletions_do_not_unlock_masti_to_jak_drak() -> None:
     assert "masti_to_jak_drak" not in evaluate_badges(
         user, consumed_at=NOW, now=NOW
     )["unlockedBadges"]
+
+
+def test_newly_unlocked_badge_ids_lists_only_additions() -> None:
+    drink = _alpsky_ryzlink(NOW)
+    user = apply_drink_stats(_user(), new_drink=drink)
+    user["unlockedBadges"]["centurion"] = {
+        "badgeId": "centurion",
+        "unlockedAt": NOW.isoformat(),
+        "isShown": True,
+    }
+
+    updated = evaluate_badges(user, consumed_at=NOW, now=NOW, drink=drink)
+
+    assert newly_unlocked_badge_ids(user, updated) == ["masti_to_jak_drak"]
+    assert newly_unlocked_badge_ids(updated, updated) == []

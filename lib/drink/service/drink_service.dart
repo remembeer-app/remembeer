@@ -15,6 +15,7 @@ import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/drink_type/model/drink_type_core.dart';
 import 'package:remembeer/location/service/location_service.dart';
+import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
@@ -439,7 +440,7 @@ class DrinkService {
         drink: drink,
       ),
     );
-    PartyDrinkCommandResult.fromMutation(result);
+    _announcePartyBadges(result);
   }
 
   Future<void> _updatePartyDrink(
@@ -458,7 +459,7 @@ class DrinkService {
         drink: newDrink,
       ),
     );
-    PartyDrinkCommandResult.fromMutation(result);
+    _announcePartyBadges(result);
   }
 
   Future<void> _deletePartyDrink(String sessionId, String drinkId) async {
@@ -469,7 +470,12 @@ class DrinkService {
         drinkId: drinkId,
       ),
     );
-    PartyDrinkCommandResult.fromMutation(result);
+    _announcePartyBadges(result);
+  }
+
+  void _announcePartyBadges(PartyCommandResult result) {
+    final drinkResult = PartyDrinkCommandResult.fromMutation(result);
+    badgeService.notifyUnlockedBadges(drinkResult.unlockedBadgeIds);
   }
 
   Future<String> _drinkTypeId(DrinkTypeCore drinkType) async {
