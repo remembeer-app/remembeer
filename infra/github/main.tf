@@ -164,7 +164,7 @@ resource "github_actions_repository_permissions" "remembeer" {
 resource "github_workflow_repository_permissions" "remembeer" {
   repository                       = github_repository.remembeer.name
   default_workflow_permissions     = "read"
-  can_approve_pull_request_reviews = false
+  can_approve_pull_request_reviews = true
 }
 
 resource "github_repository_vulnerability_alerts" "remembeer" {
