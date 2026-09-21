@@ -13,7 +13,7 @@ from firebase_functions.options import set_global_options
 
 REGION = "europe-west4"
 
-set_global_options(max_instances=10)
+set_global_options(max_instances=10, min_instances=1)
 
 initialize_app()
 
