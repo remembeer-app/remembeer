@@ -210,7 +210,12 @@ class DrinkService {
       after6pm: after6pm,
     );
     final stats = userStatsService.fromUser(user);
-    user = badgeService.evaluateBadges(user, stats, effectiveDate);
+    user = badgeService.evaluateBadges(
+      user,
+      stats,
+      effectiveDate,
+      drinkType: drinkCreate.drinkType,
+    );
     final batch = sessionController.batch;
 
     if (canAddToExisting) {
@@ -290,7 +295,12 @@ class DrinkService {
     );
 
     final stats = userStatsService.fromUser(user);
-    user = badgeService.evaluateBadges(user, stats, newEffectiveDate);
+    user = badgeService.evaluateBadges(
+      user,
+      stats,
+      newEffectiveDate,
+      drinkType: newDrink.drinkType,
+    );
 
     final batch = sessionController.batch;
 
@@ -333,7 +343,12 @@ class DrinkService {
     );
 
     final stats = userStatsService.fromUser(user);
-    user = badgeService.evaluateBadges(user, stats, effectiveDate);
+    user = badgeService.evaluateBadges(
+      user,
+      stats,
+      effectiveDate,
+      drinkType: null,
+    );
 
     final batch = sessionController.batch;
 

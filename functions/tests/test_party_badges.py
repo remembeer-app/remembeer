@@ -78,3 +78,36 @@ def test_badges_are_not_revoked_and_only_six_are_shown() -> None:
 
     assert "centurion" in updated["unlockedBadges"]
     assert updated["unlockedBadges"]["early_riser"]["isShown"] is False
+
+
+def _alpsky_ryzlink(at: datetime, name: str = "Alpský Ryzlink") -> dict[str, object]:
+    return {
+        "consumedAt": at.isoformat(),
+        "drinkType": {
+            "name": name,
+            "category": "cocktail",
+            "alcoholPercentage": 15.0,
+        },
+        "volumeInMilliliters": 50,
+    }
+
+
+def test_alpsky_ryzlink_unlocks_masti_to_jak_drak() -> None:
+    drink = _alpsky_ryzlink(NOW, name="  alpský ryzlink ")
+    user = apply_drink_stats(_user(), new_drink=drink)
+
+    updated = evaluate_badges(user, consumed_at=NOW, now=NOW, drink=drink)
+
+    assert "masti_to_jak_drak" in updated["unlockedBadges"]
+
+
+def test_other_drinks_and_deletions_do_not_unlock_masti_to_jak_drak() -> None:
+    beer = _beer(NOW)
+    user = apply_drink_stats(_user(), new_drink=beer)
+
+    assert "masti_to_jak_drak" not in evaluate_badges(
+        user, consumed_at=NOW, now=NOW, drink=beer
+    )["unlockedBadges"]
+    assert "masti_to_jak_drak" not in evaluate_badges(
+        user, consumed_at=NOW, now=NOW
+    )["unlockedBadges"]

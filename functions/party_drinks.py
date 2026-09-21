@@ -97,7 +97,9 @@ def create_party_drink_command(
             )
 
         updated_user = apply_drink_stats(user, new_drink=drink)
-        updated_user = evaluate_badges(updated_user, consumed_at=consumed_at, now=now)
+        updated_user = evaluate_badges(
+            updated_user, consumed_at=consumed_at, now=now, drink=drink
+        )
         transaction.update(
             db.collection("sessions").document(session_id),
             {"drinks": [*drinks, drink], "updatedAt": firestore.SERVER_TIMESTAMP},
@@ -195,7 +197,9 @@ def update_party_drink_command(
         )
         now = _now(now_provider, consumed_at)
         updated_user = apply_drink_stats(user, old_drink=old_drink, new_drink=new_drink)
-        updated_user = evaluate_badges(updated_user, consumed_at=consumed_at, now=now)
+        updated_user = evaluate_badges(
+            updated_user, consumed_at=consumed_at, now=now, drink=new_drink
+        )
         updated_drinks = list(drinks)
         updated_drinks[index] = new_drink
         transaction.update(
