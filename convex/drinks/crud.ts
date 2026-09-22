@@ -1,7 +1,6 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { authMutation, authQuery } from "../lib/authenticated";
-import { convex } from "../lib/builder";
 import { schema } from "../schema";
 import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
 
@@ -38,8 +37,7 @@ export const listAll = authQuery
     return [...customDrinks, ...globalDrinks];
   });
 
-export const get = convex
-  .query()
+export const get = authQuery
   .input({
     id: v.id("drinks"),
   })
@@ -47,7 +45,15 @@ export const get = convex
   .handler(async (ctx, { id }) => {
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
-      throw new Error("Drink not found");
+      throw new ConvexError("Drink not found");
+    }
+
+    if (drink.ownerId !== ctx.user._id) {
+      throw new ConvexError("You do not have permission to view this drink");
+    }
+
+    if (drink.deletedAt !== null) {
+      throw new ConvexError("Drink has been deleted");
     }
 
     return drink;
@@ -75,11 +81,15 @@ export const update = authMutation
   .handler(async (ctx, { id, name, category, alcoholPercentage }) => {
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
-      throw new Error("Drink not found");
+      throw new ConvexError("Drink not found");
     }
 
     if (drink.ownerId !== ctx.user._id) {
-      throw new Error("You do not have permission to update this drink");
+      throw new ConvexError("You do not have permission to update this drink");
+    }
+
+    if (drink.deletedAt !== null) {
+      throw new ConvexError("Drink has been deleted");
     }
 
     await ctx.db.patch("drinks", id, {
@@ -100,11 +110,15 @@ export const softDelete = authMutation
   .handler(async (ctx, { id }) => {
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
-      throw new Error("Drink not found");
+      throw new ConvexError("Drink not found");
     }
 
     if (drink.ownerId !== ctx.user._id) {
-      throw new Error("You do not have permission to delete this drink");
+      throw new ConvexError("You do not have permission to delete this drink");
+    }
+
+    if (drink.deletedAt !== null) {
+      throw new ConvexError("Drink has already been deleted");
     }
 
     const now = Date.now();
