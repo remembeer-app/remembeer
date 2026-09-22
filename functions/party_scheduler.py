@@ -11,7 +11,7 @@ from typing import Any
 from urllib.parse import quote
 
 from firebase_admin import firestore
-from firebase_functions import https_fn
+from firebase_functions import https_fn, logger
 from google.cloud.firestore_v1.base_query import FieldFilter
 from party_common import (
     callable_error,
@@ -76,6 +76,7 @@ def start_next_party_quest_command(
         [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
     ]
     | None = None,
+    log: Any = logger,
 ) -> Mapping[str, Any]:
     actor_id = require_auth(request)
     data = require_object(getattr(request, "data", None))
@@ -133,6 +134,13 @@ def start_next_party_quest_command(
         operation=operation,
         transaction_runner=transaction_runner,
     )
+    log.info(
+        "Manual Party quest start processed.",
+        actorUserId=actor_id,
+        **_outcome_log_fields(
+            party_id, {**result, "outcome": "created" if did_start else "advanced"}
+        ),
+    )
     if did_start:
         notification_dispatcher(
             db,
@@ -160,6 +168,7 @@ def run_party_scheduler(
         [Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]
     ]
     | None = None,
+    log: Any = logger,
 ) -> Mapping[str, int]:
     """Expire terminal content, then transactionally claim every due Party."""
 
@@ -171,6 +180,7 @@ def run_party_scheduler(
         "activeQuestId",
         expired_quest_provider or _expired_quest_documents,
         transaction_runner_factory,
+        log,
     )
     expired_challenges = _expire_documents(
         db,
@@ -179,6 +189,7 @@ def run_party_scheduler(
         "activeChallengeId",
         expired_challenge_provider or _expired_challenge_documents,
         transaction_runner_factory,
+        log,
     )
     due_documents = list((due_party_provider or _due_party_documents)(db, now))[
         :MAX_SCHEDULER_BATCH_SIZE
@@ -186,6 +197,7 @@ def run_party_scheduler(
     created = 0
     advanced = 0
     skipped = 0
+    failed = 0
     rng = random_source or Random()
     for party_snapshot in due_documents:
         party_id = _snapshot_id(party_snapshot)
@@ -195,8 +207,21 @@ def run_party_scheduler(
         ) -> Mapping[str, Any]:
             return _claim_due_party(transaction, db, claimed_party_id, now, rng)
 
-        result = _run_transaction(db, claim, transaction_runner_factory)
+        try:
+            result = _run_transaction(db, claim, transaction_runner_factory)
+        except Exception as error:  # noqa: BLE001 - one bad Party must not stop the rest
+            failed += 1
+            log.error(
+                "Party quest scheduler failed to process a due Party.",
+                partyId=party_id,
+                error=repr(error),
+            )
+            continue
         outcome = result.get("outcome")
+        log.info(
+            "Party quest scheduler processed a due Party.",
+            **_outcome_log_fields(party_id, result),
+        )
         if outcome == "created":
             created += 1
             notification_dispatcher(
@@ -213,13 +238,33 @@ def run_party_scheduler(
             advanced += 1
         else:
             skipped += 1
-    return {
+    summary = {
         "createdQuests": created,
         "advancedParties": advanced,
         "skippedParties": skipped,
+        "failedParties": failed,
         "expiredQuests": expired_quests,
         "expiredChallenges": expired_challenges,
     }
+    log.info(
+        "Party quest scheduler run completed.",
+        dueParties=len(due_documents),
+        **summary,
+    )
+    return summary
+
+
+def _outcome_log_fields(party_id: str, result: Mapping[str, Any]) -> dict[str, Any]:
+    """Pick the stable, non-sensitive parts of a quest start result for logs."""
+
+    fields: dict[str, Any] = {"partyId": party_id, "outcome": result.get("outcome")}
+    for key in ("reason", "templateId", "questId"):
+        if result.get(key) is not None:
+            fields[key] = result[key]
+    eligible = result.get("eligibleMemberIds")
+    if isinstance(eligible, Sequence) and not isinstance(eligible, (str, bytes)):
+        fields["eligibleMemberCount"] = len(eligible)
+    return fields
 
 
 def _claim_due_party(
@@ -363,7 +408,9 @@ def _attempt_quest_start(
             "templateId": template_id,
         }
 
-    duration = template.get("durationMinutes", schedule["defaultDurationMinutes"])
+    duration = template.get("durationMinutes")
+    if duration is None:
+        duration = schedule["defaultDurationMinutes"]
     if (
         isinstance(duration, bool)
         or not isinstance(duration, int)
@@ -457,6 +504,7 @@ def _expire_documents(
     active_field: str,
     provider: DocumentProvider,
     runner: Callable[[Callable[[Any], Mapping[str, Any]]], Mapping[str, Any]] | None,
+    log: Any = logger,
 ) -> int:
     expired = 0
     documents = list(provider(db, now))[:MAX_SCHEDULER_BATCH_SIZE]
@@ -497,9 +545,25 @@ def _expire_documents(
             transaction.update(root_ref, party_update)
             return {"expired": True}
 
-        result = _run_transaction(db, expire, runner)
+        try:
+            result = _run_transaction(db, expire, runner)
+        except Exception as error:  # noqa: BLE001 - keep expiring the rest
+            log.error(
+                "Party content expiry failed.",
+                partyId=party_ref.path.rsplit("/", 1)[-1],
+                collection=collection_name,
+                contentId=content_id,
+                error=repr(error),
+            )
+            continue
         if result.get("expired") is True:
             expired += 1
+            log.info(
+                "Party content expired.",
+                partyId=party_ref.path.rsplit("/", 1)[-1],
+                collection=collection_name,
+                contentId=content_id,
+            )
     return expired
 
 

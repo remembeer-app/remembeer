@@ -56,7 +56,7 @@ def test_seed_documents_match_party_template_schema() -> None:
             FINAL_AVAILABILITY,
         }
         assert document["pointsUnits"] > 0
-        assert document["durationMinutes"] > 0
+        assert "durationMinutes" not in document
 
 
 def test_non_builtin_template_sources_are_rejected() -> None:

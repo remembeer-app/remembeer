@@ -33,6 +33,34 @@ void main() {
     expect(drink.toJson(), isNot(contains('partyRevision')));
   });
 
+  test('reads consumed times into the local time zone', () {
+    final utc = Drink.fromJson(baseJson);
+    final withOffset = Drink.fromJson({
+      ...baseJson,
+      'consumedAt': '2026-09-02T20:30:00+02:00',
+    });
+    final local = Drink.fromJson({
+      ...baseJson,
+      'consumedAt': '2026-09-02T18:30:00.000',
+    });
+    final instant = DateTime.utc(2026, 9, 2, 18, 30);
+
+    expect(utc.consumedAt.isUtc, isFalse);
+    expect(utc.consumedAt.isAtSameMomentAs(instant), isTrue);
+    expect(withOffset.consumedAt.isUtc, isFalse);
+    expect(withOffset.consumedAt.isAtSameMomentAs(instant), isTrue);
+    expect(local.consumedAt, DateTime(2026, 9, 2, 18, 30));
+  });
+
+  test('keeps writing local consumed times without an offset', () {
+    final drink = Drink.fromJson({
+      ...baseJson,
+      'consumedAt': '2026-09-02T18:30:00.000',
+    });
+
+    expect(drink.toJson()['consumedAt'], '2026-09-02T18:30:00.000');
+  });
+
   test('reads and writes the persisted drink type identity', () {
     final drink = Drink.fromJson({...baseJson, 'drinkTypeId': 'type-1'});
 

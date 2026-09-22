@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import pytest
@@ -137,6 +137,100 @@ def test_admin_activation_creates_complete_party_and_base_awards_once() -> None:
         transaction.created_paths.count("parties/session-a/events/drink:drink-a:v:1")
         == 1
     )
+
+
+def _drink(consumed_at: str) -> dict[str, Any]:
+    return {
+        "id": "drink-a",
+        "consumedByUserId": "member",
+        "consumedAt": consumed_at,
+        "drinkType": {
+            "name": "Beer",
+            "category": "beer",
+            "alcoholPercentage": 5.0,
+        },
+        "volumeInMilliliters": 500,
+    }
+
+
+def _activate(session: dict[str, Any], **data: Any) -> dict[str, Any]:
+    db = Database({"sessions/session-a": session})
+    activate_party_command(
+        Request(
+            Auth("admin"),
+            {"sessionId": "session-a", "commandId": "activate-a", **data},
+        ),
+        db,
+        template_seed_provider=lambda _: [],
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+    return db.store["parties/session-a/events/drink:drink-a:v:1"]
+
+
+@pytest.mark.parametrize(
+    ("consumed_at", "data", "expected"),
+    [
+        # The app stores local times without an offset; the client offset
+        # decides which instant they mean.
+        (
+            "2026-01-01T20:00:00",
+            {"timeZoneOffsetMinutes": 120},
+            datetime(2026, 1, 1, 18, tzinfo=timezone.utc),
+        ),
+        (
+            "2026-01-01T20:00:00",
+            {"timeZoneOffsetMinutes": -300},
+            datetime(2026, 1, 2, 1, tzinfo=timezone.utc),
+        ),
+        # Older clients send no offset and keep the UTC interpretation.
+        (
+            "2026-01-01T20:00:00",
+            {},
+            datetime(2026, 1, 1, 20, tzinfo=timezone.utc),
+        ),
+        # Times stored with an explicit offset are never reinterpreted.
+        (
+            "2026-01-01T20:00:00+01:00",
+            {"timeZoneOffsetMinutes": 120},
+            datetime(2026, 1, 1, 19, tzinfo=timezone.utc),
+        ),
+        (
+            "2026-01-01T20:00:00Z",
+            {"timeZoneOffsetMinutes": 120},
+            datetime(2026, 1, 1, 20, tzinfo=timezone.utc),
+        ),
+    ],
+)
+def test_activation_places_initial_drink_awards_at_the_right_instant(
+    consumed_at: str,
+    data: dict[str, Any],
+    expected: datetime,
+) -> None:
+    event = _activate(_session(drinks=[_drink(consumed_at)]), **data)
+
+    assert event["occurredAt"] == expected
+    assert event["occurredAt"].tzinfo is not None
+
+
+def test_activation_applies_client_offset_to_the_stored_wall_clock_time() -> None:
+    event = _activate(
+        _session(drinks=[_drink("2026-01-01T20:00:00")]),
+        timeZoneOffsetMinutes=120,
+    )
+
+    assert event["occurredAt"].utcoffset() == timedelta(minutes=120)
+    assert event["occurredAt"].replace(tzinfo=None) == datetime(2026, 1, 1, 20)
+
+
+@pytest.mark.parametrize("offset", ["120", 12.5, True, 15 * 60, -15 * 60])
+def test_activation_rejects_invalid_time_zone_offsets(offset: Any) -> None:
+    with pytest.raises(https_fn.HttpsError) as error:
+        _activate(
+            _session(drinks=[_drink("2026-01-01T20:00:00")]),
+            timeZoneOffsetMinutes=offset,
+        )
+
+    assert error.value.code == https_fn.FunctionsErrorCode.INVALID_ARGUMENT
 
 
 def test_activation_uses_versioned_builtin_catalog_by_default() -> None:

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:remembeer/app.dart';
+import 'package:remembeer/app_icon/service/app_icon_service.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/firebase_options.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -27,6 +28,7 @@ Future<void> main() async {
   IoCContainer.initialize();
 
   await get<NotificationService>().initialize();
+  get<AppIconService>().initialize();
 
   // For the Android home screen widget.
   _quickAddChannel.setMethodCallHandler((call) async {

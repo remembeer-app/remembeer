@@ -14,7 +14,7 @@ _PartyQuestTemplate _$PartyQuestTemplateFromJson(Map<String, dynamic> json) =>
       title: json['title'] as String,
       instructions: json['instructions'] as String,
       pointsUnits: (json['pointsUnits'] as num).toInt(),
-      durationMinutes: (json['durationMinutes'] as num).toInt(),
+      durationMinutes: (json['durationMinutes'] as num?)?.toInt(),
       eligibilityRule: json['eligibilityRule'] as String,
       availability: $enumDecode(
         _$PartyQuestAvailabilityEnumMap,

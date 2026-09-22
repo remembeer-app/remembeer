@@ -100,6 +100,23 @@ npm run seed -- --dry-run
 
 The script is idempotent: it upserts every entry (preserving `createdAt`) and soft-deletes global drink types that are no longer in the seed file. Logged drinks embed their own copy of the name, category and alcohol percentage, so retiring a drink type never changes anyone's history. `test/seed_data/drink_types_seed_test.dart` validates the JSON before it can be seeded.
 
+### Dynamic App Icon
+
+The launcher icon is a bumblebee whose mood follows how much pure alcohol the user has logged on the current logical day (end-of-day boundary applies). There are 8 phases, `a` (sober) to `h` (exhausted); the artwork lives in `assets/app_icon/bumblebeer_<phase>.svg`.
+
+- **Step**: `appIconPhaseStepMl` in `lib/app_icon/constants.dart` is the only tuning knob — every that many ml of alcohol advances the icon by one phase; the last phase is kept once reached.
+- **Dart**: `AppIconPhase.forAlcoholMl()` (`lib/app_icon/type/`) maps ml to a phase. `AppIconService` (`lib/app_icon/service/`) watches the current user's daily stats plus app resume events and sends the phase over the `app_icon` method channel (`setIcon`, argument `phase`), deduplicated with `distinct()`. Signing out resets to phase `a`.
+- **iOS**: `AppDelegate.swift` calls `setAlternateIconName`. Phase `a` is the primary `AppIcon.appiconset`; the others are `AppIcon-bumblebeer_<phase>.appiconset`, listed in the `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES` build setting. iOS only allows the change while the app is active (pending changes are applied on `didBecomeActive`) and shows a system alert on every switch.
+- **Android**: one `activity-alias` per phase (`.BumblebeerA`…`.BumblebeerH`) in `AndroidManifest.xml`, all targeting `MainActivity`; only `A` is enabled by default. `MainActivity.kt` stores the requested phase and swaps the enabled alias in `onStop()` so the launcher never sees the change mid-session. Icons are adaptive (`mipmap-anydpi-v26/ic_launcher_bumblebeer_<phase>.xml` over a shared gradient `drawable/ic_launcher_background.xml`) with legacy PNG fallbacks.
+
+Regenerate every iOS/Android icon resource after changing the SVGs or the background with:
+
+```bash
+python3 scripts/generate_app_icons.py   # needs Google Chrome (headless render) and macOS sips
+```
+
+Adding a phase means: a new SVG, a new enum value in `AppIconPhase`, a new alias in the manifest, adding the phase to `APP_ICON_PHASES` in `MainActivity.kt`, appending the icon set name to the Xcode build setting, and re-running the script.
+
 ## UI Patterns
 
 ### Page Structure

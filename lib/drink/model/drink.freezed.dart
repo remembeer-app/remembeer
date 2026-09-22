@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Drink {
 
- String get id; String get consumedByUserId; DateTime get consumedAt; DrinkTypeCore get drinkType;@JsonKey(includeIfNull: false) String? get drinkTypeId; int get volumeInMilliliters;@GeoPointConverter() GeoPoint? get location;@JsonKey(includeToJson: false) int get partyRevision;
+ String get id; String get consumedByUserId;@LocalDateTimeConverter() DateTime get consumedAt; DrinkTypeCore get drinkType;@JsonKey(includeIfNull: false) String? get drinkTypeId; int get volumeInMilliliters;@GeoPointConverter() GeoPoint? get location;@JsonKey(includeToJson: false) int get partyRevision;
 /// Create a copy of Drink
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $DrinkCopyWith<$Res>  {
   factory $DrinkCopyWith(Drink value, $Res Function(Drink) _then) = _$DrinkCopyWithImpl;
 @useResult
 $Res call({
- String id, String consumedByUserId, DateTime consumedAt, DrinkTypeCore drinkType,@JsonKey(includeIfNull: false) String? drinkTypeId, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location,@JsonKey(includeToJson: false) int partyRevision
+ String id, String consumedByUserId,@LocalDateTimeConverter() DateTime consumedAt, DrinkTypeCore drinkType,@JsonKey(includeIfNull: false) String? drinkTypeId, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location,@JsonKey(includeToJson: false) int partyRevision
 });
 
 
@@ -175,7 +175,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType, @JsonKey(includeIfNull: false)  String? drinkTypeId,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String consumedByUserId, @LocalDateTimeConverter()  DateTime consumedAt,  DrinkTypeCore drinkType, @JsonKey(includeIfNull: false)  String? drinkTypeId,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Drink() when $default != null:
 return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.drinkTypeId,_that.volumeInMilliliters,_that.location,_that.partyRevision);case _:
@@ -196,7 +196,7 @@ return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType, @JsonKey(includeIfNull: false)  String? drinkTypeId,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String consumedByUserId, @LocalDateTimeConverter()  DateTime consumedAt,  DrinkTypeCore drinkType, @JsonKey(includeIfNull: false)  String? drinkTypeId,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)  $default,) {final _that = this;
 switch (_that) {
 case _Drink():
 return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.drinkTypeId,_that.volumeInMilliliters,_that.location,_that.partyRevision);case _:
@@ -216,7 +216,7 @@ return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String consumedByUserId,  DateTime consumedAt,  DrinkTypeCore drinkType, @JsonKey(includeIfNull: false)  String? drinkTypeId,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String consumedByUserId, @LocalDateTimeConverter()  DateTime consumedAt,  DrinkTypeCore drinkType, @JsonKey(includeIfNull: false)  String? drinkTypeId,  int volumeInMilliliters, @GeoPointConverter()  GeoPoint? location, @JsonKey(includeToJson: false)  int partyRevision)?  $default,) {final _that = this;
 switch (_that) {
 case _Drink() when $default != null:
 return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType,_that.drinkTypeId,_that.volumeInMilliliters,_that.location,_that.partyRevision);case _:
@@ -231,12 +231,12 @@ return $default(_that.id,_that.consumedByUserId,_that.consumedAt,_that.drinkType
 @JsonSerializable()
 
 class _Drink extends Drink {
-  const _Drink({required this.id, required this.consumedByUserId, required this.consumedAt, required this.drinkType, @JsonKey(includeIfNull: false) this.drinkTypeId, required this.volumeInMilliliters, @GeoPointConverter() this.location, @JsonKey(includeToJson: false) this.partyRevision = 1}): super._();
+  const _Drink({required this.id, required this.consumedByUserId, @LocalDateTimeConverter() required this.consumedAt, required this.drinkType, @JsonKey(includeIfNull: false) this.drinkTypeId, required this.volumeInMilliliters, @GeoPointConverter() this.location, @JsonKey(includeToJson: false) this.partyRevision = 1}): super._();
   factory _Drink.fromJson(Map<String, dynamic> json) => _$DrinkFromJson(json);
 
 @override final  String id;
 @override final  String consumedByUserId;
-@override final  DateTime consumedAt;
+@override@LocalDateTimeConverter() final  DateTime consumedAt;
 @override final  DrinkTypeCore drinkType;
 @override@JsonKey(includeIfNull: false) final  String? drinkTypeId;
 @override final  int volumeInMilliliters;
@@ -278,7 +278,7 @@ abstract mixin class _$DrinkCopyWith<$Res> implements $DrinkCopyWith<$Res> {
   factory _$DrinkCopyWith(_Drink value, $Res Function(_Drink) _then) = __$DrinkCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String consumedByUserId, DateTime consumedAt, DrinkTypeCore drinkType,@JsonKey(includeIfNull: false) String? drinkTypeId, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location,@JsonKey(includeToJson: false) int partyRevision
+ String id, String consumedByUserId,@LocalDateTimeConverter() DateTime consumedAt, DrinkTypeCore drinkType,@JsonKey(includeIfNull: false) String? drinkTypeId, int volumeInMilliliters,@GeoPointConverter() GeoPoint? location,@JsonKey(includeToJson: false) int partyRevision
 });
 
 

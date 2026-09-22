@@ -9,7 +9,9 @@ part of 'drink.dart';
 _Drink _$DrinkFromJson(Map<String, dynamic> json) => _Drink(
   id: json['id'] as String,
   consumedByUserId: json['consumedByUserId'] as String,
-  consumedAt: DateTime.parse(json['consumedAt'] as String),
+  consumedAt: const LocalDateTimeConverter().fromJson(
+    json['consumedAt'] as String,
+  ),
   drinkType: DrinkTypeCore.fromJson(json['drinkType'] as Map<String, dynamic>),
   drinkTypeId: json['drinkTypeId'] as String?,
   volumeInMilliliters: (json['volumeInMilliliters'] as num).toInt(),
@@ -23,7 +25,7 @@ _Drink _$DrinkFromJson(Map<String, dynamic> json) => _Drink(
 Map<String, dynamic> _$DrinkToJson(_Drink instance) => <String, dynamic>{
   'id': instance.id,
   'consumedByUserId': instance.consumedByUserId,
-  'consumedAt': instance.consumedAt.toIso8601String(),
+  'consumedAt': const LocalDateTimeConverter().toJson(instance.consumedAt),
   'drinkType': instance.drinkType.toJson(),
   'drinkTypeId': ?instance.drinkTypeId,
   'volumeInMilliliters': instance.volumeInMilliliters,

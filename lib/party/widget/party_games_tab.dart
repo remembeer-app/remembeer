@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
+import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/constants.dart';
@@ -25,7 +26,7 @@ typedef PartyGamesSectionBuilder =
       List<UserModel> members,
     );
 
-class PartyGamesTab extends StatelessWidget {
+class PartyGamesTab extends StatefulWidget {
   const PartyGamesTab({
     super.key,
     required this.state,
@@ -48,6 +49,23 @@ class PartyGamesTab extends StatelessWidget {
   final PartyGamesSectionBuilder? beerpongSectionBuilder;
 
   @override
+  State<PartyGamesTab> createState() => _PartyGamesTabState();
+}
+
+class _PartyGamesTabState extends State<PartyGamesTab> {
+  final _scrollController = ScrollController();
+  final _classSectionKey = GlobalKey();
+
+  PartyState get state => widget.state;
+  List<UserModel> get members => widget.members;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final settings = state.party.moduleSettings;
     if (settings.adminChallengesEnabled) {
@@ -65,10 +83,15 @@ class PartyGamesTab extends StatelessWidget {
     PartyModuleSettings settings,
     List<PartyChallenge> challenges,
   ) {
+    final needsClassSelection =
+        state.isActive &&
+        state.currentMember != null &&
+        state.currentMember?.selectedClass == null;
     final sections = <Widget>[
-      ..._classSection(),
+      if (needsClassSelection)
+        _ClassSelectionNotice(onChooseClass: _scrollToClassSection),
       if (settings.socialQuestsEnabled)
-        socialQuestSectionBuilder?.call(context, state, members) ??
+        widget.socialQuestSectionBuilder?.call(context, state, members) ??
             PartyQuestGamesSection(
               state: state,
               members: members,
@@ -77,7 +100,7 @@ class PartyGamesTab extends StatelessWidget {
       if (settings.adminChallengesEnabled)
         _buildActiveChallenge(context, challenges),
       if (settings.beerpongEnabled)
-        beerpongSectionBuilder?.call(context, state, members) ??
+        widget.beerpongSectionBuilder?.call(context, state, members) ??
             BeerpongGamesSection(
               state: state,
               members: members,
@@ -86,6 +109,7 @@ class PartyGamesTab extends StatelessWidget {
               ),
               service: _beerpongService,
             ),
+      ..._classSection(needsClassSelection: needsClassSelection),
     ];
     final activeId = state.party.activeChallengeId;
     final recentChallenges = challenges
@@ -99,6 +123,7 @@ class PartyGamesTab extends StatelessWidget {
     ].where((enabled) => !enabled).length;
 
     return ListView(
+      controller: _scrollController,
       children: [
         ..._withSpacing(sections),
         if (disabledCount > 0 && state.isAdmin && state.isActive) ...[
@@ -130,32 +155,61 @@ class PartyGamesTab extends StatelessWidget {
     );
   }
 
-  List<Widget> _classSection() {
-    final selectedClass = state.currentMember?.selectedClass;
-    final classMetadata = selectedClass == null
-        ? null
-        : partyClasses.singleWhere(
-            (metadata) => metadata.category == selectedClass,
-          );
-    if (state.isActive &&
-        state.currentMember != null &&
-        selectedClass == null) {
-      return [PartyClassSelector(onSubmit: onSelectClass)];
+  List<Widget> _classSection({required bool needsClassSelection}) {
+    if (needsClassSelection) {
+      return [
+        KeyedSubtree(
+          key: _classSectionKey,
+          child: PartyClassSelector(onSubmit: widget.onSelectClass),
+        ),
+      ];
     }
-    if (classMetadata == null) {
+    final selectedClass = state.currentMember?.selectedClass;
+    if (selectedClass == null) {
       return [];
     }
+    final classMetadata = partyClasses.singleWhere(
+      (metadata) => metadata.category == selectedClass,
+    );
     return [
-      Card(
-        child: ListTile(
-          leading: const Icon(Icons.shield_outlined),
-          title: Text(classMetadata.title),
-          subtitle: const Text(
-            'Your class bonus applies to future drinks only.',
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Your class', style: Theme.of(context).textTheme.titleLarge),
+          const Gap(8),
+          Card(
+            child: ListTile(
+              leading: DrinkIcon(category: selectedClass, size: 32),
+              title: Text(classMetadata.title),
+              subtitle: const Text(
+                'Your class bonus applies to future drinks only.',
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     ];
+  }
+
+  Future<void> _scrollToClassSection() async {
+    if (!_scrollController.hasClients) return;
+    final position = _scrollController.position;
+    if (_classSectionKey.currentContext == null) {
+      // The selector sits at the end of the lazily built list, so scroll
+      // there first to make sure it is laid out before aligning to it.
+      await _scrollController.animateTo(
+        position.maxScrollExtent,
+        duration: partyGamesScrollDuration,
+        curve: Curves.easeInOut,
+      );
+    }
+    final classContext = _classSectionKey.currentContext;
+    if (classContext == null || !classContext.mounted) return;
+    await Scrollable.ensureVisible(
+      classContext,
+      duration: partyGamesScrollDuration,
+      curve: Curves.easeInOut,
+    );
   }
 
   Widget _buildActiveChallenge(
@@ -230,13 +284,70 @@ class PartyGamesTab extends StatelessWidget {
   }
 
   PartyChallengeService get _challengeService =>
-      challengeService ?? get<PartyChallengeService>();
+      widget.challengeService ?? get<PartyChallengeService>();
 
   PartyQuestService get _questService =>
-      questService ?? get<PartyQuestService>();
+      widget.questService ?? get<PartyQuestService>();
 
   BeerpongService get _beerpongService =>
-      beerpongService ?? get<BeerpongService>();
+      widget.beerpongService ?? get<BeerpongService>();
+}
+
+class _ClassSelectionNotice extends StatelessWidget {
+  const _ClassSelectionNotice({required this.onChooseClass});
+
+  final VoidCallback onChooseClass;
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return Card(
+      color: colorScheme.tertiaryContainer,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.shield_outlined,
+                  color: colorScheme.onTertiaryContainer,
+                ),
+                const Gap(12),
+                Expanded(
+                  child: Text(
+                    'No Party class selected',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: colorScheme.onTertiaryContainer,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const Gap(8),
+            Text(
+              'Pick a class to earn a 10% Party point bonus on matching drinks. '
+              'Drinks logged without a class get no bonus.',
+              style: TextStyle(color: colorScheme.onTertiaryContainer),
+            ),
+            const Gap(4),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: onChooseClass,
+                style: TextButton.styleFrom(
+                  foregroundColor: colorScheme.onTertiaryContainer,
+                ),
+                icon: const Icon(Icons.arrow_downward),
+                label: const Text('Pick your class'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _ModulePlaceholder extends StatelessWidget {

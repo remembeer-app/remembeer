@@ -96,6 +96,26 @@ class UserController extends Controller<UserModel> {
     });
   }
 
+  void addFriendToInBatch({
+    required String userId,
+    required String friendId,
+    required WriteBatch batch,
+  }) {
+    batch.update(writeCollection.doc(userId), {
+      friendsField: FieldValue.arrayUnion([friendId]),
+    });
+  }
+
+  void removeFriendFromInBatch({
+    required String userId,
+    required String friendId,
+    required WriteBatch batch,
+  }) {
+    batch.update(writeCollection.doc(userId), {
+      friendsField: FieldValue.arrayRemove([friendId]),
+    });
+  }
+
   Future<void> anonymizeCurrentUser() async {
     final current = await currentUser;
     final placeholder = UserModel(

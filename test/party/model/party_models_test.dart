@@ -79,6 +79,31 @@ void main() {
     expect(event.toJson()['sourceCollection'], 'drinks');
   });
 
+  test('quest templates round trip without a duration override', () {
+    final template = PartyQuestTemplate(
+      id: 'template-1',
+      source: PartyQuestTemplateSource.builtIn,
+      builtInKey: 'new-ally',
+      title: 'New Ally',
+      instructions: 'Choose a partner.',
+      pointsUnits: 5000,
+      eligibilityRule: 'newAlly',
+      availability: PartyQuestAvailability.early,
+      catalogVersion: 1,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    expect(template.durationMinutes, isNull);
+    expect(PartyQuestTemplate.fromJson(template.toJson()), template);
+    expect(
+      PartyQuestTemplate.fromJson(
+        {...template.toJson()}..remove('durationMinutes'),
+      ),
+      template,
+    );
+  });
+
   test('quest documents round trip with every optional field', () {
     final template = PartyQuestTemplate(
       id: 'template-1',
