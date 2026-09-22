@@ -2,7 +2,7 @@ import { defineSchema } from "convex/server";
 import { drinksTable } from "./drinks/schema";
 import { usersTable } from "./users/schema";
 
-const schema = defineSchema({
+export const schema = defineSchema({
   users: usersTable,
   drinks: drinksTable,
 });

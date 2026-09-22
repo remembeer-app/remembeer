@@ -2,33 +2,37 @@ import { v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { authMutation, authQuery } from "../lib/authenticated";
 import { convex } from "../lib/builder";
+import { schema } from "../schema";
 import { createDrinkInputSchema, updateDrinkInputSchema } from "./schema";
 
-export const listMine = authQuery.handler(async (ctx) => {
-  const [customDrinks, globalDrinks] = await Promise.all([
-    ctx.db
-      .query("drinks")
-      .withIndex("by_ownerId_and_deletedAt", (q) =>
-        q.eq("ownerId", ctx.user._id).eq("deletedAt", null),
-      )
-      .collect(),
+export const listMine = authQuery
+  .returns(v.array(schema.doc("drinks")))
+  .handler(async (ctx) => {
+    const [customDrinks, globalDrinks] = await Promise.all([
+      ctx.db
+        .query("drinks")
+        .withIndex("by_ownerId_and_deletedAt", (q) =>
+          q.eq("ownerId", ctx.user._id).eq("deletedAt", null),
+        )
+        .collect(),
 
-    ctx.db
-      .query("drinks")
-      .withIndex("by_ownerId_and_deletedAt", (q) =>
-        q.eq("ownerId", null).eq("deletedAt", null),
-      )
-      .collect(),
-  ]);
+      ctx.db
+        .query("drinks")
+        .withIndex("by_ownerId_and_deletedAt", (q) =>
+          q.eq("ownerId", null).eq("deletedAt", null),
+        )
+        .collect(),
+    ]);
 
-  return [...customDrinks, ...globalDrinks];
-});
+    return [...customDrinks, ...globalDrinks];
+  });
 
 export const get = convex
   .query()
   .input({
     id: v.id("drinks"),
   })
+  .returns(schema.doc("drinks"))
   .handler(async (ctx, { id }) => {
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
@@ -41,6 +45,7 @@ export const get = convex
 export const create = authMutation
   .extend(WithZod)
   .input(createDrinkInputSchema)
+  .returns(schema.id("drinks"))
   .handler(async (ctx, input) => {
     const now = Date.now();
 
@@ -55,6 +60,7 @@ export const create = authMutation
 export const update = authMutation
   .extend(WithZod)
   .input(updateDrinkInputSchema)
+  .returns(v.null())
   .handler(async (ctx, { id, name, category, alcoholPercentage }) => {
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
@@ -71,12 +77,15 @@ export const update = authMutation
       alcoholPercentage: alcoholPercentage ?? drink.alcoholPercentage,
       updatedAt: Date.now(),
     });
+
+    return null;
   });
 
 export const softDelete = authMutation
   .input({
     id: v.id("drinks"),
   })
+  .returns(v.null())
   .handler(async (ctx, { id }) => {
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
@@ -93,4 +102,6 @@ export const softDelete = authMutation
       deletedAt: now,
       updatedAt: now,
     });
+
+    return null;
   });
