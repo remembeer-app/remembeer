@@ -43,6 +43,8 @@ class PartyQuestManagementPage extends StatelessWidget {
             PartyQuestManagementSection(
               sessionId: sessionId,
               service: _questService,
+              defaultDurationMinutes:
+                  state.party.questSchedule.defaultDurationMinutes,
             ),
           ],
         );

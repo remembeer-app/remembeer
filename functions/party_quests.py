@@ -50,6 +50,10 @@ def set_quest_template_enabled(request: Any) -> Mapping[str, Any]:
     return set_quest_template_enabled_command(request, firestore.client())
 
 
+def set_quest_template_duration(request: Any) -> Mapping[str, Any]:
+    return set_quest_template_duration_command(request, firestore.client())
+
+
 def select_quest_partner(request: Any) -> Mapping[str, Any]:
     return select_quest_partner_command(request, firestore.client())
 
@@ -165,6 +169,58 @@ def set_quest_template_enabled_command(
         session_id,
         command_id,
         "set_quest_template_enabled",
+        actor_id,
+        operation,
+        transaction_runner,
+    )
+
+
+def set_quest_template_duration_command(
+    request: Any,
+    db: Any,
+    *,
+    transaction_runner: TransactionRunner | None = None,
+) -> Mapping[str, Any]:
+    """Set or clear one built-in template's duration override.
+
+    A ``null`` ``durationMinutes`` clears the override so the Party's default
+    quest duration applies again.
+    """
+
+    actor_id, data, session_id, command_id = _command_input(request)
+    template_id = _document_id(data, "templateId")
+    duration = (
+        None
+        if data.get("durationMinutes") is None
+        else require_int(
+            data,
+            "durationMinutes",
+            minimum=MIN_QUEST_DURATION_MINUTES,
+            maximum=MAX_QUEST_DURATION_MINUTES,
+        )
+    )
+
+    def operation(transaction: Any) -> Mapping[str, Any]:
+        load_party_context(transaction, db, session_id, actor_id, require_admin=True)
+        template_ref, template = _load_template(
+            transaction, db, session_id, template_id
+        )
+        _require_built_in_template(template)
+        transaction.update(
+            template_ref,
+            {"durationMinutes": duration, "updatedAt": firestore.SERVER_TIMESTAMP},
+        )
+        return {
+            "sessionId": session_id,
+            "templateId": template_id,
+            "durationMinutes": duration,
+        }
+
+    return _run_command(
+        db,
+        session_id,
+        command_id,
+        "set_quest_template_duration",
         actor_id,
         operation,
         transaction_runner,

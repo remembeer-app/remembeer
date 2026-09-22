@@ -104,6 +104,11 @@ def set_quest_template_enabled(request: Any) -> Mapping[str, Any]:
 
 
 @https_fn.on_call(region=REGION)
+def set_quest_template_duration(request: Any) -> Mapping[str, Any]:
+    return party_quests.set_quest_template_duration(request)
+
+
+@https_fn.on_call(region=REGION)
 def select_quest_partner(request: Any) -> Mapping[str, Any]:
     return party_quests.select_quest_partner(request)
 

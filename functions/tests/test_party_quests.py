@@ -9,6 +9,7 @@ from party_quests import (
     QUEST_ALLOCATION_VERSION,
     select_quest_partner_command,
     set_party_quest_schedule_command,
+    set_quest_template_duration_command,
     set_quest_template_enabled_command,
 )
 from party_scoring import canonical_pair_key
@@ -254,6 +255,76 @@ def test_only_built_in_templates_can_be_enabled_or_disabled() -> None:
             transaction_runner=_runner(Transaction(db.store)),
         )
     assert error.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
+
+
+def test_template_duration_override_can_be_set_and_cleared() -> None:
+    db = Database(_base_store(active_quest=False))
+    db.store["parties/party-a/questTemplates/builtin"] = {
+        "source": "builtIn",
+        "availability": "early",
+        "enabled": True,
+    }
+
+    result = set_quest_template_duration_command(
+        _request("duration-a", templateId="builtin", durationMinutes=3),
+        db,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+    assert result["durationMinutes"] == 3
+    assert db.store["parties/party-a/questTemplates/builtin"]["durationMinutes"] == 3
+
+    result = set_quest_template_duration_command(
+        _request("duration-clear", templateId="builtin", durationMinutes=None),
+        db,
+        transaction_runner=_runner(Transaction(db.store)),
+    )
+    assert result["durationMinutes"] is None
+    assert db.store["parties/party-a/questTemplates/builtin"]["durationMinutes"] is None
+
+
+@pytest.mark.parametrize("duration", [0, 61, "3", 2.5, True])
+def test_template_duration_override_is_bounded(duration: Any) -> None:
+    db = Database(_base_store(active_quest=False))
+    db.store["parties/party-a/questTemplates/builtin"] = {
+        "source": "builtIn",
+        "availability": "early",
+        "enabled": True,
+    }
+    with pytest.raises(https_fn.HttpsError) as error:
+        set_quest_template_duration_command(
+            _request("duration-bad", templateId="builtin", durationMinutes=duration),
+            db,
+            transaction_runner=_runner(Transaction(db.store)),
+        )
+    assert error.value.code == https_fn.FunctionsErrorCode.INVALID_ARGUMENT
+
+
+def test_template_duration_override_requires_built_in_template_and_admin() -> None:
+    db = Database(_base_store(active_quest=False))
+    db.store["parties/party-a/questTemplates/legacy-custom"] = {
+        "source": "custom",
+        "enabled": True,
+    }
+    with pytest.raises(https_fn.HttpsError) as error:
+        set_quest_template_duration_command(
+            _request("duration-custom", templateId="legacy-custom", durationMinutes=3),
+            db,
+            transaction_runner=_runner(Transaction(db.store)),
+        )
+    assert error.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
+
+    db.store["parties/party-a/questTemplates/builtin"] = {
+        "source": "builtIn",
+        "availability": "early",
+        "enabled": True,
+    }
+    with pytest.raises(https_fn.HttpsError) as error:
+        set_quest_template_duration_command(
+            _request("duration-member", templateId="builtin", durationMinutes=3, actor="a"),
+            db,
+            transaction_runner=_runner(Transaction(db.store)),
+        )
+    assert error.value.code == https_fn.FunctionsErrorCode.PERMISSION_DENIED
 
 
 def test_last_enabled_early_template_cannot_be_disabled() -> None:

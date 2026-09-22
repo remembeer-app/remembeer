@@ -11,10 +11,14 @@ class PartyQuestManagementSection extends StatefulWidget {
     super.key,
     required this.sessionId,
     required this.service,
+    required this.defaultDurationMinutes,
   });
 
   final String sessionId;
   final PartyQuestService service;
+
+  /// The Party-wide quest duration used by templates without an override.
+  final int defaultDurationMinutes;
 
   @override
   State<PartyQuestManagementSection> createState() =>
@@ -86,26 +90,70 @@ class _PartyQuestManagementSectionState
 
   Widget _buildTemplate(PartyQuestTemplate template) {
     final isPending = _pendingTemplateId == template.id;
+    final override = template.durationMinutes;
+    final durationLabel = override == null
+        ? '${widget.defaultDurationMinutes} minutes (default)'
+        : '$override minutes';
     return Card(
-      child: SwitchListTile(
-        secondary: const Icon(Icons.handshake_outlined),
-        title: Text(template.title),
-        subtitle: Text(
-          '${template.instructions}\n'
-          '${formatPartyScore(template.pointsUnits)} points each · '
-          '${template.durationMinutes} minutes',
-        ),
-        value: template.enabled,
-        onChanged: isPending
-            ? null
-            : (enabled) => _runTemplateAction(
-                template.id,
-                () => widget.service.setTemplateEnabled(
-                  widget.sessionId,
-                  template.id,
-                  enabled,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SwitchListTile(
+            secondary: const Icon(Icons.handshake_outlined),
+            title: Text(template.title),
+            subtitle: Text(
+              '${template.instructions}\n'
+              '${formatPartyScore(template.pointsUnits)} points each · '
+              '$durationLabel',
+            ),
+            value: template.enabled,
+            onChanged: isPending
+                ? null
+                : (enabled) => _runTemplateAction(
+                    template.id,
+                    () => widget.service.setTemplateEnabled(
+                      widget.sessionId,
+                      template.id,
+                      enabled,
+                    ),
+                  ),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 8, bottom: 4),
+              child: TextButton.icon(
+                onPressed: isPending ? null : () => _editDuration(template),
+                icon: const Icon(Icons.timer_outlined),
+                label: Text(
+                  override == null ? 'Set duration' : 'Edit duration',
                 ),
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _editDuration(PartyQuestTemplate template) async {
+    final result = await showDialog<({int? minutes})>(
+      context: context,
+      builder: (context) => _QuestDurationDialog(
+        title: template.title,
+        currentMinutes: template.durationMinutes,
+        defaultMinutes: widget.defaultDurationMinutes,
+      ),
+    );
+    if (result == null || !mounted) {
+      return;
+    }
+    await _runTemplateAction(
+      template.id,
+      () => widget.service.setTemplateDuration(
+        widget.sessionId,
+        template.id,
+        result.minutes,
       ),
     );
   }
@@ -124,6 +172,110 @@ class _PartyQuestManagementSectionState
         setState(() => _pendingTemplateId = null);
       }
     }
+  }
+}
+
+/// Edits one template's duration override.
+///
+/// Pops `(minutes: value)` to set an override, `(minutes: null)` to fall back
+/// to the Party default, or `null` when cancelled.
+class _QuestDurationDialog extends StatefulWidget {
+  const _QuestDurationDialog({
+    required this.title,
+    required this.currentMinutes,
+    required this.defaultMinutes,
+  });
+
+  final String title;
+  final int? currentMinutes;
+  final int defaultMinutes;
+
+  @override
+  State<_QuestDurationDialog> createState() => _QuestDurationDialogState();
+}
+
+class _QuestDurationDialogState extends State<_QuestDurationDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: (widget.currentMinutes ?? widget.defaultMinutes).toString(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: Text(widget.title),
+    content: Form(
+      key: _formKey,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'Party default: ${widget.defaultMinutes} minutes',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const Gap(12),
+          TextFormField(
+            controller: _controller,
+            autofocus: true,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(
+              labelText: 'Duration',
+              suffixText: 'minutes',
+              helperText:
+                  '$minPartyQuestDurationMinutes-'
+                  '$maxPartyQuestDurationMinutes minutes',
+            ),
+            validator: _validate,
+          ),
+        ],
+      ),
+    ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Cancel'),
+      ),
+      if (widget.currentMinutes != null)
+        TextButton(
+          onPressed: () => Navigator.of(context).pop((minutes: null)),
+          child: const Text('Use default'),
+        ),
+      FilledButton(
+        onPressed: () {
+          if (_formKey.currentState?.validate() ?? false) {
+            Navigator.of(
+              context,
+            ).pop((minutes: int.parse(_controller.text.trim())));
+          }
+        },
+        child: const Text('Save'),
+      ),
+    ],
+  );
+
+  String? _validate(String? value) {
+    final minutes = int.tryParse(value?.trim() ?? '');
+    if (minutes == null ||
+        minutes < minPartyQuestDurationMinutes ||
+        minutes > maxPartyQuestDurationMinutes) {
+      return 'Enter $minPartyQuestDurationMinutes-'
+          '$maxPartyQuestDurationMinutes minutes.';
+    }
+    return null;
   }
 }
 
