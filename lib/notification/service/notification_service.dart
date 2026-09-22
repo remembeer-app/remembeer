@@ -10,6 +10,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/firebase_options.dart';
+import 'package:remembeer/notification/constants.dart';
 import 'package:remembeer/notification/model/notification_type.dart';
 import 'package:remembeer/notification/model/party_notification_payload.dart';
 import 'package:remembeer/routes.dart';
@@ -43,7 +44,7 @@ class NotificationService {
     await _firebaseMessaging.requestPermission();
     await _localNotifications.initialize(
       settings: const InitializationSettings(
-        android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+        android: AndroidInitializationSettings(androidNotificationIcon),
         iOS: DarwinInitializationSettings(
           requestAlertPermission: false,
           requestBadgePermission: false,
