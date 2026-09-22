@@ -17,24 +17,6 @@ export const ensureCurrent = convex
   })
   .public();
 
-export const current = convex
-  .query()
-  .returns(
-    v.nullable(
-      v.object({
-        _id: v.id("users"),
-        _creationTime: v.number(),
-        authUserId: v.string(),
-      }),
-    ),
-  )
-  .handler(async (ctx) => {
-    const { user } = await getCurrentUser(ctx);
-
-    return user;
-  })
-  .public();
-
 export async function getCurrentUserSafe(ctx: QueryCtx<DataModel>) {
   const authUser = await authComponent.getAuthUser(ctx);
 
