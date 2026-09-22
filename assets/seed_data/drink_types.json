@@ -1083,5 +1083,12 @@
     "name": "Skinny Bitch",
     "category": "cocktail",
     "alcoholPercentage": 10.0
+  },
+  {
+    "id": "global-cocktail-alpsky-ryzlink",
+    "userId": "global",
+    "name": "Alpský Ryzlink",
+    "category": "cocktail",
+    "alcoholPercentage": 15.0
   }
 ]

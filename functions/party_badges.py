@@ -11,6 +11,8 @@ MAX_BADGES_SHOWN = 6
 TOTAL_BEER_BADGES = {"centurion": 100, "millennial": 1_000}
 TOTAL_ALCOHOL_BADGES = {"alchemist": 1_000, "ethanol_engine": 10_000}
 STREAK_BADGES = {"finding_the_rhythm": 3, "habit_formed": 7}
+# Mirrors `mastiToJakDrakDrinkTypeName` in lib/badge/constants.dart.
+MASTI_TO_JAK_DRAK_DRINK_TYPE_NAME = "Alpský Ryzlink"
 
 
 def evaluate_badges(
@@ -18,8 +20,14 @@ def evaluate_badges(
     *,
     consumed_at: datetime,
     now: datetime,
+    drink: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Return a user copy with newly met badges unlocked, never revoked."""
+    """Return a user copy with newly met badges unlocked, never revoked.
+
+    ``drink`` is the drink that was just logged (or the new revision of an
+    edited drink). Leave it ``None`` on deletion so drink-type badges are not
+    awarded for a drink that no longer exists.
+    """
 
     updated = deepcopy(dict(user))
     unlocked = updated.get("unlockedBadges", {})
@@ -51,7 +59,31 @@ def evaluate_badges(
         _unlock(updated, "you_remembeered", now)
     if _number(daily.get("beersConsumed", 0)) >= 20:
         _unlock(updated, "case_closed", now)
+    if drink is not None and _is_masti_to_jak_drak(drink):
+        _unlock(updated, "masti_to_jak_drak", now)
     return updated
+
+
+def _is_masti_to_jak_drak(drink: Mapping[str, Any]) -> bool:
+    drink_type = drink.get("drinkType")
+    if not isinstance(drink_type, Mapping):
+        raise TypeError("Stored drinkType is invalid")
+    name = drink_type.get("name")
+    if not isinstance(name, str):
+        raise TypeError("Stored drinkType name is invalid")
+    return name.strip().casefold() == MASTI_TO_JAK_DRAK_DRINK_TYPE_NAME.casefold()
+
+
+def newly_unlocked_badge_ids(
+    before: Mapping[str, Any], after: Mapping[str, Any]
+) -> list[str]:
+    """Return the badge ids present on ``after`` but not on ``before``, sorted."""
+
+    previous = before.get("unlockedBadges", {})
+    current = after.get("unlockedBadges", {})
+    if not isinstance(previous, Mapping) or not isinstance(current, Mapping):
+        raise TypeError("Stored unlockedBadges is invalid")
+    return sorted(str(badge_id) for badge_id in current if badge_id not in previous)
 
 
 def _unlock(user: dict[str, Any], badge_id: str, now: datetime) -> None:

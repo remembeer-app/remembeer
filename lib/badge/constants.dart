@@ -1,0 +1,1 @@
+const mastiToJakDrakDrinkTypeName = 'Alpský Ryzlink';

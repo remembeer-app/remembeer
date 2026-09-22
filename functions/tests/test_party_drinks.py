@@ -174,6 +174,40 @@ def test_create_interprets_naive_session_times_in_drink_timezone() -> None:
     assert result["drink"]["id"] == "drink-a"
 
 
+def test_create_reports_newly_unlocked_badges_once() -> None:
+    store = _base_store()
+    store["drink_types/ryzlink-type"] = _drink_type("cocktail", 15.0) | {
+        "name": "Alpský Ryzlink"
+    }
+    db = Database(store)
+    transaction = Transaction(db.store)
+    request = _request("create-ryzlink", drinkTypeId="ryzlink-type")
+
+    result = create_party_drink_command(
+        request,
+        db,
+        now_provider=lambda: NOW,
+        transaction_runner=_runner(transaction),
+    )
+    retry = create_party_drink_command(
+        request,
+        db,
+        now_provider=lambda: pytest.fail("retry evaluated command"),
+        transaction_runner=_runner(transaction),
+    )
+    second = create_party_drink_command(
+        _request("create-ryzlink-2", drinkId="drink-b", drinkTypeId="ryzlink-type"),
+        db,
+        now_provider=lambda: NOW,
+        transaction_runner=_runner(transaction),
+    )
+
+    assert result["unlockedBadgeIds"] == ["masti_to_jak_drak"]
+    assert retry["unlockedBadgeIds"] == ["masti_to_jak_drak"]
+    assert second["unlockedBadgeIds"] == []
+    assert "masti_to_jak_drak" in db.store["users/member"]["unlockedBadges"]
+
+
 def test_missing_or_mismatched_class_gets_base_only() -> None:
     for selected_class in (None, "wine"):
         store = _base_store()

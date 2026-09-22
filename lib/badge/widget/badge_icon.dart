@@ -15,6 +15,17 @@ class BadgeIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (badgeDefinition.iconFillsCircle) {
+      return ClipOval(
+        child: Image.asset(
+          badgeDefinition.iconPath,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
     return Container(
       width: size,
       height: size,

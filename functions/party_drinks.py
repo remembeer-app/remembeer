@@ -6,7 +6,7 @@ from typing import Any
 
 from firebase_admin import firestore
 from firebase_functions import https_fn
-from party_badges import evaluate_badges
+from party_badges import evaluate_badges, newly_unlocked_badge_ids
 from party_common import (
     callable_error,
     load_party_context,
@@ -97,7 +97,10 @@ def create_party_drink_command(
             )
 
         updated_user = apply_drink_stats(user, new_drink=drink)
-        updated_user = evaluate_badges(updated_user, consumed_at=consumed_at, now=now)
+        updated_user = evaluate_badges(
+            updated_user, consumed_at=consumed_at, now=now, drink=drink
+        )
+        unlocked_badge_ids = newly_unlocked_badge_ids(user, updated_user)
         transaction.update(
             db.collection("sessions").document(session_id),
             {"drinks": [*drinks, drink], "updatedAt": firestore.SERVER_TIMESTAMP},
@@ -122,7 +125,7 @@ def create_party_drink_command(
                 "updatedAt": firestore.SERVER_TIMESTAMP,
             },
         )
-        return _result(session_id, drink, event_id, score)
+        return _result(session_id, drink, event_id, score, unlocked_badge_ids)
 
     return run_idempotent_command(
         db,
@@ -195,7 +198,10 @@ def update_party_drink_command(
         )
         now = _now(now_provider, consumed_at)
         updated_user = apply_drink_stats(user, old_drink=old_drink, new_drink=new_drink)
-        updated_user = evaluate_badges(updated_user, consumed_at=consumed_at, now=now)
+        updated_user = evaluate_badges(
+            updated_user, consumed_at=consumed_at, now=now, drink=new_drink
+        )
+        unlocked_badge_ids = newly_unlocked_badge_ids(user, updated_user)
         updated_drinks = list(drinks)
         updated_drinks[index] = new_drink
         transaction.update(
@@ -228,7 +234,14 @@ def update_party_drink_command(
                 "updatedAt": firestore.SERVER_TIMESTAMP,
             },
         )
-        return _result(session_id, new_drink, new_event_id, score, reverse_id)
+        return _result(
+            session_id,
+            new_drink,
+            new_event_id,
+            score,
+            unlocked_badge_ids,
+            reversal_id=reverse_id,
+        )
 
     return run_idempotent_command(
         db,
@@ -286,6 +299,7 @@ def delete_party_drink_command(
         now = _now(now_provider, consumed_at)
         updated_user = apply_drink_stats(user, old_drink=drink)
         updated_user = evaluate_badges(updated_user, consumed_at=consumed_at, now=now)
+        unlocked_badge_ids = newly_unlocked_badge_ids(user, updated_user)
         transaction.update(
             db.collection("sessions").document(session_id),
             {
@@ -311,6 +325,7 @@ def delete_party_drink_command(
             "sessionId": session_id,
             "drinkId": drink_id,
             "reversalEventId": reverse_id,
+            "unlockedBadgeIds": unlocked_badge_ids,
         }
 
     return run_idempotent_command(
@@ -554,6 +569,8 @@ def _result(
     drink: Mapping[str, Any],
     event_id: str,
     score: Any,
+    unlocked_badge_ids: Sequence[str],
+    *,
     reversal_id: str | None = None,
 ) -> Mapping[str, Any]:
     callable_drink = dict(drink)
@@ -570,6 +587,7 @@ def _result(
         "baseScoreUnits": score.base_units,
         "classBonusUnits": score.class_bonus_units,
         "awardedScoreUnits": score.awarded_units,
+        "unlockedBadgeIds": list(unlocked_badge_ids),
     }
     if reversal_id is not None:
         result["reversalEventId"] = reversal_id
