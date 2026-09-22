@@ -8,6 +8,17 @@ import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
 export const listMine = authQuery
   .returns(v.array(schema.doc("drinks")))
   .handler(async (ctx) => {
+    return await ctx.db
+      .query("drinks")
+      .withIndex("by_ownerId_and_deletedAt", (q) =>
+        q.eq("ownerId", ctx.user._id).eq("deletedAt", null),
+      )
+      .collect();
+  });
+
+export const listAll = authQuery
+  .returns(v.array(schema.doc("drinks")))
+  .handler(async (ctx) => {
     const [customDrinks, globalDrinks] = await Promise.all([
       ctx.db
         .query("drinks")
