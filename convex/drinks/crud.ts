@@ -1,7 +1,8 @@
 import { v } from "convex/values";
+import { WithZod } from "fluent-convex/zod";
 import { authMutation, authQuery } from "../lib/authenticated";
 import { convex } from "../lib/builder";
-import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
+import { createDrinkInputSchema, updateDrinkInputSchema } from "./schema";
 
 export const listMine = authQuery.handler(async (ctx) => {
   const [customDrinks, globalDrinks] = await Promise.all([
@@ -38,7 +39,8 @@ export const get = convex
   });
 
 export const create = authMutation
-  .input(createDrinkInputValidator)
+  .extend(WithZod)
+  .input(createDrinkInputSchema)
   .handler(async (ctx, input) => {
     const now = Date.now();
 
@@ -51,8 +53,9 @@ export const create = authMutation
   });
 
 export const update = authMutation
-  .input(updateDrinkInputValidator)
-  .handler(async (ctx, { id, ...patch }) => {
+  .extend(WithZod)
+  .input(updateDrinkInputSchema)
+  .handler(async (ctx, { id, name, category, alcoholPercentage }) => {
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
       throw new Error("Drink not found");
@@ -63,7 +66,9 @@ export const update = authMutation
     }
 
     await ctx.db.patch("drinks", id, {
-      ...patch,
+      name: name ?? drink.name,
+      category: category ?? drink.category,
+      alcoholPercentage: alcoholPercentage ?? drink.alcoholPercentage,
       updatedAt: Date.now(),
     });
   });
