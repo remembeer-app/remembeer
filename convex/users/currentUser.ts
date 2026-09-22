@@ -1,6 +1,7 @@
 import { type QueryCtx } from "fluent-convex";
 import type { DataModel } from "../_generated/dataModel";
 import { authComponent } from "../lib/auth";
+import { ConvexError } from "convex/values";
 
 export async function getCurrentUserSafe(ctx: QueryCtx<DataModel>) {
   const authUser = await authComponent.getAuthUser(ctx);
@@ -16,8 +17,7 @@ export async function getCurrentUserSafe(ctx: QueryCtx<DataModel>) {
 export async function getCurrentUser(ctx: QueryCtx<DataModel>) {
   const { user, authUser } = await getCurrentUserSafe(ctx);
   if (!user) {
-    // TODO(ohtenkay): Figure out errors in Convex.
-    throw new Error("No user found for the authenticated user");
+    throw new ConvexError("No user found for the authenticated user");
   }
 
   return { user, authUser };
