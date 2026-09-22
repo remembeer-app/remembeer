@@ -9,6 +9,7 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as authenticated from "../authenticated.js";
 import type * as drinks from "../drinks.js";
 import type * as http from "../http.js";
 import type * as lib from "../lib.js";
@@ -22,6 +23,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  authenticated: typeof authenticated;
   drinks: typeof drinks;
   http: typeof http;
   lib: typeof lib;
