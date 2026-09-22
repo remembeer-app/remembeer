@@ -9,6 +9,7 @@ import 'package:remembeer/party/model/party_tab.dart';
 import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/party/widget/party_activity_tab.dart';
 import 'package:remembeer/party/widget/party_games_tab.dart';
+import 'package:remembeer/party/widget/party_live_banner.dart';
 import 'package:remembeer/party/widget/party_ranking_tab.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/service/session_service.dart';
@@ -147,26 +148,11 @@ class _PartyPageState extends State<PartyPage>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            color: headerBackgroundColor,
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: Row(
-              children: [
-                Icon(
-                  state.isActive ? Icons.local_fire_department : Icons.archive,
-                  color: accent?.color ?? headerForegroundColor,
-                ),
-                const Gap(12),
-                Expanded(
-                  child: Text(
-                    state.isActive
-                        ? '${members.length} participants · Party in progress'
-                        : '${members.length} participants · Archived Party',
-                    style: TextStyle(color: headerForegroundColor),
-                  ),
-                ),
-              ],
-            ),
+          PartyLiveBanner(
+            state: state,
+            backgroundColor: headerBackgroundColor,
+            foregroundColor: headerForegroundColor,
+            accentColor: accent?.color,
           ),
           Material(
             color: headerBackgroundColor,

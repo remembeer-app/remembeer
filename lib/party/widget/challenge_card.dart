@@ -102,7 +102,7 @@ class _ChallengeCardState extends State<ChallengeCard> {
                   _Metadata(
                     icon: isLive ? Icons.timer_outlined : Icons.schedule,
                     text: isLive
-                        ? _formatRemaining(
+                        ? formatPartyRemaining(
                             widget.challenge.endsAt.difference(_now),
                           )
                         : DateFormat.MMMd().add_jm().format(
@@ -195,15 +195,3 @@ IconData _statusIcon(PartyChallengeStatus status) => switch (status) {
   PartyChallengeStatus.expired => Icons.timer_off_outlined,
   PartyChallengeStatus.cancelled => Icons.cancel_outlined,
 };
-
-String _formatRemaining(Duration duration) {
-  final seconds = duration.inSeconds.clamp(0, 86400);
-  final hours = seconds ~/ Duration.secondsPerHour;
-  final minutes =
-      (seconds % Duration.secondsPerHour) ~/ Duration.secondsPerMinute;
-  final remainingSeconds = seconds % Duration.secondsPerMinute;
-  if (hours > 0) {
-    return '${hours}h ${minutes}m left';
-  }
-  return '$minutes:${remainingSeconds.toString().padLeft(2, '0')} left';
-}

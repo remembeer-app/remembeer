@@ -76,3 +76,15 @@ String formatPartyScore(int scoreUnits) {
   final fixed = (scoreUnits / partyScoreUnitsPerPoint).toStringAsFixed(3);
   return fixed.replaceFirst(RegExp(r'\.?0+$'), '');
 }
+
+String formatPartyRemaining(Duration duration) {
+  final seconds = duration.inSeconds.clamp(0, Duration.secondsPerDay);
+  final hours = seconds ~/ Duration.secondsPerHour;
+  final minutes =
+      (seconds % Duration.secondsPerHour) ~/ Duration.secondsPerMinute;
+  final remainingSeconds = seconds % Duration.secondsPerMinute;
+  if (hours > 0) {
+    return '${hours}h ${minutes}m left';
+  }
+  return '$minutes:${remainingSeconds.toString().padLeft(2, '0')} left';
+}
