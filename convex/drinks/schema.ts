@@ -1,5 +1,7 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
+import { convexToZod } from "convex-helpers/server/zod4";
+import { z } from "zod";
 
 const drinkCategoryValidator = v.union(
   v.object({ kind: v.literal("beer") }),
@@ -18,12 +20,29 @@ export const drinksTable = defineTable({
   deletedAt: v.nullable(v.number()),
 }).index("by_ownerId_and_deletedAt", ["ownerId", "deletedAt"]);
 
-export const createDrinkInputValidator = drinksTable.validator.pick(
+const createDrinkInputValidator = drinksTable.validator.pick(
   "name",
   "category",
   "alcoholPercentage",
 );
 
-export const updateDrinkInputValidator = createDrinkInputValidator
+const updateDrinkInputValidator = createDrinkInputValidator
   .partial()
   .extend({ id: v.id("drinks") });
+
+const alcoholPercentageSchema = z
+  .number()
+  .min(1, "Alcohol percentage must be at least 1")
+  .max(100, "Alcohol percentage must be at most 100");
+
+export const createDrinkInputSchema = convexToZod(
+  createDrinkInputValidator,
+).extend({
+  alcoholPercentage: alcoholPercentageSchema,
+});
+
+export const updateDrinkInputSchema = convexToZod(
+  updateDrinkInputValidator,
+).extend({
+  alcoholPercentage: alcoholPercentageSchema.optional(),
+});

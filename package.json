@@ -17,7 +17,9 @@
     "@convex-dev/better-auth": "0.12.3",
     "better-auth": "1.6.33",
     "convex": "^1.46.0",
-    "fluent-convex": "^0.13.0"
+    "convex-helpers": "^0.1.124",
+    "fluent-convex": "^0.13.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "^5.0.0",
