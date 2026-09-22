@@ -115,7 +115,7 @@ class _QuestCardState extends State<QuestCard> {
                     _Metadata(
                       icon: isActive ? Icons.timer_outlined : Icons.schedule,
                       text: isActive
-                          ? _formatRemaining(
+                          ? formatPartyRemaining(
                               widget.quest.endsAt.difference(_now),
                             )
                           : DateFormat.MMMd().add_jm().format(
@@ -241,15 +241,3 @@ IconData _statusIcon(PartyQuestStatus status) => switch (status) {
   PartyQuestStatus.expired => Icons.timer_off_outlined,
   PartyQuestStatus.cancelled => Icons.cancel_outlined,
 };
-
-String _formatRemaining(Duration duration) {
-  final seconds = duration.inSeconds.clamp(0, Duration.secondsPerDay);
-  final hours = seconds ~/ Duration.secondsPerHour;
-  final minutes =
-      (seconds % Duration.secondsPerHour) ~/ Duration.secondsPerMinute;
-  final remainingSeconds = seconds % Duration.secondsPerMinute;
-  if (hours > 0) {
-    return '${hours}h ${minutes}m left';
-  }
-  return '$minutes:${remainingSeconds.toString().padLeft(2, '0')} left';
-}
