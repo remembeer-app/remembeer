@@ -61,87 +61,88 @@ class DrinksApi {
     return TypedConvexSubscription<GetTypeResult>(subscription$, typedStream$);
   }
 
-  Future<List<ListAllResultItem>> listAll() async {
+  Future<List<ListAvailableResultItem>> listAvailable() async {
     final raw$ = await _client.query(
-      'drinks:listAll',
+      'drinks:listAvailable',
       const <String, dynamic>{},
     );
     return expectList(
       raw$,
-      label: 'ListAllResult',
-    ).map((item) => _decodeListAllResultItem(item)).toList();
+      label: 'ListAvailableResult',
+    ).map((item) => _decodeListAvailableResultItem(item)).toList();
   }
 
-  TypedConvexSubscription<List<ListAllResultItem>> listAllSubscribe() {
+  TypedConvexSubscription<List<ListAvailableResultItem>>
+  listAvailableSubscribe() {
     final subscription$ = _client.subscribe(
-      'drinks:listAll',
+      'drinks:listAvailable',
       const <String, dynamic>{},
     );
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
         case QuerySuccess(:final value):
-          return TypedQuerySuccess<List<ListAllResultItem>>(
+          return TypedQuerySuccess<List<ListAvailableResultItem>>(
             expectList(
               value,
-              label: 'ListAllResult',
-            ).map((item) => _decodeListAllResultItem(item)).toList(),
+              label: 'ListAvailableResult',
+            ).map((item) => _decodeListAvailableResultItem(item)).toList(),
           );
         case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<List<ListAllResultItem>>(
+          return TypedQueryLoading<List<ListAvailableResultItem>>(
             hasPendingWrites: hasPendingWrites,
           );
         case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<List<ListAllResultItem>>(
+          return TypedQueryError<List<ListAvailableResultItem>>(
             message,
             data: data,
             logLines: logLines,
           );
       }
     });
-    return TypedConvexSubscription<List<ListAllResultItem>>(
+    return TypedConvexSubscription<List<ListAvailableResultItem>>(
       subscription$,
       typedStream$,
     );
   }
 
-  Future<List<ListMineResultItem>> listMine() async {
+  Future<List<ListCustomResultItem>> listCustom() async {
     final raw$ = await _client.query(
-      'drinks:listMine',
+      'drinks:listCustom',
       const <String, dynamic>{},
     );
     return expectList(
       raw$,
-      label: 'ListMineResult',
-    ).map((item) => _decodeListMineResultItem(item)).toList();
+      label: 'ListCustomResult',
+    ).map((item) => _decodeListCustomResultItem(item)).toList();
   }
 
-  TypedConvexSubscription<List<ListMineResultItem>> listMineSubscribe() {
+  TypedConvexSubscription<List<ListCustomResultItem>> listCustomSubscribe() {
     final subscription$ = _client.subscribe(
-      'drinks:listMine',
+      'drinks:listCustom',
       const <String, dynamic>{},
     );
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
         case QuerySuccess(:final value):
-          return TypedQuerySuccess<List<ListMineResultItem>>(
+          return TypedQuerySuccess<List<ListCustomResultItem>>(
             expectList(
               value,
-              label: 'ListMineResult',
-            ).map((item) => _decodeListMineResultItem(item)).toList(),
+              label: 'ListCustomResult',
+            ).map((item) => _decodeListCustomResultItem(item)).toList(),
           );
         case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<List<ListMineResultItem>>(
+          return TypedQueryLoading<List<ListCustomResultItem>>(
             hasPendingWrites: hasPendingWrites,
           );
         case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<List<ListMineResultItem>>(
+          return TypedQueryError<List<ListCustomResultItem>>(
             message,
             data: data,
             logLines: logLines,
           );
       }
     });
-    return TypedConvexSubscription<List<ListMineResultItem>>(
+    return TypedConvexSubscription<List<ListCustomResultItem>>(
       subscription$,
       typedStream$,
     );
@@ -714,230 +715,251 @@ GetTypeArgs _decodeGetTypeArgs(dynamic raw) {
   return (id: DrinksId(expectString(map['id'], label: 'GetTypeArgsId')));
 }
 
-typedef ListAllResultItemCategory1 = ({String kind});
+typedef ListAvailableResultItemCategory1 = ({String kind});
 
-Map<String, dynamic> _encodeListAllResultItemCategory1(
-  ListAllResultItemCategory1 value$,
+Map<String, dynamic> _encodeListAvailableResultItemCategory1(
+  ListAvailableResultItemCategory1 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListAllResultItemCategory1 _decodeListAllResultItemCategory1(dynamic raw) {
-  final map = expectMap(raw, label: 'ListAllResultItemCategory1');
+ListAvailableResultItemCategory1 _decodeListAvailableResultItemCategory1(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListAvailableResultItemCategory1');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListAllResultItemCategory1',
+      'Missing required field "kind" for ListAvailableResultItemCategory1',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'beer',
-      label: 'ListAllResultItemCategory1Kind',
+      label: 'ListAvailableResultItemCategory1Kind',
     ),
   );
 }
 
-typedef ListAllResultItemCategory2 = ({String kind});
+typedef ListAvailableResultItemCategory2 = ({String kind});
 
-Map<String, dynamic> _encodeListAllResultItemCategory2(
-  ListAllResultItemCategory2 value$,
+Map<String, dynamic> _encodeListAvailableResultItemCategory2(
+  ListAvailableResultItemCategory2 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListAllResultItemCategory2 _decodeListAllResultItemCategory2(dynamic raw) {
-  final map = expectMap(raw, label: 'ListAllResultItemCategory2');
+ListAvailableResultItemCategory2 _decodeListAvailableResultItemCategory2(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListAvailableResultItemCategory2');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListAllResultItemCategory2',
+      'Missing required field "kind" for ListAvailableResultItemCategory2',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'cider',
-      label: 'ListAllResultItemCategory2Kind',
+      label: 'ListAvailableResultItemCategory2Kind',
     ),
   );
 }
 
-typedef ListAllResultItemCategory3 = ({String kind});
+typedef ListAvailableResultItemCategory3 = ({String kind});
 
-Map<String, dynamic> _encodeListAllResultItemCategory3(
-  ListAllResultItemCategory3 value$,
+Map<String, dynamic> _encodeListAvailableResultItemCategory3(
+  ListAvailableResultItemCategory3 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListAllResultItemCategory3 _decodeListAllResultItemCategory3(dynamic raw) {
-  final map = expectMap(raw, label: 'ListAllResultItemCategory3');
+ListAvailableResultItemCategory3 _decodeListAvailableResultItemCategory3(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListAvailableResultItemCategory3');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListAllResultItemCategory3',
+      'Missing required field "kind" for ListAvailableResultItemCategory3',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'cocktail',
-      label: 'ListAllResultItemCategory3Kind',
+      label: 'ListAvailableResultItemCategory3Kind',
     ),
   );
 }
 
-typedef ListAllResultItemCategory4 = ({String kind});
+typedef ListAvailableResultItemCategory4 = ({String kind});
 
-Map<String, dynamic> _encodeListAllResultItemCategory4(
-  ListAllResultItemCategory4 value$,
+Map<String, dynamic> _encodeListAvailableResultItemCategory4(
+  ListAvailableResultItemCategory4 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListAllResultItemCategory4 _decodeListAllResultItemCategory4(dynamic raw) {
-  final map = expectMap(raw, label: 'ListAllResultItemCategory4');
+ListAvailableResultItemCategory4 _decodeListAvailableResultItemCategory4(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListAvailableResultItemCategory4');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListAllResultItemCategory4',
+      'Missing required field "kind" for ListAvailableResultItemCategory4',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'spirit',
-      label: 'ListAllResultItemCategory4Kind',
+      label: 'ListAvailableResultItemCategory4Kind',
     ),
   );
 }
 
-typedef ListAllResultItemCategory5 = ({String kind});
+typedef ListAvailableResultItemCategory5 = ({String kind});
 
-Map<String, dynamic> _encodeListAllResultItemCategory5(
-  ListAllResultItemCategory5 value$,
+Map<String, dynamic> _encodeListAvailableResultItemCategory5(
+  ListAvailableResultItemCategory5 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListAllResultItemCategory5 _decodeListAllResultItemCategory5(dynamic raw) {
-  final map = expectMap(raw, label: 'ListAllResultItemCategory5');
+ListAvailableResultItemCategory5 _decodeListAvailableResultItemCategory5(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListAvailableResultItemCategory5');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListAllResultItemCategory5',
+      'Missing required field "kind" for ListAvailableResultItemCategory5',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'wine',
-      label: 'ListAllResultItemCategory5Kind',
+      label: 'ListAvailableResultItemCategory5Kind',
     ),
   );
 }
 
-sealed class ListAllResultItemCategory {
-  const ListAllResultItemCategory();
+sealed class ListAvailableResultItemCategory {
+  const ListAvailableResultItemCategory();
 }
 
-class ListAllResultItemCategory1Value extends ListAllResultItemCategory {
-  const ListAllResultItemCategory1Value(this.value);
-  final ListAllResultItemCategory1 value;
+class ListAvailableResultItemCategory1Value
+    extends ListAvailableResultItemCategory {
+  const ListAvailableResultItemCategory1Value(this.value);
+  final ListAvailableResultItemCategory1 value;
 }
 
-class ListAllResultItemCategory2Value extends ListAllResultItemCategory {
-  const ListAllResultItemCategory2Value(this.value);
-  final ListAllResultItemCategory2 value;
+class ListAvailableResultItemCategory2Value
+    extends ListAvailableResultItemCategory {
+  const ListAvailableResultItemCategory2Value(this.value);
+  final ListAvailableResultItemCategory2 value;
 }
 
-class ListAllResultItemCategory3Value extends ListAllResultItemCategory {
-  const ListAllResultItemCategory3Value(this.value);
-  final ListAllResultItemCategory3 value;
+class ListAvailableResultItemCategory3Value
+    extends ListAvailableResultItemCategory {
+  const ListAvailableResultItemCategory3Value(this.value);
+  final ListAvailableResultItemCategory3 value;
 }
 
-class ListAllResultItemCategory4Value extends ListAllResultItemCategory {
-  const ListAllResultItemCategory4Value(this.value);
-  final ListAllResultItemCategory4 value;
+class ListAvailableResultItemCategory4Value
+    extends ListAvailableResultItemCategory {
+  const ListAvailableResultItemCategory4Value(this.value);
+  final ListAvailableResultItemCategory4 value;
 }
 
-class ListAllResultItemCategory5Value extends ListAllResultItemCategory {
-  const ListAllResultItemCategory5Value(this.value);
-  final ListAllResultItemCategory5 value;
+class ListAvailableResultItemCategory5Value
+    extends ListAvailableResultItemCategory {
+  const ListAvailableResultItemCategory5Value(this.value);
+  final ListAvailableResultItemCategory5 value;
 }
 
-dynamic _encodeListAllResultItemCategory(ListAllResultItemCategory value) {
+dynamic _encodeListAvailableResultItemCategory(
+  ListAvailableResultItemCategory value,
+) {
   switch (value) {
-    case ListAllResultItemCategory1Value(value: final inner):
-      return _encodeListAllResultItemCategory1(inner);
-    case ListAllResultItemCategory2Value(value: final inner):
-      return _encodeListAllResultItemCategory2(inner);
-    case ListAllResultItemCategory3Value(value: final inner):
-      return _encodeListAllResultItemCategory3(inner);
-    case ListAllResultItemCategory4Value(value: final inner):
-      return _encodeListAllResultItemCategory4(inner);
-    case ListAllResultItemCategory5Value(value: final inner):
-      return _encodeListAllResultItemCategory5(inner);
+    case ListAvailableResultItemCategory1Value(value: final inner):
+      return _encodeListAvailableResultItemCategory1(inner);
+    case ListAvailableResultItemCategory2Value(value: final inner):
+      return _encodeListAvailableResultItemCategory2(inner);
+    case ListAvailableResultItemCategory3Value(value: final inner):
+      return _encodeListAvailableResultItemCategory3(inner);
+    case ListAvailableResultItemCategory4Value(value: final inner):
+      return _encodeListAvailableResultItemCategory4(inner);
+    case ListAvailableResultItemCategory5Value(value: final inner):
+      return _encodeListAvailableResultItemCategory5(inner);
   }
 }
 
-ListAllResultItemCategory _decodeListAllResultItemCategory(dynamic raw) {
+ListAvailableResultItemCategory _decodeListAvailableResultItemCategory(
+  dynamic raw,
+) {
   final errors = <String>[];
   try {
-    return ListAllResultItemCategory1Value(
-      _decodeListAllResultItemCategory1(raw),
+    return ListAvailableResultItemCategory1Value(
+      _decodeListAvailableResultItemCategory1(raw),
     );
   } catch (e) {
-    errors.add('ListAllResultItemCategory1Value: $e');
+    errors.add('ListAvailableResultItemCategory1Value: $e');
   }
   try {
-    return ListAllResultItemCategory2Value(
-      _decodeListAllResultItemCategory2(raw),
+    return ListAvailableResultItemCategory2Value(
+      _decodeListAvailableResultItemCategory2(raw),
     );
   } catch (e) {
-    errors.add('ListAllResultItemCategory2Value: $e');
+    errors.add('ListAvailableResultItemCategory2Value: $e');
   }
   try {
-    return ListAllResultItemCategory3Value(
-      _decodeListAllResultItemCategory3(raw),
+    return ListAvailableResultItemCategory3Value(
+      _decodeListAvailableResultItemCategory3(raw),
     );
   } catch (e) {
-    errors.add('ListAllResultItemCategory3Value: $e');
+    errors.add('ListAvailableResultItemCategory3Value: $e');
   }
   try {
-    return ListAllResultItemCategory4Value(
-      _decodeListAllResultItemCategory4(raw),
+    return ListAvailableResultItemCategory4Value(
+      _decodeListAvailableResultItemCategory4(raw),
     );
   } catch (e) {
-    errors.add('ListAllResultItemCategory4Value: $e');
+    errors.add('ListAvailableResultItemCategory4Value: $e');
   }
   try {
-    return ListAllResultItemCategory5Value(
-      _decodeListAllResultItemCategory5(raw),
+    return ListAvailableResultItemCategory5Value(
+      _decodeListAvailableResultItemCategory5(raw),
     );
   } catch (e) {
-    errors.add('ListAllResultItemCategory5Value: $e');
+    errors.add('ListAvailableResultItemCategory5Value: $e');
   }
   throw FormatException(
-    'Expected ListAllResultItemCategory but received ${describeType(raw)}.\n'
+    'Expected ListAvailableResultItemCategory but received ${describeType(raw)}.\n'
     'Tried: ${errors.join(", ")}',
   );
 }
 
-typedef ListAllResultItem = ({
+typedef ListAvailableResultItem = ({
   double creationTime,
   DrinksId id,
   double alcoholPercentage,
-  ListAllResultItemCategory category,
+  ListAvailableResultItemCategory category,
   double? deletedAt,
   String name,
   UsersId? ownerId,
   double updatedAt,
 });
 
-Map<String, dynamic> _encodeListAllResultItem(ListAllResultItem value$) {
+Map<String, dynamic> _encodeListAvailableResultItem(
+  ListAvailableResultItem value$,
+) {
   final (
     creationTime: creationTime,
     id: id,
@@ -952,7 +974,7 @@ Map<String, dynamic> _encodeListAllResultItem(ListAllResultItem value$) {
     '_creationTime': creationTime,
     '_id': id.value,
     'alcoholPercentage': alcoholPercentage,
-    'category': _encodeListAllResultItemCategory(category),
+    'category': _encodeListAvailableResultItemCategory(category),
     'deletedAt': deletedAt,
     'name': name,
     'ownerId': switch (ownerId) {
@@ -963,297 +985,317 @@ Map<String, dynamic> _encodeListAllResultItem(ListAllResultItem value$) {
   };
 }
 
-ListAllResultItem _decodeListAllResultItem(dynamic raw) {
-  final map = expectMap(raw, label: 'ListAllResultItem');
+ListAvailableResultItem _decodeListAvailableResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ListAvailableResultItem');
   if (!map.containsKey('_creationTime')) {
     throw FormatException(
-      'Missing required field "_creationTime" for ListAllResultItem',
+      'Missing required field "_creationTime" for ListAvailableResultItem',
     );
   }
   if (!map.containsKey('_id')) {
-    throw FormatException('Missing required field "_id" for ListAllResultItem');
+    throw FormatException(
+      'Missing required field "_id" for ListAvailableResultItem',
+    );
   }
   if (!map.containsKey('alcoholPercentage')) {
     throw FormatException(
-      'Missing required field "alcoholPercentage" for ListAllResultItem',
+      'Missing required field "alcoholPercentage" for ListAvailableResultItem',
     );
   }
   if (!map.containsKey('category')) {
     throw FormatException(
-      'Missing required field "category" for ListAllResultItem',
+      'Missing required field "category" for ListAvailableResultItem',
     );
   }
   if (!map.containsKey('deletedAt')) {
     throw FormatException(
-      'Missing required field "deletedAt" for ListAllResultItem',
+      'Missing required field "deletedAt" for ListAvailableResultItem',
     );
   }
   if (!map.containsKey('name')) {
     throw FormatException(
-      'Missing required field "name" for ListAllResultItem',
+      'Missing required field "name" for ListAvailableResultItem',
     );
   }
   if (!map.containsKey('ownerId')) {
     throw FormatException(
-      'Missing required field "ownerId" for ListAllResultItem',
+      'Missing required field "ownerId" for ListAvailableResultItem',
     );
   }
   if (!map.containsKey('updatedAt')) {
     throw FormatException(
-      'Missing required field "updatedAt" for ListAllResultItem',
+      'Missing required field "updatedAt" for ListAvailableResultItem',
     );
   }
   return (
     creationTime: expectDouble(
       map['_creationTime'],
-      label: 'ListAllResultItemCreationTime',
+      label: 'ListAvailableResultItemCreationTime',
     ),
-    id: DrinksId(expectString(map['_id'], label: 'ListAllResultItemId')),
+    id: DrinksId(expectString(map['_id'], label: 'ListAvailableResultItemId')),
     alcoholPercentage: expectDouble(
       map['alcoholPercentage'],
-      label: 'ListAllResultItemAlcoholPercentage',
+      label: 'ListAvailableResultItemAlcoholPercentage',
     ),
-    category: _decodeListAllResultItemCategory(map['category']),
+    category: _decodeListAvailableResultItemCategory(map['category']),
     deletedAt: map['deletedAt'] == null
         ? null
-        : expectDouble(map['deletedAt'], label: 'ListAllResultItemDeletedAt'),
-    name: expectString(map['name'], label: 'ListAllResultItemName'),
+        : expectDouble(
+            map['deletedAt'],
+            label: 'ListAvailableResultItemDeletedAt',
+          ),
+    name: expectString(map['name'], label: 'ListAvailableResultItemName'),
     ownerId: map['ownerId'] == null
         ? null
         : UsersId(
-            expectString(map['ownerId'], label: 'ListAllResultItemOwnerId'),
+            expectString(
+              map['ownerId'],
+              label: 'ListAvailableResultItemOwnerId',
+            ),
           ),
     updatedAt: expectDouble(
       map['updatedAt'],
-      label: 'ListAllResultItemUpdatedAt',
+      label: 'ListAvailableResultItemUpdatedAt',
     ),
   );
 }
 
-typedef ListMineResultItemCategory1 = ({String kind});
+typedef ListCustomResultItemCategory1 = ({String kind});
 
-Map<String, dynamic> _encodeListMineResultItemCategory1(
-  ListMineResultItemCategory1 value$,
+Map<String, dynamic> _encodeListCustomResultItemCategory1(
+  ListCustomResultItemCategory1 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListMineResultItemCategory1 _decodeListMineResultItemCategory1(dynamic raw) {
-  final map = expectMap(raw, label: 'ListMineResultItemCategory1');
+ListCustomResultItemCategory1 _decodeListCustomResultItemCategory1(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListCustomResultItemCategory1');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListMineResultItemCategory1',
+      'Missing required field "kind" for ListCustomResultItemCategory1',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'beer',
-      label: 'ListMineResultItemCategory1Kind',
+      label: 'ListCustomResultItemCategory1Kind',
     ),
   );
 }
 
-typedef ListMineResultItemCategory2 = ({String kind});
+typedef ListCustomResultItemCategory2 = ({String kind});
 
-Map<String, dynamic> _encodeListMineResultItemCategory2(
-  ListMineResultItemCategory2 value$,
+Map<String, dynamic> _encodeListCustomResultItemCategory2(
+  ListCustomResultItemCategory2 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListMineResultItemCategory2 _decodeListMineResultItemCategory2(dynamic raw) {
-  final map = expectMap(raw, label: 'ListMineResultItemCategory2');
+ListCustomResultItemCategory2 _decodeListCustomResultItemCategory2(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListCustomResultItemCategory2');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListMineResultItemCategory2',
+      'Missing required field "kind" for ListCustomResultItemCategory2',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'cider',
-      label: 'ListMineResultItemCategory2Kind',
+      label: 'ListCustomResultItemCategory2Kind',
     ),
   );
 }
 
-typedef ListMineResultItemCategory3 = ({String kind});
+typedef ListCustomResultItemCategory3 = ({String kind});
 
-Map<String, dynamic> _encodeListMineResultItemCategory3(
-  ListMineResultItemCategory3 value$,
+Map<String, dynamic> _encodeListCustomResultItemCategory3(
+  ListCustomResultItemCategory3 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListMineResultItemCategory3 _decodeListMineResultItemCategory3(dynamic raw) {
-  final map = expectMap(raw, label: 'ListMineResultItemCategory3');
+ListCustomResultItemCategory3 _decodeListCustomResultItemCategory3(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListCustomResultItemCategory3');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListMineResultItemCategory3',
+      'Missing required field "kind" for ListCustomResultItemCategory3',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'cocktail',
-      label: 'ListMineResultItemCategory3Kind',
+      label: 'ListCustomResultItemCategory3Kind',
     ),
   );
 }
 
-typedef ListMineResultItemCategory4 = ({String kind});
+typedef ListCustomResultItemCategory4 = ({String kind});
 
-Map<String, dynamic> _encodeListMineResultItemCategory4(
-  ListMineResultItemCategory4 value$,
+Map<String, dynamic> _encodeListCustomResultItemCategory4(
+  ListCustomResultItemCategory4 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListMineResultItemCategory4 _decodeListMineResultItemCategory4(dynamic raw) {
-  final map = expectMap(raw, label: 'ListMineResultItemCategory4');
+ListCustomResultItemCategory4 _decodeListCustomResultItemCategory4(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListCustomResultItemCategory4');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListMineResultItemCategory4',
+      'Missing required field "kind" for ListCustomResultItemCategory4',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'spirit',
-      label: 'ListMineResultItemCategory4Kind',
+      label: 'ListCustomResultItemCategory4Kind',
     ),
   );
 }
 
-typedef ListMineResultItemCategory5 = ({String kind});
+typedef ListCustomResultItemCategory5 = ({String kind});
 
-Map<String, dynamic> _encodeListMineResultItemCategory5(
-  ListMineResultItemCategory5 value$,
+Map<String, dynamic> _encodeListCustomResultItemCategory5(
+  ListCustomResultItemCategory5 value$,
 ) {
   final (kind: kind) = value$;
   return <String, dynamic>{'kind': kind};
 }
 
-ListMineResultItemCategory5 _decodeListMineResultItemCategory5(dynamic raw) {
-  final map = expectMap(raw, label: 'ListMineResultItemCategory5');
+ListCustomResultItemCategory5 _decodeListCustomResultItemCategory5(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListCustomResultItemCategory5');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing required field "kind" for ListMineResultItemCategory5',
+      'Missing required field "kind" for ListCustomResultItemCategory5',
     );
   }
   return (
     kind: expectLiteral<String>(
       map['kind'],
       'wine',
-      label: 'ListMineResultItemCategory5Kind',
+      label: 'ListCustomResultItemCategory5Kind',
     ),
   );
 }
 
-sealed class ListMineResultItemCategory {
-  const ListMineResultItemCategory();
+sealed class ListCustomResultItemCategory {
+  const ListCustomResultItemCategory();
 }
 
-class ListMineResultItemCategory1Value extends ListMineResultItemCategory {
-  const ListMineResultItemCategory1Value(this.value);
-  final ListMineResultItemCategory1 value;
+class ListCustomResultItemCategory1Value extends ListCustomResultItemCategory {
+  const ListCustomResultItemCategory1Value(this.value);
+  final ListCustomResultItemCategory1 value;
 }
 
-class ListMineResultItemCategory2Value extends ListMineResultItemCategory {
-  const ListMineResultItemCategory2Value(this.value);
-  final ListMineResultItemCategory2 value;
+class ListCustomResultItemCategory2Value extends ListCustomResultItemCategory {
+  const ListCustomResultItemCategory2Value(this.value);
+  final ListCustomResultItemCategory2 value;
 }
 
-class ListMineResultItemCategory3Value extends ListMineResultItemCategory {
-  const ListMineResultItemCategory3Value(this.value);
-  final ListMineResultItemCategory3 value;
+class ListCustomResultItemCategory3Value extends ListCustomResultItemCategory {
+  const ListCustomResultItemCategory3Value(this.value);
+  final ListCustomResultItemCategory3 value;
 }
 
-class ListMineResultItemCategory4Value extends ListMineResultItemCategory {
-  const ListMineResultItemCategory4Value(this.value);
-  final ListMineResultItemCategory4 value;
+class ListCustomResultItemCategory4Value extends ListCustomResultItemCategory {
+  const ListCustomResultItemCategory4Value(this.value);
+  final ListCustomResultItemCategory4 value;
 }
 
-class ListMineResultItemCategory5Value extends ListMineResultItemCategory {
-  const ListMineResultItemCategory5Value(this.value);
-  final ListMineResultItemCategory5 value;
+class ListCustomResultItemCategory5Value extends ListCustomResultItemCategory {
+  const ListCustomResultItemCategory5Value(this.value);
+  final ListCustomResultItemCategory5 value;
 }
 
-dynamic _encodeListMineResultItemCategory(ListMineResultItemCategory value) {
+dynamic _encodeListCustomResultItemCategory(
+  ListCustomResultItemCategory value,
+) {
   switch (value) {
-    case ListMineResultItemCategory1Value(value: final inner):
-      return _encodeListMineResultItemCategory1(inner);
-    case ListMineResultItemCategory2Value(value: final inner):
-      return _encodeListMineResultItemCategory2(inner);
-    case ListMineResultItemCategory3Value(value: final inner):
-      return _encodeListMineResultItemCategory3(inner);
-    case ListMineResultItemCategory4Value(value: final inner):
-      return _encodeListMineResultItemCategory4(inner);
-    case ListMineResultItemCategory5Value(value: final inner):
-      return _encodeListMineResultItemCategory5(inner);
+    case ListCustomResultItemCategory1Value(value: final inner):
+      return _encodeListCustomResultItemCategory1(inner);
+    case ListCustomResultItemCategory2Value(value: final inner):
+      return _encodeListCustomResultItemCategory2(inner);
+    case ListCustomResultItemCategory3Value(value: final inner):
+      return _encodeListCustomResultItemCategory3(inner);
+    case ListCustomResultItemCategory4Value(value: final inner):
+      return _encodeListCustomResultItemCategory4(inner);
+    case ListCustomResultItemCategory5Value(value: final inner):
+      return _encodeListCustomResultItemCategory5(inner);
   }
 }
 
-ListMineResultItemCategory _decodeListMineResultItemCategory(dynamic raw) {
+ListCustomResultItemCategory _decodeListCustomResultItemCategory(dynamic raw) {
   final errors = <String>[];
   try {
-    return ListMineResultItemCategory1Value(
-      _decodeListMineResultItemCategory1(raw),
+    return ListCustomResultItemCategory1Value(
+      _decodeListCustomResultItemCategory1(raw),
     );
   } catch (e) {
-    errors.add('ListMineResultItemCategory1Value: $e');
+    errors.add('ListCustomResultItemCategory1Value: $e');
   }
   try {
-    return ListMineResultItemCategory2Value(
-      _decodeListMineResultItemCategory2(raw),
+    return ListCustomResultItemCategory2Value(
+      _decodeListCustomResultItemCategory2(raw),
     );
   } catch (e) {
-    errors.add('ListMineResultItemCategory2Value: $e');
+    errors.add('ListCustomResultItemCategory2Value: $e');
   }
   try {
-    return ListMineResultItemCategory3Value(
-      _decodeListMineResultItemCategory3(raw),
+    return ListCustomResultItemCategory3Value(
+      _decodeListCustomResultItemCategory3(raw),
     );
   } catch (e) {
-    errors.add('ListMineResultItemCategory3Value: $e');
+    errors.add('ListCustomResultItemCategory3Value: $e');
   }
   try {
-    return ListMineResultItemCategory4Value(
-      _decodeListMineResultItemCategory4(raw),
+    return ListCustomResultItemCategory4Value(
+      _decodeListCustomResultItemCategory4(raw),
     );
   } catch (e) {
-    errors.add('ListMineResultItemCategory4Value: $e');
+    errors.add('ListCustomResultItemCategory4Value: $e');
   }
   try {
-    return ListMineResultItemCategory5Value(
-      _decodeListMineResultItemCategory5(raw),
+    return ListCustomResultItemCategory5Value(
+      _decodeListCustomResultItemCategory5(raw),
     );
   } catch (e) {
-    errors.add('ListMineResultItemCategory5Value: $e');
+    errors.add('ListCustomResultItemCategory5Value: $e');
   }
   throw FormatException(
-    'Expected ListMineResultItemCategory but received ${describeType(raw)}.\n'
+    'Expected ListCustomResultItemCategory but received ${describeType(raw)}.\n'
     'Tried: ${errors.join(", ")}',
   );
 }
 
-typedef ListMineResultItem = ({
+typedef ListCustomResultItem = ({
   double creationTime,
   DrinksId id,
   double alcoholPercentage,
-  ListMineResultItemCategory category,
+  ListCustomResultItemCategory category,
   double? deletedAt,
   String name,
   UsersId? ownerId,
   double updatedAt,
 });
 
-Map<String, dynamic> _encodeListMineResultItem(ListMineResultItem value$) {
+Map<String, dynamic> _encodeListCustomResultItem(ListCustomResultItem value$) {
   final (
     creationTime: creationTime,
     id: id,
@@ -1268,7 +1310,7 @@ Map<String, dynamic> _encodeListMineResultItem(ListMineResultItem value$) {
     '_creationTime': creationTime,
     '_id': id.value,
     'alcoholPercentage': alcoholPercentage,
-    'category': _encodeListMineResultItemCategory(category),
+    'category': _encodeListCustomResultItemCategory(category),
     'deletedAt': deletedAt,
     'name': name,
     'ownerId': switch (ownerId) {
@@ -1279,71 +1321,74 @@ Map<String, dynamic> _encodeListMineResultItem(ListMineResultItem value$) {
   };
 }
 
-ListMineResultItem _decodeListMineResultItem(dynamic raw) {
-  final map = expectMap(raw, label: 'ListMineResultItem');
+ListCustomResultItem _decodeListCustomResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ListCustomResultItem');
   if (!map.containsKey('_creationTime')) {
     throw FormatException(
-      'Missing required field "_creationTime" for ListMineResultItem',
+      'Missing required field "_creationTime" for ListCustomResultItem',
     );
   }
   if (!map.containsKey('_id')) {
     throw FormatException(
-      'Missing required field "_id" for ListMineResultItem',
+      'Missing required field "_id" for ListCustomResultItem',
     );
   }
   if (!map.containsKey('alcoholPercentage')) {
     throw FormatException(
-      'Missing required field "alcoholPercentage" for ListMineResultItem',
+      'Missing required field "alcoholPercentage" for ListCustomResultItem',
     );
   }
   if (!map.containsKey('category')) {
     throw FormatException(
-      'Missing required field "category" for ListMineResultItem',
+      'Missing required field "category" for ListCustomResultItem',
     );
   }
   if (!map.containsKey('deletedAt')) {
     throw FormatException(
-      'Missing required field "deletedAt" for ListMineResultItem',
+      'Missing required field "deletedAt" for ListCustomResultItem',
     );
   }
   if (!map.containsKey('name')) {
     throw FormatException(
-      'Missing required field "name" for ListMineResultItem',
+      'Missing required field "name" for ListCustomResultItem',
     );
   }
   if (!map.containsKey('ownerId')) {
     throw FormatException(
-      'Missing required field "ownerId" for ListMineResultItem',
+      'Missing required field "ownerId" for ListCustomResultItem',
     );
   }
   if (!map.containsKey('updatedAt')) {
     throw FormatException(
-      'Missing required field "updatedAt" for ListMineResultItem',
+      'Missing required field "updatedAt" for ListCustomResultItem',
     );
   }
   return (
     creationTime: expectDouble(
       map['_creationTime'],
-      label: 'ListMineResultItemCreationTime',
+      label: 'ListCustomResultItemCreationTime',
     ),
-    id: DrinksId(expectString(map['_id'], label: 'ListMineResultItemId')),
+    id: DrinksId(expectString(map['_id'], label: 'ListCustomResultItemId')),
     alcoholPercentage: expectDouble(
       map['alcoholPercentage'],
-      label: 'ListMineResultItemAlcoholPercentage',
+      label: 'ListCustomResultItemAlcoholPercentage',
     ),
-    category: _decodeListMineResultItemCategory(map['category']),
+    category: _decodeListCustomResultItemCategory(map['category']),
     deletedAt: map['deletedAt'] == null
         ? null
-        : expectDouble(map['deletedAt'], label: 'ListMineResultItemDeletedAt'),
-    name: expectString(map['name'], label: 'ListMineResultItemName'),
+        : expectDouble(
+            map['deletedAt'],
+            label: 'ListCustomResultItemDeletedAt',
+          ),
+    name: expectString(map['name'], label: 'ListCustomResultItemName'),
     ownerId: map['ownerId'] == null
         ? null
         : UsersId(
-            expectString(map['ownerId'], label: 'ListMineResultItemOwnerId'),
+            expectString(map['ownerId'], label: 'ListCustomResultItemOwnerId'),
           ),
     updatedAt: expectDouble(
       map['updatedAt'],
-      label: 'ListMineResultItemUpdatedAt',
+      label: 'ListCustomResultItemUpdatedAt',
     ),
   );
 }
