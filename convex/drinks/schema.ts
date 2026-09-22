@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
 
-export const drinkCategoryValidator = v.union(
+const drinkCategoryValidator = v.union(
   v.object({ kind: v.literal("beer") }),
   v.object({ kind: v.literal("cider") }),
   v.object({ kind: v.literal("cocktail") }),
@@ -17,3 +17,13 @@ export const drinksTable = defineTable({
   updatedAt: v.number(),
   deletedAt: v.nullable(v.number()),
 }).index("by_ownerId_and_deletedAt", ["ownerId", "deletedAt"]);
+
+export const createDrinkInputValidator = drinksTable.validator.pick(
+  "name",
+  "category",
+  "alcoholPercentage",
+);
+
+export const updateDrinkInputValidator = createDrinkInputValidator
+  .partial()
+  .extend({ id: v.id("drinks") });
