@@ -1,5 +1,12 @@
+import type { MutationCtx, QueryCtx } from "fluent-convex";
 import { getCurrentUser } from "../users/currentUser";
 import { convex } from "./builder";
+import type { DataModel } from "../_generated/dataModel";
+
+type CurrentUserContext = Awaited<ReturnType<typeof getCurrentUser>>;
+
+export type AuthQueryCtx = QueryCtx<DataModel> & CurrentUserContext;
+export type AuthMutationCtx = MutationCtx<DataModel> & CurrentUserContext;
 
 const authQueryMiddleware = convex
   .query()

@@ -9,14 +9,15 @@
  */
 
 import type * as drinks from "../drinks.js";
-import type * as drinks_crud from "../drinks/crud.js";
+import type * as drinks_mutation from "../drinks/mutation.js";
+import type * as drinks_query from "../drinks/query.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_authenticated from "../lib/authenticated.js";
 import type * as lib_builder from "../lib/builder.js";
 import type * as users from "../users.js";
-import type * as users_crud from "../users/crud.js";
 import type * as users_currentUser from "../users/currentUser.js";
+import type * as users_mutation from "../users/mutation.js";
 
 import type {
   ApiFromModules,
@@ -26,14 +27,15 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   drinks: typeof drinks;
-  "drinks/crud": typeof drinks_crud;
+  "drinks/mutation": typeof drinks_mutation;
+  "drinks/query": typeof drinks_query;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/authenticated": typeof lib_authenticated;
   "lib/builder": typeof lib_builder;
   users: typeof users;
-  "users/crud": typeof users_crud;
   "users/currentUser": typeof users_currentUser;
+  "users/mutation": typeof users_mutation;
 }>;
 
 /**
