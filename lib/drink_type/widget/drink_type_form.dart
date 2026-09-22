@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+
+const _drinkCategories = <DrinkCategory>[
+  Beer(),
+  Cider(),
+  Cocktail(),
+  Spirit(),
+  Wine(),
+];
+
+String _drinkCategoryDisplayName(DrinkCategory drinkCategory) {
+  return switch (drinkCategory) {
+    Beer() => 'Beer',
+    Cider() => 'Cider',
+    Cocktail() => 'Cocktail',
+    Spirit() => 'Spirit',
+    Wine() => 'Wine',
+  };
+}
 
 class DrinkTypeForm extends StatefulWidget {
   final String initialName;
@@ -64,6 +82,7 @@ class _DrinkTypeFormState extends State<DrinkTypeForm> {
               ],
             ),
           ),
+          form.buildErrorMessage(),
           _buildActionButtons(form),
         ],
       ),
@@ -93,11 +112,8 @@ class _DrinkTypeFormState extends State<DrinkTypeForm> {
           return 'Please enter an alcohol percentage.';
         }
         final percentage = double.tryParse(value);
-        if (percentage == null || percentage < 0 || percentage > 100) {
+        if (percentage == null || percentage < 1 || percentage > 100) {
           return 'Please enter a valid number.';
-        }
-        if (percentage == 0) {
-          return "You don't need our app for that";
         }
         return null;
       },
@@ -136,10 +152,10 @@ class _DrinkTypeFormState extends State<DrinkTypeForm> {
     return DropdownButtonFormField<DrinkCategory>(
       initialValue: _selectedDrinkCategory,
       hint: const Text('Select Category'),
-      items: DrinkCategory.values.map((drinkCategory) {
+      items: _drinkCategories.map((drinkCategory) {
         return DropdownMenuItem(
           value: drinkCategory,
-          child: Text(drinkCategory.displayName),
+          child: Text(_drinkCategoryDisplayName(drinkCategory)),
         );
       }).toList(),
       onChanged: form.isLoading

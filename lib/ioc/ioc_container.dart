@@ -15,6 +15,7 @@ import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
+import 'package:remembeer/drink_type/service/custom_drink_type_service.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
 import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
@@ -110,6 +111,7 @@ class IoCContainer {
 
   static void _registerServices() {
     get
+      ..registerSingleton(DrinksService(api: get<ConvexApi>()))
       ..registerSingleton(DateService(userController: get<UserController>()))
       ..registerSingleton(
         AppIconService(

@@ -10,6 +10,7 @@ import 'package:dartvex/dartvex.dart';
 
 export 'runtime.dart';
 export 'schema.dart';
+export 'types.dart';
 
 class ConvexApi {
   const ConvexApi(this._client);

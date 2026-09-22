@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
-import 'package:remembeer/drink_type/model/drink_type.dart';
+import 'package:remembeer/convex_api/modules/drinks.dart';
+import 'package:remembeer/drink_type/service/custom_drink_type_service.dart';
 import 'package:remembeer/drink_type/widget/drink_type_form.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 
@@ -12,37 +12,36 @@ class UpdateDrinkTypePage extends StatelessWidget {
 
   UpdateDrinkTypePage({super.key, required this.drinkTypeId});
 
-  final _drinkTypeController = get<DrinkTypeController>();
+  final _customDrinkTypeService = get<CustomDrinkTypeService>();
 
   @override
   Widget build(BuildContext context) {
-    return AsyncBuilder<DrinkType>(
-      stream: _drinkTypeController.streamById(drinkTypeId),
+    return AsyncBuilder<GetTypeResult>(
+      future: _customDrinkTypeService.getById(drinkTypeId),
       builder: _buildPage,
     );
   }
 
-  Widget _buildPage(BuildContext context, DrinkType drinkTypeToUpdate) {
+  Widget _buildPage(BuildContext context, GetTypeResult drink) {
     return PageTemplate(
       title: const Text('Update Custom Drink Type'),
       child: DrinkTypeForm(
-        initialName: drinkTypeToUpdate.name,
-        initialAlcoholPercentage: drinkTypeToUpdate.alcoholPercentage,
-        initialDrinkCategory: drinkTypeToUpdate.category,
+        initialName: drink.name,
+        initialAlcoholPercentage: drink.alcoholPercentage,
+        initialDrinkCategory: drink.drinkCategory,
         onSubmit: (name, alcoholPercentage, drinkCategory) async {
-          await _drinkTypeController.updateSingle(
-            drinkTypeToUpdate.copyWith(
-              name: name,
-              alcoholPercentage: alcoholPercentage,
-              category: drinkCategory,
-            ),
+          await _customDrinkTypeService.update(
+            id: drink.id,
+            name: name,
+            alcoholPercentage: alcoholPercentage,
+            drinkCategory: drinkCategory,
           );
           if (context.mounted) {
             context.pop();
           }
         },
         onDelete: () async {
-          await _drinkTypeController.deleteSingle(drinkTypeToUpdate);
+          await _customDrinkTypeService.delete(drink.id);
           if (context.mounted) {
             context.pop();
           }

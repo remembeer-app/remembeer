@@ -4,6 +4,7 @@
     "modules/drinks.dart",
     "modules/users.dart",
     "runtime.dart",
-    "schema.dart"
+    "schema.dart",
+    "types.dart"
   ]
 }
