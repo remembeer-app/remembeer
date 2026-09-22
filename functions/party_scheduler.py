@@ -363,7 +363,9 @@ def _attempt_quest_start(
             "templateId": template_id,
         }
 
-    duration = template.get("durationMinutes", schedule["defaultDurationMinutes"])
+    duration = template.get("durationMinutes")
+    if duration is None:
+        duration = schedule["defaultDurationMinutes"]
     if (
         isinstance(duration, bool)
         or not isinstance(duration, int)

@@ -31,6 +31,7 @@ void main() {
               child: PartyQuestManagementSection(
                 sessionId: 'session-1',
                 service: service,
+                defaultDurationMinutes: 15,
               ),
             ),
           ),
@@ -54,6 +55,8 @@ void main() {
     );
     expect(find.textContaining('25 points each'), findsOneWidget);
     expect(find.textContaining('Choose a partner.'), findsOneWidget);
+    expect(find.textContaining('10 minutes'), findsOneWidget);
+    expect(find.text('Edit duration'), findsOneWidget);
     expect(find.byIcon(Icons.handshake_outlined), findsOneWidget);
     expect(find.byIcon(Icons.auto_awesome_outlined), findsNothing);
     expect(find.text('Custom quest'), findsNothing);
@@ -69,6 +72,97 @@ void main() {
     expect(find.text('Quest template disabled.'), findsNothing);
   });
 
+  testWidgets('shows the Party default and lets admins set an override', (
+    tester,
+  ) async {
+    final service = _FakeQuestService([
+      _template(
+        id: 'built-in',
+        source: PartyQuestTemplateSource.builtIn,
+        now: DateTime.utc(2026),
+        durationMinutes: null,
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      ToastificationWrapper(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: PartyQuestManagementSection(
+                sessionId: 'session-1',
+                service: service,
+                defaultDurationMinutes: 3,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.textContaining('3 minutes (default)'), findsOneWidget);
+    expect(find.text('Set duration'), findsOneWidget);
+
+    await tester.tap(find.text('Set duration'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Party default: 3 minutes'), findsOneWidget);
+    expect(find.text('Use default'), findsNothing);
+
+    await tester.enterText(find.byType(TextFormField), '99');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Enter 1-60 minutes.'), findsOneWidget);
+    expect(service.durationTemplateId, isNull);
+
+    await tester.enterText(find.byType(TextFormField), '7');
+    await tester.tap(find.text('Save'));
+    await tester.pumpAndSettle();
+
+    expect(service.durationTemplateId, 'built-in');
+    expect(service.durationValue, 7);
+  });
+
+  testWidgets('lets admins clear an override back to the Party default', (
+    tester,
+  ) async {
+    final service = _FakeQuestService([
+      _template(
+        id: 'built-in',
+        source: PartyQuestTemplateSource.builtIn,
+        now: DateTime.utc(2026),
+      ),
+    ]);
+
+    await tester.pumpWidget(
+      ToastificationWrapper(
+        child: MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: PartyQuestManagementSection(
+                sessionId: 'session-1',
+                service: service,
+                defaultDurationMinutes: 3,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Edit duration'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Use default'));
+    await tester.pumpAndSettle();
+
+    expect(service.durationTemplateId, 'built-in');
+    expect(service.durationValue, isNull);
+    expect(service.durationCalls, 1);
+  });
+
   testWidgets('shows an empty state when no built-in templates exist', (
     tester,
   ) async {
@@ -79,6 +173,7 @@ void main() {
             body: SingleChildScrollView(
               child: PartyQuestManagementSection(
                 sessionId: 'session-1',
+                defaultDurationMinutes: 15,
                 service: _FakeQuestService([
                   _template(
                     id: 'custom',
@@ -103,6 +198,7 @@ PartyQuestTemplate _template({
   required String id,
   required PartyQuestTemplateSource source,
   required DateTime now,
+  int? durationMinutes = 10,
 }) => PartyQuestTemplate(
   id: id,
   source: source,
@@ -112,7 +208,7 @@ PartyQuestTemplate _template({
       : 'Custom quest',
   instructions: 'Choose a partner.',
   pointsUnits: 25000,
-  durationMinutes: 10,
+  durationMinutes: durationMinutes,
   eligibilityRule: 'allEligibleMembers',
   availability: PartyQuestAvailability.early,
   catalogVersion: 1,
@@ -126,6 +222,9 @@ class _FakeQuestService implements PartyQuestService {
   final List<PartyQuestTemplate> templates;
   String? enabledTemplateId;
   bool? enabledValue;
+  String? durationTemplateId;
+  int? durationValue;
+  var durationCalls = 0;
 
   @override
   Stream<List<PartyQuestTemplate>> templatesStream(String sessionId) =>
@@ -139,6 +238,17 @@ class _FakeQuestService implements PartyQuestService {
   ) async {
     enabledTemplateId = templateId;
     enabledValue = enabled;
+  }
+
+  @override
+  Future<void> setTemplateDuration(
+    String sessionId,
+    String templateId,
+    int? durationMinutes,
+  ) async {
+    durationTemplateId = templateId;
+    durationValue = durationMinutes;
+    durationCalls += 1;
   }
 
   @override

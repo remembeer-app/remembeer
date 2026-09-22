@@ -11,7 +11,6 @@ from dataclasses import dataclass
 from typing import Any
 
 CATALOG_VERSION = 1
-DEFAULT_DURATION_MINUTES = 15
 POINT_UNITS_PER_POINT = 1_000
 PARTY_CLASSES = ("beer", "cider", "cocktail", "spirit", "wine")
 
@@ -67,7 +66,6 @@ class BuiltInQuestTemplate:
     title: str
     instructions: str
     points_units: int
-    duration_minutes: int
     eligibility_rule: str
     availability: str
 
@@ -82,7 +80,6 @@ class BuiltInQuestTemplate:
             "title": self.title,
             "instructions": self.instructions,
             "pointsUnits": self.points_units,
-            "durationMinutes": self.duration_minutes,
             "eligibilityRule": self.eligibility_rule,
             "availability": self.availability,
             "enabled": True,
@@ -117,7 +114,6 @@ def _class_templates() -> list[BuiltInQuestTemplate]:
                 f"{_CLASS_TITLES[party_class]}."
             ),
             points_units=_points(30),
-            duration_minutes=DEFAULT_DURATION_MINUTES,
             eligibility_rule=f"{TARGET_CLASS_PREFIX}{party_class}",
             availability=EARLY_AVAILABILITY,
         )
@@ -136,7 +132,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "each other."
             ),
             _points(25),
-            DEFAULT_DURATION_MINUTES,
             SAME_ACCENT,
             EARLY_AVAILABILITY,
         ),
@@ -148,7 +143,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "select each other."
             ),
             _points(20),
-            DEFAULT_DURATION_MINUTES,
             DIFFERENT_ACCENT,
             EARLY_AVAILABILITY,
         ),
@@ -160,7 +154,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "with before and select each other."
             ),
             _points(30),
-            DEFAULT_DURATION_MINUTES,
             NEW_ALLY,
             EARLY_AVAILABILITY,
         ),
@@ -172,7 +165,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "each other."
             ),
             _points(25),
-            DEFAULT_DURATION_MINUTES,
             DIFFERENT_CLASS,
             EARLY_AVAILABILITY,
         ),
@@ -184,7 +176,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "other."
             ),
             _points(25),
-            DEFAULT_DURATION_MINUTES,
             SAME_CLASS,
             EARLY_AVAILABILITY,
         ),
@@ -196,7 +187,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "the bottom quarter of the ranking."
             ),
             _points(30),
-            DEFAULT_DURATION_MINUTES,
             BOTTOM_QUARTER,
             REGULAR_AVAILABILITY,
         ),
@@ -208,7 +198,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "currently share first place."
             ),
             _points(30),
-            DEFAULT_DURATION_MINUTES,
             LEADER,
             REGULAR_AVAILABILITY,
         ),
@@ -220,7 +209,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "currently hold a top-three rank."
             ),
             _points(30),
-            DEFAULT_DURATION_MINUTES,
             TOP_THREE,
             REGULAR_AVAILABILITY,
         ),
@@ -232,7 +220,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "of you must be in the top half and the other in the bottom half."
             ),
             _points(30),
-            DEFAULT_DURATION_MINUTES,
             OPPOSITE_HALVES,
             REGULAR_AVAILABILITY,
         ),
@@ -244,7 +231,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "select each other."
             ),
             _points(25),
-            DEFAULT_DURATION_MINUTES,
             NEARBY_RANK,
             REGULAR_AVAILABILITY,
         ),
@@ -256,7 +242,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "and select each other."
             ),
             _points(25),
-            DEFAULT_DURATION_MINUTES,
             DIFFERENT_BEERPONG_TEAM,
             REGULAR_AVAILABILITY,
         ),
@@ -268,7 +253,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "other."
             ),
             _points(25),
-            DEFAULT_DURATION_MINUTES,
             SAME_BEERPONG_TEAM,
             REGULAR_AVAILABILITY,
         ),
@@ -280,7 +264,6 @@ BUILT_IN_QUEST_CATALOG: tuple[BuiltInQuestTemplate, ...] = tuple(
                 "to a beerpong finalist team."
             ),
             _points(30),
-            DEFAULT_DURATION_MINUTES,
             FINALIST_TEAM,
             FINAL_AVAILABILITY,
         ),

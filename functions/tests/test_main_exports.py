@@ -19,6 +19,7 @@ CALLABLE_EXPORTS = {
     "set_party_quest_schedule",
     "start_next_party_quest",
     "set_quest_template_enabled",
+    "set_quest_template_duration",
     "select_quest_partner",
     "set_beerpong_opt_in",
     "create_beerpong_tournament",

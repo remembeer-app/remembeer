@@ -131,6 +131,17 @@ class PartyQuestService {
     data: {'enabled': enabled},
   );
 
+  Future<void> setTemplateDuration(
+    String sessionId,
+    String templateId,
+    int? durationMinutes,
+  ) => _templateCommand(
+    'set_quest_template_duration',
+    sessionId,
+    templateId,
+    data: {'durationMinutes': durationMinutes},
+  );
+
   Future<void> _templateCommand(
     String commandName,
     String sessionId,

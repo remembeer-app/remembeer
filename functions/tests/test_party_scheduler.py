@@ -213,6 +213,41 @@ def test_no_enabled_template_advances_schedule() -> None:
     assert db.store["parties/party-a"]["activeQuestId"] is None
 
 
+def test_template_without_duration_override_uses_party_default() -> None:
+    store = _base_store()
+    del store["parties/party-a/questTemplates/template-a"]["durationMinutes"]
+    store["parties/party-a"]["questSchedule"]["defaultDurationMinutes"] = 3
+    db = Database(store)
+    result = _run(db, Notifications())
+    assert result["createdQuests"] == 1
+    quest_id = db.store["parties/party-a"]["activeQuestId"]
+    quest = db.store[f"parties/party-a/quests/{quest_id}"]
+    assert quest["endsAt"] == NOW + timedelta(minutes=3)
+
+
+def test_template_duration_override_wins_over_party_default() -> None:
+    store = _base_store()
+    store["parties/party-a"]["questSchedule"]["defaultDurationMinutes"] = 3
+    db = Database(store)
+    result = _run(db, Notifications())
+    assert result["createdQuests"] == 1
+    quest_id = db.store["parties/party-a"]["activeQuestId"]
+    quest = db.store[f"parties/party-a/quests/{quest_id}"]
+    assert quest["endsAt"] == NOW + timedelta(minutes=10)
+
+
+def test_explicit_null_template_duration_uses_party_default() -> None:
+    store = _base_store()
+    store["parties/party-a/questTemplates/template-a"]["durationMinutes"] = None
+    store["parties/party-a"]["questSchedule"]["defaultDurationMinutes"] = 3
+    db = Database(store)
+    result = _run(db, Notifications())
+    assert result["createdQuests"] == 1
+    quest_id = db.store["parties/party-a"]["activeQuestId"]
+    quest = db.store[f"parties/party-a/quests/{quest_id}"]
+    assert quest["endsAt"] == NOW + timedelta(minutes=3)
+
+
 def test_scheduler_ignores_enabled_legacy_custom_templates() -> None:
     store = _base_store()
     store["parties/party-a/questTemplates/template-a"]["enabled"] = False

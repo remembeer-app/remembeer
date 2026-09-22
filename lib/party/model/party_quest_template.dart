@@ -26,7 +26,7 @@ abstract class PartyQuestTemplate
     required String title,
     required String instructions,
     required int pointsUnits,
-    required int durationMinutes,
+    int? durationMinutes,
     required String eligibilityRule,
     required PartyQuestAvailability availability,
     @Default(true) bool enabled,
