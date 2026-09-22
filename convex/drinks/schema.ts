@@ -14,7 +14,7 @@ const drinkCategoryValidator = v.union(
 export const drinksTable = defineTable({
   ownerId: v.nullable(v.id("users")),
   name: v.string(),
-  category: drinkCategoryValidator,
+  drinkCategory: drinkCategoryValidator,
   alcoholPercentage: v.number(),
   updatedAt: v.number(),
   deletedAt: v.nullable(v.number()),
@@ -26,7 +26,7 @@ const alcoholPercentageValidator = z
   .max(100, "Alcohol percentage must be at most 100");
 
 export const createDrinkInputValidator = convexToZod(
-  drinksTable.validator.pick("name", "category", "alcoholPercentage"),
+  drinksTable.validator.pick("name", "drinkCategory", "alcoholPercentage"),
 ).extend({
   alcoholPercentage: alcoholPercentageValidator,
 });

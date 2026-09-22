@@ -22,12 +22,12 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateDrinkInputValidator)
   .returns(v.null())
-  .handler(async (ctx, { id, name, category, alcoholPercentage }) => {
+  .handler(async (ctx, { id, name, drinkCategory, alcoholPercentage }) => {
     const drink = await getCustomDrinkHandler(ctx, { id });
 
     await ctx.db.patch("drinks", id, {
       name: name ?? drink.name,
-      category: category ?? drink.category,
+      drinkCategory: drinkCategory ?? drink.drinkCategory,
       alcoholPercentage: alcoholPercentage ?? drink.alcoholPercentage,
       updatedAt: Date.now(),
     });

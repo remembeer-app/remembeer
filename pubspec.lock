@@ -332,10 +332,11 @@ packages:
   dartvex_codegen:
     dependency: "direct dev"
     description:
-      name: dartvex_codegen
-      sha256: "07f81e4b16460eeb58673f6e514911df92ba5b38513d9207a4211a92646512a7"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/dartvex_codegen"
+      ref: b052348bf1c26290b5ee7b983a54a4ddd9e9272d
+      resolved-ref: b052348bf1c26290b5ee7b983a54a4ddd9e9272d
+      url: "https://github.com/ohtenkay/dartvex.git"
+    source: git
     version: "0.2.0"
   dartvex_flutter:
     dependency: "direct main"
