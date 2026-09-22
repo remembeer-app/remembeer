@@ -1,17 +1,14 @@
 import { v } from "convex/values";
+import { authMutation, authQuery } from "./authenticated";
 import { convex } from "./lib";
-import { getCurrentUser } from "./users";
 
-export const listMine = convex
-  .query()
+export const listMine = authQuery
   .handler(async (ctx) => {
-    const { user } = await getCurrentUser(ctx);
-
     const [customDrinks, globalDrinks] = await Promise.all([
       ctx.db
         .query("drinks")
         .withIndex("by_ownerId_and_deletedAt", (q) =>
-          q.eq("ownerId", user._id).eq("deletedAt", null),
+          q.eq("ownerId", ctx.user._id).eq("deletedAt", null),
         )
         .collect(),
 
@@ -42,8 +39,7 @@ export const get = convex
   })
   .public();
 
-export const create = convex
-  .mutation()
+export const create = authMutation
   .input({
     name: v.string(),
     category: v.union(
@@ -56,12 +52,10 @@ export const create = convex
     alcoholPercentage: v.number(),
   })
   .handler(async (ctx, { name, category, alcoholPercentage }) => {
-    const { user } = await getCurrentUser(ctx);
-
     const now = Date.now();
 
     return await ctx.db.insert("drinks", {
-      ownerId: user._id,
+      ownerId: ctx.user._id,
       name,
       category,
       alcoholPercentage,
@@ -72,8 +66,7 @@ export const create = convex
   .public();
 
 // TODO(ohtenkay): use patch, partial validators or something like that
-export const update = convex
-  .mutation()
+export const update = authMutation
   .input({
     id: v.id("drinks"),
     name: v.string(),
@@ -87,14 +80,12 @@ export const update = convex
     alcoholPercentage: v.number(),
   })
   .handler(async (ctx, { id, name, category, alcoholPercentage }) => {
-    const { user } = await getCurrentUser(ctx);
-
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
       throw new Error("Drink not found");
     }
 
-    if (drink.ownerId !== user._id) {
+    if (drink.ownerId !== ctx.user._id) {
       throw new Error("You do not have permission to update this drink");
     }
 
@@ -109,20 +100,17 @@ export const update = convex
   })
   .public();
 
-export const softDelete = convex
-  .mutation()
+export const softDelete = authMutation
   .input({
     id: v.id("drinks"),
   })
   .handler(async (ctx, { id }) => {
-    const { user } = await getCurrentUser(ctx);
-
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
       throw new Error("Drink not found");
     }
 
-    if (drink.ownerId !== user._id) {
+    if (drink.ownerId !== ctx.user._id) {
       throw new Error("You do not have permission to delete this drink");
     }
 
