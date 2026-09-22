@@ -3,7 +3,7 @@ import { WithZod } from "fluent-convex/zod";
 import { authMutation, authQuery } from "../lib/authenticated";
 import { convex } from "../lib/builder";
 import { schema } from "../schema";
-import { createDrinkInputSchema, updateDrinkInputSchema } from "./schema";
+import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
 
 export const listMine = authQuery
   .returns(v.array(schema.doc("drinks")))
@@ -44,7 +44,7 @@ export const get = convex
 
 export const create = authMutation
   .extend(WithZod)
-  .input(createDrinkInputSchema)
+  .input(createDrinkInputValidator)
   .returns(schema.id("drinks"))
   .handler(async (ctx, input) => {
     const now = Date.now();
@@ -59,7 +59,7 @@ export const create = authMutation
 
 export const update = authMutation
   .extend(WithZod)
-  .input(updateDrinkInputSchema)
+  .input(updateDrinkInputValidator)
   .returns(v.null())
   .handler(async (ctx, { id, name, category, alcoholPercentage }) => {
     const drink = await ctx.db.get("drinks", id);
