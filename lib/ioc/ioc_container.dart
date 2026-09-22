@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:remembeer/account_deletion/service/account_deletion_service.dart';
 import 'package:remembeer/activity/service/activity_service.dart';
+import 'package:remembeer/app_icon/service/app_icon_service.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
@@ -71,6 +72,12 @@ class IoCContainer {
   static void _registerServices() {
     get
       ..registerSingleton(DateService(userController: get<UserController>()))
+      ..registerSingleton(
+        AppIconService(
+          authService: get<AuthService>(),
+          userController: get<UserController>(),
+        ),
+      )
       ..registerSingleton(
         DrinkService(
           authService: get<AuthService>(),
