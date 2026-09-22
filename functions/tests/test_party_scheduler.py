@@ -338,6 +338,49 @@ def test_manual_start_logs_its_outcome() -> None:
     ]
 
 
+def test_scheduler_continues_past_a_failing_party() -> None:
+    store = _base_store()
+    store["sessions/party-b"] = {
+        "memberIds": ["a", "b"],
+        "adminIds": ["a"],
+        "userId": "a",
+    }
+    store["parties/party-b"] = _party()
+    store["parties/party-b/questTemplates/legacy"] = {
+        "source": "builtIn",
+        "title": "Legacy",
+        "instructions": "Seeded before availability existed.",
+        "pointsUnits": 20_000,
+        "eligibilityRule": "differentClass",
+        "enabled": True,
+    }
+    db = Database(store)
+    notifications = Notifications()
+    log = Log()
+
+    result = _run(
+        db,
+        notifications,
+        log=log,
+        due=lambda current, _now: [
+            _snapshot(current, "parties/party-b"),
+            _snapshot(current, "parties/party-a"),
+        ],
+    )
+
+    assert result["failedParties"] == 1
+    assert result["createdQuests"] == 1
+    assert db.store["parties/party-a"]["activeQuestId"] is not None
+    assert db.store["parties/party-b"]["activeQuestId"] is None
+    assert len(notifications.calls) == 1
+    errors = [entry for entry in log.entries if entry[0] == "error"]
+    assert len(errors) == 1
+    assert errors[0][1] == "Party quest scheduler failed to process a due Party."
+    assert errors[0][2]["partyId"] == "party-b"
+    assert "Stored availability is invalid" in errors[0][2]["error"]
+    assert [fields["partyId"] for fields in log.outcomes()] == ["party-a"]
+
+
 def test_scheduler_ignores_enabled_legacy_custom_templates() -> None:
     store = _base_store()
     store["parties/party-a/questTemplates/template-a"]["enabled"] = False

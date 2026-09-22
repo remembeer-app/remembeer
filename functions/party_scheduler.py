@@ -197,6 +197,7 @@ def run_party_scheduler(
     created = 0
     advanced = 0
     skipped = 0
+    failed = 0
     rng = random_source or Random()
     for party_snapshot in due_documents:
         party_id = _snapshot_id(party_snapshot)
@@ -206,7 +207,16 @@ def run_party_scheduler(
         ) -> Mapping[str, Any]:
             return _claim_due_party(transaction, db, claimed_party_id, now, rng)
 
-        result = _run_transaction(db, claim, transaction_runner_factory)
+        try:
+            result = _run_transaction(db, claim, transaction_runner_factory)
+        except Exception as error:  # noqa: BLE001 - one bad Party must not stop the rest
+            failed += 1
+            log.error(
+                "Party quest scheduler failed to process a due Party.",
+                partyId=party_id,
+                error=repr(error),
+            )
+            continue
         outcome = result.get("outcome")
         log.info(
             "Party quest scheduler processed a due Party.",
@@ -232,6 +242,7 @@ def run_party_scheduler(
         "createdQuests": created,
         "advancedParties": advanced,
         "skippedParties": skipped,
+        "failedParties": failed,
         "expiredQuests": expired_quests,
         "expiredChallenges": expired_challenges,
     }
@@ -534,7 +545,17 @@ def _expire_documents(
             transaction.update(root_ref, party_update)
             return {"expired": True}
 
-        result = _run_transaction(db, expire, runner)
+        try:
+            result = _run_transaction(db, expire, runner)
+        except Exception as error:  # noqa: BLE001 - keep expiring the rest
+            log.error(
+                "Party content expiry failed.",
+                partyId=party_ref.path.rsplit("/", 1)[-1],
+                collection=collection_name,
+                contentId=content_id,
+                error=repr(error),
+            )
+            continue
         if result.get("expired") is True:
             expired += 1
             log.info(
