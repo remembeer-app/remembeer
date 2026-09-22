@@ -3,15 +3,15 @@ import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
 import { schema } from "../schema";
 import type { Id } from "../_generated/dataModel";
 
-export const listMine = authQuery
+export const listCustom = authQuery
   .returns(v.array(schema.doc("drinks")))
-  .handler(listMineHanlder);
+  .handler(listAvailableHanlder);
 
-export const listAll = authQuery
+export const listAvailable = authQuery
   .returns(v.array(schema.doc("drinks")))
   .handler(async (ctx) => {
     const [customDrinks, globalDrinks] = await Promise.all([
-      listMineHanlder(ctx),
+      listAvailableHanlder(ctx),
       ctx.db
         .query("drinks")
         .withIndex("by_ownerId_and_deletedAt", (q) =>
@@ -23,7 +23,7 @@ export const listAll = authQuery
     return [...customDrinks, ...globalDrinks];
   });
 
-function listMineHanlder(ctx: AuthQueryCtx) {
+function listAvailableHanlder(ctx: AuthQueryCtx) {
   return ctx.db
     .query("drinks")
     .withIndex("by_ownerId_and_deletedAt", (q) =>
