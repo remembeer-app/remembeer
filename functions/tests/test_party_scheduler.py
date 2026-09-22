@@ -33,6 +33,27 @@ class PredictableRandom:
         return values[0]
 
 
+class Log:
+    def __init__(self) -> None:
+        self.entries: list[tuple[str, str, dict[str, Any]]] = []
+
+    def info(self, message: str, **fields: Any) -> None:
+        self.entries.append(("info", message, fields))
+
+    def warn(self, message: str, **fields: Any) -> None:
+        self.entries.append(("warn", message, fields))
+
+    def error(self, message: str, **fields: Any) -> None:
+        self.entries.append(("error", message, fields))
+
+    def outcomes(self) -> list[dict[str, Any]]:
+        return [
+            fields
+            for _, message, fields in self.entries
+            if message == "Party quest scheduler processed a due Party."
+        ]
+
+
 class Notifications:
     def __init__(self) -> None:
         self.calls: list[dict[str, Any]] = []
@@ -145,6 +166,7 @@ def _run(
             expired_challenge_provider=providers.get("challenges", _none),
             notification_dispatcher=notifications,
             transaction_runner_factory=_runner(db),
+            log=providers.get("log", Log()),
         )
     )
 
@@ -246,6 +268,74 @@ def test_explicit_null_template_duration_uses_party_default() -> None:
     quest_id = db.store["parties/party-a"]["activeQuestId"]
     quest = db.store[f"parties/party-a/quests/{quest_id}"]
     assert quest["endsAt"] == NOW + timedelta(minutes=3)
+
+
+def test_scheduler_logs_every_due_party_outcome_and_a_run_summary() -> None:
+    db = Database(_base_store())
+    log = Log()
+    result = _run(db, Notifications(), log=log)
+
+    assert result["createdQuests"] == 1
+    quest_id = db.store["parties/party-a"]["activeQuestId"]
+    assert log.outcomes() == [
+        {
+            "partyId": "party-a",
+            "outcome": "created",
+            "templateId": "template-a",
+            "questId": quest_id,
+            "eligibleMemberCount": 2,
+        }
+    ]
+    assert log.entries[-1] == (
+        "info",
+        "Party quest scheduler run completed.",
+        {"dueParties": 1, **result},
+    )
+
+
+def test_scheduler_logs_silent_advances_with_their_reason() -> None:
+    store = _base_store(selected_b="beer")
+    db = Database(store)
+    log = Log()
+    result = _run(db, Notifications(), log=log)
+
+    assert result["advancedParties"] == 1
+    assert log.outcomes() == [
+        {
+            "partyId": "party-a",
+            "outcome": "advanced",
+            "reason": "insufficientEligibility",
+            "templateId": "template-a",
+        }
+    ]
+
+
+def test_manual_start_logs_its_outcome() -> None:
+    db = Database(_base_store())
+    log = Log()
+    result = start_next_party_quest_command(
+        _request("start-logged"),
+        db,
+        now_provider=lambda: NOW,
+        random_source=PredictableRandom(),  # type: ignore[arg-type]
+        notification_dispatcher=Notifications(),
+        transaction_runner=_runner(db),
+        log=log,
+    )
+    assert log.entries == [
+        (
+            "info",
+            "Manual Party quest start processed.",
+            {
+                "actorUserId": "a",
+                "partyId": "party-a",
+                "outcome": "created",
+                "templateId": "template-a",
+                "questId": result["questId"],
+                "eligibleMemberCount": 2,
+            },
+        )
+    ]
 
 
 def test_scheduler_ignores_enabled_legacy_custom_templates() -> None:
