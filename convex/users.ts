@@ -1,3 +1,3 @@
-import * as crud from "./users/crud";
+import * as mutation from "./users/mutation";
 
-export const ensureCurrent = crud.ensureCurrent.public();
+export const ensureCurrent = mutation.ensureCurrent.public();
