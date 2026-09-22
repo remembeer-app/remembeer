@@ -8,7 +8,7 @@ export const ensureCurrent = convex
   .mutation()
   .returns(v.id("users"))
   .handler(async (ctx) => {
-    const { user, authUser } = await getCurrentUser(ctx);
+    const { user, authUser } = await getCurrentUserSafe(ctx);
     if (user) {
       return user._id;
     }
