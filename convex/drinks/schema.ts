@@ -20,29 +20,19 @@ export const drinksTable = defineTable({
   deletedAt: v.nullable(v.number()),
 }).index("by_ownerId_and_deletedAt", ["ownerId", "deletedAt"]);
 
-const createDrinkInputValidator = drinksTable.validator.pick(
-  "name",
-  "category",
-  "alcoholPercentage",
-);
-
-const updateDrinkInputValidator = createDrinkInputValidator
-  .partial()
-  .extend({ id: v.id("drinks") });
-
-const alcoholPercentageSchema = z
+const alcoholPercentageValidator = z
   .number()
   .min(1, "Alcohol percentage must be at least 1")
   .max(100, "Alcohol percentage must be at most 100");
 
-export const createDrinkInputSchema = convexToZod(
-  createDrinkInputValidator,
+export const createDrinkInputValidator = convexToZod(
+  drinksTable.validator.pick("name", "category", "alcoholPercentage"),
 ).extend({
-  alcoholPercentage: alcoholPercentageSchema,
+  alcoholPercentage: alcoholPercentageValidator,
 });
 
-export const updateDrinkInputSchema = convexToZod(
-  updateDrinkInputValidator,
-).extend({
-  alcoholPercentage: alcoholPercentageSchema.optional(),
-});
+export const updateDrinkInputValidator = createDrinkInputValidator
+  .partial()
+  .extend({
+    id: convexToZod(v.id("drinks")),
+  });
