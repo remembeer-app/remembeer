@@ -5,7 +5,7 @@ the deployment entry point and can export them as Firebase callables in P21.
 """
 
 from collections.abc import Callable, Mapping, Sequence
-from datetime import datetime
+from datetime import datetime, timedelta, timezone, tzinfo
 from typing import Any
 
 from firebase_admin import firestore
@@ -15,6 +15,7 @@ from party_common import (
     load_party_context,
     require_auth,
     require_command_id,
+    require_int,
     require_object,
     require_session_admin,
     require_session_member,
@@ -30,6 +31,7 @@ PARTY_CLASSES = {"beer", "cider", "cocktail", "spirit", "wine"}
 DEFAULT_QUEST_MIN_INTERVAL_MINUTES = 15
 DEFAULT_QUEST_MAX_INTERVAL_MINUTES = 45
 DEFAULT_QUEST_DURATION_MINUTES = 15
+MAX_TIME_ZONE_OFFSET_MINUTES = 14 * 60
 
 TemplateSeed = tuple[str, Mapping[str, Any]]
 TemplateSeedProvider = Callable[[str], Sequence[TemplateSeed]]
@@ -87,6 +89,7 @@ def activate_party_command(
     data = require_object(getattr(request, "data", None))
     session_id = require_string(data, "sessionId", max_length=1_500)
     command_id = require_command_id(data)
+    drink_timezone = _requested_timezone(data)
     did_activate = False
     recipients: Sequence[str] = ()
     session_name = "Party"
@@ -124,7 +127,9 @@ def activate_party_command(
         seed_provider = template_seed_provider or built_in_template_seeds
         template_seeds = list(seed_provider(actor_user_id))
         _validate_template_seeds(template_seeds)
-        awards, member_totals = _initial_drink_awards(session, member_ids)
+        awards, member_totals = _initial_drink_awards(
+            session, member_ids, default_timezone=drink_timezone
+        )
         stored_name = session.get("name")
         if isinstance(stored_name, str) and stored_name:
             session_name = stored_name
@@ -504,9 +509,31 @@ def archive_party_command(
     return result
 
 
+def _requested_timezone(data: Mapping[str, Any]) -> tzinfo:
+    """Resolve the client's UTC offset used for stored drink times without one.
+
+    Drinks logged in a regular Session are stored by the app as local ISO-8601
+    strings without an offset. Firestore would treat those as UTC, so the app
+    sends its ``timeZoneOffsetMinutes`` on activation. Older clients omit it and
+    keep the previous UTC interpretation.
+    """
+
+    if data.get("timeZoneOffsetMinutes") is None:
+        return timezone.utc
+    offset_minutes = require_int(
+        data,
+        "timeZoneOffsetMinutes",
+        minimum=-MAX_TIME_ZONE_OFFSET_MINUTES,
+        maximum=MAX_TIME_ZONE_OFFSET_MINUTES,
+    )
+    return timezone(timedelta(minutes=offset_minutes))
+
+
 def _initial_drink_awards(
     session: Mapping[str, Any],
     member_ids: Sequence[str],
+    *,
+    default_timezone: tzinfo = timezone.utc,
 ) -> tuple[list[tuple[str, Mapping[str, Any]]], dict[str, tuple[int, int]]]:
     drinks = session.get("drinks", [])
     if not isinstance(drinks, Sequence) or isinstance(drinks, (str, bytes)):
@@ -558,6 +585,8 @@ def _initial_drink_awards(
                 raise _invalid_stored_drink() from error
         if not isinstance(occurred_at, datetime):
             raise _invalid_stored_drink()
+        if occurred_at.tzinfo is None:
+            occurred_at = occurred_at.replace(tzinfo=default_timezone)
         event_id = deterministic_event_id("drink", drink_id, "v", "1")
         event = {
             "kind": "drink",
