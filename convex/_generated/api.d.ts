@@ -8,12 +8,15 @@
  * @module
  */
 
-import type * as auth from "../auth.js";
-import type * as authenticated from "../authenticated.js";
 import type * as drinks from "../drinks.js";
+import type * as drinks_crud from "../drinks/crud.js";
 import type * as http from "../http.js";
-import type * as lib from "../lib.js";
+import type * as lib_auth from "../lib/auth.js";
+import type * as lib_authenticated from "../lib/authenticated.js";
+import type * as lib_builder from "../lib/builder.js";
 import type * as users from "../users.js";
+import type * as users_crud from "../users/crud.js";
+import type * as users_currentUser from "../users/currentUser.js";
 
 import type {
   ApiFromModules,
@@ -22,12 +25,15 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  auth: typeof auth;
-  authenticated: typeof authenticated;
   drinks: typeof drinks;
+  "drinks/crud": typeof drinks_crud;
   http: typeof http;
-  lib: typeof lib;
+  "lib/auth": typeof lib_auth;
+  "lib/authenticated": typeof lib_authenticated;
+  "lib/builder": typeof lib_builder;
   users: typeof users;
+  "users/crud": typeof users_crud;
+  "users/currentUser": typeof users_currentUser;
 }>;
 
 /**

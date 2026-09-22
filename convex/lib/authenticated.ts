@@ -1,5 +1,5 @@
-import { convex } from "./lib";
-import { getCurrentUser } from "./users";
+import { getCurrentUser } from "../users/currentUser";
+import { convex } from "./builder";
 
 const authQueryMiddleware = convex
   .query()
