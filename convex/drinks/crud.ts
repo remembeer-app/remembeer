@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { authMutation, authQuery } from "../lib/authenticated";
 import { convex } from "../lib/builder";
-import { drinkCategoryValidator } from "./schema";
+import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
 
 export const listMine = authQuery.handler(async (ctx) => {
   const [customDrinks, globalDrinks] = await Promise.all([
@@ -38,33 +38,21 @@ export const get = convex
   });
 
 export const create = authMutation
-  .input({
-    name: v.string(),
-    category: drinkCategoryValidator,
-    alcoholPercentage: v.number(),
-  })
-  .handler(async (ctx, { name, category, alcoholPercentage }) => {
+  .input(createDrinkInputValidator)
+  .handler(async (ctx, input) => {
     const now = Date.now();
 
     return await ctx.db.insert("drinks", {
       ownerId: ctx.user._id,
-      name,
-      category,
-      alcoholPercentage,
+      ...input,
       updatedAt: now,
       deletedAt: null,
     });
   });
 
-// TODO(ohtenkay): use patch, partial validators or something like that
 export const update = authMutation
-  .input({
-    id: v.id("drinks"),
-    name: v.string(),
-    category: drinkCategoryValidator,
-    alcoholPercentage: v.number(),
-  })
-  .handler(async (ctx, { id, name, category, alcoholPercentage }) => {
+  .input(updateDrinkInputValidator)
+  .handler(async (ctx, { id, ...patch }) => {
     const drink = await ctx.db.get("drinks", id);
     if (!drink) {
       throw new Error("Drink not found");
@@ -74,13 +62,9 @@ export const update = authMutation
       throw new Error("You do not have permission to update this drink");
     }
 
-    const now = Date.now();
-
     await ctx.db.patch("drinks", id, {
-      name,
-      category,
-      alcoholPercentage,
-      updatedAt: now,
+      ...patch,
+      updatedAt: Date.now(),
     });
   });
 

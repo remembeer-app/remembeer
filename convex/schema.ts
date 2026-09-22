@@ -2,7 +2,9 @@ import { defineSchema } from "convex/server";
 import { drinksTable } from "./drinks/schema";
 import { usersTable } from "./users/schema";
 
-export default defineSchema({
+const schema = defineSchema({
   users: usersTable,
   drinks: drinksTable,
 });
+
+export default schema;

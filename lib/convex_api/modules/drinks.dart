@@ -96,10 +96,10 @@ class DrinksApi {
   }
 
   Future<dynamic> update({
-    required double alcoholPercentage,
-    required UpdateArgsCategory category,
+    Optional<double> alcoholPercentage = const Optional.absent(),
+    Optional<UpdateArgsCategory> category = const Optional.absent(),
     required DrinksId id,
-    required String name,
+    Optional<String> name = const Optional.absent(),
   }) async {
     final raw$ = await _client.mutate(
       'drinks:update',
@@ -568,10 +568,10 @@ UpdateArgsCategory _decodeUpdateArgsCategory(dynamic raw) {
 }
 
 typedef UpdateArgs = ({
-  double alcoholPercentage,
-  UpdateArgsCategory category,
+  Optional<double> alcoholPercentage,
+  Optional<UpdateArgsCategory> category,
   DrinksId id,
-  String name,
+  Optional<String> name,
 });
 
 Map<String, dynamic> _encodeUpdateArgs(UpdateArgs value$) {
@@ -582,36 +582,35 @@ Map<String, dynamic> _encodeUpdateArgs(UpdateArgs value$) {
     name: name,
   ) = value$;
   return <String, dynamic>{
-    'alcoholPercentage': alcoholPercentage,
-    'category': _encodeUpdateArgsCategory(category),
+    if (alcoholPercentage.isDefined)
+      'alcoholPercentage': alcoholPercentage.value,
+    if (category.isDefined)
+      'category': _encodeUpdateArgsCategory(category.value),
     'id': id.value,
-    'name': name,
+    if (name.isDefined) 'name': name.value,
   };
 }
 
 UpdateArgs _decodeUpdateArgs(dynamic raw) {
   final map = expectMap(raw, label: 'UpdateArgs');
-  if (!map.containsKey('alcoholPercentage')) {
-    throw FormatException(
-      'Missing required field "alcoholPercentage" for UpdateArgs',
-    );
-  }
-  if (!map.containsKey('category')) {
-    throw FormatException('Missing required field "category" for UpdateArgs');
-  }
   if (!map.containsKey('id')) {
     throw FormatException('Missing required field "id" for UpdateArgs');
   }
-  if (!map.containsKey('name')) {
-    throw FormatException('Missing required field "name" for UpdateArgs');
-  }
   return (
-    alcoholPercentage: expectDouble(
-      map['alcoholPercentage'],
-      label: 'UpdateArgsAlcoholPercentage',
-    ),
-    category: _decodeUpdateArgsCategory(map['category']),
+    alcoholPercentage: map.containsKey('alcoholPercentage')
+        ? Optional.of(
+            expectDouble(
+              map['alcoholPercentage'],
+              label: 'UpdateArgsAlcoholPercentage',
+            ),
+          )
+        : const Optional.absent(),
+    category: map.containsKey('category')
+        ? Optional.of(_decodeUpdateArgsCategory(map['category']))
+        : const Optional.absent(),
     id: DrinksId(expectString(map['id'], label: 'UpdateArgsId')),
-    name: expectString(map['name'], label: 'UpdateArgsName'),
+    name: map.containsKey('name')
+        ? Optional.of(expectString(map['name'], label: 'UpdateArgsName'))
+        : const Optional.absent(),
   );
 }
