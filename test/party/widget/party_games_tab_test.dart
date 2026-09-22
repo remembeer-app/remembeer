@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:remembeer/drink_type/model/drink_category.dart';
 import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_member.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/service/party_challenge_service.dart';
+import 'package:remembeer/party/widget/party_class_selector.dart';
 import 'package:remembeer/party/widget/party_games_tab.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/model/user_model.dart';
@@ -40,6 +42,88 @@ void main() {
     expect(find.text('Admin challenges'), findsNothing);
   });
 
+  testWidgets('highlights missing class and puts the selector last', (
+    tester,
+  ) async {
+    final state = _state(
+      settings: const PartyModuleSettings(
+        socialQuestsEnabled: true,
+        adminChallengesEnabled: true,
+        beerpongEnabled: true,
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PartyGamesTab(
+            state: state,
+            members: const [_user],
+            challengeService: _FakeChallengeService(),
+            onSelectClass: (_) async {},
+            socialQuestSectionBuilder: (_, _, _) => const Text('Quest slot'),
+            beerpongSectionBuilder: (_, _, _) => const Text('Beerpong slot'),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('No Party class selected'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('No Party class selected')).dy,
+      lessThan(tester.getTopLeft(find.text('Quest slot')).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Quest slot')).dy,
+      lessThan(tester.getTopLeft(find.text('Admin challenges')).dy),
+    );
+
+    await tester.tap(find.text('Pick your class'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(PartyClassSelector), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Admin challenges')).dy,
+      lessThan(tester.getTopLeft(find.text('Beerpong slot')).dy),
+    );
+    expect(
+      tester.getTopLeft(find.text('Beerpong slot')).dy,
+      lessThan(tester.getTopLeft(find.text('Choose your Party class')).dy),
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('shows the selected class without the notice', (tester) async {
+    final state = _state(
+      settings: const PartyModuleSettings(socialQuestsEnabled: true),
+      selectedClass: DrinkCategory.wine,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PartyGamesTab(
+            state: state,
+            members: const [_user],
+            challengeService: _FakeChallengeService(),
+            onSelectClass: (_) async {},
+            socialQuestSectionBuilder: (_, _, _) => const Text('Quest slot'),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('No Party class selected'), findsNothing);
+    expect(find.byType(PartyClassSelector), findsNothing);
+    expect(find.text('Wine Warrior'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('Quest slot')).dy,
+      lessThan(tester.getTopLeft(find.text('Wine Warrior')).dy),
+    );
+  });
+
   testWidgets('shows the active challenge and recent results', (tester) async {
     final now = DateTime.now();
     final active = _challenge(
@@ -59,6 +143,7 @@ void main() {
         beerpongEnabled: true,
       ),
       activeChallengeId: active.id,
+      selectedClass: DrinkCategory.beer,
     );
 
     await tester.pumpWidget(
@@ -103,6 +188,7 @@ const _user = UserModel(
 PartyState _state({
   required PartyModuleSettings settings,
   String? activeChallengeId,
+  DrinkCategory? selectedClass,
 }) {
   final now = DateTime.utc(2026);
   final session = Session(
@@ -136,6 +222,7 @@ PartyState _state({
     currentMember: PartyMember(
       id: 'user-1',
       userId: 'user-1',
+      selectedClass: selectedClass,
       joinedAt: now,
       updatedAt: now,
     ),

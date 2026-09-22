@@ -35,6 +35,7 @@ const maxPartyChallengePoints = 500;
 const minPartyChallengeDurationMinutes = 1;
 const maxPartyChallengeDurationMinutes = 60;
 const partyChallengeRecentResultCount = 3;
+const partyGamesScrollDuration = Duration(milliseconds: 400);
 
 const minPartyQuestDurationMinutes = 1;
 const maxPartyQuestDurationMinutes = 60;
