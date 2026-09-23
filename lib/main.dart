@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:remembeer/app.dart';
 import 'package:remembeer/app_icon/service/app_icon_service.dart';
-import 'package:remembeer/drink/service/drink_service.dart';
+import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/firebase_options.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
@@ -26,7 +26,7 @@ Future<void> main() async {
   // For the Android home screen widget.
   _quickAddChannel.setMethodCallHandler((call) async {
     if (call.method == 'quickAddPressed') {
-      await get<DrinkService>().addDefaultDrink();
+      await get<DrinkLogService>().addDefaultDrinkLog();
     }
   });
 

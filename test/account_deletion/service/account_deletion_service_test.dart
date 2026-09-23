@@ -4,11 +4,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/account_deletion/service/account_deletion_service.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
+import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
-import 'package:remembeer/drink_type/model/drink_type.dart';
-import 'package:remembeer/drink_type/model/drink_type_core.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_snapshot.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/friend_request/model/friend_request.dart';
 import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
@@ -26,7 +26,7 @@ const _me = 'me';
 
 void main() {
   late List<String> log;
-  late _FakeDrinkTypeController drinkTypes;
+  late _FakeDrinkController drinks;
   late _FakeSessionController sessions;
   late _FakeLeaderboardController leaderboards;
   late _FakeFriendRequestController friendRequests;
@@ -39,7 +39,7 @@ void main() {
 
   setUp(() {
     log = [];
-    drinkTypes = _FakeDrinkTypeController(log);
+    drinks = _FakeDrinkController(log);
     sessions = _FakeSessionController(log);
     leaderboards = _FakeLeaderboardController(log);
     friendRequests = _FakeFriendRequestController(log);
@@ -53,7 +53,7 @@ void main() {
 
   AccountDeletionService service() => AccountDeletionService(
     authService: auth,
-    drinkTypeController: drinkTypes,
+    drinkController: drinks,
     sessionController: sessions,
     leaderboardController: leaderboards,
     friendRequestController: friendRequests,
@@ -65,14 +65,14 @@ void main() {
   );
 
   test('runs every step in order and deletes the auth user last', () async {
-    drinkTypes.owned = [_drinkType('dt-1')];
+    drinks.owned = [_drink('dt-1')];
     friendRequests.involving = [_friendRequest('fr-1')];
     users.withFriend = [_user('friend-1')];
 
     await service().deleteAccount();
 
     expect(log, [
-      'drinkType.hardDelete dt-1',
+      'drink.hardDelete dt-1',
       'session.allWithMember me',
       'leaderboard.allWithMember me',
       'friendRequest.hardDelete fr-1',
@@ -275,19 +275,19 @@ void main() {
     });
   });
 
-  group('drink types', () {
+  group('drinks', () {
     test(
-      'skips a drink type whose delete is rejected and still deletes the auth user',
+      'skips a drink whose delete is rejected and still deletes the auth user',
       () async {
-        drinkTypes
-          ..owned = [_drinkType('dt-1'), _drinkType('dt-2')]
+        drinks
+          ..owned = [_drink('dt-1'), _drink('dt-2')]
           ..rejectDeleteFor = {'dt-1'};
 
         await service().deleteAccount();
 
-        expect(log, contains('drinkType.hardDelete dt-2'));
+        expect(log, contains('drink.hardDelete dt-2'));
         expect(log, contains('auth.delete'));
-        expect(log, isNot(contains('drinkType.hardDelete dt-1')));
+        expect(log, isNot(contains('drink.hardDelete dt-1')));
       },
     );
   });
@@ -343,7 +343,7 @@ void main() {
 // ---------------------------------------------------------------------------
 // Fixtures
 
-DrinkType _drinkType(String id) => DrinkType(
+Drink _drink(String id) => Drink(
   id: id,
   userId: _me,
   createdAt: DateTime.utc(2026),
@@ -393,12 +393,12 @@ Session _session(
   isSoloSession: memberIds.length == 1,
   isParty: isParty,
   pictureUrls: pictureUrls,
-  drinks: [
-    Drink(
+  drinkLogs: [
+    DrinkLog(
       id: 'd-$id',
       consumedByUserId: _me,
       consumedAt: DateTime.utc(2026),
-      drinkType: const DrinkTypeCore(
+      drink: const DrinkSnapshot(
         name: 'Beer',
         category: DrinkCategory.beer,
         alcoholPercentage: 4.5,
@@ -451,24 +451,24 @@ class _FakeFirebaseUser implements User {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
-class _FakeDrinkTypeController implements DrinkTypeController {
-  _FakeDrinkTypeController(this.log);
+class _FakeDrinkController implements DrinkController {
+  _FakeDrinkController(this.log);
   final List<String> log;
-  List<DrinkType> owned = [];
+  List<Drink> owned = [];
   Set<String> rejectDeleteFor = {};
 
   @override
-  Future<List<DrinkType>> allOwnedBy(String userId) async => owned;
+  Future<List<Drink>> allOwnedBy(String userId) async => owned;
 
   @override
-  Future<void> hardDeleteSingle(DrinkType entity) async {
+  Future<void> hardDeleteSingle(Drink entity) async {
     if (rejectDeleteFor.contains(entity.id)) {
       throw FirebaseException(
         plugin: 'cloud_firestore',
         code: 'permission-denied',
       );
     }
-    log.add('drinkType.hardDelete ${entity.id}');
+    log.add('drink.hardDelete ${entity.id}');
   }
 
   @override

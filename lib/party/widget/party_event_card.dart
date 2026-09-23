@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/service/party_activity_service.dart';
@@ -149,7 +149,7 @@ class PartyEventCard extends StatelessWidget {
   }
 
   String _title(PartyEvent event, String names) => switch (event.kind) {
-    PartyEventKind.drink =>
+    PartyEventKind.drinkLog =>
       '$names logged ${_payloadString(event, 'drinkName', 'a drink')}',
     PartyEventKind.socialQuest =>
       '$names completed ${_payloadString(event, 'title', 'a social quest')}',
@@ -186,7 +186,7 @@ class PartyEventCard extends StatelessWidget {
   }
 
   DrinkCategory? _drinkCategory(PartyEvent event) {
-    if (event.kind != PartyEventKind.drink) {
+    if (event.kind != PartyEventKind.drinkLog) {
       return null;
     }
     final category = event.payload['category'];
@@ -196,7 +196,7 @@ class PartyEventCard extends StatelessWidget {
   }
 
   IconData _icon(PartyEventKind kind) => switch (kind) {
-    PartyEventKind.drink => Icons.local_bar,
+    PartyEventKind.drinkLog => Icons.local_bar,
     PartyEventKind.socialQuest => Icons.groups,
     PartyEventKind.adminChallenge => Icons.flag,
     PartyEventKind.beerpongPlacement => Icons.emoji_events,

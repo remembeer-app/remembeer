@@ -177,7 +177,7 @@ class _PartyActivityFiltersSheetState
 
 extension PartyEventKindActivityLabel on PartyEventKind {
   String get activityLabel => switch (this) {
-    PartyEventKind.drink => 'Drinks',
+    PartyEventKind.drinkLog => 'Drinks',
     PartyEventKind.socialQuest => 'Quests',
     PartyEventKind.adminChallenge => 'Challenges',
     PartyEventKind.beerpongPlacement => 'Placements',

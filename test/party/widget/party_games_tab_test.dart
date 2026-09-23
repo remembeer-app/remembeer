@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_member.dart';

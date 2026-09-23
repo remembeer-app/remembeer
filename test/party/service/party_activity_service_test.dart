@@ -55,14 +55,14 @@ void main() {
     );
     const filters = PartyActivityFilters(
       participantIds: {'a', 'b'},
-      kinds: {PartyEventKind.drink, PartyEventKind.socialQuest},
+      kinds: {PartyEventKind.drinkLog, PartyEventKind.socialQuest},
     );
 
     await service.setFilters(filters);
 
     expect(people, {'a', 'b'});
     expect(selectedKinds, {
-      PartyEventKind.drink,
+      PartyEventKind.drinkLog,
       PartyEventKind.socialQuest,
       PartyEventKind.reversal,
     });
@@ -215,7 +215,7 @@ void main() {
 PartyEvent _event(
   String id, {
   int minute = 0,
-  PartyEventKind kind = PartyEventKind.drink,
+  PartyEventKind kind = PartyEventKind.drinkLog,
   String sourceId = 'drink-1',
   String recipientId = 'a',
   List<String>? participantIds,
@@ -232,7 +232,7 @@ PartyEvent _event(
     PartyEventKind.socialQuest => PartyEventSourceCollection.quests,
     PartyEventKind.adminChallenge => PartyEventSourceCollection.challenges,
     PartyEventKind.beerpongPlacement => PartyEventSourceCollection.tournaments,
-    _ => PartyEventSourceCollection.drinks,
+    _ => PartyEventSourceCollection.drinkLogs,
   },
   sourceId: sourceId,
   reversesEventId: reversesEventId,

@@ -19,24 +19,24 @@ void main() {
 
   test('routes every Party event to its typed destination', () {
     const cases = <NotificationType, String>{
-      NotificationType.partyActivated: '/drink/parties/party-1',
+      NotificationType.partyActivated: '/drink-logs/parties/party-1',
       NotificationType.partyQuestStarted:
-          '/drink/parties/party-1/quests/source-1?tab=games',
+          '/drink-logs/parties/party-1/quests/source-1?tab=games',
       NotificationType.partyQuestCompleted:
-          '/drink/parties/party-1/quests/source-1',
+          '/drink-logs/parties/party-1/quests/source-1',
       NotificationType.partyChallengeStarted:
-          '/drink/parties/party-1/challenges/source-1?tab=games',
+          '/drink-logs/parties/party-1/challenges/source-1?tab=games',
       NotificationType.partyChallengeWinner:
-          '/drink/parties/party-1/challenges/source-1',
+          '/drink-logs/parties/party-1/challenges/source-1',
       NotificationType.partyBeerpongEnrollment:
-          '/drink/parties/party-1/tournaments/source-1?tab=games',
+          '/drink-logs/parties/party-1/tournaments/source-1?tab=games',
       NotificationType.partyBeerpongMatchReady:
-          '/drink/parties/party-1/tournaments/source-1?tab=games',
+          '/drink-logs/parties/party-1/tournaments/source-1?tab=games',
       NotificationType.partyBeerpongMatchResult:
-          '/drink/parties/party-1/tournaments/source-1?tab=games',
+          '/drink-logs/parties/party-1/tournaments/source-1?tab=games',
       NotificationType.partyBeerpongCompleted:
-          '/drink/parties/party-1/tournaments/source-1?tab=ranking',
-      NotificationType.partyArchived: '/drink/parties/party-1',
+          '/drink-logs/parties/party-1/tournaments/source-1?tab=ranking',
+      NotificationType.partyArchived: '/drink-logs/parties/party-1',
     };
 
     for (final entry in cases.entries) {
@@ -103,6 +103,6 @@ void main() {
 
     expect(notificationRouter.handle(data, messageId: 'message-1'), isTrue);
     expect(notificationRouter.handle(data, messageId: 'message-1'), isTrue);
-    expect(locations, ['/drink/parties/party-1']);
+    expect(locations, ['/drink-logs/parties/party-1']);
   });
 }

@@ -25,14 +25,14 @@ abstract class MonthlyStats with _$MonthlyStats {
 
   static String keyFor(int year, int month) => '${year}_$month';
 
-  MonthlyStats addDrink({
+  MonthlyStats addDrinkLog({
     required int day,
     required double beersEquivalent,
     required double alcoholMl,
     required bool after6pm,
   }) {
     final currentDaily = dailyStats[day] ?? DailyStats(day: day);
-    final updatedDaily = currentDaily.addDrink(
+    final updatedDaily = currentDaily.addDrinkLog(
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
       after6pm: after6pm,
@@ -45,14 +45,14 @@ abstract class MonthlyStats with _$MonthlyStats {
     );
   }
 
-  MonthlyStats removeDrink({
+  MonthlyStats removeDrinkLog({
     required int day,
     required double beersEquivalent,
     required double alcoholMl,
     required bool after6pm,
   }) {
     final currentDaily = dailyStats[day] ?? DailyStats(day: day);
-    final updatedDaily = currentDaily.removeDrink(
+    final updatedDaily = currentDaily.removeDrinkLog(
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
       after6pm: after6pm,

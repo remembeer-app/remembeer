@@ -35,13 +35,13 @@ class _PartyStandingCard extends StatelessWidget {
     final accent = standing.user?.accentColor;
     final color = accent?.softColor;
     final points = formatPartyScore(standing.member.scoreUnits);
-    final drinks = standing.member.drinkCount;
+    final drinkCount = standing.member.drinkCount;
 
     return Semantics(
       container: true,
       label:
           'Rank ${standing.rank}, ${standing.username}, $points points, '
-          '$drinks ${drinks == 1 ? 'drink' : 'drinks'}'
+          '$drinkCount ${drinkCount == 1 ? 'drink' : 'drinks'}'
           '${standing.isCurrentUser ? ', you' : ''}',
       child: Card(
         color: color,
@@ -88,7 +88,7 @@ class _PartyStandingCard extends StatelessWidget {
                         color: accent?.textColor,
                       ),
                     ),
-                    Text('$drinks ${drinks == 1 ? 'drink' : 'drinks'}'),
+                    Text('$drinkCount ${drinkCount == 1 ? 'drink' : 'drinks'}'),
                   ],
                 ),
               ),

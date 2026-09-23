@@ -163,7 +163,7 @@ service cloud.firestore {
           !isPartySession(resource.data)
           || !request.resource.data.diff(resource.data).changedKeys().hasAny([
             "deletedAt",
-            "drinks",
+            "drinkLogs",
             "endedAt",
             "memberIds",
             "startedAt"
@@ -195,7 +195,7 @@ service cloud.firestore {
     /* =========================
        COLLECTION RULES
        ========================= */
-    match /drink_types/{id} {
+    match /drinks/{id} {
       allow read: if isSignedIn()
         && (isOwner(resource.data) || resource.data.userId == "global");
 
@@ -256,14 +256,14 @@ service cloud.firestore {
         && (
           isOwner(resource.data)
           || (isAdmin()
-              && onlyUpdatingFields(["name", "description", "startedAt", "endedAt", "drinks", "updatedAt", "pictureUrls"]))
+              && onlyUpdatingFields(["name", "description", "startedAt", "endedAt", "drinkLogs", "updatedAt", "pictureUrls"]))
           || (isSignedIn() && isMember() && notBanned()
-              && onlyUpdatingFields(["memberIds", "adminIds", "drinks", "updatedAt"])
+              && onlyUpdatingFields(["memberIds", "adminIds", "drinkLogs", "updatedAt"])
               && adminIdsSelfRemovalOnly())
         );
 
       allow update: if !isPartySession(resource.data)
-        && isOwnerHandOver(["memberIds", "adminIds", "drinks", "userId", "updatedAt"]);
+        && isOwnerHandOver(["memberIds", "adminIds", "drinkLogs", "userId", "updatedAt"]);
 
       allow delete: if isOwner(resource.data)
         && !isPartySession(resource.data);

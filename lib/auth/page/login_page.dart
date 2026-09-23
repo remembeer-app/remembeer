@@ -6,7 +6,7 @@ import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/legal/widget/privacy_policy_notice.dart';
 import 'package:remembeer/routes.dart';

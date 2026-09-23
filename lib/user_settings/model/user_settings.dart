@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/model/document.dart';
-import 'package:remembeer/drink_type/model/drink_type_core.dart';
-import 'package:remembeer/user_settings/model/drink_list_sort.dart';
+import 'package:remembeer/drink/model/drink_snapshot.dart';
+import 'package:remembeer/user_settings/model/drink_log_list_sort.dart';
 
 part 'user_settings.freezed.dart';
 part 'user_settings.g.dart';
@@ -11,10 +11,10 @@ abstract class UserSettings with _$UserSettings implements Document {
   const factory UserSettings({
     required String id,
 
-    required DrinkTypeCore defaultDrinkType,
+    required DrinkSnapshot defaultDrink,
     required int defaultDrinkSize,
-    @Default(DrinkListSortOrder.descending)
-    DrinkListSortOrder drinkListSortOrder,
+    @Default(DrinkLogListSortOrder.descending)
+    DrinkLogListSortOrder drinkLogListSortOrder,
     String? notificationToken,
   }) = _UserSettings;
 

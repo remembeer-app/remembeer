@@ -7,14 +7,14 @@ part 'party_event.freezed.dart';
 part 'party_event.g.dart';
 
 enum PartyEventKind {
-  drink,
+  drinkLog,
   socialQuest,
   adminChallenge,
   beerpongPlacement,
   reversal,
 }
 
-enum PartyEventSourceCollection { drinks, quests, challenges, tournaments }
+enum PartyEventSourceCollection { drinkLogs, quests, challenges, tournaments }
 
 @freezed
 abstract class PartyEvent with _$PartyEvent implements Document {

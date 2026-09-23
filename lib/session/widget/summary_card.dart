@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 
 class SummaryCard extends StatelessWidget {
   final String title;
   final int drinkCount;
-  final List<Drink> drinks;
+  final List<DrinkLog> drinkLogs;
 
   const SummaryCard({
     super.key,
     required this.title,
     required this.drinkCount,
-    required this.drinks,
+    required this.drinkLogs,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final drinksByCategory = _groupByCategory(drinks);
+    final drinkLogsByCategory = _groupByCategory(drinkLogs);
 
     return Card(
       elevation: 0,
@@ -37,7 +37,7 @@ class SummaryCard extends StatelessWidget {
             const Gap(12),
             Divider(height: 1, color: theme.colorScheme.outlineVariant),
             const Gap(12),
-            ..._buildCategorySections(context, drinksByCategory),
+            ..._buildCategorySections(context, drinkLogsByCategory),
           ],
         ),
       ),
@@ -75,27 +75,29 @@ class SummaryCard extends StatelessWidget {
     );
   }
 
-  Map<DrinkCategory, List<Drink>> _groupByCategory(List<Drink> drinks) {
-    final map = <DrinkCategory, List<Drink>>{};
-    for (final drink in drinks) {
-      final category = drink.drinkType.category;
-      map.putIfAbsent(category, () => []).add(drink);
+  Map<DrinkCategory, List<DrinkLog>> _groupByCategory(
+    List<DrinkLog> drinkLogs,
+  ) {
+    final map = <DrinkCategory, List<DrinkLog>>{};
+    for (final drinkLog in drinkLogs) {
+      final category = drinkLog.drink.category;
+      map.putIfAbsent(category, () => []).add(drinkLog);
     }
     return map;
   }
 
   List<Widget> _buildCategorySections(
     BuildContext context,
-    Map<DrinkCategory, List<Drink>> drinksByCategory,
+    Map<DrinkCategory, List<DrinkLog>> drinkLogsByCategory,
   ) {
     final widgets = <Widget>[];
-    final sortedCategories = drinksByCategory.keys.toList()
+    final sortedCategories = drinkLogsByCategory.keys.toList()
       ..sort((a, b) => a.name.compareTo(b.name));
 
     for (final category in sortedCategories) {
-      final categoryDrinks = drinksByCategory[category]!;
+      final categoryDrinkLogs = drinkLogsByCategory[category]!;
       widgets
-        ..add(_buildCategorySection(context, category, categoryDrinks))
+        ..add(_buildCategorySection(context, category, categoryDrinkLogs))
         ..add(const Gap(8));
     }
 
@@ -109,10 +111,10 @@ class SummaryCard extends StatelessWidget {
   Widget _buildCategorySection(
     BuildContext context,
     DrinkCategory category,
-    List<Drink> drinks,
+    List<DrinkLog> drinkLogs,
   ) {
     final theme = Theme.of(context);
-    final aggregated = _aggregateDrinksByName(drinks);
+    final aggregated = _aggregateDrinkLogsByName(drinkLogs);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,18 +134,20 @@ class SummaryCard extends StatelessWidget {
         ),
         const Gap(4),
         ...aggregated.entries.map(
-          (entry) => _buildDrinkTypeEntry(context, entry.key, entry.value),
+          (entry) => _buildDrinkEntry(context, entry.key, entry.value),
         ),
       ],
     );
   }
 
-  Map<String, Map<int, int>> _aggregateDrinksByName(List<Drink> drinks) {
+  Map<String, Map<int, int>> _aggregateDrinkLogsByName(
+    List<DrinkLog> drinkLogs,
+  ) {
     final result = <String, Map<int, int>>{};
 
-    for (final drink in drinks) {
-      final name = drink.drinkType.name;
-      final volume = drink.volumeInMilliliters;
+    for (final drinkLog in drinkLogs) {
+      final name = drinkLog.drink.name;
+      final volume = drinkLog.volumeInMilliliters;
 
       result.putIfAbsent(name, () => {});
       result[name]![volume] = (result[name]![volume] ?? 0) + 1;
@@ -152,9 +156,9 @@ class SummaryCard extends StatelessWidget {
     return result;
   }
 
-  Widget _buildDrinkTypeEntry(
+  Widget _buildDrinkEntry(
     BuildContext context,
-    String drinkTypeName,
+    String drinkName,
     Map<int, int> volumeCounts,
   ) {
     final theme = Theme.of(context);
@@ -177,7 +181,7 @@ class SummaryCard extends StatelessWidget {
                 style: theme.textTheme.bodyMedium,
                 children: [
                   TextSpan(
-                    text: '$drinkTypeName: ',
+                    text: '$drinkName: ',
                     style: const TextStyle(fontWeight: FontWeight.w500),
                   ),
                   TextSpan(

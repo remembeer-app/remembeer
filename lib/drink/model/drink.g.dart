@@ -8,37 +8,48 @@ part of 'drink.dart';
 
 _Drink _$DrinkFromJson(Map<String, dynamic> json) => _Drink(
   id: json['id'] as String,
-  consumedByUserId: json['consumedByUserId'] as String,
-  consumedAt: const LocalDateTimeConverter().fromJson(
-    json['consumedAt'] as String,
+  userId: json['userId'] as String,
+  createdAt: const TimestampConverterOptimistic().fromJson(
+    json['createdAt'] as Timestamp?,
   ),
-  drinkType: DrinkTypeCore.fromJson(json['drinkType'] as Map<String, dynamic>),
-  drinkTypeId: json['drinkTypeId'] as String?,
-  volumeInMilliliters: (json['volumeInMilliliters'] as num).toInt(),
-  location: _$JsonConverterFromJson<GeoPoint, GeoPoint>(
-    json['location'],
-    const GeoPointConverter().fromJson,
+  updatedAt: const TimestampConverterOptimistic().fromJson(
+    json['updatedAt'] as Timestamp?,
   ),
-  partyRevision: (json['partyRevision'] as num?)?.toInt() ?? 1,
+  deletedAt: _$JsonConverterFromJson<Timestamp, DateTime>(
+    json['deletedAt'],
+    const TimestampConverter().fromJson,
+  ),
+  name: json['name'] as String,
+  category: $enumDecode(_$DrinkCategoryEnumMap, json['category']),
+  alcoholPercentage: (json['alcoholPercentage'] as num).toDouble(),
 );
 
 Map<String, dynamic> _$DrinkToJson(_Drink instance) => <String, dynamic>{
   'id': instance.id,
-  'consumedByUserId': instance.consumedByUserId,
-  'consumedAt': const LocalDateTimeConverter().toJson(instance.consumedAt),
-  'drinkType': instance.drinkType.toJson(),
-  'drinkTypeId': ?instance.drinkTypeId,
-  'volumeInMilliliters': instance.volumeInMilliliters,
-  'location': _$JsonConverterToJson<GeoPoint, GeoPoint>(
-    instance.location,
-    const GeoPointConverter().toJson,
+  'userId': instance.userId,
+  'createdAt': const TimestampConverterOptimistic().toJson(instance.createdAt),
+  'updatedAt': const TimestampConverterOptimistic().toJson(instance.updatedAt),
+  'deletedAt': _$JsonConverterToJson<Timestamp, DateTime>(
+    instance.deletedAt,
+    const TimestampConverter().toJson,
   ),
+  'name': instance.name,
+  'category': _$DrinkCategoryEnumMap[instance.category]!,
+  'alcoholPercentage': instance.alcoholPercentage,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
   Value? Function(Json json) fromJson,
 ) => json == null ? null : fromJson(json as Json);
+
+const _$DrinkCategoryEnumMap = {
+  DrinkCategory.beer: 'beer',
+  DrinkCategory.cider: 'cider',
+  DrinkCategory.cocktail: 'cocktail',
+  DrinkCategory.spirit: 'spirit',
+  DrinkCategory.wine: 'wine',
+};
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,

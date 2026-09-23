@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/model/value_object.dart';
-import 'package:remembeer/drink/model/drink.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 
 part 'session_create.freezed.dart';
 
@@ -17,7 +17,7 @@ abstract class SessionCreate with _$SessionCreate implements ValueObject {
     @Default({}) Set<String> bannedMemberIds,
     @Default(true) bool isSoloSession,
     @Default(false) bool isParty,
-    @Default([]) List<Drink> drinks,
+    @Default([]) List<DrinkLog> drinkLogs,
     @Default('') String description,
   }) = _SessionCreate;
 

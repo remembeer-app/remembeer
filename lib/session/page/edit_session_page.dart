@@ -165,7 +165,7 @@ class EditSessionPage extends StatelessWidget {
       onPressed: () async {
         await _sessionService.deleteSession(session);
         if (context.mounted) {
-          const DrinkRoute().go(context);
+          const DrinkLogRoute().go(context);
         }
       },
     );

@@ -12,22 +12,22 @@ void main() {
     ]);
     expect(
       const PartyRoute(sessionId: 'session-1').location,
-      '/drink/parties/session-1',
+      '/drink-logs/parties/session-1',
     );
     expect(
       const PartyRoute(sessionId: 'session-1', tab: PartyTab.ranking).location,
-      '/drink/parties/session-1?tab=ranking',
+      '/drink-logs/parties/session-1?tab=ranking',
     );
   });
 
-  test('Party route remains nested in the Drink branch', () {
+  test('Party route remains nested in the DrinkLog branch', () {
     final shell = $navbarShellRouteData as StatefulShellRoute;
-    final drinkRoute = shell.branches[2].routes.single as GoRoute;
-    final partyRoute = drinkRoute.routes.whereType<GoRoute>().singleWhere(
+    final drinkLogRoute = shell.branches[2].routes.single as GoRoute;
+    final partyRoute = drinkLogRoute.routes.whereType<GoRoute>().singleWhere(
       (route) => route.path == 'parties/:sessionId',
     );
 
-    expect(drinkRoute.path, '/drink');
+    expect(drinkLogRoute.path, '/drink-logs');
     expect(partyRoute.path, 'parties/:sessionId');
   });
 
@@ -37,14 +37,14 @@ void main() {
         sessionId: 'session-1',
         tab: PartyTab.games,
       ).location,
-      '/drink/parties/session-1/manage?tab=games',
+      '/drink-logs/parties/session-1/manage?tab=games',
     );
     expect(
       const PartyQuestManagementRoute(
         sessionId: 'session-1',
         tab: PartyTab.games,
       ).location,
-      '/drink/parties/session-1/manage/quests?tab=games',
+      '/drink-logs/parties/session-1/manage/quests?tab=games',
     );
     expect(
       const PartyQuestRoute(
@@ -52,7 +52,7 @@ void main() {
         questId: 'quest-1',
         tab: PartyTab.games,
       ).location,
-      '/drink/parties/session-1/quests/quest-1?tab=games',
+      '/drink-logs/parties/session-1/quests/quest-1?tab=games',
     );
     expect(
       const PartyChallengeRoute(
@@ -60,7 +60,7 @@ void main() {
         challengeId: 'challenge-1',
         tab: PartyTab.ranking,
       ).location,
-      '/drink/parties/session-1/challenges/challenge-1?tab=ranking',
+      '/drink-logs/parties/session-1/challenges/challenge-1?tab=ranking',
     );
     expect(
       const PartyTournamentRoute(
@@ -68,7 +68,7 @@ void main() {
         tournamentId: 'tournament-1',
         tab: PartyTab.games,
       ).location,
-      '/drink/parties/session-1/tournaments/tournament-1?tab=games',
+      '/drink-logs/parties/session-1/tournaments/tournament-1?tab=games',
     );
   });
 }

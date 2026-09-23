@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';

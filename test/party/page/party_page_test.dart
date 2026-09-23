@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink/service/drink_service.dart';
+import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/controller/party_event_controller.dart';
 import 'package:remembeer/party/model/party.dart';
@@ -58,7 +58,7 @@ void main() {
 
 void _registerServices(PartyState state) {
   get
-    ..registerSingleton<DrinkService>(_FakeDrinkService())
+    ..registerSingleton<DrinkLogService>(_FakeDrinkLogService())
     ..registerSingleton<PartyService>(_FakePartyService(state))
     ..registerSingleton<PartyEventController>(_FakePartyEventController())
     ..registerSingleton<SessionService>(_FakeSessionService());
@@ -104,7 +104,7 @@ PartyState _state({bool isArchived = false}) {
   );
 }
 
-class _FakeDrinkService implements DrinkService {
+class _FakeDrinkLogService implements DrinkLogService {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

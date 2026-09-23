@@ -14,7 +14,7 @@ SCORE_UNITS_PER_POINT = 1_000
 CLASS_BONUS_PERCENT = 10
 POINT_ALLOCATION_VERSION = 2
 _AWARD_KINDS = {
-    "drink",
+    "drinkLog",
     "socialQuest",
     "adminChallenge",
     "beerpongPlacement",
@@ -274,7 +274,7 @@ def _validate_award(award: AwardInput) -> int:
     if award.points_units <= 0:
         raise ValueError("Award points_units must be positive")
     count_delta = (
-        (1 if award.kind == "drink" else 0)
+        (1 if award.kind == "drinkLog" else 0)
         if award.drink_count_delta is None
         else award.drink_count_delta
     )
@@ -427,7 +427,7 @@ def create_reversals(
         pending_creates.append((reversal_ref, reversal))
         score_deltas[recipient_id] = score_deltas.get(recipient_id, 0) - points_units
         drink_deltas[recipient_id] = drink_deltas.get(recipient_id, 0) - (
-            1 if reversal["payload"]["reversedKind"] == "drink" else 0
+            1 if reversal["payload"]["reversedKind"] == "drinkLog" else 0
         )
         results.append(
             EventWriteResult(reversal_ref.path.rsplit("/", 1)[-1], reversal, True)

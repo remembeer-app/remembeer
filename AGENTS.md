@@ -61,7 +61,7 @@ Three generators are used by the project:
 - **Soft deletes**: Entities use `deletedAt` field, never hard-deleted from Firestore
 - **Server timestamps**: `withServerCreateTimestamps()`, `withServerUpdateTimestamp()`, `withServerDeleteTimestamps()` extension methods on JSON maps
 - **Ownership**: All entities have a `userId` field; Firestore rules enforce ownership-based access
-- **Global entities**: Some entities (e.g., seed drink types) use a special `globalUserId` and cannot be modified from the app
+- **Global entities**: Some entities (e.g., seed drinks) use a special `globalUserId` and cannot be modified from the app
 
 ### Date Handling — Logical Days and End-of-Day Boundary
 
@@ -82,9 +82,9 @@ When working with dates in this codebase, always account for the boundary — ne
 
 Python 3.13 functions in `functions/main.py` — push notification triggers for friend requests and session invites.
 
-### Seeding Global Drink Types
+### Seeding Global Drinks
 
-`assets/seed_data/drink_types.json` holds the global drink types. Firestore rules forbid *every* client from writing documents with `userId: "global"`, so seeding runs through the Admin SDK instead:
+`assets/seed_data/drinks.json` holds the global drinks. Firestore rules forbid *every* client from writing documents with `userId: "global"`, so seeding runs through the Admin SDK instead:
 
 ```bash
 # Against production (service account key from the Firebase console, keep it out of the repo)
@@ -98,7 +98,7 @@ FIRESTORE_EMULATOR_HOST=localhost:8080 npm run seed
 npm run seed -- --dry-run
 ```
 
-The script is idempotent: it upserts every entry (preserving `createdAt`) and soft-deletes global drink types that are no longer in the seed file. Logged drinks embed their own copy of the name, category and alcohol percentage, so retiring a drink type never changes anyone's history. `test/seed_data/drink_types_seed_test.dart` validates the JSON before it can be seeded.
+The script is idempotent: it upserts every entry (preserving `createdAt`) and soft-deletes global drinks that are no longer in the seed file. Drink logs embed their own copy of the name, category and alcohol percentage, so retiring a drink never changes anyone's history. `test/drink/seed_data/drinks_seed_test.dart` validates the JSON before it can be seeded.
 
 ### Dynamic App Icon
 

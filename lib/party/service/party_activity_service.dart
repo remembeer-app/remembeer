@@ -192,7 +192,7 @@ List<PartyEventGroup> groupPartyEvents(List<PartyEvent> events) {
   for (final event in events) {
     final isReversed = reversedEventIds.contains(event.id);
     final canGroup =
-        event.kind != PartyEventKind.drink &&
+        event.kind != PartyEventKind.drinkLog &&
         event.kind != PartyEventKind.reversal;
     final key = _partyEventGroupKey(event, isReversed: isReversed);
     final existingIndex = canGroup ? groupedIndexes[key] : null;

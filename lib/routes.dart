@@ -13,11 +13,11 @@ import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/common/widget/nav_bar.dart';
 import 'package:remembeer/drink/page/add_drink_page.dart';
-import 'package:remembeer/drink/page/drink_page.dart';
+import 'package:remembeer/drink/page/custom_drinks_page.dart';
 import 'package:remembeer/drink/page/update_drink_page.dart';
-import 'package:remembeer/drink_type/page/add_drink_type_page.dart';
-import 'package:remembeer/drink_type/page/custom_drink_types_page.dart';
-import 'package:remembeer/drink_type/page/update_drink_type_page.dart';
+import 'package:remembeer/drink_log/page/add_drink_log_page.dart';
+import 'package:remembeer/drink_log/page/drink_log_page.dart';
+import 'package:remembeer/drink_log/page/update_drink_log_page.dart';
 import 'package:remembeer/friend_request/page/friend_requests_page.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/page/create_leaderboard_page.dart';
@@ -45,7 +45,7 @@ import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user/page/search_user_page.dart';
 import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
 import 'package:remembeer/user_settings/page/default_drink_page.dart';
-import 'package:remembeer/user_settings/page/drink_list_sort_page.dart';
+import 'package:remembeer/user_settings/page/drink_log_list_sort_page.dart';
 import 'package:remembeer/user_settings/page/end_of_day_page.dart';
 import 'package:remembeer/user_settings/page/profile_details_page.dart';
 import 'package:remembeer/user_settings/page/settings_page.dart';
@@ -132,12 +132,12 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
         ),
       ],
     ),
-    TypedStatefulShellBranch<DrinkBranch>(
+    TypedStatefulShellBranch<DrinkLogBranch>(
       routes: [
-        TypedGoRoute<DrinkRoute>(
-          path: '/drink',
+        TypedGoRoute<DrinkLogRoute>(
+          path: '/drink-logs',
           routes: [
-            TypedGoRoute<AddDrinkRoute>(path: 'new'),
+            TypedGoRoute<AddDrinkLogRoute>(path: 'new'),
             TypedGoRoute<PartyRoute>(
               path: 'parties/:sessionId',
               routes: [
@@ -167,8 +167,8 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             TypedGoRoute<AddSessionFriendsRoute>(
               path: 'sessions/:sessionId/friends/add',
             ),
-            TypedGoRoute<UpdateDrinkRoute>(
-              path: 'sessions/:sessionId/drinks/:drinkId/edit',
+            TypedGoRoute<UpdateDrinkLogRoute>(
+              path: 'sessions/:sessionId/drink-logs/:drinkLogId/edit',
             ),
           ],
         ),
@@ -194,15 +194,15 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
         TypedGoRoute<SettingsRoute>(
           path: '/settings',
           routes: [
-            TypedGoRoute<CustomDrinkTypesRoute>(
-              path: 'drink-types',
+            TypedGoRoute<CustomDrinksRoute>(
+              path: 'drinks',
               routes: [
-                TypedGoRoute<AddDrinkTypeRoute>(path: 'new'),
-                TypedGoRoute<UpdateDrinkTypeRoute>(path: ':drinkTypeId/edit'),
+                TypedGoRoute<AddDrinkRoute>(path: 'new'),
+                TypedGoRoute<UpdateDrinkRoute>(path: ':drinkId/edit'),
               ],
             ),
             TypedGoRoute<DefaultDrinkSettingsRoute>(path: 'default-drink'),
-            TypedGoRoute<DrinkSortSettingsRoute>(path: 'drink-sort'),
+            TypedGoRoute<DrinkLogSortSettingsRoute>(path: 'drink-log-sort'),
             TypedGoRoute<UsernameSettingsRoute>(path: 'username'),
             TypedGoRoute<ProfileDetailsSettingsRoute>(path: 'profile-details'),
             TypedGoRoute<ChangeAvatarSettingsRoute>(path: 'avatar'),
@@ -244,8 +244,8 @@ class LeaderboardsBranch extends StatefulShellBranchData {
   const LeaderboardsBranch();
 }
 
-class DrinkBranch extends StatefulShellBranchData {
-  const DrinkBranch();
+class DrinkLogBranch extends StatefulShellBranchData {
+  const DrinkLogBranch();
 }
 
 class ActivityBranch extends StatefulShellBranchData {
@@ -277,12 +277,12 @@ class LeaderboardsRoute extends GoRouteData with $LeaderboardsRoute {
   }
 }
 
-class DrinkRoute extends GoRouteData with $DrinkRoute {
-  const DrinkRoute();
+class DrinkLogRoute extends GoRouteData with $DrinkLogRoute {
+  const DrinkLogRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return DrinkPage();
+    return DrinkLogPage();
   }
 }
 
@@ -393,14 +393,14 @@ class UpdateLeaderboardNameRoute extends GoRouteData
   }
 }
 
-class AddDrinkRoute extends GoRouteData with $AddDrinkRoute {
+class AddDrinkLogRoute extends GoRouteData with $AddDrinkLogRoute {
   final String? targetSessionId;
 
-  const AddDrinkRoute({this.targetSessionId});
+  const AddDrinkLogRoute({this.targetSessionId});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return AddDrinkPage(targetSessionId: targetSessionId);
+    return AddDrinkLogPage(targetSessionId: targetSessionId);
   }
 }
 
@@ -571,15 +571,18 @@ class AddSessionFriendsRoute extends GoRouteData with $AddSessionFriendsRoute {
   }
 }
 
-class UpdateDrinkRoute extends GoRouteData with $UpdateDrinkRoute {
+class UpdateDrinkLogRoute extends GoRouteData with $UpdateDrinkLogRoute {
   final String sessionId;
-  final String drinkId;
+  final String drinkLogId;
 
-  const UpdateDrinkRoute({required this.sessionId, required this.drinkId});
+  const UpdateDrinkLogRoute({
+    required this.sessionId,
+    required this.drinkLogId,
+  });
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return UpdateDrinkPage(sessionId: sessionId, drinkId: drinkId);
+    return UpdateDrinkLogPage(sessionId: sessionId, drinkLogId: drinkLogId);
   }
 }
 
@@ -609,32 +612,32 @@ class SessionPhotoRoute extends GoRouteData with $SessionPhotoRoute {
   }
 }
 
-class CustomDrinkTypesRoute extends GoRouteData with $CustomDrinkTypesRoute {
-  const CustomDrinkTypesRoute();
+class CustomDrinksRoute extends GoRouteData with $CustomDrinksRoute {
+  const CustomDrinksRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const CustomDrinkTypesPage();
+    return const CustomDrinksPage();
   }
 }
 
-class AddDrinkTypeRoute extends GoRouteData with $AddDrinkTypeRoute {
-  const AddDrinkTypeRoute();
+class AddDrinkRoute extends GoRouteData with $AddDrinkRoute {
+  const AddDrinkRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return AddDrinkTypePage();
+    return AddDrinkPage();
   }
 }
 
-class UpdateDrinkTypeRoute extends GoRouteData with $UpdateDrinkTypeRoute {
-  final String drinkTypeId;
+class UpdateDrinkRoute extends GoRouteData with $UpdateDrinkRoute {
+  final String drinkId;
 
-  const UpdateDrinkTypeRoute({required this.drinkTypeId});
+  const UpdateDrinkRoute({required this.drinkId});
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return UpdateDrinkTypePage(drinkTypeId: drinkTypeId);
+    return UpdateDrinkPage(drinkId: drinkId);
   }
 }
 
@@ -648,12 +651,13 @@ class DefaultDrinkSettingsRoute extends GoRouteData
   }
 }
 
-class DrinkSortSettingsRoute extends GoRouteData with $DrinkSortSettingsRoute {
-  const DrinkSortSettingsRoute();
+class DrinkLogSortSettingsRoute extends GoRouteData
+    with $DrinkLogSortSettingsRoute {
+  const DrinkLogSortSettingsRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return const DrinkListSortPage();
+    return const DrinkLogListSortPage();
   }
 }
 
