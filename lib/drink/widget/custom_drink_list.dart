@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/convex_api/modules/drinks.dart';
+import 'package:remembeer/convex_api/modules/drink.dart';
 import 'package:remembeer/convex_api/runtime.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
 import 'package:remembeer/drink/widget/drink_tile.dart';

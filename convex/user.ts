@@ -1,3 +1,3 @@
-import * as mutation from "./users/mutation";
+import * as mutation from "./user/mutation";
 
 export const ensureCurrent = mutation.ensureCurrent.public();

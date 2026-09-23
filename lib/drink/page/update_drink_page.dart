@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
-import 'package:remembeer/convex_api/modules/drinks.dart';
+import 'package:remembeer/convex_api/modules/drink.dart';
 import 'package:remembeer/drink/widget/drink_form.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 
@@ -17,7 +17,7 @@ class UpdateDrinkPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AsyncBuilder<GetTypeResult>(
-      future: _convexApi.drinks.getValue(id: DrinksId(drinkId)),
+      future: _convexApi.drink.getValue(id: DrinkId(drinkId)),
       builder: _buildPage,
     );
   }
@@ -30,7 +30,7 @@ class UpdateDrinkPage extends StatelessWidget {
         initialAlcoholPercentage: drink.alcoholPercentage,
         initialDrinkCategory: drink.drinkCategory,
         onSubmit: (name, alcoholPercentage, drinkCategory) async {
-          await _convexApi.drinks.update(
+          await _convexApi.drink.update(
             id: drink.id,
             name: Optional.of(name),
             alcoholPercentage: Optional.of(alcoholPercentage),
@@ -41,7 +41,7 @@ class UpdateDrinkPage extends StatelessWidget {
           }
         },
         onDelete: () async {
-          await _convexApi.drinks.softDelete(id: drink.id);
+          await _convexApi.drink.softDelete(id: drink.id);
           if (context.mounted) {
             context.pop();
           }

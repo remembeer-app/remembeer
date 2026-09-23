@@ -7,40 +7,37 @@ import '../types.dart';
 
 import 'package:dartvex/dartvex.dart';
 
-class DrinksApi {
-  const DrinksApi(this._client);
+class DrinkApi {
+  const DrinkApi(this._client);
 
   final ConvexFunctionCaller _client;
 
-  Future<DrinksId> create({
+  Future<DrinkId> create({
     required double alcoholPercentage,
     required DrinkCategory drinkCategory,
     required String name,
   }) async {
     final raw$ = await _client.mutate(
-      'drinks:create',
+      'drink:create',
       _encodeCreateArgs((
         alcoholPercentage: alcoholPercentage,
         drinkCategory: drinkCategory,
         name: name,
       )),
     );
-    return DrinksId(expectString(raw$, label: 'CreateResult'));
+    return DrinkId(expectString(raw$, label: 'CreateResult'));
   }
 
-  Future<GetTypeResult> getValue({required DrinksId id}) async {
-    final raw$ = await _client.query(
-      'drinks:get',
-      _encodeGetTypeArgs((id: id)),
-    );
+  Future<GetTypeResult> getValue({required DrinkId id}) async {
+    final raw$ = await _client.query('drink:get', _encodeGetTypeArgs((id: id)));
     return _decodeGetTypeResult(raw$);
   }
 
   TypedConvexSubscription<GetTypeResult> getValueSubscribe({
-    required DrinksId id,
+    required DrinkId id,
   }) {
     final subscription$ = _client.subscribe(
-      'drinks:get',
+      'drink:get',
       _encodeGetTypeArgs((id: id)),
     );
     final typedStream$ = subscription$.stream.map((event) {
@@ -64,7 +61,7 @@ class DrinksApi {
 
   Future<List<ListAvailableResultItem>> listAvailable() async {
     final raw$ = await _client.query(
-      'drinks:listAvailable',
+      'drink:listAvailable',
       const <String, dynamic>{},
     );
     return expectList(
@@ -76,7 +73,7 @@ class DrinksApi {
   TypedConvexSubscription<List<ListAvailableResultItem>>
   listAvailableSubscribe() {
     final subscription$ = _client.subscribe(
-      'drinks:listAvailable',
+      'drink:listAvailable',
       const <String, dynamic>{},
     );
     final typedStream$ = subscription$.stream.map((event) {
@@ -108,7 +105,7 @@ class DrinksApi {
 
   Future<List<ListCustomResultItem>> listCustom() async {
     final raw$ = await _client.query(
-      'drinks:listCustom',
+      'drink:listCustom',
       const <String, dynamic>{},
     );
     return expectList(
@@ -119,7 +116,7 @@ class DrinksApi {
 
   TypedConvexSubscription<List<ListCustomResultItem>> listCustomSubscribe() {
     final subscription$ = _client.subscribe(
-      'drinks:listCustom',
+      'drink:listCustom',
       const <String, dynamic>{},
     );
     final typedStream$ = subscription$.stream.map((event) {
@@ -149,19 +146,19 @@ class DrinksApi {
     );
   }
 
-  Future<Null> softDelete({required DrinksId id}) async {
-    await _client.mutate('drinks:softDelete', _encodeSoftDeleteArgs((id: id)));
+  Future<Null> softDelete({required DrinkId id}) async {
+    await _client.mutate('drink:softDelete', _encodeSoftDeleteArgs((id: id)));
     return null;
   }
 
   Future<Null> update({
     Optional<double> alcoholPercentage = const Optional.absent(),
     Optional<DrinkCategory> drinkCategory = const Optional.absent(),
-    required DrinksId id,
+    required DrinkId id,
     Optional<String> name = const Optional.absent(),
   }) async {
     await _client.mutate(
-      'drinks:update',
+      'drink:update',
       _encodeUpdateArgs((
         alcoholPercentage: alcoholPercentage,
         drinkCategory: drinkCategory,
@@ -258,12 +255,12 @@ CreateArgs _decodeCreateArgs(dynamic raw) {
 
 typedef GetTypeResult = ({
   double creationTime,
-  DrinksId id,
+  DrinkId id,
   double alcoholPercentage,
   double? deletedAt,
   DrinkCategory drinkCategory,
   String name,
-  UsersId? ownerId,
+  UserId? ownerId,
   double updatedAt,
 });
 
@@ -334,7 +331,7 @@ GetTypeResult _decodeGetTypeResult(dynamic raw) {
       map['_creationTime'],
       label: 'GetTypeResultCreationTime',
     ),
-    id: DrinksId(expectString(map['_id'], label: 'GetTypeResultId')),
+    id: DrinkId(expectString(map['_id'], label: 'GetTypeResultId')),
     alcoholPercentage: expectDouble(
       map['alcoholPercentage'],
       label: 'GetTypeResultAlcoholPercentage',
@@ -346,12 +343,12 @@ GetTypeResult _decodeGetTypeResult(dynamic raw) {
     name: expectString(map['name'], label: 'GetTypeResultName'),
     ownerId: map['ownerId'] == null
         ? null
-        : UsersId(expectString(map['ownerId'], label: 'GetTypeResultOwnerId')),
+        : UserId(expectString(map['ownerId'], label: 'GetTypeResultOwnerId')),
     updatedAt: expectDouble(map['updatedAt'], label: 'GetTypeResultUpdatedAt'),
   );
 }
 
-typedef GetTypeArgs = ({DrinksId id});
+typedef GetTypeArgs = ({DrinkId id});
 
 Map<String, dynamic> _encodeGetTypeArgs(GetTypeArgs value$) {
   final (id: id) = value$;
@@ -363,17 +360,17 @@ GetTypeArgs _decodeGetTypeArgs(dynamic raw) {
   if (!map.containsKey('id')) {
     throw FormatException('Missing required field "id" for GetTypeArgs');
   }
-  return (id: DrinksId(expectString(map['id'], label: 'GetTypeArgsId')));
+  return (id: DrinkId(expectString(map['id'], label: 'GetTypeArgsId')));
 }
 
 typedef ListAvailableResultItem = ({
   double creationTime,
-  DrinksId id,
+  DrinkId id,
   double alcoholPercentage,
   double? deletedAt,
   DrinkCategory drinkCategory,
   String name,
-  UsersId? ownerId,
+  UserId? ownerId,
   double updatedAt,
 });
 
@@ -452,7 +449,7 @@ ListAvailableResultItem _decodeListAvailableResultItem(dynamic raw) {
       map['_creationTime'],
       label: 'ListAvailableResultItemCreationTime',
     ),
-    id: DrinksId(expectString(map['_id'], label: 'ListAvailableResultItemId')),
+    id: DrinkId(expectString(map['_id'], label: 'ListAvailableResultItemId')),
     alcoholPercentage: expectDouble(
       map['alcoholPercentage'],
       label: 'ListAvailableResultItemAlcoholPercentage',
@@ -467,7 +464,7 @@ ListAvailableResultItem _decodeListAvailableResultItem(dynamic raw) {
     name: expectString(map['name'], label: 'ListAvailableResultItemName'),
     ownerId: map['ownerId'] == null
         ? null
-        : UsersId(
+        : UserId(
             expectString(
               map['ownerId'],
               label: 'ListAvailableResultItemOwnerId',
@@ -482,12 +479,12 @@ ListAvailableResultItem _decodeListAvailableResultItem(dynamic raw) {
 
 typedef ListCustomResultItem = ({
   double creationTime,
-  DrinksId id,
+  DrinkId id,
   double alcoholPercentage,
   double? deletedAt,
   DrinkCategory drinkCategory,
   String name,
-  UsersId? ownerId,
+  UserId? ownerId,
   double updatedAt,
 });
 
@@ -564,7 +561,7 @@ ListCustomResultItem _decodeListCustomResultItem(dynamic raw) {
       map['_creationTime'],
       label: 'ListCustomResultItemCreationTime',
     ),
-    id: DrinksId(expectString(map['_id'], label: 'ListCustomResultItemId')),
+    id: DrinkId(expectString(map['_id'], label: 'ListCustomResultItemId')),
     alcoholPercentage: expectDouble(
       map['alcoholPercentage'],
       label: 'ListCustomResultItemAlcoholPercentage',
@@ -579,7 +576,7 @@ ListCustomResultItem _decodeListCustomResultItem(dynamic raw) {
     name: expectString(map['name'], label: 'ListCustomResultItemName'),
     ownerId: map['ownerId'] == null
         ? null
-        : UsersId(
+        : UserId(
             expectString(map['ownerId'], label: 'ListCustomResultItemOwnerId'),
           ),
     updatedAt: expectDouble(
@@ -589,7 +586,7 @@ ListCustomResultItem _decodeListCustomResultItem(dynamic raw) {
   );
 }
 
-typedef SoftDeleteArgs = ({DrinksId id});
+typedef SoftDeleteArgs = ({DrinkId id});
 
 Map<String, dynamic> _encodeSoftDeleteArgs(SoftDeleteArgs value$) {
   final (id: id) = value$;
@@ -601,13 +598,13 @@ SoftDeleteArgs _decodeSoftDeleteArgs(dynamic raw) {
   if (!map.containsKey('id')) {
     throw FormatException('Missing required field "id" for SoftDeleteArgs');
   }
-  return (id: DrinksId(expectString(map['id'], label: 'SoftDeleteArgsId')));
+  return (id: DrinkId(expectString(map['id'], label: 'SoftDeleteArgsId')));
 }
 
 typedef UpdateArgs = ({
   Optional<double> alcoholPercentage,
   Optional<DrinkCategory> drinkCategory,
-  DrinksId id,
+  DrinkId id,
   Optional<String> name,
 });
 
@@ -645,7 +642,7 @@ UpdateArgs _decodeUpdateArgs(dynamic raw) {
     drinkCategory: map.containsKey('drinkCategory')
         ? Optional.of(_decodeDrinkCategory(map['drinkCategory']))
         : const Optional.absent(),
-    id: DrinksId(expectString(map['id'], label: 'UpdateArgsId')),
+    id: DrinkId(expectString(map['id'], label: 'UpdateArgsId')),
     name: map.containsKey('name')
         ? Optional.of(expectString(map['name'], label: 'UpdateArgsName'))
         : const Optional.absent(),

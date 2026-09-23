@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/convex_api/api.dart';
-import 'package:remembeer/convex_api/modules/drinks.dart';
+import 'package:remembeer/convex_api/modules/drink.dart';
 import 'package:remembeer/convex_api/types.dart' as convex;
 import 'package:remembeer/drink/model/drink_category.dart' as app;
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -61,7 +61,7 @@ class DrinkTile extends StatelessWidget {
       text: 'Are you sure you want to delete "${drink.name}"?',
       submitButtonText: 'Delete',
       isDestructive: true,
-      onPressed: () async => _convexApi.drinks.softDelete(id: drink.id),
+      onPressed: () async => _convexApi.drink.softDelete(id: drink.id),
     );
   }
 }

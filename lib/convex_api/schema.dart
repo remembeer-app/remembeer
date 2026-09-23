@@ -3,14 +3,14 @@
 
 import 'runtime.dart';
 
-class DrinksId extends ConvexTableId {
-  const DrinksId(super.value);
+class DrinkId extends ConvexTableId {
+  const DrinkId(super.value);
 
-  static const String tableName = 'drinks';
+  static const String tableName = 'drink';
 }
 
-class UsersId extends ConvexTableId {
-  const UsersId(super.value);
+class UserId extends ConvexTableId {
+  const UserId(super.value);
 
-  static const String tableName = 'users';
+  static const String tableName = 'user';
 }

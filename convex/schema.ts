@@ -1,10 +1,10 @@
 import { defineSchema } from "convex/server";
-import { drinksTable } from "./drinks/schema";
-import { usersTable } from "./users/schema";
+import { drinkTable } from "./drink/schema";
+import { userTable } from "./user/schema";
 
 export const schema = defineSchema({
-  users: usersTable,
-  drinks: drinksTable,
+  user: userTable,
+  drink: drinkTable,
 });
 
 export default schema;

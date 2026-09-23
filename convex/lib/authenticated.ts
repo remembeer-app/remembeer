@@ -1,5 +1,5 @@
 import type { MutationCtx, QueryCtx } from "fluent-convex";
-import { getCurrentUser } from "../users/currentUser";
+import { getCurrentUser } from "../user/currentUser";
 import { convex } from "./builder";
 import type { DataModel } from "../_generated/dataModel";
 

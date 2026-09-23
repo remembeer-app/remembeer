@@ -7,7 +7,7 @@ export async function getCurrentUserSafe(ctx: QueryCtx<DataModel>) {
   const authUser = await authComponent.getAuthUser(ctx);
 
   const user = await ctx.db
-    .query("users")
+    .query("user")
     .withIndex("by_authUserId", (q) => q.eq("authUserId", authUser._id))
     .unique();
 

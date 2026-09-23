@@ -1,5 +1,5 @@
-import * as query from "./drinks/query";
-import * as mutation from "./drinks/mutation";
+import * as query from "./drink/query";
+import * as mutation from "./drink/mutation";
 
 export const listCustom = query.listCustom.public();
 export const listAvailable = query.listAvailable.public();

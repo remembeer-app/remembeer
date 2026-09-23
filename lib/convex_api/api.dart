@@ -1,8 +1,8 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND.
 // ignore_for_file: type=lint, unused_element, unused_import, unused_local_variable
 
-import './modules/drinks.dart';
-import './modules/users.dart';
+import './modules/drink.dart';
+import './modules/user.dart';
 import './runtime.dart';
 import './schema.dart';
 
@@ -17,6 +17,6 @@ class ConvexApi {
 
   final ConvexFunctionCaller _client;
 
-  DrinksApi get drinks => DrinksApi(_client);
-  UsersApi get users => UsersApi(_client);
+  DrinkApi get drink => DrinkApi(_client);
+  UserApi get user => UserApi(_client);
 }

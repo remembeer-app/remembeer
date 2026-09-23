@@ -54,7 +54,7 @@ class ConvexAuthService extends ChangeNotifier {
   ) async {
     await authenticate();
     try {
-      await _api.users.ensureCurrent();
+      await _api.user.ensureCurrent();
     } on Object {
       await _client.logout();
       rethrow;
