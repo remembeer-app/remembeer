@@ -8,16 +8,16 @@
  * @module
  */
 
-import type * as drinks from "../drinks.js";
-import type * as drinks_mutation from "../drinks/mutation.js";
-import type * as drinks_query from "../drinks/query.js";
+import type * as drink from "../drink.js";
+import type * as drink_mutation from "../drink/mutation.js";
+import type * as drink_query from "../drink/query.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_authenticated from "../lib/authenticated.js";
 import type * as lib_builder from "../lib/builder.js";
-import type * as users from "../users.js";
-import type * as users_currentUser from "../users/currentUser.js";
-import type * as users_mutation from "../users/mutation.js";
+import type * as user from "../user.js";
+import type * as user_currentUser from "../user/currentUser.js";
+import type * as user_mutation from "../user/mutation.js";
 
 import type {
   ApiFromModules,
@@ -26,16 +26,16 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  drinks: typeof drinks;
-  "drinks/mutation": typeof drinks_mutation;
-  "drinks/query": typeof drinks_query;
+  drink: typeof drink;
+  "drink/mutation": typeof drink_mutation;
+  "drink/query": typeof drink_query;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/authenticated": typeof lib_authenticated;
   "lib/builder": typeof lib_builder;
-  users: typeof users;
-  "users/currentUser": typeof users_currentUser;
-  "users/mutation": typeof users_mutation;
+  user: typeof user;
+  "user/currentUser": typeof user_currentUser;
+  "user/mutation": typeof user_mutation;
 }>;
 
 /**

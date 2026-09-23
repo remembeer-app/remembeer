@@ -5,5 +5,5 @@ class DrinkService {
 
   DrinkService({required ConvexApi api}) : _api = api;
 
-  late final customDrinks = _api.drinks.listCustomSubscribe();
+  late final customDrinks = _api.drink.listCustomSubscribe();
 }

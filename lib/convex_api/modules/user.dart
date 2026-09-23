@@ -6,16 +6,16 @@ import '../schema.dart';
 
 import 'package:dartvex/dartvex.dart';
 
-class UsersApi {
-  const UsersApi(this._client);
+class UserApi {
+  const UserApi(this._client);
 
   final ConvexFunctionCaller _client;
 
-  Future<UsersId> ensureCurrent() async {
+  Future<UserId> ensureCurrent() async {
     final raw$ = await _client.mutate(
-      'users:ensureCurrent',
+      'user:ensureCurrent',
       const <String, dynamic>{},
     );
-    return UsersId(expectString(raw$, label: 'EnsureCurrentResult'));
+    return UserId(expectString(raw$, label: 'EnsureCurrentResult'));
   }
 }

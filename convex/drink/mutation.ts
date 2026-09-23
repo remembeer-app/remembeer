@@ -8,9 +8,9 @@ import { getCustomDrinkHandler } from "./query";
 export const create = authMutation
   .extend(WithZod)
   .input(createDrinkInputValidator)
-  .returns(schema.id("drinks"))
+  .returns(schema.id("drink"))
   .handler(async (ctx, input) => {
-    return await ctx.db.insert("drinks", {
+    return await ctx.db.insert("drink", {
       ownerId: ctx.user._id,
       ...input,
       updatedAt: Date.now(),
@@ -25,7 +25,7 @@ export const update = authMutation
   .handler(async (ctx, { id, name, drinkCategory, alcoholPercentage }) => {
     const drink = await getCustomDrinkHandler(ctx, { id });
 
-    await ctx.db.patch("drinks", id, {
+    await ctx.db.patch("drink", id, {
       name: name ?? drink.name,
       drinkCategory: drinkCategory ?? drink.drinkCategory,
       alcoholPercentage: alcoholPercentage ?? drink.alcoholPercentage,
@@ -37,14 +37,14 @@ export const update = authMutation
 
 export const softDelete = authMutation
   .input({
-    id: v.id("drinks"),
+    id: v.id("drink"),
   })
   .returns(v.null())
   .handler(async (ctx, { id }) => {
     await getCustomDrinkHandler(ctx, { id });
 
     const now = Date.now();
-    await ctx.db.patch("drinks", id, {
+    await ctx.db.patch("drink", id, {
       deletedAt: now,
       updatedAt: now,
     });

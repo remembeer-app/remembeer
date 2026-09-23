@@ -19,7 +19,7 @@ class AddDrinkPage extends StatelessWidget {
         initialAlcoholPercentage: 6.9,
         initialDrinkCategory: const Beer(),
         onSubmit: (name, alcoholPercentage, drinkCategory) async {
-          await _convexApi.drinks.create(
+          await _convexApi.drink.create(
             name: name,
             drinkCategory: drinkCategory,
             alcoholPercentage: alcoholPercentage,
