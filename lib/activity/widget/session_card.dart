@@ -6,7 +6,7 @@ import 'package:remembeer/activity/model/session_with_members.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/routes.dart';
 
 class SessionCard extends StatelessWidget {
@@ -204,7 +204,7 @@ class SessionCard extends StatelessWidget {
 
     final session = sessionWithMembers.session;
     final duration = formatDuration(session.startedAt, session.endedAt);
-    final drinkCount = session.drinksCount;
+    final drinkCount = session.drinkLogsCount;
     final totalAlcoholMl = session.totalAlcoholMl;
 
     return Row(

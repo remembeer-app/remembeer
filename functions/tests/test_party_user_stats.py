@@ -1,10 +1,10 @@
 from datetime import datetime, timezone
 
 import pytest
-from party_user_stats import apply_drink_stats, effective_date, user_stats
+from party_user_stats import apply_drink_log_stats, effective_date, user_stats
 
 
-def _drink(
+def _drink_log(
     consumed_at: str,
     *,
     category: str = "beer",
@@ -13,7 +13,7 @@ def _drink(
 ) -> dict[str, object]:
     return {
         "consumedAt": consumed_at,
-        "drinkType": {
+        "drink": {
             "name": category,
             "category": category,
             "alcoholPercentage": percentage,
@@ -48,16 +48,16 @@ def test_effective_date_uses_strict_custom_boundary() -> None:
 
 def test_add_remove_matches_dart_monthly_daily_and_after_six_calculations() -> None:
     user = _user()
-    beer = _drink("2026-02-02T02:00:00+01:00")
-    wine = _drink(
+    beer = _drink_log("2026-02-02T02:00:00+01:00")
+    wine = _drink_log(
         "2026-02-01T17:00:00+01:00",
         category="wine",
         volume=200,
         percentage=12,
     )
 
-    updated = apply_drink_stats(user, new_drink=beer)
-    updated = apply_drink_stats(updated, new_drink=wine)
+    updated = apply_drink_log_stats(user, new_drink_log=beer)
+    updated = apply_drink_log_stats(updated, new_drink_log=wine)
     stats = updated["monthlyStats"]["2026_2"]
     daily = stats["dailyStats"]["1"]
 
@@ -69,7 +69,7 @@ def test_add_remove_matches_dart_monthly_daily_and_after_six_calculations() -> N
         "alcoholConsumedMl": 49,
         "beersAfter6pm": 1,
     }
-    removed = apply_drink_stats(updated, old_drink=beer)
+    removed = apply_drink_log_stats(updated, old_drink_log=beer)
     assert removed["monthlyStats"]["2026_2"]["dailyStats"]["1"] == {
         "day": 1,
         "beersConsumed": 0,
@@ -79,7 +79,9 @@ def test_add_remove_matches_dart_monthly_daily_and_after_six_calculations() -> N
 
 
 def test_remove_clamps_each_stat_at_zero_like_dart_models() -> None:
-    removed = apply_drink_stats(_user(), old_drink=_drink("2026-01-01T20:00:00"))
+    removed = apply_drink_log_stats(
+        _user(), old_drink_log=_drink_log("2026-01-01T20:00:00")
+    )
     stats = removed["monthlyStats"]["2026_1"]
 
     assert stats["beersConsumed"] == 0
@@ -90,9 +92,9 @@ def test_remove_clamps_each_stat_at_zero_like_dart_models() -> None:
 def test_streak_uses_current_logical_day_and_previous_day_fallback() -> None:
     user = _user()
     for day in (1, 2, 3):
-        user = apply_drink_stats(
+        user = apply_drink_log_stats(
             user,
-            new_drink=_drink(f"2026-01-{day:02}T20:00:00+00:00"),
+            new_drink_log=_drink_log(f"2026-01-{day:02}T20:00:00+00:00"),
         )
 
     active = user_stats(user, now=datetime.fromisoformat("2026-01-04T02:00:00+00:00"))

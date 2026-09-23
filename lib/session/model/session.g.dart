@@ -31,9 +31,9 @@ _Session _$SessionFromJson(Map<String, dynamic> json) => _Session(
   endedAt: json['endedAt'] == null
       ? null
       : DateTime.parse(json['endedAt'] as String),
-  drinks:
-      (json['drinks'] as List<dynamic>?)
-          ?.map((e) => Drink.fromJson(e as Map<String, dynamic>))
+  drinkLogs:
+      (json['drinkLogs'] as List<dynamic>?)
+          ?.map((e) => DrinkLog.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
   isSoloSession: json['isSoloSession'] as bool? ?? true,
@@ -61,7 +61,7 @@ Map<String, dynamic> _$SessionToJson(_Session instance) => <String, dynamic>{
   'name': instance.name,
   'startedAt': instance.startedAt.toIso8601String(),
   'endedAt': instance.endedAt?.toIso8601String(),
-  'drinks': instance.drinks.map((e) => e.toJson()).toList(),
+  'drinkLogs': instance.drinkLogs.map((e) => e.toJson()).toList(),
   'isSoloSession': instance.isSoloSession,
   'isParty': instance.isParty,
   'description': instance.description,

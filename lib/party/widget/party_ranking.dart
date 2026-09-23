@@ -36,13 +36,13 @@ class PartyStandingCard extends StatelessWidget {
     final accent = standing.user?.accentColor;
     final color = accent?.softColor;
     final points = formatPartyScore(standing.member.scoreUnits);
-    final drinks = standing.member.drinkCount;
+    final drinkCount = standing.member.drinkCount;
 
     return Semantics(
       container: true,
       label:
           'Rank ${standing.rank}, ${standing.username}, $points points, '
-          '$drinks ${drinks == 1 ? 'drink' : 'drinks'}'
+          '$drinkCount ${drinkCount == 1 ? 'drink' : 'drinks'}'
           '${standing.isCurrentUser ? ', you' : ''}',
       child: Card(
         color: color,
@@ -59,16 +59,47 @@ class PartyStandingCard extends StatelessWidget {
               ? BorderSide(color: theme.colorScheme.primary, width: 2)
               : BorderSide.none,
         ),
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    '#${standing.rank}',
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 40,
+                child: Text(
+                  '#${standing.rank}',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: accent?.textColor,
+                  ),
+                ),
+              ),
+              if (standing.user case final user?) UserAvatar(user: user),
+              if (standing.user == null)
+                const CircleAvatar(child: Icon(Icons.person_outline)),
+              const Gap(12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      standing.username,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: accent?.textColor,
+                      ),
+                    ),
+                    Text('$drinkCount ${drinkCount == 1 ? 'drink' : 'drinks'}'),
+                  ],
+                ),
+              ),
+              const Gap(8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    points,
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: accent?.textColor,

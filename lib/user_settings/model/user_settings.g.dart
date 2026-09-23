@@ -9,30 +9,30 @@ part of 'user_settings.dart';
 _UserSettings _$UserSettingsFromJson(Map<String, dynamic> json) =>
     _UserSettings(
       id: json['id'] as String,
-      defaultDrinkType: DrinkTypeCore.fromJson(
-        json['defaultDrinkType'] as Map<String, dynamic>,
+      defaultDrink: DrinkSnapshot.fromJson(
+        json['defaultDrink'] as Map<String, dynamic>,
       ),
       defaultDrinkSize: (json['defaultDrinkSize'] as num).toInt(),
-      drinkListSortOrder:
+      drinkLogListSortOrder:
           $enumDecodeNullable(
-            _$DrinkListSortOrderEnumMap,
-            json['drinkListSortOrder'],
+            _$DrinkLogListSortOrderEnumMap,
+            json['drinkLogListSortOrder'],
           ) ??
-          DrinkListSortOrder.descending,
+          DrinkLogListSortOrder.descending,
       notificationToken: json['notificationToken'] as String?,
     );
 
 Map<String, dynamic> _$UserSettingsToJson(_UserSettings instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'defaultDrinkType': instance.defaultDrinkType.toJson(),
+      'defaultDrink': instance.defaultDrink.toJson(),
       'defaultDrinkSize': instance.defaultDrinkSize,
-      'drinkListSortOrder':
-          _$DrinkListSortOrderEnumMap[instance.drinkListSortOrder]!,
+      'drinkLogListSortOrder':
+          _$DrinkLogListSortOrderEnumMap[instance.drinkLogListSortOrder]!,
       'notificationToken': instance.notificationToken,
     };
 
-const _$DrinkListSortOrderEnumMap = {
-  DrinkListSortOrder.descending: 'descending',
-  DrinkListSortOrder.ascending: 'ascending',
+const _$DrinkLogListSortOrderEnumMap = {
+  DrinkLogListSortOrder.descending: 'descending',
+  DrinkLogListSortOrder.ascending: 'ascending',
 };

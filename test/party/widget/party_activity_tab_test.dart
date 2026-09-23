@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
-import 'package:remembeer/drink_type/model/drink_type_core.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_snapshot.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/model/party_event_page.dart';
 import 'package:remembeer/party/service/party_activity_service.dart';
@@ -11,10 +11,10 @@ import 'package:remembeer/party/widget/party_activity_tab.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 void main() {
-  testWidgets('refreshes when the session drinks change', (tester) async {
+  testWidgets('refreshes when the session drink logs change', (tester) async {
     var fetches = 0;
-    final drinks = ValueNotifier<List<Drink>>([_drink('first')]);
-    addTearDown(drinks.dispose);
+    final drinkLogs = ValueNotifier<List<DrinkLog>>([_drinkLog('first')]);
+    addTearDown(drinkLogs.dispose);
     final service = PartyActivityService(
       sessionId: 'party-1',
       fetchPage:
@@ -33,11 +33,11 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ValueListenableBuilder(
-            valueListenable: drinks,
+            valueListenable: drinkLogs,
             builder: (context, value, child) => PartyActivityTab(
               sessionId: 'party-1',
               members: const [_user],
-              drinks: value,
+              drinkLogs: value,
               currentUserId: 'user-1',
               isPartyActive: true,
               service: service,
@@ -49,7 +49,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(fetches, 1);
 
-    drinks.value = [_drink('first'), _drink('second')];
+    drinkLogs.value = [_drinkLog('first'), _drinkLog('second')];
     await tester.pumpAndSettle();
 
     expect(fetches, 2);
@@ -95,10 +95,10 @@ void main() {
               body: PartyActivityTab(
                 sessionId: 'party-1',
                 members: const [_user, _otherUser],
-                drinks: [
-                  _drink('current', revision: 2),
-                  _drink('other', ownerId: 'other'),
-                  _drink('reversed'),
+                drinkLogs: [
+                  _drinkLog('current', revision: 2),
+                  _drinkLog('other', ownerId: 'other'),
+                  _drinkLog('reversed'),
                 ],
                 currentUserId: 'user-1',
                 isPartyActive: true,
@@ -107,13 +107,13 @@ void main() {
             ),
           ),
           GoRoute(
-            path: '/drink/sessions/:sessionId/drinks/:drinkId/edit',
+            path: '/drink-logs/sessions/:sessionId/drink-logs/:drinkLogId/edit',
             builder: (context, state) => Scaffold(
               body: FilledButton(
                 onPressed: () => context.pop(true),
                 child: Text(
                   'Save ${state.pathParameters['sessionId']}/'
-                  '${state.pathParameters['drinkId']}',
+                  '${state.pathParameters['drinkLogId']}',
                 ),
               ),
             ),
@@ -160,7 +160,7 @@ void main() {
           body: PartyActivityTab(
             sessionId: 'party-1',
             members: const [_user],
-            drinks: [_drink('current', revision: 2)],
+            drinkLogs: [_drinkLog('current', revision: 2)],
             currentUserId: 'user-1',
             isPartyActive: false,
             service: service,
@@ -179,7 +179,7 @@ PartyEvent _event(
   required String sourceId,
   required int revision,
   String recipientId = 'user-1',
-  PartyEventKind kind = PartyEventKind.drink,
+  PartyEventKind kind = PartyEventKind.drinkLog,
   String? reversesEventId,
 }) => PartyEvent(
   id: id,
@@ -187,7 +187,7 @@ PartyEvent _event(
   recipientUserId: recipientId,
   participantIds: [recipientId],
   pointsUnits: kind == PartyEventKind.reversal ? -1000 : 1000,
-  sourceCollection: PartyEventSourceCollection.drinks,
+  sourceCollection: PartyEventSourceCollection.drinkLogs,
   sourceId: sourceId,
   reversesEventId: reversesEventId,
   occurredAt: DateTime.utc(2026, 9, 2, 18, 30),
@@ -195,18 +195,19 @@ PartyEvent _event(
   payload: {'drinkName': 'Beer', 'revision': revision},
 );
 
-Drink _drink(String id, {int revision = 1, String ownerId = 'user-1'}) => Drink(
-  id: id,
-  consumedByUserId: ownerId,
-  consumedAt: DateTime.utc(2026, 9, 2, 18, 30),
-  drinkType: const DrinkTypeCore(
-    name: 'Beer',
-    category: DrinkCategory.beer,
-    alcoholPercentage: 5,
-  ),
-  volumeInMilliliters: 500,
-  partyRevision: revision,
-);
+DrinkLog _drinkLog(String id, {int revision = 1, String ownerId = 'user-1'}) =>
+    DrinkLog(
+      id: id,
+      consumedByUserId: ownerId,
+      consumedAt: DateTime.utc(2026, 9, 2, 18, 30),
+      drink: const DrinkSnapshot(
+        name: 'Beer',
+        category: DrinkCategory.beer,
+        alcoholPercentage: 5,
+      ),
+      volumeInMilliliters: 500,
+      partyRevision: revision,
+    );
 
 const _user = UserModel(
   id: 'user-1',

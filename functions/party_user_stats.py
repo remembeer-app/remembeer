@@ -17,22 +17,22 @@ def effective_date(consumed_at: datetime, boundary: Mapping[str, Any]) -> dateti
     return consumed_at - timedelta(days=1) if consumed_at < boundary_at else consumed_at
 
 
-def apply_drink_stats(
+def apply_drink_log_stats(
     user: Mapping[str, Any],
     *,
-    old_drink: Mapping[str, Any] | None = None,
-    new_drink: Mapping[str, Any] | None = None,
+    old_drink_log: Mapping[str, Any] | None = None,
+    new_drink_log: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Remove and/or add a drink using UserModel/MonthlyStats clamp semantics."""
+    """Remove and/or add a drink log using UserModel/MonthlyStats semantics."""
 
     updated = deepcopy(dict(user))
     boundary = updated.get("endOfDayBoundary")
     if not isinstance(boundary, Mapping):
         boundary = {"hour": DEFAULT_END_OF_DAY_HOUR, "minute": 0}
-    if old_drink is not None:
-        _apply_delta(updated, old_drink, boundary, -1)
-    if new_drink is not None:
-        _apply_delta(updated, new_drink, boundary, 1)
+    if old_drink_log is not None:
+        _apply_delta(updated, old_drink_log, boundary, -1)
+    if new_drink_log is not None:
+        _apply_delta(updated, new_drink_log, boundary, 1)
     return updated
 
 
@@ -69,18 +69,18 @@ def user_stats(user: Mapping[str, Any], *, now: datetime) -> dict[str, Any]:
 
 def _apply_delta(
     user: dict[str, Any],
-    drink: Mapping[str, Any],
+    drink_log: Mapping[str, Any],
     boundary: Mapping[str, Any],
     direction: int,
 ) -> None:
-    consumed_at = _drink_datetime(drink)
+    consumed_at = _drink_log_datetime(drink_log)
     logical_date = effective_date(consumed_at, boundary)
-    drink_type = drink.get("drinkType")
-    if not isinstance(drink_type, Mapping):
-        raise TypeError("Stored drinkType is invalid")
-    category = drink_type.get("category")
-    volume = _number(drink.get("volumeInMilliliters"), "volumeInMilliliters")
-    percentage = _number(drink_type.get("alcoholPercentage"), "alcoholPercentage")
+    drink = drink_log.get("drink")
+    if not isinstance(drink, Mapping):
+        raise TypeError("Stored drink is invalid")
+    category = drink.get("category")
+    volume = _number(drink_log.get("volumeInMilliliters"), "volumeInMilliliters")
+    percentage = _number(drink.get("alcoholPercentage"), "alcoholPercentage")
     beers = volume / BEER_VOLUME_ML if category == "beer" else 0.0
     alcohol = volume * percentage / 100
     after_six = consumed_at > logical_date.replace(
@@ -180,8 +180,8 @@ def _boundary_parts(boundary: Mapping[str, Any]) -> tuple[int, int]:
     return hour, minute
 
 
-def _drink_datetime(drink: Mapping[str, Any]) -> datetime:
-    value = drink.get("consumedAt")
+def _drink_log_datetime(drink_log: Mapping[str, Any]) -> datetime:
+    value = drink_log.get("consumedAt")
     if isinstance(value, datetime):
         return value
     if isinstance(value, str):

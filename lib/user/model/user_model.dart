@@ -70,7 +70,7 @@ abstract class UserModel with _$UserModel implements Document {
   }
 
   // TODO(ohtenkay): try to rewrite this using the deepcopy from freezed
-  UserModel addDrink({
+  UserModel addDrinkLog({
     required int year,
     required int month,
     required int day,
@@ -79,7 +79,7 @@ abstract class UserModel with _$UserModel implements Document {
     required bool after6pm,
   }) {
     final currentStats = getMonthlyStats(year, month);
-    final updatedStats = currentStats.addDrink(
+    final updatedStats = currentStats.addDrinkLog(
       day: day,
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,
@@ -88,7 +88,7 @@ abstract class UserModel with _$UserModel implements Document {
     return _updateMonthlyStats(updatedStats);
   }
 
-  UserModel removeDrink({
+  UserModel removeDrinkLog({
     required int year,
     required int month,
     required int day,
@@ -97,7 +97,7 @@ abstract class UserModel with _$UserModel implements Document {
     required bool after6pm,
   }) {
     final currentStats = getMonthlyStats(year, month);
-    final updatedStats = currentStats.removeDrink(
+    final updatedStats = currentStats.removeDrinkLog(
       day: day,
       beersEquivalent: beersEquivalent,
       alcoholMl: alcoholMl,

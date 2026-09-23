@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/controller/members_crud_controller.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
-import 'package:remembeer/drink/model/drink.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/session/constants.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
@@ -72,23 +72,30 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
         return sessions.where((session) => session.isActiveAt(at)).toList();
       });
 
-  void addDrinkInBatch(String sessionId, Drink drink, WriteBatch batch) {
+  void addDrinkLogInBatch(
+    String sessionId,
+    DrinkLog drinkLog,
+    WriteBatch batch,
+  ) {
     batch.update(writeCollection.doc(sessionId), {
-      'drinks': FieldValue.arrayUnion([drink.toJson()]),
+      drinkLogsField: FieldValue.arrayUnion([drinkLog.toJson()]),
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
 
-  void createSoloSessionWithDrinkInBatch(Drink drink, WriteBatch batch) {
+  void createSoloSessionWithDrinkLogInBatch(
+    DrinkLog drinkLog,
+    WriteBatch batch,
+  ) {
     final userId = authService.authenticatedUser.uid;
     // TODO(metju-ac): Refactor to not set all values for solo sessions
     final sessionCreate = SessionCreate(
       name: '',
-      startedAt: drink.consumedAt,
-      endedAt: drink.consumedAt,
+      startedAt: drinkLog.consumedAt,
+      endedAt: drinkLog.consumedAt,
       memberIds: {userId},
       adminIds: {userId},
-      drinks: [drink],
+      drinkLogs: [drinkLog],
     );
 
     final docRef = writeCollection.doc();
@@ -100,9 +107,13 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
     );
   }
 
-  void removeDrinkInBatch(String sessionId, Drink drink, WriteBatch batch) {
+  void removeDrinkLogInBatch(
+    String sessionId,
+    DrinkLog drinkLog,
+    WriteBatch batch,
+  ) {
     batch.update(writeCollection.doc(sessionId), {
-      'drinks': FieldValue.arrayRemove([drink.toJson()]),
+      drinkLogsField: FieldValue.arrayRemove([drinkLog.toJson()]),
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
@@ -113,17 +124,17 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
     required String name,
     required String description,
     required DateTime startedAt,
-    required List<Drink> drinksToRemove,
+    required List<DrinkLog> drinkLogsToRemove,
     DateTime? endedAt,
   }) {
-    final displacedJson = drinksToRemove.map((d) => d.toJson()).toList();
+    final displacedJson = drinkLogsToRemove.map((d) => d.toJson()).toList();
 
     batch.update(writeCollection.doc(sessionId), {
       'name': name,
       'description': description,
       'startedAt': startedAt.toIso8601String(),
       'endedAt': endedAt?.toIso8601String(),
-      'drinks': FieldValue.arrayRemove(displacedJson),
+      drinkLogsField: FieldValue.arrayRemove(displacedJson),
       'updatedAt': FieldValue.serverTimestamp(),
     });
   }
@@ -162,13 +173,13 @@ class SessionController extends MembersCrudController<Session, SessionCreate> {
         return;
       }
 
-      final remainingDrinks = session.drinks
-          .where((drink) => drink.consumedByUserId != userId)
-          .map((drink) => drink.toJson())
+      final remainingDrinkLogs = session.drinkLogs
+          .where((drinkLog) => drinkLog.consumedByUserId != userId)
+          .map((drinkLog) => drinkLog.toJson())
           .toList();
 
       transaction.update(writeCollection.doc(sessionId), {
-        drinksField: remainingDrinks,
+        drinkLogsField: remainingDrinkLogs,
         memberIdsField: FieldValue.arrayRemove([userId]),
         adminIdsField: FieldValue.arrayRemove([userId]),
         userIdField: ?newOwnerId,

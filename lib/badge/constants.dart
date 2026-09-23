@@ -1,1 +1,1 @@
-const mastiToJakDrakDrinkTypeName = 'Alpský Ryzlink';
+const mastiToJakDrakDrinkName = 'Alpský Ryzlink';

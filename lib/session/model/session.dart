@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/converter/timestamp_converter.dart';
 import 'package:remembeer/common/model/entity_with_members.dart';
-import 'package:remembeer/drink/model/drink.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/session/constants.dart';
 
 part 'session.freezed.dart';
@@ -26,7 +26,7 @@ abstract class Session with _$Session implements EntityWithMembers {
     required String name,
     required DateTime startedAt,
     DateTime? endedAt,
-    @Default([]) List<Drink> drinks,
+    @Default([]) List<DrinkLog> drinkLogs,
     @Default(true) bool isSoloSession,
     @Default(false) bool isParty,
     @Default('') String description,
@@ -36,12 +36,14 @@ abstract class Session with _$Session implements EntityWithMembers {
   factory Session.fromJson(Map<String, dynamic> json) =>
       _$SessionFromJson(json);
 
-  int get drinksCount => drinks.length;
+  int get drinkLogsCount => drinkLogs.length;
 
-  double get totalAlcoholMl =>
-      drinks.fold<double>(0, (total, drink) => total + drink.alcoholMl);
+  double get totalAlcoholMl => drinkLogs.fold<double>(
+    0,
+    (total, drinkLog) => total + drinkLog.alcoholMl,
+  );
 
-  bool get hasFreeSpace => drinksCount < maxSessionDrinks;
+  bool get hasFreeSpace => drinkLogsCount < maxSessionDrinks;
 
   bool get isMultipleDaySession {
     final startDate = startedAt;

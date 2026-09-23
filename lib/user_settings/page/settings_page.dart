@@ -117,7 +117,7 @@ class SettingsPage extends StatelessWidget {
       children: [
         _buildSettingsCard(
           title: 'Custom drinks',
-          onTap: () => const CustomDrinkTypesRoute().push<void>(context),
+          onTap: () => const CustomDrinksRoute().push<void>(context),
         ),
         _divider,
         _buildSettingsCard(
@@ -127,7 +127,7 @@ class SettingsPage extends StatelessWidget {
         _divider,
         _buildSettingsCard(
           title: 'Drink list order',
-          onTap: () => const DrinkSortSettingsRoute().push<void>(context),
+          onTap: () => const DrinkLogSortSettingsRoute().push<void>(context),
         ),
       ],
     );

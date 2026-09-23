@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/drink_type/model/drink_type_core.dart';
-import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
+import 'package:remembeer/drink/model/drink_snapshot.dart';
+import 'package:remembeer/drink/widget/drink_picker.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user_settings/service/user_settings_service.dart';
 import 'package:remembeer/user_settings/widget/settings_page_template.dart';
@@ -19,7 +19,7 @@ class _DefaultDrinkPageState extends State<DefaultDrinkPage> {
   final _userSettingsService = get<UserSettingsService>();
   final _formKey = GlobalKey<FormState>();
 
-  DrinkTypeCore? _selectedDrinkType;
+  DrinkSnapshot? _selectedDrink;
   int? _selectedVolume;
 
   @override
@@ -34,14 +34,14 @@ class _DefaultDrinkPageState extends State<DefaultDrinkPage> {
       child: AsyncBuilder(
         future: _userSettingsService.currentUserSettings,
         builder: (context, userSettings) {
-          _selectedDrinkType ??= userSettings.defaultDrinkType;
+          _selectedDrink ??= userSettings.defaultDrink;
           _selectedVolume ??= userSettings.defaultDrinkSize;
 
           return Form(
             key: _formKey,
             child: Column(
               children: [
-                _buildDrinkTypeDropdown(),
+                _buildDrinkDropdown(),
                 const Gap(16),
                 _buildVolumeInput(),
               ],
@@ -57,7 +57,7 @@ class _DefaultDrinkPageState extends State<DefaultDrinkPage> {
       return;
     }
 
-    await _userSettingsService.updateDefaultDrinkType(_selectedDrinkType!);
+    await _userSettingsService.updateDefaultDrink(_selectedDrink!);
     await _userSettingsService.updateDefaultDrinkSize(_selectedVolume!);
 
     if (mounted) {
@@ -89,12 +89,12 @@ class _DefaultDrinkPageState extends State<DefaultDrinkPage> {
     );
   }
 
-  Widget _buildDrinkTypeDropdown() {
-    return DrinkTypePicker(
-      selectedDrinkType: _selectedDrinkType!,
+  Widget _buildDrinkDropdown() {
+    return DrinkPicker(
+      selectedDrink: _selectedDrink!,
       onChanged: (newValue) {
         setState(() {
-          _selectedDrinkType = newValue;
+          _selectedDrink = newValue;
         });
       },
     );

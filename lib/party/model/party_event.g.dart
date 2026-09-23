@@ -50,7 +50,7 @@ Map<String, dynamic> _$PartyEventToJson(
 };
 
 const _$PartyEventKindEnumMap = {
-  PartyEventKind.drink: 'drink',
+  PartyEventKind.drinkLog: 'drinkLog',
   PartyEventKind.socialQuest: 'socialQuest',
   PartyEventKind.adminChallenge: 'adminChallenge',
   PartyEventKind.beerpongPlacement: 'beerpongPlacement',
@@ -58,7 +58,7 @@ const _$PartyEventKindEnumMap = {
 };
 
 const _$PartyEventSourceCollectionEnumMap = {
-  PartyEventSourceCollection.drinks: 'drinks',
+  PartyEventSourceCollection.drinkLogs: 'drinkLogs',
   PartyEventSourceCollection.quests: 'quests',
   PartyEventSourceCollection.challenges: 'challenges',
   PartyEventSourceCollection.tournaments: 'tournaments',

@@ -9,7 +9,7 @@ import 'package:remembeer/session/model/session_create.dart';
 import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
-import 'package:remembeer/user_settings/model/drink_list_sort.dart';
+import 'package:remembeer/user_settings/model/drink_log_list_sort.dart';
 import 'package:rxdart/rxdart.dart';
 
 class SessionService {
@@ -43,7 +43,7 @@ class SessionService {
       userSettingsController.currentUserSettingsStream,
       userService.currentUserStream,
       (sessions, _, userSettings, user) {
-        final drinkListSort = userSettings.drinkListSortOrder;
+        final drinkLogListSort = userSettings.drinkLogListSortOrder;
         final (startTime, endTime) = dateService.selectedDateBoundaries(
           user.endOfDayBoundary,
         );
@@ -55,10 +55,10 @@ class SessionService {
           return startsBeforeDayEnds && endsAfterDayStarts;
         }).toList();
 
-        switch (drinkListSort) {
-          case DrinkListSortOrder.descending:
+        switch (drinkLogListSort) {
+          case DrinkLogListSortOrder.descending:
             filtered.sort((a, b) => b.startedAt.compareTo(a.startedAt));
-          case DrinkListSortOrder.ascending:
+          case DrinkLogListSortOrder.ascending:
             filtered.sort((a, b) => a.startedAt.compareTo(b.startedAt));
         }
 
@@ -107,10 +107,10 @@ class SessionService {
     final newStartedAt = startedAt ?? session.startedAt;
     final newEndedAt = endedAt ?? session.endedAt;
 
-    final displacedDrinks = session.drinks.where((drink) {
-      final beforeStart = !drink.consumedAt.isAfter(newStartedAt);
+    final displacedDrinkLogs = session.drinkLogs.where((drinkLog) {
+      final beforeStart = !drinkLog.consumedAt.isAfter(newStartedAt);
       final afterEnd =
-          newEndedAt != null && !drink.consumedAt.isBefore(newEndedAt);
+          newEndedAt != null && !drinkLog.consumedAt.isBefore(newEndedAt);
       return beforeStart || afterEnd;
     }).toList();
 
@@ -123,11 +123,11 @@ class SessionService {
       description: newDescription,
       startedAt: newStartedAt,
       endedAt: newEndedAt,
-      drinksToRemove: displacedDrinks,
+      drinkLogsToRemove: displacedDrinkLogs,
     );
 
-    for (final drink in displacedDrinks) {
-      sessionController.createSoloSessionWithDrinkInBatch(drink, batch);
+    for (final drinkLog in displacedDrinkLogs) {
+      sessionController.createSoloSessionWithDrinkLogInBatch(drinkLog, batch);
     }
 
     await batch.commit();
