@@ -1,4 +1,4 @@
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 
 const partySchemaVersion = 1;
 

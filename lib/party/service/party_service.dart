@@ -1,5 +1,5 @@
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/model/party_member.dart';

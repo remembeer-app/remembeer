@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
-import 'package:remembeer/drink_type/model/drink_type_core.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_snapshot.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 
@@ -98,11 +98,11 @@ void main() {
         },
       ),
     );
-    final drink = Drink(
-      id: 'drink-1',
+    final drinkLog = DrinkLog(
+      id: 'drink-log-1',
       consumedByUserId: 'user-1',
       consumedAt: DateTime(2026, 9, 2, 20),
-      drinkType: const DrinkTypeCore(
+      drink: const DrinkSnapshot(
         name: 'Wine',
         category: DrinkCategory.wine,
         alcoholPercentage: 12,
@@ -111,21 +111,21 @@ void main() {
       location: const GeoPoint(49.2, 16.6),
     );
 
-    await controller.createPartyDrink(
+    await controller.createPartyDrinkLog(
       sessionId: 'party-1',
       commandId: 'command-1',
-      drinkTypeId: 'type-1',
-      drink: drink,
+      catalogDrinkId: 'drink-1',
+      drinkLog: drinkLog,
     );
 
     final consumedAt = invokedData?['consumedAt'];
     expect(consumedAt, isA<String>());
     expect(consumedAt, matches(RegExp(r'(Z|[+-]\d{2}:\d{2})$')));
-    expect(DateTime.parse(consumedAt! as String), drink.consumedAt.toUtc());
-    expect(invokedName, 'create_party_drink');
+    expect(DateTime.parse(consumedAt! as String), drinkLog.consumedAt.toUtc());
+    expect(invokedName, 'create_party_drink_log');
     expect(invokedData, {
+      'drinkLogId': 'drink-log-1',
       'drinkId': 'drink-1',
-      'drinkTypeId': 'type-1',
       'consumedAt': consumedAt,
       'volumeInMilliliters': 200,
       'location': {'latitude': 49.2, 'longitude': 16.6},

@@ -1,8 +1,10 @@
 {
   "files": [
     "api.dart",
-    "modules/auth.dart",
+    "modules/drink.dart",
+    "modules/user.dart",
     "runtime.dart",
-    "schema.dart"
+    "schema.dart",
+    "types.dart"
   ]
 }

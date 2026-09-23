@@ -1,7 +1,7 @@
 {
   "indexes": [
     {
-      "collectionGroup": "drink_types",
+      "collectionGroup": "drinks",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -24,7 +24,7 @@
       "density": "SPARSE_ALL"
     },
     {
-      "collectionGroup": "drinks",
+      "collectionGroup": "drinkLogs",
       "queryScope": "COLLECTION",
       "fields": [
         {
@@ -51,7 +51,7 @@
       "density": "SPARSE_ALL"
     },
     {
-      "collectionGroup": "drinks",
+      "collectionGroup": "drinkLogs",
       "queryScope": "COLLECTION",
       "fields": [
         {

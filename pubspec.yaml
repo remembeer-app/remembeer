@@ -19,7 +19,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.10.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -36,6 +36,7 @@ dependencies:
   dartvex: ^0.2.0
   dartvex_auth_better: ^0.2.0
   dartvex_flutter: ^0.2.0
+  dartvex_local: ^0.2.0
 
   diacritic: ^0.1.6
   firebase_auth: ^6.4.0
@@ -66,7 +67,11 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.15.1
-  dartvex_codegen: ^0.2.0
+  dartvex_codegen:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: b052348bf1c26290b5ee7b983a54a4ddd9e9272d
+      path: packages/dartvex_codegen
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter

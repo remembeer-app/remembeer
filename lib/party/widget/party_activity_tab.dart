@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/drink/model/drink.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/controller/party_event_controller.dart';
 import 'package:remembeer/party/model/party_event.dart';
@@ -16,7 +16,7 @@ class PartyActivityTab extends StatefulWidget {
     super.key,
     required this.sessionId,
     required this.members,
-    required this.drinks,
+    required this.drinkLogs,
     required this.currentUserId,
     required this.isPartyActive,
     this.service,
@@ -24,7 +24,7 @@ class PartyActivityTab extends StatefulWidget {
 
   final String sessionId;
   final List<UserModel> members;
-  final List<Drink> drinks;
+  final List<DrinkLog> drinkLogs;
   final String currentUserId;
   final bool isPartyActive;
   final PartyActivityService? service;
@@ -54,7 +54,7 @@ class _PartyActivityTabState extends State<PartyActivityTab> {
   @override
   void didUpdateWidget(covariant PartyActivityTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (!listEquals(oldWidget.drinks, widget.drinks)) {
+    if (!listEquals(oldWidget.drinkLogs, widget.drinkLogs)) {
       _service.loadInitial();
     }
   }
@@ -168,24 +168,24 @@ class _PartyActivityTabState extends State<PartyActivityTab> {
           );
         }
         final group = groups[index];
-        final editableDrink = _editableDrink(group);
+        final editableDrinkLog = _editableDrinkLog(group);
         return PartyEventCard(
           group: group,
           membersById: membersById,
-          onEdit: editableDrink == null
+          onEdit: editableDrinkLog == null
               ? null
-              : () => _editDrink(context, editableDrink.id),
+              : () => _editDrinkLog(context, editableDrinkLog.id),
         );
       },
     );
   }
 
-  Drink? _editableDrink(PartyEventGroup group) {
+  DrinkLog? _editableDrinkLog(PartyEventGroup group) {
     final event = group.events.first;
     if (!widget.isPartyActive ||
         group.isReversed ||
-        event.kind != PartyEventKind.drink ||
-        event.sourceCollection != PartyEventSourceCollection.drinks ||
+        event.kind != PartyEventKind.drinkLog ||
+        event.sourceCollection != PartyEventSourceCollection.drinkLogs ||
         event.recipientUserId != widget.currentUserId) {
       return null;
     }
@@ -193,20 +193,20 @@ class _PartyActivityTabState extends State<PartyActivityTab> {
     if (revision is! int) {
       return null;
     }
-    for (final drink in widget.drinks) {
-      if (drink.id == event.sourceId &&
-          drink.consumedByUserId == widget.currentUserId &&
-          drink.partyRevision == revision) {
-        return drink;
+    for (final drinkLog in widget.drinkLogs) {
+      if (drinkLog.id == event.sourceId &&
+          drinkLog.consumedByUserId == widget.currentUserId &&
+          drinkLog.partyRevision == revision) {
+        return drinkLog;
       }
     }
     return null;
   }
 
-  Future<void> _editDrink(BuildContext context, String drinkId) async {
-    final updated = await UpdateDrinkRoute(
+  Future<void> _editDrinkLog(BuildContext context, String drinkLogId) async {
+    final updated = await UpdateDrinkLogRoute(
       sessionId: widget.sessionId,
-      drinkId: drinkId,
+      drinkLogId: drinkLogId,
     ).push<bool>(context);
     if (updated ?? false) {
       await _service.loadInitial();

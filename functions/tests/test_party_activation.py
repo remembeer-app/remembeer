@@ -47,7 +47,7 @@ def _session(**overrides: Any) -> dict[str, Any]:
         "isParty": False,
         "startedAt": "2026-01-01T18:00:00",
         "endedAt": None,
-        "drinks": [],
+        "drinkLogs": [],
     }
     session.update(overrides)
     return session
@@ -69,18 +69,18 @@ def _active_party() -> dict[str, Any]:
 
 
 def test_admin_activation_creates_complete_party_and_base_awards_once() -> None:
-    drink = {
-        "id": "drink-a",
+    drink_log = {
+        "id": "drink-log-a",
         "consumedByUserId": "member",
         "consumedAt": "2026-01-01T20:00:00",
-        "drinkType": {
+        "drink": {
             "name": "Beer",
             "category": "beer",
             "alcoholPercentage": 5.0,
         },
         "volumeInMilliliters": 500,
     }
-    db = Database({"sessions/session-a": _session(drinks=[drink])})
+    db = Database({"sessions/session-a": _session(drinkLogs=[drink_log])})
     transaction = Transaction(db.store)
     request = Request(
         Auth("admin"),
@@ -127,24 +127,26 @@ def test_admin_activation_creates_complete_party_and_base_awards_once() -> None:
         "joinedAt": db.store["parties/session-a/members/member"]["joinedAt"],
         "updatedAt": db.store["parties/session-a/members/member"]["updatedAt"],
     }
-    event = db.store["parties/session-a/events/drink:drink-a:v:1"]
+    event = db.store["parties/session-a/events/drinkLog:drink-log-a:v:1"]
     assert event["pointsUnits"] == 25_000
     assert isinstance(event["occurredAt"], datetime)
     assert event["payload"]["selectedClass"] is None
     assert event["payload"]["appliedMultiplier"] == 1
     assert db.store["parties/session-a/questTemplates/meet"] == template
     assert (
-        transaction.created_paths.count("parties/session-a/events/drink:drink-a:v:1")
+        transaction.created_paths.count(
+            "parties/session-a/events/drinkLog:drink-log-a:v:1"
+        )
         == 1
     )
 
 
-def _drink(consumed_at: str) -> dict[str, Any]:
+def _drink_log(consumed_at: str) -> dict[str, Any]:
     return {
-        "id": "drink-a",
+        "id": "drink-log-a",
         "consumedByUserId": "member",
         "consumedAt": consumed_at,
-        "drinkType": {
+        "drink": {
             "name": "Beer",
             "category": "beer",
             "alcoholPercentage": 5.0,
@@ -164,7 +166,7 @@ def _activate(session: dict[str, Any], **data: Any) -> dict[str, Any]:
         template_seed_provider=lambda _: [],
         transaction_runner=_runner(Transaction(db.store)),
     )
-    return db.store["parties/session-a/events/drink:drink-a:v:1"]
+    return db.store["parties/session-a/events/drinkLog:drink-log-a:v:1"]
 
 
 @pytest.mark.parametrize(
@@ -201,12 +203,12 @@ def _activate(session: dict[str, Any], **data: Any) -> dict[str, Any]:
         ),
     ],
 )
-def test_activation_places_initial_drink_awards_at_the_right_instant(
+def test_activation_places_initial_drink_log_awards_at_the_right_instant(
     consumed_at: str,
     data: dict[str, Any],
     expected: datetime,
 ) -> None:
-    event = _activate(_session(drinks=[_drink(consumed_at)]), **data)
+    event = _activate(_session(drinkLogs=[_drink_log(consumed_at)]), **data)
 
     assert event["occurredAt"] == expected
     assert event["occurredAt"].tzinfo is not None
@@ -214,7 +216,7 @@ def test_activation_places_initial_drink_awards_at_the_right_instant(
 
 def test_activation_applies_client_offset_to_the_stored_wall_clock_time() -> None:
     event = _activate(
-        _session(drinks=[_drink("2026-01-01T20:00:00")]),
+        _session(drinkLogs=[_drink_log("2026-01-01T20:00:00")]),
         timeZoneOffsetMinutes=120,
     )
 
@@ -226,7 +228,7 @@ def test_activation_applies_client_offset_to_the_stored_wall_clock_time() -> Non
 def test_activation_rejects_invalid_time_zone_offsets(offset: Any) -> None:
     with pytest.raises(https_fn.HttpsError) as error:
         _activate(
-            _session(drinks=[_drink("2026-01-01T20:00:00")]),
+            _session(drinkLogs=[_drink_log("2026-01-01T20:00:00")]),
             timeZoneOffsetMinutes=offset,
         )
 

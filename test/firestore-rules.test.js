@@ -25,7 +25,7 @@ const session = (overrides = {}) => ({
   description: '',
   startedAt: '2026-09-04T18:00:00.000Z',
   endedAt: null,
-  drinks: [],
+  drinkLogs: [],
   isSoloSession: false,
   isParty: true,
   deletedAt: null,
@@ -155,9 +155,9 @@ describe('Session-backed Party reads', () => {
     const queries = [
       party.collection('members').orderBy('scoreUnits', 'desc').orderBy('userId'),
       party.collection('events').orderBy('occurredAt', 'desc'),
-      party.collection('events').where('kind', '==', 'drink').orderBy('occurredAt', 'desc'),
+      party.collection('events').where('kind', '==', 'drinkLog').orderBy('occurredAt', 'desc'),
       party.collection('events').where('participantIds', 'array-contains', 'member').orderBy('occurredAt', 'desc'),
-      party.collection('events').where('participantIds', 'array-contains-any', ['member']).where('kind', 'in', ['drink']).orderBy('occurredAt', 'desc'),
+      party.collection('events').where('participantIds', 'array-contains-any', ['member']).where('kind', 'in', ['drinkLog']).orderBy('occurredAt', 'desc'),
       party.collection('events').where('sourceCollection', '==', 'challenges').where('sourceId', '==', 'challenge-1'),
       party.collection('questTemplates').orderBy('title'),
       party.collection('quests').orderBy('createdAt', 'desc'),
@@ -285,9 +285,9 @@ describe('Party Session protection', () => {
     );
   });
 
-  test('Party lifecycle, membership, and embedded drinks are callable-only', async () => {
+  test('Party lifecycle, membership, and embedded drink logs are callable-only', async () => {
     const protectedUpdates = [
-      { drinks: [{ id: 'forged' }] },
+      { drinkLogs: [{ id: 'forged' }] },
       { startedAt: '2026-09-04T19:00:00.000Z' },
       { endedAt: '2026-09-05T01:00:00.000Z' },
       { memberIds: ['owner', 'admin', 'member', 'outsider'] },
@@ -335,8 +335,8 @@ describe('Party Session protection', () => {
       .doc('sessions/ordinary');
 
     await assertSucceeds(ownerRef.update({ endedAt: '2026-09-05T01:00:00Z' }));
-    await assertSucceeds(adminRef.update({ drinks: [], updatedAt: 'admin' }));
-    await assertSucceeds(memberRef.update({ drinks: [], updatedAt: 'member' }));
+    await assertSucceeds(adminRef.update({ drinkLogs: [], updatedAt: 'admin' }));
+    await assertSucceeds(memberRef.update({ drinkLogs: [], updatedAt: 'member' }));
     await assertSucceeds(
       testEnv.authenticatedContext('owner').firestore().collection('sessions').add(
         session({ isParty: false, memberIds: ['owner'], adminIds: ['owner'] }),
@@ -419,18 +419,18 @@ describe('account deletion', () => {
   const otherDb = () => testEnv.authenticatedContext('other').firestore();
   const thirdDb = () => testEnv.authenticatedContext('third').firestore();
 
-  const drink = (id, consumedByUserId) => ({
+  const drinkLog = (id, consumedByUserId) => ({
     id,
     consumedByUserId,
     consumedAt: '2026-09-04T19:00:00.000Z',
-    drinkType: { name: 'Beer', category: 'beer', alcoholPercentage: 4.5 },
+    drink: { name: 'Beer', category: 'beer', alcoholPercentage: 4.5 },
     volumeInMilliliters: 500,
   });
 
   beforeEach(async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       const db = context.firestore();
-      await db.doc('drink_types/own').set({
+      await db.doc('drinks/own').set({
         userId: 'member',
         name: 'IPA',
         category: 'beer',
@@ -468,7 +468,7 @@ describe('account deletion', () => {
           memberIds: ['member', 'other', 'third'],
           adminIds: ['member', 'other'],
           isParty: false,
-          drinks: [drink('d1', 'member'), drink('d2', 'other')],
+          drinkLogs: [drinkLog('d1', 'member'), drinkLog('d2', 'other')],
         }),
       );
       await db.doc('sessions/party-owned').set(
@@ -486,15 +486,15 @@ describe('account deletion', () => {
     });
   });
 
-  test('owner can hard-delete own drink type, leaderboard and non-party session', async () => {
-    await assertSucceeds(memberDb().doc('drink_types/own').delete());
+  test('owner can hard-delete own drink, leaderboard and non-party session', async () => {
+    await assertSucceeds(memberDb().doc('drinks/own').delete());
     await assertSucceeds(memberDb().doc('leaderboards/board').delete());
     await assertSucceeds(memberDb().doc('sessions/solo').delete());
     await assertSucceeds(memberDb().doc('sessions/shared').delete());
   });
 
-  test('non-owner cannot hard-delete drink type, leaderboard or session', async () => {
-    await assertFails(otherDb().doc('drink_types/own').delete());
+  test('non-owner cannot hard-delete drink, leaderboard or session', async () => {
+    await assertFails(otherDb().doc('drinks/own').delete());
     await assertFails(otherDb().doc('leaderboards/board').delete());
     await assertFails(otherDb().doc('sessions/shared').delete());
   });
@@ -509,14 +509,14 @@ describe('account deletion', () => {
         userId: 'other',
         memberIds: ['other', 'third'],
         adminIds: ['other'],
-        drinks: [drink('d2', 'other')],
+        drinkLogs: [drinkLog('d2', 'other')],
         updatedAt: 'after',
       }),
     );
     const snapshot = await otherDb().doc('sessions/shared').get();
     assert.equal(snapshot.data().userId, 'other');
     assert.deepEqual(snapshot.data().memberIds, ['other', 'third']);
-    assert.equal(snapshot.data().drinks.length, 1);
+    assert.equal(snapshot.data().drinkLogs.length, 1);
   });
 
   test('owner can hand a leaderboard over while leaving', async () => {
@@ -566,16 +566,16 @@ describe('account deletion', () => {
         userId: 'other',
         memberIds: ['other'],
         adminIds: [],
-        drinks: [],
+        drinkLogs: [],
         updatedAt: 'after',
       }),
     );
   });
 
-  test('an admin member can strip own drinks and leave, removing self from admins', async () => {
+  test('an admin member can strip own drink logs and leave, removing self from admins', async () => {
     await assertSucceeds(
       otherDb().doc('sessions/shared').update({
-        drinks: [drink('d1', 'member')],
+        drinkLogs: [drinkLog('d1', 'member')],
         memberIds: arrayRemove('other'),
         adminIds: arrayRemove('other'),
         updatedAt: 'after',
@@ -584,13 +584,13 @@ describe('account deletion', () => {
     const snapshot = await memberDb().doc('sessions/shared').get();
     assert.deepEqual(snapshot.data().memberIds, ['member', 'third']);
     assert.deepEqual(snapshot.data().adminIds, ['member']);
-    assert.equal(snapshot.data().drinks.length, 1);
+    assert.equal(snapshot.data().drinkLogs.length, 1);
   });
 
-  test('a plain member can strip own drinks and leave although not an admin', async () => {
+  test('a plain member can strip own drink logs and leave although not an admin', async () => {
     await assertSucceeds(
       thirdDb().doc('sessions/shared').update({
-        drinks: [drink('d1', 'member'), drink('d2', 'other')],
+        drinkLogs: [drinkLog('d1', 'member'), drinkLog('d2', 'other')],
         memberIds: arrayRemove('third'),
         adminIds: arrayRemove('third'),
         updatedAt: 'after',

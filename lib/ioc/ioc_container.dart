@@ -1,4 +1,6 @@
+import 'package:dartvex/dartvex.dart';
 import 'package:dartvex_auth_better/dartvex_auth_better.dart';
+import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
@@ -6,11 +8,14 @@ import 'package:remembeer/account_deletion/service/account_deletion_service.dart
 import 'package:remembeer/activity/service/activity_service.dart';
 import 'package:remembeer/app_icon/service/app_icon_service.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
+import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/date/service/date_service.dart';
+import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/service/drink_service.dart';
-import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
+import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
 import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
@@ -39,11 +44,10 @@ class IoCContainer {
   IoCContainer._();
 
   static void initialize() {
+    _registerConvex();
+
     get
       ..registerSingleton(FirebaseAuth.instance)
-      ..registerSingleton(
-        BetterAuthClient(baseUrl: dotenv.get('CONVEX_SITE_URL')),
-      )
       ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
       ..registerSingleton(NotificationService())
       ..registerSingleton(MonthService())
@@ -55,9 +59,40 @@ class IoCContainer {
     _registerServices();
   }
 
+  static void _registerConvex() {
+    get
+      ..registerSingleton(
+        BetterAuthClient(baseUrl: dotenv.get('CONVEX_SITE_URL')),
+      )
+      ..registerSingleton(
+        ConvexClient(
+          dotenv.get('CONVEX_URL'),
+          config: ConvexClientConfig(
+            connectivitySignal: ConnectivityPlusSignal(),
+          ),
+        ),
+      )
+      ..registerSingleton(
+        ConvexBetterAuthProvider(client: get<BetterAuthClient>()),
+      )
+      ..registerSingleton(
+        get<ConvexClient>().withAuth(get<ConvexBetterAuthProvider>()),
+      )
+      ..registerSingleton(
+        ConvexApi(get<ConvexClientWithAuth<BetterAuthSession>>()),
+      )
+      ..registerSingleton(
+        ConvexAuthService(
+          authProvider: get<ConvexBetterAuthProvider>(),
+          client: get<ConvexClientWithAuth<BetterAuthSession>>(),
+          api: get<ConvexApi>(),
+        ),
+      );
+  }
+
   static void _registerControllers() {
     get
-      ..registerSingleton(DrinkTypeController(authService: get<AuthService>()))
+      ..registerSingleton(DrinkController(authService: get<AuthService>()))
       ..registerSingleton(
         FriendRequestController(authService: get<AuthService>()),
       )
@@ -76,6 +111,7 @@ class IoCContainer {
 
   static void _registerServices() {
     get
+      ..registerSingleton(DrinkService(api: get<ConvexApi>()))
       ..registerSingleton(DateService(userController: get<UserController>()))
       ..registerSingleton(
         AppIconService(
@@ -84,7 +120,7 @@ class IoCContainer {
         ),
       )
       ..registerSingleton(
-        DrinkService(
+        DrinkLogService(
           authService: get<AuthService>(),
           userController: get<UserController>(),
           userSettingsController: get<UserSettingsController>(),
@@ -93,7 +129,7 @@ class IoCContainer {
           locationService: get<LocationService>(),
           userStatsService: get<UserStatsService>(),
           badgeService: get<BadgeService>(),
-          drinkTypeController: get<DrinkTypeController>(),
+          drinkController: get<DrinkController>(),
           partyController: get<PartyController>(),
         ),
       )
@@ -179,7 +215,7 @@ class IoCContainer {
       ..registerSingleton(
         AccountDeletionService(
           authService: get<AuthService>(),
-          drinkTypeController: get<DrinkTypeController>(),
+          drinkController: get<DrinkController>(),
           sessionController: get<SessionController>(),
           leaderboardController: get<LeaderboardController>(),
           friendRequestController: get<FriendRequestController>(),

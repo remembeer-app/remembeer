@@ -12,10 +12,10 @@ class SessionStatisticsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final session = sessionWithMembers.session;
-    final drinks = session.drinks;
+    final drinkLogs = session.drinkLogs;
     final memberCount = sessionWithMembers.memberCount;
 
-    final totalDrinks = drinks.length;
+    final totalDrinks = drinkLogs.length;
     final totalAlcoholMl = session.totalAlcoholMl;
     final avgDrinksPerPerson = memberCount > 0 ? totalDrinks / memberCount : 0;
     final duration = formatDuration(session.startedAt, session.endedAt);

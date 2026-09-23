@@ -127,7 +127,7 @@ def activate_party_command(
         seed_provider = template_seed_provider or built_in_template_seeds
         template_seeds = list(seed_provider(actor_user_id))
         _validate_template_seeds(template_seeds)
-        awards, member_totals = _initial_drink_awards(
+        awards, member_totals = _initial_drink_log_awards(
             session, member_ids, default_timezone=drink_timezone
         )
         stored_name = session.get("name")
@@ -529,43 +529,45 @@ def _requested_timezone(data: Mapping[str, Any]) -> tzinfo:
     return timezone(timedelta(minutes=offset_minutes))
 
 
-def _initial_drink_awards(
+def _initial_drink_log_awards(
     session: Mapping[str, Any],
     member_ids: Sequence[str],
     *,
     default_timezone: tzinfo = timezone.utc,
 ) -> tuple[list[tuple[str, Mapping[str, Any]]], dict[str, tuple[int, int]]]:
-    drinks = session.get("drinks", [])
-    if not isinstance(drinks, Sequence) or isinstance(drinks, (str, bytes)):
+    drink_logs = session.get("drinkLogs", [])
+    if not isinstance(drink_logs, Sequence) or isinstance(
+        drink_logs, (str, bytes)
+    ):
         raise callable_error(
             https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-            "Stored Session drinks are invalid.",
+            "Stored Session drink logs are invalid.",
         )
     member_set = set(member_ids)
     awards: list[tuple[str, Mapping[str, Any]]] = []
     totals: dict[str, tuple[int, int]] = {}
-    seen_drink_ids: set[str] = set()
-    for raw_drink in drinks:
-        if not isinstance(raw_drink, Mapping):
-            raise _invalid_stored_drink()
-        drink_id = _stored_string(raw_drink, "id")
-        recipient_id = _stored_string(raw_drink, "consumedByUserId")
-        if drink_id in seen_drink_ids or recipient_id not in member_set:
-            raise _invalid_stored_drink()
-        seen_drink_ids.add(drink_id)
-        drink_type = raw_drink.get("drinkType")
-        if not isinstance(drink_type, Mapping):
-            raise _invalid_stored_drink()
-        category = _stored_string(drink_type, "category")
-        alcohol_percentage = drink_type.get("alcoholPercentage")
-        volume_ml = raw_drink.get("volumeInMilliliters")
+    seen_drink_log_ids: set[str] = set()
+    for raw_drink_log in drink_logs:
+        if not isinstance(raw_drink_log, Mapping):
+            raise _invalid_stored_drink_log()
+        drink_log_id = _stored_string(raw_drink_log, "id")
+        recipient_id = _stored_string(raw_drink_log, "consumedByUserId")
+        if drink_log_id in seen_drink_log_ids or recipient_id not in member_set:
+            raise _invalid_stored_drink_log()
+        seen_drink_log_ids.add(drink_log_id)
+        drink = raw_drink_log.get("drink")
+        if not isinstance(drink, Mapping):
+            raise _invalid_stored_drink_log()
+        category = _stored_string(drink, "category")
+        alcohol_percentage = drink.get("alcoholPercentage")
+        volume_ml = raw_drink_log.get("volumeInMilliliters")
         if (
             isinstance(alcohol_percentage, bool)
             or not isinstance(alcohol_percentage, (int, float))
             or isinstance(volume_ml, bool)
             or not isinstance(volume_ml, (int, float))
         ):
-            raise _invalid_stored_drink()
+            raise _invalid_stored_drink_log()
         try:
             score = calculate_drink_score(
                 volume_ml,
@@ -574,34 +576,34 @@ def _initial_drink_awards(
                 selected_class=None,
             )
         except ValueError as error:
-            raise _invalid_stored_drink() from error
-        occurred_at = raw_drink.get("consumedAt")
+            raise _invalid_stored_drink_log() from error
+        occurred_at = raw_drink_log.get("consumedAt")
         if isinstance(occurred_at, str):
             try:
                 occurred_at = datetime.fromisoformat(
                     occurred_at.replace("Z", "+00:00")
                 )
             except ValueError as error:
-                raise _invalid_stored_drink() from error
+                raise _invalid_stored_drink_log() from error
         if not isinstance(occurred_at, datetime):
-            raise _invalid_stored_drink()
+            raise _invalid_stored_drink_log()
         if occurred_at.tzinfo is None:
             occurred_at = occurred_at.replace(tzinfo=default_timezone)
-        event_id = deterministic_event_id("drink", drink_id, "v", "1")
+        event_id = deterministic_event_id("drinkLog", drink_log_id, "v", "1")
         event = {
-            "kind": "drink",
+            "kind": "drinkLog",
             "recipientUserId": recipient_id,
             "participantIds": [recipient_id],
             "pointsUnits": score.base_units,
-            "sourceCollection": "drinks",
-            "sourceId": drink_id,
+            "sourceCollection": "drinkLogs",
+            "sourceId": drink_log_id,
             "reversesEventId": None,
             "actorUserId": None,
             "occurredAt": occurred_at,
             "createdAt": firestore.SERVER_TIMESTAMP,
             "payload": {
-                "drinkId": drink_id,
-                "drinkName": drink_type.get("name"),
+                "drinkLogId": drink_log_id,
+                "drinkName": drink.get("name"),
                 "category": category,
                 "alcoholPercentage": alcohol_percentage,
                 "volumeInMilliliters": volume_ml,
@@ -693,7 +695,7 @@ def _stored_nonnegative_int(document: Mapping[str, Any], field_name: str) -> int
 def _stored_string(document: Mapping[str, Any], field_name: str) -> str:
     value = document.get(field_name)
     if not isinstance(value, str) or not value:
-        raise _invalid_stored_drink()
+        raise _invalid_stored_drink_log()
     return value
 
 
@@ -714,8 +716,8 @@ def _validate_end_time(ended_at: str, started_at: Any) -> None:
         ) from error
 
 
-def _invalid_stored_drink() -> https_fn.HttpsError:
+def _invalid_stored_drink_log() -> https_fn.HttpsError:
     return callable_error(
         https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-        "A stored Session drink is invalid for Party activation.",
+        "A stored Session drink log is invalid for Party activation.",
     )

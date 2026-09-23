@@ -64,7 +64,10 @@ def test_canonical_pair_and_event_ids_are_stable_and_collision_safe() -> None:
         "user/a", "user:b"
     )
     assert canonical_pair_key("user:b", "user/a") == "pair:user%2Fa:user%3Ab"
-    assert deterministic_event_id("drink", "a/b", "v", "1") == "drink:a%2Fb:v:1"
+    assert (
+        deterministic_event_id("drinkLog", "a/b", "v", "1")
+        == "drinkLog:a%2Fb:v:1"
+    )
     with pytest.raises(ValueError):
         canonical_pair_key("same", "same")
 
@@ -107,17 +110,17 @@ def test_award_and_reversal_are_atomic_immutable_and_exactly_once() -> None:
     )
     party_ref = db.collection("parties").document("party-a")
     transaction = Transaction(db.store)
-    event_id = deterministic_event_id("drink", "drink-a", "v", "1")
+    event_id = deterministic_event_id("drinkLog", "drink-log-a", "v", "1")
     award = create_award(
         transaction,
         party_ref,
         event_id=event_id,
-        kind="drink",
+        kind="drinkLog",
         recipient_user_id="user-a",
         participant_ids=["user-a", "user-a"],
         points_units=25_000,
-        source_collection="drinks",
-        source_id="drink-a",
+        source_collection="drinkLogs",
+        source_id="drink-log-a",
         occurred_at="award-time",
         payload={"category": "beer"},
     )
@@ -131,12 +134,12 @@ def test_award_and_reversal_are_atomic_immutable_and_exactly_once() -> None:
         transaction,
         party_ref,
         event_id=event_id,
-        kind="drink",
+        kind="drinkLog",
         recipient_user_id="user-a",
         participant_ids=["user-a"],
         points_units=25_000,
-        source_collection="drinks",
-        source_id="drink-a",
+        source_collection="drinkLogs",
+        source_id="drink-log-a",
         occurred_at="award-time",
         payload={"category": "beer"},
     )
@@ -200,13 +203,13 @@ def test_bulk_awards_group_member_aggregate_update() -> None:
         party_ref,
         [
             AwardInput(
-                event_id=f"drink:drink-{revision}:v:1",
-                kind="drink",
+                event_id=f"drinkLog:drink-log-{revision}:v:1",
+                kind="drinkLog",
                 recipient_user_id="user-a",
                 participant_ids=["user-a"],
                 points_units=revision * 1_000,
-                source_collection="drinks",
-                source_id=f"drink-{revision}",
+                source_collection="drinkLogs",
+                source_id=f"drink-log-{revision}",
                 occurred_at=f"time-{revision}",
             )
             for revision in (1, 2)

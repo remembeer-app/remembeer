@@ -19,7 +19,7 @@ abstract class DailyStats with _$DailyStats {
   factory DailyStats.fromJson(Map<String, dynamic> json) =>
       _$DailyStatsFromJson(json);
 
-  DailyStats addDrink({
+  DailyStats addDrinkLog({
     required double beersEquivalent,
     required double alcoholMl,
     required bool after6pm,
@@ -31,7 +31,7 @@ abstract class DailyStats with _$DailyStats {
     );
   }
 
-  DailyStats removeDrink({
+  DailyStats removeDrinkLog({
     required double beersEquivalent,
     required double alcoholMl,
     required bool after6pm,

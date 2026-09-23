@@ -7,7 +7,7 @@ from party_commands import (
     archive_party_command,
     select_party_class_command,
 )
-from party_drinks import create_party_drink_command
+from party_drink_logs import create_party_drink_log_command
 
 from tests.fakes import Database, Transaction
 
@@ -39,14 +39,14 @@ def test_activation_class_scoring_retry_and_archive_flow() -> None:
                 "isParty": False,
                 "startedAt": "2026-01-01T18:00:00+00:00",
                 "endedAt": None,
-                "drinks": [],
+                "drinkLogs": [],
             },
             "users/member": {
                 "monthlyStats": {},
                 "unlockedBadges": {},
                 "endOfDayBoundary": {"hour": 6, "minute": 0},
             },
-            "drink_types/beer-type": {
+            "drinks/beer": {
                 "userId": "global",
                 "deletedAt": None,
                 "name": "Beer",
@@ -83,20 +83,20 @@ def test_activation_class_scoring_retry_and_archive_flow() -> None:
         {
             "sessionId": "party-a",
             "commandId": "drink-a",
-            "drinkId": "drink-a",
-            "drinkTypeId": "beer-type",
+            "drinkLogId": "drink-log-a",
+            "drinkId": "beer",
             "consumedAt": "2026-01-02T02:00:00+00:00",
             "volumeInMilliliters": 500,
             "location": None,
         },
     )
-    first = create_party_drink_command(
+    first = create_party_drink_log_command(
         drink_request,
         db,
         now_provider=lambda: datetime(2026, 1, 2, 3, tzinfo=timezone.utc),
         transaction_runner=_run(db),
     )
-    retry = create_party_drink_command(
+    retry = create_party_drink_log_command(
         drink_request,
         db,
         now_provider=lambda: datetime(2026, 1, 2, 4, tzinfo=timezone.utc),
@@ -118,7 +118,7 @@ def test_activation_class_scoring_retry_and_archive_flow() -> None:
 
     assert retry == first
     assert first["awardedScoreUnits"] == 27_500
-    assert len(db.store["sessions/party-a"]["drinks"]) == 1
+    assert len(db.store["sessions/party-a"]["drinkLogs"]) == 1
     assert db.store["parties/party-a/members/member"]["scoreUnits"] == 27_500
     assert db.store["parties/party-a"]["status"] == "archived"
     assert db.store["sessions/party-a"]["endedAt"] == "2026-01-02T05:00:00+00:00"

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
-import 'package:remembeer/drink_type/controller/drink_type_controller.dart';
+import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
 import 'package:remembeer/leaderboard/model/leaderboard.dart';
@@ -14,7 +14,7 @@ import 'package:remembeer/user_settings/controller/user_settings_controller.dart
 
 class AccountDeletionService {
   final AuthService authService;
-  final DrinkTypeController drinkTypeController;
+  final DrinkController drinkController;
   final SessionController sessionController;
   final LeaderboardController leaderboardController;
   final FriendRequestController friendRequestController;
@@ -26,7 +26,7 @@ class AccountDeletionService {
 
   AccountDeletionService({
     required this.authService,
-    required this.drinkTypeController,
+    required this.drinkController,
     required this.sessionController,
     required this.leaderboardController,
     required this.friendRequestController,
@@ -40,7 +40,7 @@ class AccountDeletionService {
   Future<void> deleteAccount() async {
     final userId = authService.authenticatedUser.uid;
 
-    await _deleteOwnedDrinkTypes(userId);
+    await _deleteOwnedDrinks(userId);
     await _detachFromSessions(userId);
     await _detachFromLeaderboards(userId);
     await _deleteFriendRequests(userId);
@@ -65,12 +65,12 @@ class AccountDeletionService {
     }
   }
 
-  Future<void> _deleteOwnedDrinkTypes(String userId) async {
-    final drinkTypes = await drinkTypeController.allOwnedBy(userId);
-    for (final drinkType in drinkTypes) {
+  Future<void> _deleteOwnedDrinks(String userId) async {
+    final drinks = await drinkController.allOwnedBy(userId);
+    for (final drink in drinks) {
       await _tryStep(
-        'delete drink type ${drinkType.id}',
-        () => drinkTypeController.hardDeleteSingle(drinkType),
+        'delete drink ${drink.id}',
+        () => drinkController.hardDeleteSingle(drink),
       );
     }
   }

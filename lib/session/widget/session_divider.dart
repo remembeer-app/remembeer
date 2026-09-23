@@ -116,7 +116,7 @@ class _SessionDividerState extends State<SessionDivider> {
         Icon(Icons.local_drink_outlined, size: 14, color: detailColor),
         const Gap(4),
         Text(
-          '${_session.drinksCount} / $maxSessionDrinks',
+          '${_session.drinkLogsCount} / $maxSessionDrinks',
           style: theme.textTheme.bodySmall?.copyWith(
             color: _session.hasFreeSpace
                 ? detailColor
