@@ -7,6 +7,7 @@ import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/model/session.dart';
@@ -25,11 +26,27 @@ class EditSessionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return AsyncBuilder<Session>(
       stream: _sessionService.sessionStream(sessionId),
-      builder: _buildPage,
+      builder: (context, session) {
+        if (!session.isParty) {
+          return _buildPage(context, session, isEditable: true);
+        }
+        return AsyncBuilder<Party>(
+          stream: _partyService.partyStream(session.id),
+          builder: (context, party) => _buildPage(
+            context,
+            session,
+            isEditable: party.status == PartyStatus.active,
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildPage(BuildContext context, Session session) {
+  Widget _buildPage(
+    BuildContext context,
+    Session session, {
+    required bool isEditable,
+  }) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return PageTemplate(
@@ -44,12 +61,20 @@ class EditSessionPage extends StatelessWidget {
         children: [
           _buildPartyButton(context, session),
           const Gap(16),
+          if (!isEditable) ...[
+            Text(
+              'This party has ended and can no longer be edited.',
+              style: TextStyle(color: colorScheme.onSurfaceVariant),
+            ),
+            const Gap(16),
+          ],
           Expanded(
             child: SessionForm(
               initialName: session.name,
               initialDescription: session.description,
               initialStartedAt: session.startedAt,
               submitButtonText: 'Save Changes',
+              enabled: isEditable,
               onSubmit: (name, description, startedAt) async {
                 await _sessionService.updateSession(
                   session: session,
@@ -61,7 +86,11 @@ class EditSessionPage extends StatelessWidget {
                   context.pop();
                 }
               },
-              additionalActions: _buildAdditionalActions(context, session),
+              additionalActions: _buildAdditionalActions(
+                context,
+                session,
+                isEditable: isEditable,
+              ),
             ),
           ),
         ],
@@ -69,16 +98,26 @@ class EditSessionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAdditionalActions(BuildContext context, Session session) {
+  Widget _buildAdditionalActions(
+    BuildContext context,
+    Session session, {
+    required bool isEditable,
+  }) {
     return Column(
       children: [
-        _buildManageAdminsButton(context, session),
+        _buildManageAdminsButton(context, session, isEditable: isEditable),
         const Gap(16),
         Row(
           children: [
             Expanded(child: _buildDeleteButton(context, session)),
             const Gap(16),
-            Expanded(child: _buildEndTimeButton(context, session)),
+            Expanded(
+              child: _buildEndTimeButton(
+                context,
+                session,
+                isEditable: isEditable,
+              ),
+            ),
           ],
         ),
       ],
@@ -109,12 +148,19 @@ class EditSessionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildManageAdminsButton(BuildContext context, Session session) {
+  Widget _buildManageAdminsButton(
+    BuildContext context,
+    Session session, {
+    required bool isEditable,
+  }) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
-        onPressed: () =>
-            ManageSessionAdminsRoute(sessionId: session.id).push<void>(context),
+        onPressed: isEditable
+            ? () => ManageSessionAdminsRoute(
+                sessionId: session.id,
+              ).push<void>(context)
+            : null,
         style: OutlinedButton.styleFrom(padding: const EdgeInsets.all(16)),
         icon: const Icon(Icons.admin_panel_settings),
         label: const Text('Manage Admins'),
@@ -122,12 +168,16 @@ class EditSessionPage extends StatelessWidget {
     );
   }
 
-  Widget _buildEndTimeButton(BuildContext context, Session session) {
+  Widget _buildEndTimeButton(
+    BuildContext context,
+    Session session, {
+    required bool isEditable,
+  }) {
     final isOngoing = session.endedAt == null;
 
     // TODO(ohtenkay): This entire page needs a design review.
     return OutlinedButton.icon(
-      onPressed: () => _showEndTimeDialog(context, session),
+      onPressed: isEditable ? () => _showEndTimeDialog(context, session) : null,
       icon: Icon(isOngoing ? Icons.check_circle_outline : Icons.event),
       label: Text(
         isOngoing
@@ -141,11 +191,16 @@ class EditSessionPage extends StatelessWidget {
   Widget _buildDeleteButton(BuildContext context, Session session) {
     final theme = Theme.of(context);
 
+    // Firestore rules never allow deleting a party session.
     return OutlinedButton.icon(
-      onPressed: () => _showDeleteConfirmationDialog(context, session),
+      onPressed: session.isParty
+          ? null
+          : () => _showDeleteConfirmationDialog(context, session),
       style: OutlinedButton.styleFrom(
         foregroundColor: theme.colorScheme.error,
-        side: BorderSide(color: theme.colorScheme.error),
+        side: session.isParty
+            ? null
+            : BorderSide(color: theme.colorScheme.error),
         padding: const EdgeInsets.all(16),
       ),
       icon: const Icon(Icons.delete),
