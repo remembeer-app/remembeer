@@ -3,7 +3,7 @@ import UIKit
 import UserNotifications
 
 @main
-@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate {
+@objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, FlutterSceneLifeCycleDelegate {
   private static let appIconChannel = "app_icon"
   private static let appIconSetMethod = "setIcon"
   /// The phase whose icon set is the primary `AppIcon`; the others are the
@@ -11,8 +11,23 @@ import UserNotifications
   /// build setting `ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES`.
   private static let primaryAppIconPhase = "a"
 
+  /// Same channel and method as `MainActivity` on Android; handled in `main.dart`.
+  private static let quickAddChannelName = "quick_add_action"
+  private static let quickAddMethod = "quickAddPressed"
+  /// URL opened by the Quick Add home screen widget (see `QuickAddWidget.swift`).
+  private static let quickAddURLScheme = "remembeer"
+  private static let quickAddURLHost = "quick-add"
+  private static let quickAddPluginKey = "QuickAddWidget"
+
   /// Icon phase requested by Flutter while the app was not active yet.
   private var pendingAppIconPhase: String?
+
+  private var quickAddChannel: FlutterMethodChannel?
+  /// Set once Flutter has drawn its first frame, which means `main.dart` has
+  /// installed the method call handler. Messages sent earlier would be dropped.
+  private var isFlutterReady = false
+  /// A widget tap that arrived before Flutter was ready to handle it.
+  private var hasPendingQuickAdd = false
 
   override func application(
     _ application: UIApplication,
@@ -36,10 +51,9 @@ import UserNotifications
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
 
-    let channel = FlutterMethodChannel(
-      name: AppDelegate.appIconChannel,
-      binaryMessenger: engineBridge.applicationRegistrar.messenger()
-    )
+    let messenger = engineBridge.applicationRegistrar.messenger()
+
+    let channel = FlutterMethodChannel(name: AppDelegate.appIconChannel, binaryMessenger: messenger)
     channel.setMethodCallHandler { [weak self] call, result in
       guard call.method == AppDelegate.appIconSetMethod else {
         result(FlutterMethodNotImplemented)
@@ -55,7 +69,84 @@ import UserNotifications
       self?.applyPendingAppIcon()
       result(nil)
     }
+
+    quickAddChannel = FlutterMethodChannel(
+      name: AppDelegate.quickAddChannelName,
+      binaryMessenger: messenger
+    )
+    // The widget URL is delivered through the scene delegate, which Flutter
+    // forwards to scene life cycle delegates registered by plugins; register the
+    // app delegate itself the way a plugin would.
+    engineBridge.pluginRegistry
+      .registrar(forPlugin: AppDelegate.quickAddPluginKey)?
+      .addSceneDelegate(self)
   }
+
+  // MARK: - FlutterSceneLifeCycleDelegate
+
+  func scene(
+    _ scene: UIScene,
+    willConnectTo session: UISceneSession,
+    options connectionOptions: UIScene.ConnectionOptions?
+  ) -> Bool {
+    observeFlutterReadiness(in: scene)
+    // Cold start from the widget: the URL is part of the connection options.
+    return handleQuickAddURLs(connectionOptions?.urlContexts ?? [])
+  }
+
+  func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) -> Bool {
+    // Warm start from the widget: the app was already running.
+    return handleQuickAddURLs(URLContexts)
+  }
+
+  // MARK: - Quick Add widget
+
+  private func handleQuickAddURLs(_ urlContexts: Set<UIOpenURLContext>) -> Bool {
+    let isQuickAdd = urlContexts.contains { context in
+      let url = context.url
+      return url.scheme == AppDelegate.quickAddURLScheme && url.host == AppDelegate.quickAddURLHost
+    }
+    guard isQuickAdd else {
+      return false
+    }
+    hasPendingQuickAdd = true
+    flushPendingQuickAdd()
+    return true
+  }
+
+  private func flushPendingQuickAdd() {
+    guard hasPendingQuickAdd, isFlutterReady, let channel = quickAddChannel else {
+      return
+    }
+    hasPendingQuickAdd = false
+    channel.invokeMethod(AppDelegate.quickAddMethod, arguments: nil)
+  }
+
+  /// Marks Flutter as ready once the storyboard's `FlutterViewController` has
+  /// rendered its first frame, then delivers any tap that was waiting for it.
+  private func observeFlutterReadiness(in scene: UIScene) {
+    guard !isFlutterReady else {
+      return
+    }
+    let flutterViewController = (scene as? UIWindowScene)?.windows
+      .compactMap { $0.rootViewController as? FlutterViewController }
+      .first
+    guard let flutterViewController = flutterViewController else {
+      NSLog("Quick Add: no FlutterViewController found in the connected scene")
+      return
+    }
+    if flutterViewController.isDisplayingFlutterUI {
+      isFlutterReady = true
+      flushPendingQuickAdd()
+      return
+    }
+    flutterViewController.setFlutterViewDidRenderCallback { [weak self] in
+      self?.isFlutterReady = true
+      self?.flushPendingQuickAdd()
+    }
+  }
+
+  // MARK: - App icon
 
   private func applyPendingAppIcon() {
     let application = UIApplication.shared

@@ -14,6 +14,8 @@
 	<dict>
 		<key>cz.remembeer.com</key>
 		<string>Remembeer App Store</string>
+		<key>cz.remembeer.com.QuickAddWidget</key>
+		<string>Remembeer Quick Add Widget App Store</string>
 	</dict>
 	<key>uploadSymbols</key>
 	<true/>

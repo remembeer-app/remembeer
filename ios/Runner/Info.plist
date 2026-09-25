@@ -32,6 +32,16 @@
 				<string>com.googleusercontent.apps.578025081321-g1lvefc8cab9256upmeeqfuuseg4m81u</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>cz.remembeer.com.quick-add</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>remembeer</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
