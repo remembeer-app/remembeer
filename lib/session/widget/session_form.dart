@@ -18,6 +18,7 @@ class SessionForm extends StatefulWidget {
   )
   onSubmit;
   final Widget? additionalActions;
+  final bool enabled;
 
   const SessionForm({
     super.key,
@@ -27,6 +28,7 @@ class SessionForm extends StatefulWidget {
     required this.submitButtonText,
     required this.onSubmit,
     this.additionalActions,
+    this.enabled = true,
   });
 
   @override
@@ -88,6 +90,7 @@ class _SessionFormState extends State<SessionForm> {
       label: 'Session Name',
       prefixIcon: Icons.celebration,
       maxLength: _maxNameLength,
+      enabled: widget.enabled,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Name cannot be empty.';
@@ -107,6 +110,7 @@ class _SessionFormState extends State<SessionForm> {
       maxLength: maxSessionDescriptionLength,
       minLines: 3,
       maxLines: 7,
+      enabled: widget.enabled,
     );
   }
 
@@ -118,6 +122,7 @@ class _SessionFormState extends State<SessionForm> {
       onChanged: (newDateTime) =>
           setState(() => _selectedStartedAt = newDateTime),
       lastDate: DateTime.now().add(const Duration(days: 1)),
+      enabled: widget.enabled,
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please select when the session starts.';
@@ -131,6 +136,7 @@ class _SessionFormState extends State<SessionForm> {
     return form.buildSubmitButton(
       text: widget.submitButtonText,
       margin: const EdgeInsets.only(bottom: 16),
+      enabled: widget.enabled,
       onSubmit: () => widget.onSubmit(
         _nameController.text.trim(),
         _descriptionController.text.trim(),

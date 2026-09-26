@@ -289,11 +289,12 @@ service cloud.firestore {
     }
 
     match /parties/{partyId} {
-      allow read: if isSessionMember(partyId);
+      allow read: if isSignedIn();
       allow write: if false;
 
-      match /{document=**} {
-        allow read: if isSessionMember(partyId);
+      match /{collection}/{document=**} {
+        allow read: if isSessionMember(partyId)
+          || (isSignedIn() && collection != "commands");
         allow write: if false;
       }
     }
