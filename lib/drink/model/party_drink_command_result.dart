@@ -38,7 +38,7 @@ class PartyDrinkCommandResult {
       baseScoreUnits: _optionalInt(data, 'baseScoreUnits'),
       classBonusUnits: _optionalInt(data, 'classBonusUnits'),
       awardedScoreUnits: _optionalInt(data, 'awardedScoreUnits'),
-      unlockedBadgeIds: _requiredStringList(data, 'unlockedBadgeIds'),
+      unlockedBadgeIds: _optionalStringList(data, 'unlockedBadgeIds'),
     );
   }
 
@@ -61,11 +61,12 @@ class PartyDrinkCommandResult {
     return value;
   }
 
-  static List<String> _requiredStringList(
+  static List<String> _optionalStringList(
     Map<String, Object?> data,
     String key,
   ) {
     final value = data[key];
+    if (value == null) return const [];
     if (value is! List<Object?>) {
       throw StateError('Party drink command returned an invalid $key.');
     }

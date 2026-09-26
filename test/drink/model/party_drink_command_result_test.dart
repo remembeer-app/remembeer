@@ -36,20 +36,25 @@ void main() {
     expect(result.unlockedBadgeIds, ['masti_to_jak_drak', 'centurion']);
   });
 
-  test('rejects missing or malformed unlocked badge ids', () {
-    for (final data in [
-      const {'sessionId': 'party-1', 'drinkId': 'drink-1'},
-      const {
-        'sessionId': 'party-1',
-        'drinkId': 'drink-1',
-        'unlockedBadgeIds': ['masti_to_jak_drak', 3],
-      },
-    ]) {
-      expect(
-        () => PartyDrinkCommandResult.fromMutation(PartyCommandResult(data)),
-        throwsStateError,
-      );
-    }
+  test('accepts a response from before badge IDs were added', () {
+    final result = PartyDrinkCommandResult.fromMutation(
+      const PartyCommandResult({'sessionId': 'party-1', 'drinkId': 'drink-1'}),
+    );
+
+    expect(result.unlockedBadgeIds, isEmpty);
+  });
+
+  test('rejects malformed unlocked badge ids', () {
+    expect(
+      () => PartyDrinkCommandResult.fromMutation(
+        const PartyCommandResult({
+          'sessionId': 'party-1',
+          'drinkId': 'drink-1',
+          'unlockedBadgeIds': ['masti_to_jak_drak', 3],
+        }),
+      ),
+      throwsStateError,
+    );
   });
 
   test('rejects malformed callable result', () {
