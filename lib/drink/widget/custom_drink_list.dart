@@ -22,7 +22,8 @@ class CustomDrinkList extends StatelessWidget {
       separatorBuilder: (_, _) => const Divider(),
       itemCount: customDrinks.length,
       itemBuilder: (context, index) {
-        return DrinkTile(drink: customDrinks[index]);
+        final drink = customDrinks[index];
+        return DrinkTile(key: ValueKey(drink.id), drink: drink);
       },
     );
   }

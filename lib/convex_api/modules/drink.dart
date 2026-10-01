@@ -678,27 +678,35 @@ final ConvexQueryReference<GetTypeArgs, GetTypeResult> getValueQueryReference =
     ConvexQueryReference(
       name: 'drink:get',
       encode: (args) => _encodeGetTypeArgs(args),
+      decodeArgs: (raw) => _decodeGetTypeArgs(raw),
       decode: (raw) => _decodeGetTypeResult(raw),
+      encodeResult: (value) => _encodeGetTypeResult(value),
     );
 
 final ConvexQueryReference<NoArgs, List<ListAvailableResultItem>>
 listAvailableQueryReference = ConvexQueryReference(
   name: 'drink:listAvailable',
   encode: (args) => const <String, dynamic>{},
+  decodeArgs: (raw) => const NoArgs(),
   decode: (raw) => expectList(
     raw,
     label: 'ListAvailableResult',
   ).map((item) => _decodeListAvailableResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodeListAvailableResultItem(item)).toList(),
 );
 
 final ConvexQueryReference<NoArgs, List<ListCustomResultItem>>
 listCustomQueryReference = ConvexQueryReference(
   name: 'drink:listCustom',
   encode: (args) => const <String, dynamic>{},
+  decodeArgs: (raw) => const NoArgs(),
   decode: (raw) => expectList(
     raw,
     label: 'ListCustomResult',
   ).map((item) => _decodeListCustomResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodeListCustomResultItem(item)).toList(),
 );
 
 final ConvexMutationReference<SoftDeleteArgs, void>

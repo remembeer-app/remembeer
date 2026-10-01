@@ -49,13 +49,13 @@ class DrinkCreateMutation extends StatelessWidget {
   final ConvexRuntimeClient? client;
 
   /// Optional optimistic update for the mutation.
-  final OptimisticUpdate? optimisticUpdate;
+  final TypedOptimisticUpdate<CreateArgs>? optimisticUpdate;
 
   @override
   Widget build(BuildContext context) => ConvexMutation<CreateArgs, DrinkId>(
     mutation: createMutationReference,
     client: client,
-    optimisticUpdate: optimisticUpdate,
+    typedOptimisticUpdate: optimisticUpdate,
     builder: (context, mutate, snapshot) =>
         builder(context, DrinkCreateMutationExecutor(mutate), snapshot),
   );
@@ -94,13 +94,13 @@ class DrinkSoftDeleteMutation extends StatelessWidget {
   final ConvexRuntimeClient? client;
 
   /// Optional optimistic update for the mutation.
-  final OptimisticUpdate? optimisticUpdate;
+  final TypedOptimisticUpdate<SoftDeleteArgs>? optimisticUpdate;
 
   @override
   Widget build(BuildContext context) => ConvexMutation<SoftDeleteArgs, void>(
     mutation: softDeleteMutationReference,
     client: client,
-    optimisticUpdate: optimisticUpdate,
+    typedOptimisticUpdate: optimisticUpdate,
     builder: (context, mutate, snapshot) =>
         builder(context, DrinkSoftDeleteMutationExecutor(mutate), snapshot),
   );
@@ -149,13 +149,13 @@ class DrinkUpdateMutation extends StatelessWidget {
   final ConvexRuntimeClient? client;
 
   /// Optional optimistic update for the mutation.
-  final OptimisticUpdate? optimisticUpdate;
+  final TypedOptimisticUpdate<UpdateArgs>? optimisticUpdate;
 
   @override
   Widget build(BuildContext context) => ConvexMutation<UpdateArgs, void>(
     mutation: updateMutationReference,
     client: client,
-    optimisticUpdate: optimisticUpdate,
+    typedOptimisticUpdate: optimisticUpdate,
     builder: (context, mutate, snapshot) =>
         builder(context, DrinkUpdateMutationExecutor(mutate), snapshot),
   );

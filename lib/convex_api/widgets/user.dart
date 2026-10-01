@@ -41,13 +41,13 @@ class UserEnsureCurrentMutation extends StatelessWidget {
   final ConvexRuntimeClient? client;
 
   /// Optional optimistic update for the mutation.
-  final OptimisticUpdate? optimisticUpdate;
+  final TypedOptimisticUpdate<NoArgs>? optimisticUpdate;
 
   @override
   Widget build(BuildContext context) => ConvexMutation<NoArgs, UserId>(
     mutation: ensureCurrentMutationReference,
     client: client,
-    optimisticUpdate: optimisticUpdate,
+    typedOptimisticUpdate: optimisticUpdate,
     builder: (context, mutate, snapshot) =>
         builder(context, UserEnsureCurrentMutationExecutor(mutate), snapshot),
   );
