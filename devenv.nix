@@ -43,8 +43,11 @@
   '';
 
   scripts.startem.exec = ''
-    # Work around https://github.com/cachix/devenv/issues/2782 by preventing the emulator from loading an incompatible libc++.so.
-        exec env -u LD_LIBRARY_PATH \
-          emulator -avd remembeer-pixel-9-api-36 -gpu host "$@"
+    # Exclude Android toolchain libraries that provide an incompatible libc++.so,
+    # while keeping the host GL/Vulkan drivers available to the emulator.
+    # Select NVIDIA for GLX as well as Vulkan on hybrid-GPU systems.
+    exec env LD_LIBRARY_PATH="${pkgs.libglvnd}/lib:${pkgs.vulkan-loader}/lib:/run/opengl-driver/lib" \
+      __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia \
+      emulator -avd remembeer-pixel-9-api-36 -gpu host "$@"
   '';
 }
