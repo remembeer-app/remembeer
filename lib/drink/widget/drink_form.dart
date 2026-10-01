@@ -2,24 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/convex_api/types.dart';
-
-const _drinkCategories = <DrinkCategory>[
-  Beer(),
-  Cider(),
-  Cocktail(),
-  Spirit(),
-  Wine(),
-];
-
-String _drinkCategoryDisplayName(DrinkCategory drinkCategory) {
-  return switch (drinkCategory) {
-    Beer() => 'Beer',
-    Cider() => 'Cider',
-    Cocktail() => 'Cocktail',
-    Spirit() => 'Spirit',
-    Wine() => 'Wine',
-  };
-}
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 
 class DrinkForm extends StatefulWidget {
   final String initialName;
@@ -152,10 +135,10 @@ class _DrinkFormState extends State<DrinkForm> {
     return DropdownButtonFormField<DrinkCategory>(
       initialValue: _selectedDrinkCategory,
       hint: const Text('Select Category'),
-      items: _drinkCategories.map((drinkCategory) {
+      items: convexDrinkCategories.map((drinkCategory) {
         return DropdownMenuItem(
           value: drinkCategory,
-          child: Text(_drinkCategoryDisplayName(drinkCategory)),
+          child: Text(drinkCategory.displayName),
         );
       }).toList(),
       onChanged: form.isLoading

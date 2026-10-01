@@ -3,8 +3,7 @@ import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/drink.dart';
-import 'package:remembeer/convex_api/types.dart' as convex;
-import 'package:remembeer/drink/model/drink_category.dart' as app;
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
 
@@ -18,7 +17,7 @@ class DrinkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: DrinkIcon(category: _appCategory(drink.drinkCategory)),
+      leading: DrinkIcon(category: drink.drinkCategory.legacyCategory),
       title: Text(drink.name),
       subtitle: Text('ABV: ${drink.alcoholPercentage}%'),
       trailing: Transform.translate(
@@ -42,16 +41,6 @@ class DrinkTile extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  app.DrinkCategory _appCategory(convex.DrinkCategory category) {
-    return switch (category) {
-      convex.Beer() => app.DrinkCategory.beer,
-      convex.Cider() => app.DrinkCategory.cider,
-      convex.Cocktail() => app.DrinkCategory.cocktail,
-      convex.Spirit() => app.DrinkCategory.spirit,
-      convex.Wine() => app.DrinkCategory.wine,
-    };
   }
 
   void _showDeleteConfirmation(BuildContext context) {
