@@ -9,15 +9,7 @@ class CustomDrinkList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DrinkListCustomQuery(
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return _buildList(snapshot.data!);
-      },
+      builder: (context, customDrinks) => _buildList(customDrinks),
     );
   }
 

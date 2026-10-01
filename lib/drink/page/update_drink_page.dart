@@ -13,18 +13,7 @@ class UpdateDrinkPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DrinkGetTypeQuery(
-      id: DrinkId(drinkId),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return _buildPage(context, snapshot.data!);
-      },
-    );
+    return DrinkGetTypeQuery(id: DrinkId(drinkId), builder: _buildPage);
   }
 
   Widget _buildPage(BuildContext context, GetTypeResult drink) {

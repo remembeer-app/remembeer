@@ -163,17 +163,38 @@ class DrinkUpdateMutation extends StatelessWidget {
 
 /// Flutter widget for drink:get.
 class DrinkGetTypeQuery extends StatelessWidget {
-  /// Creates a typed query widget.
+  /// Creates a typed query widget with default loading and error UI.
   const DrinkGetTypeQuery({
     super.key,
     required this.builder,
     this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
     required this.id,
-  });
+  }) : snapshotBuilder = null;
 
-  /// Builds the UI from the latest query snapshot.
-  final Widget Function(BuildContext, ConvexQuerySnapshot<GetTypeResult>)
-  builder;
+  /// Creates a query widget whose builder handles every snapshot state.
+  const DrinkGetTypeQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    required this.id,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, GetTypeResult)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(BuildContext, ConvexQuerySnapshot<GetTypeResult>)?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
 
   /// Optional runtime client override.
   final ConvexRuntimeClient? client;
@@ -181,65 +202,145 @@ class DrinkGetTypeQuery extends StatelessWidget {
   final DrinkId id;
 
   @override
-  Widget build(BuildContext context) =>
-      ConvexTypedQuery<GetTypeArgs, GetTypeResult>(
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<GetTypeArgs, GetTypeResult>.snapshot(
         query: getValueQueryReference,
         args: (id: id),
         client: client,
-        builder: builder,
+        snapshotBuilder: buildSnapshot,
       );
+    }
+    return ConvexTypedQuery<GetTypeArgs, GetTypeResult>(
+      query: getValueQueryReference,
+      args: (id: id),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
 }
 
 /// Flutter widget for drink:listAvailable.
 class DrinkListAvailableQuery extends StatelessWidget {
-  /// Creates a typed query widget.
+  /// Creates a typed query widget with default loading and error UI.
   const DrinkListAvailableQuery({
     super.key,
     required this.builder,
     this.client,
-  });
+    this.waitingBuilder,
+    this.errorBuilder,
+  }) : snapshotBuilder = null;
 
-  /// Builds the UI from the latest query snapshot.
+  /// Creates a query widget whose builder handles every snapshot state.
+  const DrinkListAvailableQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, List<ListAvailableResultItem>)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
   final Widget Function(
     BuildContext,
     ConvexQuerySnapshot<List<ListAvailableResultItem>>,
-  )
-  builder;
+  )?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
 
   /// Optional runtime client override.
   final ConvexRuntimeClient? client;
 
   @override
-  Widget build(BuildContext context) =>
-      ConvexTypedQuery<NoArgs, List<ListAvailableResultItem>>(
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<NoArgs, List<ListAvailableResultItem>>.snapshot(
         query: listAvailableQueryReference,
         args: const NoArgs(),
         client: client,
-        builder: builder,
+        snapshotBuilder: buildSnapshot,
       );
+    }
+    return ConvexTypedQuery<NoArgs, List<ListAvailableResultItem>>(
+      query: listAvailableQueryReference,
+      args: const NoArgs(),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
 }
 
 /// Flutter widget for drink:listCustom.
 class DrinkListCustomQuery extends StatelessWidget {
-  /// Creates a typed query widget.
-  const DrinkListCustomQuery({super.key, required this.builder, this.client});
+  /// Creates a typed query widget with default loading and error UI.
+  const DrinkListCustomQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+  }) : snapshotBuilder = null;
 
-  /// Builds the UI from the latest query snapshot.
+  /// Creates a query widget whose builder handles every snapshot state.
+  const DrinkListCustomQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, List<ListCustomResultItem>)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
   final Widget Function(
     BuildContext,
     ConvexQuerySnapshot<List<ListCustomResultItem>>,
-  )
-  builder;
+  )?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
 
   /// Optional runtime client override.
   final ConvexRuntimeClient? client;
 
   @override
-  Widget build(BuildContext context) =>
-      ConvexTypedQuery<NoArgs, List<ListCustomResultItem>>(
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<NoArgs, List<ListCustomResultItem>>.snapshot(
         query: listCustomQueryReference,
         args: const NoArgs(),
         client: client,
-        builder: builder,
+        snapshotBuilder: buildSnapshot,
       );
+    }
+    return ConvexTypedQuery<NoArgs, List<ListCustomResultItem>>(
+      query: listCustomQueryReference,
+      args: const NoArgs(),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
 }

@@ -36,13 +36,13 @@ dependencies:
   dartvex:
     git:
       url: https://github.com/ohtenkay/dartvex.git
-      ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
+      ref: 26610dcec5cfdfe32679aefc1dbb74c0cc123308
       path: packages/dartvex
   dartvex_auth_better: ^0.2.0
   dartvex_flutter:
     git:
       url: https://github.com/ohtenkay/dartvex.git
-      ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
+      ref: 26610dcec5cfdfe32679aefc1dbb74c0cc123308
       path: packages/dartvex_flutter
   dartvex_local: ^0.2.0
 
@@ -78,7 +78,7 @@ dev_dependencies:
   dartvex_codegen:
     git:
       url: https://github.com/ohtenkay/dartvex.git
-      ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
+      ref: 26610dcec5cfdfe32679aefc1dbb74c0cc123308
       path: packages/dartvex_codegen
   flutter_lints: ^6.0.0
   flutter_test:
@@ -92,7 +92,7 @@ dependency_overrides:
   dartvex:
     git:
       url: https://github.com/ohtenkay/dartvex.git
-      ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
+      ref: 26610dcec5cfdfe32679aefc1dbb74c0cc123308
       path: packages/dartvex
 
 # For information on the generic Dart part of this file, see the

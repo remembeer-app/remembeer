@@ -317,8 +317,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/dartvex"
-      ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
-      resolved-ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
+      ref: "26610dcec5cfdfe32679aefc1dbb74c0cc123308"
+      resolved-ref: "26610dcec5cfdfe32679aefc1dbb74c0cc123308"
       url: "https://github.com/ohtenkay/dartvex.git"
     source: git
     version: "0.2.0"
@@ -334,8 +334,8 @@ packages:
     dependency: "direct dev"
     description:
       path: "packages/dartvex_codegen"
-      ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
-      resolved-ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
+      ref: "26610dcec5cfdfe32679aefc1dbb74c0cc123308"
+      resolved-ref: "26610dcec5cfdfe32679aefc1dbb74c0cc123308"
       url: "https://github.com/ohtenkay/dartvex.git"
     source: git
     version: "0.2.0"
@@ -343,8 +343,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/dartvex_flutter"
-      ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
-      resolved-ref: adea9b8d3457e2a3e3da8da8b07b4baa24b82103
+      ref: "26610dcec5cfdfe32679aefc1dbb74c0cc123308"
+      resolved-ref: "26610dcec5cfdfe32679aefc1dbb74c0cc123308"
       url: "https://github.com/ohtenkay/dartvex.git"
     source: git
     version: "0.2.0"
