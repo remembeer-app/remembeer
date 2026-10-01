@@ -246,6 +246,16 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
                   hasOverriddenOnExit: false,
                   factory: $SessionPhotoRoute._fromState,
                 ),
+                GoRouteData.$route(
+                  path: 'party/ranking',
+                  hasOverriddenOnExit: false,
+                  factory: $ActivityPartyRankingRoute._fromState,
+                ),
+                GoRouteData.$route(
+                  path: 'party/events',
+                  hasOverriddenOnExit: false,
+                  factory: $ActivityPartyEventsRoute._fromState,
+                ),
               ],
             ),
           ],
@@ -1113,6 +1123,56 @@ mixin $SessionPhotoRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/activity/sessions/${Uri.encodeComponent(_self.sessionId)}/photos/${Uri.encodeComponent(_self.initialIndex.toString())}',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ActivityPartyRankingRoute on GoRouteData {
+  static ActivityPartyRankingRoute _fromState(GoRouterState state) =>
+      ActivityPartyRankingRoute(sessionId: state.pathParameters['sessionId']!);
+
+  ActivityPartyRankingRoute get _self => this as ActivityPartyRankingRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/activity/sessions/${Uri.encodeComponent(_self.sessionId)}/party/ranking',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ActivityPartyEventsRoute on GoRouteData {
+  static ActivityPartyEventsRoute _fromState(GoRouterState state) =>
+      ActivityPartyEventsRoute(sessionId: state.pathParameters['sessionId']!);
+
+  ActivityPartyEventsRoute get _self => this as ActivityPartyEventsRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/activity/sessions/${Uri.encodeComponent(_self.sessionId)}/party/events',
   );
 
   @override

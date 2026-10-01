@@ -5,6 +5,7 @@ import 'package:remembeer/activity/service/activity_service.dart';
 import 'package:remembeer/activity/widget/session_drinks_section.dart';
 import 'package:remembeer/activity/widget/session_header_card.dart';
 import 'package:remembeer/activity/widget/session_participants_section.dart';
+import 'package:remembeer/activity/widget/session_party_section.dart';
 import 'package:remembeer/activity/widget/session_photos_section.dart';
 import 'package:remembeer/activity/widget/session_statistics_card.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
@@ -63,6 +64,8 @@ class SessionDetailPage extends StatelessWidget {
             SessionPhotosSection(sessionId: session.id),
             SessionParticipantsSection(members: sessionWithMembers.membersList),
             const Gap(16),
+            if (session.isParty)
+              SessionPartySection(sessionWithMembers: sessionWithMembers),
             SessionDrinksSection(sessionWithMembers: sessionWithMembers),
             const Gap(16),
             SessionStatisticsCard(sessionWithMembers: sessionWithMembers),
