@@ -22,7 +22,7 @@ export const drinkTable = defineTable({
 
 const alcoholPercentageValidator = z
   .number()
-  .min(1, "Alcohol percentage must be at least 1")
+  .min(0.1, "Alcohol percentage must be at least 0.1")
   .max(100, "Alcohol percentage must be at most 100");
 
 export const createDrinkInputValidator = convexToZod(
