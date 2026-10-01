@@ -15,7 +15,7 @@ class CustomDrinksPage extends StatelessWidget {
           'when adding a drink.',
       fabIcon: Icons.add,
       onFabPressed: () => const AddDrinkRoute().push<void>(context),
-      child: CustomDrinkList(),
+      child: const CustomDrinkList(),
     );
   }
 }

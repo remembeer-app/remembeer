@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/drink.dart';
 import 'package:remembeer/convex_api/widgets.dart';
 import 'package:remembeer/drink/widget/drink_form.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 
 class UpdateDrinkPage extends StatelessWidget {
   final String drinkId;
 
-  UpdateDrinkPage({super.key, required this.drinkId});
-
-  final ConvexApi _convexApi = get<ConvexApi>();
+  const UpdateDrinkPage({super.key, required this.drinkId});
 
   @override
   Widget build(BuildContext context) {
-    return AsyncBuilder<GetTypeResult>(
-      future: _convexApi.drink.getValue(id: DrinkId(drinkId)),
-      builder: _buildPage,
+    return DrinkGetTypeQuery(
+      id: DrinkId(drinkId),
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return _buildPage(context, snapshot.data!);
+      },
     );
   }
 

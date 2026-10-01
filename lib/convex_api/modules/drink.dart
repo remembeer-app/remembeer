@@ -62,6 +62,9 @@ class DrinkApi {
     return TypedConvexSubscription<GetTypeResult>(subscription$, typedStream$);
   }
 
+  ConvexQueryReference<GetTypeArgs, GetTypeResult> get getValueQuery =>
+      getValueQueryReference;
+
   Future<List<ListAvailableResultItem>> listAvailable() async {
     final raw$ = await _client.query(
       'drink:listAvailable',
@@ -106,6 +109,9 @@ class DrinkApi {
     );
   }
 
+  ConvexQueryReference<NoArgs, List<ListAvailableResultItem>>
+  get listAvailableQuery => listAvailableQueryReference;
+
   Future<List<ListCustomResultItem>> listCustom() async {
     final raw$ = await _client.query(
       'drink:listCustom',
@@ -148,6 +154,9 @@ class DrinkApi {
       typedStream$,
     );
   }
+
+  ConvexQueryReference<NoArgs, List<ListCustomResultItem>>
+  get listCustomQuery => listCustomQueryReference;
 
   Future<Null> softDelete({required DrinkId id}) async {
     await _client.mutate('drink:softDelete', _encodeSoftDeleteArgs((id: id)));
@@ -664,6 +673,33 @@ final ConvexMutationReference<CreateArgs, DrinkId> createMutationReference =
       encode: (args) => _encodeCreateArgs(args),
       decode: (raw) => DrinkId(expectString(raw, label: 'CreateResult')),
     );
+
+final ConvexQueryReference<GetTypeArgs, GetTypeResult> getValueQueryReference =
+    ConvexQueryReference(
+      name: 'drink:get',
+      encode: (args) => _encodeGetTypeArgs(args),
+      decode: (raw) => _decodeGetTypeResult(raw),
+    );
+
+final ConvexQueryReference<NoArgs, List<ListAvailableResultItem>>
+listAvailableQueryReference = ConvexQueryReference(
+  name: 'drink:listAvailable',
+  encode: (args) => const <String, dynamic>{},
+  decode: (raw) => expectList(
+    raw,
+    label: 'ListAvailableResult',
+  ).map((item) => _decodeListAvailableResultItem(item)).toList(),
+);
+
+final ConvexQueryReference<NoArgs, List<ListCustomResultItem>>
+listCustomQueryReference = ConvexQueryReference(
+  name: 'drink:listCustom',
+  encode: (args) => const <String, dynamic>{},
+  decode: (raw) => expectList(
+    raw,
+    label: 'ListCustomResult',
+  ).map((item) => _decodeListCustomResultItem(item)).toList(),
+);
 
 final ConvexMutationReference<SoftDeleteArgs, void>
 softDeleteMutationReference = ConvexMutationReference(

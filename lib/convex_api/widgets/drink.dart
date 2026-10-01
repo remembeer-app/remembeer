@@ -160,3 +160,86 @@ class DrinkUpdateMutation extends StatelessWidget {
         builder(context, DrinkUpdateMutationExecutor(mutate), snapshot),
   );
 }
+
+/// Flutter widget for drink:get.
+class DrinkGetTypeQuery extends StatelessWidget {
+  /// Creates a typed query widget.
+  const DrinkGetTypeQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    required this.id,
+  });
+
+  /// Builds the UI from the latest query snapshot.
+  final Widget Function(BuildContext, ConvexQuerySnapshot<GetTypeResult>)
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final DrinkId id;
+
+  @override
+  Widget build(BuildContext context) =>
+      ConvexTypedQuery<GetTypeArgs, GetTypeResult>(
+        query: getValueQueryReference,
+        args: (id: id),
+        client: client,
+        builder: builder,
+      );
+}
+
+/// Flutter widget for drink:listAvailable.
+class DrinkListAvailableQuery extends StatelessWidget {
+  /// Creates a typed query widget.
+  const DrinkListAvailableQuery({
+    super.key,
+    required this.builder,
+    this.client,
+  });
+
+  /// Builds the UI from the latest query snapshot.
+  final Widget Function(
+    BuildContext,
+    ConvexQuerySnapshot<List<ListAvailableResultItem>>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  @override
+  Widget build(BuildContext context) =>
+      ConvexTypedQuery<NoArgs, List<ListAvailableResultItem>>(
+        query: listAvailableQueryReference,
+        args: const NoArgs(),
+        client: client,
+        builder: builder,
+      );
+}
+
+/// Flutter widget for drink:listCustom.
+class DrinkListCustomQuery extends StatelessWidget {
+  /// Creates a typed query widget.
+  const DrinkListCustomQuery({super.key, required this.builder, this.client});
+
+  /// Builds the UI from the latest query snapshot.
+  final Widget Function(
+    BuildContext,
+    ConvexQuerySnapshot<List<ListCustomResultItem>>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  @override
+  Widget build(BuildContext context) =>
+      ConvexTypedQuery<NoArgs, List<ListCustomResultItem>>(
+        query: listCustomQueryReference,
+        args: const NoArgs(),
+        client: client,
+        builder: builder,
+      );
+}
