@@ -28,6 +28,13 @@ class DrinkApi {
     return DrinkId(expectString(raw$, label: 'CreateResult'));
   }
 
+  ConvexMutationReference<CreateArgs, DrinkId> get createMutation =>
+      ConvexMutationReference(
+        name: 'drink:create',
+        encode: (args) => _encodeCreateArgs(args),
+        decode: (raw) => DrinkId(expectString(raw, label: 'CreateResult')),
+      );
+
   Future<GetTypeResult> getValue({required DrinkId id}) async {
     final raw$ = await _client.query('drink:get', _encodeGetTypeArgs((id: id)));
     return _decodeGetTypeResult(raw$);
@@ -151,6 +158,13 @@ class DrinkApi {
     return null;
   }
 
+  ConvexMutationReference<SoftDeleteArgs, void> get softDeleteMutation =>
+      ConvexMutationReference(
+        name: 'drink:softDelete',
+        encode: (args) => _encodeSoftDeleteArgs(args),
+        decode: (raw) => null,
+      );
+
   Future<Null> update({
     Optional<double> alcoholPercentage = const Optional.absent(),
     Optional<DrinkCategory> drinkCategory = const Optional.absent(),
@@ -168,6 +182,13 @@ class DrinkApi {
     );
     return null;
   }
+
+  ConvexMutationReference<UpdateArgs, void> get updateMutation =>
+      ConvexMutationReference(
+        name: 'drink:update',
+        encode: (args) => _encodeUpdateArgs(args),
+        decode: (raw) => null,
+      );
 }
 
 Map<String, dynamic> _encodeDrinkCategory(DrinkCategory value) {

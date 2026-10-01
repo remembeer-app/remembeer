@@ -33,9 +33,17 @@ dependencies:
   cloud_functions: ^6.2.0
   crypto: ^3.0.7
   cupertino_icons: ^1.0.9
-  dartvex: ^0.2.0
+  dartvex:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
+      path: packages/dartvex
   dartvex_auth_better: ^0.2.0
-  dartvex_flutter: ^0.2.0
+  dartvex_flutter:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
+      path: packages/dartvex_flutter
   dartvex_local: ^0.2.0
 
   diacritic: ^0.1.6
@@ -70,7 +78,7 @@ dev_dependencies:
   dartvex_codegen:
     git:
       url: https://github.com/ohtenkay/dartvex.git
-      ref: b052348bf1c26290b5ee7b983a54a4ddd9e9272d
+      ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
       path: packages/dartvex_codegen
   flutter_lints: ^6.0.0
   flutter_test:
@@ -79,6 +87,13 @@ dev_dependencies:
   go_router_builder: ^4.4.0
   json_serializable: ^6.14.0
   meta: ^1.16.0
+
+dependency_overrides:
+  dartvex:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
+      path: packages/dartvex
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

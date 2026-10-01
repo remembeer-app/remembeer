@@ -316,10 +316,11 @@ packages:
   dartvex:
     dependency: "direct main"
     description:
-      name: dartvex
-      sha256: "7a343c5853f25a1a136051d2d37002a0e1e3f6c230b6f24560797880de33b5d8"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/dartvex"
+      ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
+      resolved-ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
+      url: "https://github.com/ohtenkay/dartvex.git"
+    source: git
     version: "0.2.0"
   dartvex_auth_better:
     dependency: "direct main"
@@ -333,18 +334,19 @@ packages:
     dependency: "direct dev"
     description:
       path: "packages/dartvex_codegen"
-      ref: b052348bf1c26290b5ee7b983a54a4ddd9e9272d
-      resolved-ref: b052348bf1c26290b5ee7b983a54a4ddd9e9272d
+      ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
+      resolved-ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
       url: "https://github.com/ohtenkay/dartvex.git"
     source: git
     version: "0.2.0"
   dartvex_flutter:
     dependency: "direct main"
     description:
-      name: dartvex_flutter
-      sha256: "644374d9eedba2b24229eff1ed2d0797a043bc1212af1fc79d25c38bbccf4a5c"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/dartvex_flutter"
+      ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
+      resolved-ref: be365b7e15d2ff6ea0e1a19f212f7b1f2bc91670
+      url: "https://github.com/ohtenkay/dartvex.git"
+    source: git
     version: "0.2.0"
   dartvex_local:
     dependency: "direct main"

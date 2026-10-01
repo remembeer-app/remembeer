@@ -1,3 +1,4 @@
+import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
@@ -16,41 +17,57 @@ class DrinkTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
-      leading: DrinkIcon(category: drink.drinkCategory.legacyCategory),
-      title: Text(drink.name),
-      subtitle: Text('ABV: ${drink.alcoholPercentage}%'),
-      trailing: Transform.translate(
-        offset: const Offset(10, 0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              onPressed: () =>
-                  UpdateDrinkRoute(drinkId: drink.id.value).push<void>(context),
-              icon: const Icon(Icons.edit),
-            ),
-            IconButton(
-              onPressed: () => _showDeleteConfirmation(context),
-              icon: Icon(
-                Icons.delete,
-                color: Theme.of(context).colorScheme.error,
+    return ConvexMutation<SoftDeleteArgs, void>(
+      mutation: _convexApi.drink.softDeleteMutation,
+      builder: (context, softDelete, snapshot) => ListTile(
+        leading: DrinkIcon(category: drink.drinkCategory.legacyCategory),
+        title: Text(drink.name),
+        subtitle: Text(
+          snapshot.error?.toString() ?? 'ABV: ${drink.alcoholPercentage}%',
+          style: snapshot.hasError
+              ? TextStyle(color: Theme.of(context).colorScheme.error)
+              : null,
+        ),
+        trailing: Transform.translate(
+          offset: const Offset(10, 0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                onPressed: snapshot.isLoading
+                    ? null
+                    : () => UpdateDrinkRoute(
+                        drinkId: drink.id.value,
+                      ).push<void>(context),
+                icon: const Icon(Icons.edit),
               ),
-            ),
-          ],
+              IconButton(
+                onPressed: snapshot.isLoading
+                    ? null
+                    : () => _showDeleteConfirmation(context, softDelete),
+                icon: Icon(
+                  Icons.delete,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context) {
+  void _showDeleteConfirmation(
+    BuildContext context,
+    Future<void> Function(SoftDeleteArgs) softDelete,
+  ) {
     showConfirmationDialog(
       context: context,
       title: 'Delete Drink',
       text: 'Are you sure you want to delete "${drink.name}"?',
       submitButtonText: 'Delete',
       isDestructive: true,
-      onPressed: () async => _convexApi.drink.softDelete(id: drink.id),
+      onPressed: () async => softDelete((id: drink.id)).ignore(),
     );
   }
 }

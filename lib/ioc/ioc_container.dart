@@ -72,6 +72,7 @@ class IoCContainer {
           ),
         ),
       )
+      ..registerSingleton(ConvexClientRuntime(get<ConvexClient>()))
       ..registerSingleton(
         ConvexBetterAuthProvider(client: get<BetterAuthClient>()),
       )
