@@ -136,41 +136,66 @@ describe('Session-backed Party reads', () => {
     }
   });
 
-  test('non-members and unauthenticated users cannot read any Party path', async () => {
-    for (const context of [
-      testEnv.authenticatedContext('outsider'),
-      testEnv.unauthenticatedContext(),
-    ]) {
-      const db = context.firestore();
+  test('signed-in non-members can read active and archived Party paths except command receipts', async () => {
+    const db = testEnv.authenticatedContext('outsider').firestore();
+    for (const id of [partyId, archivedPartyId]) {
       for (const path of paths) {
-        await assertFails(db.doc(`parties/${partyId}${path}`).get());
+        const read = db.doc(`parties/${id}${path}`).get();
+        if (path.startsWith('/commands/')) {
+          await assertFails(read);
+        } else {
+          await assertSucceeds(read);
+        }
+      }
+    }
+    await assertFails(db.collection(`parties/${partyId}/commands`).get());
+  });
+
+  test('unauthenticated users cannot read any Party path', async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    for (const id of [partyId, archivedPartyId]) {
+      for (const path of paths) {
+        await assertFails(db.doc(`parties/${id}${path}`).get());
       }
     }
   });
 
-  test('actual Party collection queries authorize members only', async () => {
+  test('non-members cannot write any Party path', async () => {
+    const db = testEnv.authenticatedContext('outsider').firestore();
+    for (const path of paths) {
+      await assertFails(db.doc(`parties/${partyId}${path}`).set({ forged: true }));
+    }
+    await assertFails(db.doc(`parties/${partyId}/events/new-event`).set({ forged: true }));
+  });
+
+  test('actual Party collection queries authorize signed-in users', async () => {
     const memberDb = testEnv.authenticatedContext('member').firestore();
     const outsiderDb = testEnv.authenticatedContext('outsider').firestore();
-    const party = memberDb.doc(`parties/${partyId}`);
-    const queries = [
-      party.collection('members').orderBy('scoreUnits', 'desc').orderBy('userId'),
-      party.collection('events').orderBy('occurredAt', 'desc'),
-      party.collection('events').where('kind', '==', 'drink').orderBy('occurredAt', 'desc'),
-      party.collection('events').where('participantIds', 'array-contains', 'member').orderBy('occurredAt', 'desc'),
-      party.collection('events').where('participantIds', 'array-contains-any', ['member']).where('kind', 'in', ['drink']).orderBy('occurredAt', 'desc'),
-      party.collection('events').where('sourceCollection', '==', 'challenges').where('sourceId', '==', 'challenge-1'),
-      party.collection('questTemplates').orderBy('title'),
-      party.collection('quests').orderBy('createdAt', 'desc'),
-      party.collection('challenges').orderBy('createdAt', 'desc'),
-      party.collection('tournaments').orderBy('createdAt', 'desc'),
-      party.collection('tournaments/tournament-1/teams').orderBy('seed'),
-      party.collection('tournaments/tournament-1/matches').orderBy('round').orderBy('position'),
-    ];
-    for (const query of queries) {
-      await assertSucceeds(query.get());
+    const unauthenticatedDb = testEnv.unauthenticatedContext().firestore();
+    const queriesFor = (db) => {
+      const party = db.doc(`parties/${partyId}`);
+      return [
+        party.collection('members').orderBy('scoreUnits', 'desc').orderBy('userId'),
+        party.collection('events').orderBy('occurredAt', 'desc'),
+        party.collection('events').where('kind', '==', 'drink').orderBy('occurredAt', 'desc'),
+        party.collection('events').where('participantIds', 'array-contains', 'member').orderBy('occurredAt', 'desc'),
+        party.collection('events').where('participantIds', 'array-contains-any', ['member']).where('kind', 'in', ['drink']).orderBy('occurredAt', 'desc'),
+        party.collection('events').where('sourceCollection', '==', 'challenges').where('sourceId', '==', 'challenge-1'),
+        party.collection('questTemplates').orderBy('title'),
+        party.collection('quests').orderBy('createdAt', 'desc'),
+        party.collection('challenges').orderBy('createdAt', 'desc'),
+        party.collection('tournaments').orderBy('createdAt', 'desc'),
+        party.collection('tournaments/tournament-1/teams').orderBy('seed'),
+        party.collection('tournaments/tournament-1/matches').orderBy('round').orderBy('position'),
+      ];
+    };
+    for (const db of [memberDb, outsiderDb]) {
+      for (const query of queriesFor(db)) {
+        await assertSucceeds(query.get());
+      }
     }
     await assertFails(
-      outsiderDb
+      unauthenticatedDb
         .collection(`parties/${partyId}/events`)
         .orderBy('occurredAt', 'desc')
         .get(),

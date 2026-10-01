@@ -39,6 +39,7 @@ class LoadingFormState extends State<LoadingForm> {
     String? Function(String?)? validator,
     int? minLines,
     int? maxLines,
+    bool enabled = true,
   }) {
     return TextFormField(
       controller: controller,
@@ -46,7 +47,7 @@ class LoadingFormState extends State<LoadingForm> {
       textInputAction: isLastField
           ? TextInputAction.done
           : TextInputAction.next,
-      enabled: !_isLoading,
+      enabled: enabled && !_isLoading,
       maxLength: maxLength,
       inputFormatters: [LengthLimitingTextInputFormatter(maxLength)],
       validator: validator,
@@ -103,6 +104,7 @@ class LoadingFormState extends State<LoadingForm> {
     DateTime? firstDate,
     required DateTime lastDate,
     String? Function(String?)? validator,
+    bool enabled = true,
   }) {
     Future<void> selectDateTime() async {
       final pickedDate = await showDatePicker(
@@ -135,7 +137,7 @@ class LoadingFormState extends State<LoadingForm> {
     return TextFormField(
       controller: controller,
       readOnly: true,
-      enabled: !_isLoading,
+      enabled: enabled && !_isLoading,
       onTap: selectDateTime,
       decoration: InputDecoration(
         labelText: label,
@@ -150,6 +152,7 @@ class LoadingFormState extends State<LoadingForm> {
     required String text,
     required Future<void> Function() onSubmit,
     EdgeInsetsGeometry margin = EdgeInsets.zero,
+    bool enabled = true,
   }) {
     final theme = Theme.of(context);
 
@@ -158,7 +161,7 @@ class LoadingFormState extends State<LoadingForm> {
       child: SizedBox(
         width: double.infinity,
         child: FilledButton(
-          onPressed: _isLoading ? null : () => _submit(onSubmit),
+          onPressed: !enabled || _isLoading ? null : () => _submit(onSubmit),
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 16),
           ),
