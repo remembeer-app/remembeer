@@ -1,24 +1,19 @@
-import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/drink.dart';
+import 'package:remembeer/convex_api/widgets.dart';
 import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
 
 class DrinkTile extends StatelessWidget {
   final ListCustomResultItem drink;
 
-  DrinkTile({super.key, required this.drink});
-
-  final _convexApi = get<ConvexApi>();
+  const DrinkTile({super.key, required this.drink});
 
   @override
   Widget build(BuildContext context) {
-    return ConvexMutation<SoftDeleteArgs, void>(
-      mutation: _convexApi.drink.softDeleteMutation,
+    return DrinkSoftDeleteMutation(
       builder: (context, softDelete, snapshot) => ListTile(
         leading: DrinkIcon(category: drink.drinkCategory.legacyCategory),
         title: Text(drink.name),
@@ -59,7 +54,7 @@ class DrinkTile extends StatelessWidget {
 
   void _showDeleteConfirmation(
     BuildContext context,
-    Future<void> Function(SoftDeleteArgs) softDelete,
+    DrinkSoftDeleteMutationExecutor softDelete,
   ) {
     showConfirmationDialog(
       context: context,
@@ -67,7 +62,7 @@ class DrinkTile extends StatelessWidget {
       text: 'Are you sure you want to delete "${drink.name}"?',
       submitButtonText: 'Delete',
       isDestructive: true,
-      onPressed: () async => softDelete((id: drink.id)).ignore(),
+      onPressed: () async => softDelete(id: drink.id).ignore(),
     );
   }
 }

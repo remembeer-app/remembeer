@@ -29,11 +29,7 @@ class DrinkApi {
   }
 
   ConvexMutationReference<CreateArgs, DrinkId> get createMutation =>
-      ConvexMutationReference(
-        name: 'drink:create',
-        encode: (args) => _encodeCreateArgs(args),
-        decode: (raw) => DrinkId(expectString(raw, label: 'CreateResult')),
-      );
+      createMutationReference;
 
   Future<GetTypeResult> getValue({required DrinkId id}) async {
     final raw$ = await _client.query('drink:get', _encodeGetTypeArgs((id: id)));
@@ -159,11 +155,7 @@ class DrinkApi {
   }
 
   ConvexMutationReference<SoftDeleteArgs, void> get softDeleteMutation =>
-      ConvexMutationReference(
-        name: 'drink:softDelete',
-        encode: (args) => _encodeSoftDeleteArgs(args),
-        decode: (raw) => null,
-      );
+      softDeleteMutationReference;
 
   Future<Null> update({
     Optional<double> alcoholPercentage = const Optional.absent(),
@@ -184,11 +176,7 @@ class DrinkApi {
   }
 
   ConvexMutationReference<UpdateArgs, void> get updateMutation =>
-      ConvexMutationReference(
-        name: 'drink:update',
-        encode: (args) => _encodeUpdateArgs(args),
-        decode: (raw) => null,
-      );
+      updateMutationReference;
 }
 
 Map<String, dynamic> _encodeDrinkCategory(DrinkCategory value) {
@@ -669,3 +657,24 @@ UpdateArgs _decodeUpdateArgs(dynamic raw) {
         : const Optional.absent(),
   );
 }
+
+final ConvexMutationReference<CreateArgs, DrinkId> createMutationReference =
+    ConvexMutationReference(
+      name: 'drink:create',
+      encode: (args) => _encodeCreateArgs(args),
+      decode: (raw) => DrinkId(expectString(raw, label: 'CreateResult')),
+    );
+
+final ConvexMutationReference<SoftDeleteArgs, void>
+softDeleteMutationReference = ConvexMutationReference(
+  name: 'drink:softDelete',
+  encode: (args) => _encodeSoftDeleteArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<UpdateArgs, void> updateMutationReference =
+    ConvexMutationReference(
+      name: 'drink:update',
+      encode: (args) => _encodeUpdateArgs(args),
+      decode: (raw) => null,
+    );

@@ -9,7 +9,7 @@
     "convex:dev": "convex dev",
     "convex:generate": "npm run convex:codegen && npm run dartvex:codegen && dart format lib/convex_api",
     "convex:typecheck": "tsc -p convex/tsconfig.json",
-    "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api",
+    "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api --flutter-widgets",
     "test": "node --test test/firestore-rules.test.js",
     "seed": "node scripts/seed_drinks.mjs"
   },

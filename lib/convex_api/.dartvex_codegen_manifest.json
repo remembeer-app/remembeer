@@ -5,6 +5,9 @@
     "modules/user.dart",
     "runtime.dart",
     "schema.dart",
-    "types.dart"
+    "types.dart",
+    "widgets.dart",
+    "widgets/drink.dart",
+    "widgets/user.dart"
   ]
 }

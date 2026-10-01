@@ -20,10 +20,12 @@ class UserApi {
   }
 
   ConvexMutationReference<NoArgs, UserId> get ensureCurrentMutation =>
-      ConvexMutationReference(
-        name: 'user:ensureCurrent',
-        encode: (args) => const <String, dynamic>{},
-        decode: (raw) =>
-            UserId(expectString(raw, label: 'EnsureCurrentResult')),
-      );
+      ensureCurrentMutationReference;
 }
+
+final ConvexMutationReference<NoArgs, UserId> ensureCurrentMutationReference =
+    ConvexMutationReference(
+      name: 'user:ensureCurrent',
+      encode: (args) => const <String, dynamic>{},
+      decode: (raw) => UserId(expectString(raw, label: 'EnsureCurrentResult')),
+    );

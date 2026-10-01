@@ -654,7 +654,7 @@ class AddDrinkRoute extends GoRouteData with $AddDrinkRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return AddDrinkPage();
+    return const AddDrinkPage();
   }
 }
 
