@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/convex_api/types.dart' as convex;
+// TODO(ohtenkay): Remove legacy import when legacy DrinkCategory is removed
 import 'package:remembeer/drink/model/drink_category.dart' as legacy;
 
 const convexDrinkCategories = <convex.DrinkCategory>[

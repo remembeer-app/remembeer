@@ -16,7 +16,6 @@ class DrinkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DrinkSoftDeleteMutation(
-      key: ValueKey(drink.id),
       optimisticUpdate: _optimisticDeleteDrink,
       builder: (context, softDelete, _) => ListTile(
         leading: DrinkIcon(category: drink.drinkCategory.legacyCategory),
