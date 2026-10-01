@@ -5,13 +5,13 @@ import type { Id } from "../_generated/dataModel";
 
 export const listCustom = authQuery
   .returns(v.array(schema.doc("drink")))
-  .handler(listAvailableHanlder);
+  .handler(listCustomHanlder);
 
 export const listAvailable = authQuery
   .returns(v.array(schema.doc("drink")))
   .handler(async (ctx) => {
     const [customDrinks, globalDrinks] = await Promise.all([
-      listAvailableHanlder(ctx),
+      listCustomHanlder(ctx),
       ctx.db
         .query("drink")
         .withIndex("by_ownerId_and_deletedAt", (q) =>
@@ -23,7 +23,7 @@ export const listAvailable = authQuery
     return [...customDrinks, ...globalDrinks];
   });
 
-function listAvailableHanlder(ctx: AuthQueryCtx) {
+function listCustomHanlder(ctx: AuthQueryCtx) {
   return ctx.db
     .query("drink")
     .withIndex("by_ownerId_and_deletedAt", (q) =>
