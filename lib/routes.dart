@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/account_deletion/page/delete_account_page.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
+import 'package:remembeer/activity/page/party_events_page.dart';
+import 'package:remembeer/activity/page/party_standings_page.dart';
 import 'package:remembeer/activity/page/session_detail_page.dart';
 import 'package:remembeer/activity/widget/session_photo_viewer.dart';
 import 'package:remembeer/auth/page/change_password_page.dart';
@@ -178,6 +180,8 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
               path: 'sessions/:sessionId',
               routes: [
                 TypedGoRoute<SessionPhotoRoute>(path: 'photos/:initialIndex'),
+                TypedGoRoute<ActivityPartyRankingRoute>(path: 'party/ranking'),
+                TypedGoRoute<ActivityPartyEventsRoute>(path: 'party/events'),
               ],
             ),
           ],
@@ -579,6 +583,30 @@ class ActivitySessionRoute extends GoRouteData with $ActivitySessionRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return SessionDetailPage(sessionId: sessionId);
+  }
+}
+
+class ActivityPartyRankingRoute extends GoRouteData
+    with $ActivityPartyRankingRoute {
+  final String sessionId;
+
+  const ActivityPartyRankingRoute({required this.sessionId});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PartyStandingsPage(sessionId: sessionId);
+  }
+}
+
+class ActivityPartyEventsRoute extends GoRouteData
+    with $ActivityPartyEventsRoute {
+  final String sessionId;
+
+  const ActivityPartyEventsRoute({required this.sessionId});
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return PartyEventsPage(sessionId: sessionId);
   }
 }
 
