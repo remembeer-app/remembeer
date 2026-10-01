@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
-import 'package:remembeer/drink_type/model/drink_type_core.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
-import 'package:remembeer/user_settings/model/drink_list_sort.dart';
+import 'package:remembeer/user_settings/model/drink_log_list_sort.dart';
 import 'package:remembeer/user_settings/model/user_settings.dart';
 
-const _defaultDrinkType = DrinkTypeCore(
+const _defaultDrink = DrinkSnapshot(
   name: 'Beer',
   category: DrinkCategory.beer,
   alcoholPercentage: 4.5,
@@ -53,7 +53,7 @@ class UserSettingsService {
   Future<void> createDefaultUserSettings() async {
     final defaultUserSettings = UserSettings(
       id: authService.authenticatedUser.uid,
-      defaultDrinkType: _defaultDrinkType,
+      defaultDrink: _defaultDrink,
       defaultDrinkSize: _defaultDrinkSize,
     );
 
@@ -62,15 +62,15 @@ class UserSettingsService {
     );
   }
 
-  Future<void> updateDefaultDrinkType(DrinkTypeCore drinkType) async {
+  Future<void> updateDefaultDrink(DrinkSnapshot drink) async {
     final currentUserSettings =
         await userSettingsController.currentUserSettings;
-    if (currentUserSettings.defaultDrinkType == drinkType) {
+    if (currentUserSettings.defaultDrink == drink) {
       return;
     }
 
     final updatedUserSettings = currentUserSettings.copyWith(
-      defaultDrinkType: drinkType,
+      defaultDrink: drink,
     );
 
     await userSettingsController.createOrUpdateUserSettings(
@@ -94,17 +94,17 @@ class UserSettingsService {
     );
   }
 
-  Future<void> updateDrinkListSort(
-    DrinkListSortOrder drinkListSortOrder,
+  Future<void> updateDrinkLogListSort(
+    DrinkLogListSortOrder drinkLogListSortOrder,
   ) async {
     final currentUserSettings =
         await userSettingsController.currentUserSettings;
-    if (currentUserSettings.drinkListSortOrder == drinkListSortOrder) {
+    if (currentUserSettings.drinkLogListSortOrder == drinkLogListSortOrder) {
       return;
     }
 
     final updatedUserSettings = currentUserSettings.copyWith(
-      drinkListSortOrder: drinkListSortOrder,
+      drinkLogListSortOrder: drinkLogListSortOrder,
     );
 
     await userSettingsController.createOrUpdateUserSettings(

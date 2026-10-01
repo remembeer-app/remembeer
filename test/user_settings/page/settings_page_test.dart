@@ -1,7 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
+import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user_settings/page/settings_page.dart';
 
@@ -9,7 +8,7 @@ void main() {
   testWidgets('shows the about section with privacy policy and support link', (
     tester,
   ) async {
-    get.registerSingleton<AuthService>(_FakeAuthService());
+    get.registerSingleton<ConvexAuthService>(_FakeConvexAuthService());
     addTearDown(get.reset);
 
     tester.view.physicalSize = const Size(1000, 4000);
@@ -27,21 +26,7 @@ void main() {
   });
 }
 
-class _FakeAuthService implements AuthService {
-  @override
-  bool get hasPasswordProvider => false;
-
-  @override
-  User get authenticatedUser => _FakeFirebaseUser();
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _FakeFirebaseUser implements User {
-  @override
-  String get uid => 'user-1';
-
+class _FakeConvexAuthService implements ConvexAuthService {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

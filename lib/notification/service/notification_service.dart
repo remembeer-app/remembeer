@@ -115,7 +115,7 @@ class NotificationService {
           _navigate(UserProfileRoute(userId: fromUserId).location);
         }
       case NotificationType.addedToSession:
-        _navigate(const DrinkRoute().location);
+        _navigate(const DrinkLogRoute().location);
       case NotificationType.partyActivated:
       case NotificationType.partyQuestStarted:
       case NotificationType.partyQuestCompleted:

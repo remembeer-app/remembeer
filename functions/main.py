@@ -4,7 +4,7 @@ from typing import Any
 import party_beerpong
 import party_challenges
 import party_commands
-import party_drinks
+import party_drink_logs
 import party_quests
 import party_scheduler as party_scheduler_module
 from firebase_admin import firestore, initialize_app, messaging
@@ -44,18 +44,18 @@ def set_party_member_class(request: Any) -> Mapping[str, Any]:
 
 
 @https_fn.on_call(region=REGION)
-def create_party_drink(request: Any) -> Mapping[str, Any]:
-    return party_drinks.create_party_drink(request)
+def create_party_drink_log(request: Any) -> Mapping[str, Any]:
+    return party_drink_logs.create_party_drink_log(request)
 
 
 @https_fn.on_call(region=REGION)
-def update_party_drink(request: Any) -> Mapping[str, Any]:
-    return party_drinks.update_party_drink(request)
+def update_party_drink_log(request: Any) -> Mapping[str, Any]:
+    return party_drink_logs.update_party_drink_log(request)
 
 
 @https_fn.on_call(region=REGION)
-def delete_party_drink(request: Any) -> Mapping[str, Any]:
-    return party_drinks.delete_party_drink(request)
+def delete_party_drink_log(request: Any) -> Mapping[str, Any]:
+    return party_drink_logs.delete_party_drink_log(request)
 
 
 @https_fn.on_call(region=REGION)

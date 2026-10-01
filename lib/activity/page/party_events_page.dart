@@ -27,7 +27,7 @@ class PartyEventsPage extends StatelessWidget {
           builder: (context, members) => PartyActivityTab(
             sessionId: sessionId,
             members: members,
-            drinks: session.drinks,
+            drinkLogs: session.drinkLogs,
             currentUserId: _partyService.currentUserId,
             isPartyActive: false,
           ),

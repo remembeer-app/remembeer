@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/util/invariant.dart';
-import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/model/party.dart';
@@ -183,39 +183,39 @@ class PartyController {
     },
   );
 
-  Future<PartyCommandResult> createPartyDrink({
+  Future<PartyCommandResult> createPartyDrinkLog({
     required String sessionId,
     required String commandId,
-    required String drinkTypeId,
-    required Drink drink,
+    required String catalogDrinkId,
+    required DrinkLog drinkLog,
   }) => invokeCommand(
-    commandName: 'create_party_drink',
+    commandName: 'create_party_drink_log',
     sessionId: sessionId,
     commandId: commandId,
-    data: _drinkData(drinkTypeId: drinkTypeId, drink: drink),
+    data: _drinkLogData(catalogDrinkId: catalogDrinkId, drinkLog: drinkLog),
   );
 
-  Future<PartyCommandResult> updatePartyDrink({
+  Future<PartyCommandResult> updatePartyDrinkLog({
     required String sessionId,
     required String commandId,
-    required String drinkTypeId,
-    required Drink drink,
+    required String catalogDrinkId,
+    required DrinkLog drinkLog,
   }) => invokeCommand(
-    commandName: 'update_party_drink',
+    commandName: 'update_party_drink_log',
     sessionId: sessionId,
     commandId: commandId,
-    data: _drinkData(drinkTypeId: drinkTypeId, drink: drink),
+    data: _drinkLogData(catalogDrinkId: catalogDrinkId, drinkLog: drinkLog),
   );
 
-  Future<PartyCommandResult> deletePartyDrink({
+  Future<PartyCommandResult> deletePartyDrinkLog({
     required String sessionId,
     required String commandId,
-    required String drinkId,
+    required String drinkLogId,
   }) => invokeCommand(
-    commandName: 'delete_party_drink',
+    commandName: 'delete_party_drink_log',
     sessionId: sessionId,
     commandId: commandId,
-    data: {'drinkId': drinkId},
+    data: {'drinkLogId': drinkLogId},
   );
 
   Future<PartyCommandResult> archiveParty({
@@ -229,15 +229,15 @@ class PartyController {
     data: {'endedAt': endedAt.toIso8601String()},
   );
 
-  Map<String, Object?> _drinkData({
-    required String drinkTypeId,
-    required Drink drink,
+  Map<String, Object?> _drinkLogData({
+    required String catalogDrinkId,
+    required DrinkLog drinkLog,
   }) => {
-    'drinkId': drink.id,
-    'drinkTypeId': drinkTypeId,
-    'consumedAt': _dateTimeWithOffset(drink.consumedAt),
-    'volumeInMilliliters': drink.volumeInMilliliters,
-    'location': switch (drink.location) {
+    'drinkLogId': drinkLog.id,
+    'drinkId': catalogDrinkId,
+    'consumedAt': _dateTimeWithOffset(drinkLog.consumedAt),
+    'volumeInMilliliters': drinkLog.volumeInMilliliters,
+    'location': switch (drinkLog.location) {
       final location? => {
         'latitude': location.latitude,
         'longitude': location.longitude,

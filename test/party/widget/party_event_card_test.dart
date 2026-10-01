@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/service/party_activity_service.dart';
 import 'package:remembeer/party/widget/party_event_card.dart';
@@ -77,11 +77,11 @@ void main() {
 
 PartyEvent _drinkEvent() => PartyEvent(
   id: 'drink-event',
-  kind: PartyEventKind.drink,
+  kind: PartyEventKind.drinkLog,
   recipientUserId: 'a',
   participantIds: const ['a'],
   pointsUnits: 1000,
-  sourceCollection: PartyEventSourceCollection.drinks,
+  sourceCollection: PartyEventSourceCollection.drinkLogs,
   sourceId: 'drink-1',
   occurredAt: DateTime.utc(2026),
   createdAt: DateTime.utc(2026),

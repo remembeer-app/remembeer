@@ -19,7 +19,7 @@ publish_to: "none" # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+3
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.10.0
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -33,9 +33,18 @@ dependencies:
   cloud_functions: ^6.2.0
   crypto: ^3.0.7
   cupertino_icons: ^1.0.9
-  dartvex: ^0.2.0
+  dartvex:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: 2a84cd46a8cc294b23dde0e0bcd6c11418d9815d
+      path: packages/dartvex
   dartvex_auth_better: ^0.2.0
-  dartvex_flutter: ^0.2.0
+  dartvex_flutter:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: 2a84cd46a8cc294b23dde0e0bcd6c11418d9815d
+      path: packages/dartvex_flutter
+  dartvex_local: ^0.2.0
 
   diacritic: ^0.1.6
   firebase_auth: ^6.4.0
@@ -66,7 +75,11 @@ dependencies:
 
 dev_dependencies:
   build_runner: ^2.15.1
-  dartvex_codegen: ^0.2.0
+  dartvex_codegen:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: 2a84cd46a8cc294b23dde0e0bcd6c11418d9815d
+      path: packages/dartvex_codegen
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
@@ -74,6 +87,13 @@ dev_dependencies:
   go_router_builder: ^4.4.0
   json_serializable: ^6.14.0
   meta: ^1.16.0
+
+dependency_overrides:
+  dartvex:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: 2a84cd46a8cc294b23dde0e0bcd6c11418d9815d
+      path: packages/dartvex
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

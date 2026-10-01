@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:remembeer/activity/type/user_with_drinks.dart';
-import 'package:remembeer/drink/model/drink.dart';
+import 'package:remembeer/activity/type/user_with_drink_logs.dart';
+import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
@@ -23,25 +23,27 @@ abstract class SessionWithMembers with _$SessionWithMembers {
     return session.isMultipleDaySession;
   }
 
-  List<UserWithDrinks> get drinksByUser {
-    if (session.drinks.isEmpty) {
+  List<UserWithDrinkLogs> get drinkLogsByUser {
+    if (session.drinkLogs.isEmpty) {
       return [];
     }
 
-    final drinksByUserId = <String, List<Drink>>{};
-    for (final drink in session.drinks) {
-      drinksByUserId.putIfAbsent(drink.consumedByUserId, () => []).add(drink);
+    final drinkLogsByUserId = <String, List<DrinkLog>>{};
+    for (final drinkLog in session.drinkLogs) {
+      drinkLogsByUserId
+          .putIfAbsent(drinkLog.consumedByUserId, () => [])
+          .add(drinkLog);
     }
 
-    for (final userDrinks in drinksByUserId.values) {
-      userDrinks.sort((a, b) => a.consumedAt.compareTo(b.consumedAt));
+    for (final userDrinkLogs in drinkLogsByUserId.values) {
+      userDrinkLogs.sort((a, b) => a.consumedAt.compareTo(b.consumedAt));
     }
 
-    final result = <UserWithDrinks>[];
-    for (final entry in drinksByUserId.entries) {
+    final result = <UserWithDrinkLogs>[];
+    for (final entry in drinkLogsByUserId.entries) {
       final user = members[entry.key];
       if (user != null) {
-        result.add((user: user, drinks: entry.value));
+        result.add((user: user, drinkLogs: entry.value));
       }
     }
 

@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink_type/model/drink_category.dart';
+import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/beerpong_match.dart';
 import 'package:remembeer/party/model/beerpong_team.dart';
@@ -65,7 +65,7 @@ void main() {
       recipientUserId: 'user-1',
       participantIds: const ['user-1', 'user-2'],
       pointsUnits: -12500,
-      sourceCollection: PartyEventSourceCollection.drinks,
+      sourceCollection: PartyEventSourceCollection.drinkLogs,
       sourceId: 'drink-1',
       reversesEventId: 'event-0',
       actorUserId: 'admin-1',
@@ -76,7 +76,7 @@ void main() {
 
     expect(PartyEvent.fromJson(event.toJson()), event);
     expect(event.toJson()['kind'], 'reversal');
-    expect(event.toJson()['sourceCollection'], 'drinks');
+    expect(event.toJson()['sourceCollection'], 'drinkLogs');
   });
 
   test('quest templates round trip without a duration override', () {

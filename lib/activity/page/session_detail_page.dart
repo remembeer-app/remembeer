@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/activity/model/session_with_members.dart';
 import 'package:remembeer/activity/service/activity_service.dart';
-import 'package:remembeer/activity/widget/session_drinks_section.dart';
+import 'package:remembeer/activity/widget/session_drink_logs_section.dart';
 import 'package:remembeer/activity/widget/session_header_card.dart';
 import 'package:remembeer/activity/widget/session_participants_section.dart';
 import 'package:remembeer/activity/widget/session_party_section.dart';
@@ -66,7 +66,7 @@ class SessionDetailPage extends StatelessWidget {
             const Gap(16),
             if (session.isParty)
               SessionPartySection(sessionWithMembers: sessionWithMembers),
-            SessionDrinksSection(sessionWithMembers: sessionWithMembers),
+            SessionDrinkLogsSection(sessionWithMembers: sessionWithMembers),
             const Gap(16),
             SessionStatisticsCard(sessionWithMembers: sessionWithMembers),
           ],
