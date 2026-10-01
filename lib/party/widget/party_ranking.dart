@@ -59,47 +59,16 @@ class PartyStandingCard extends StatelessWidget {
               ? BorderSide(color: theme.colorScheme.primary, width: 2)
               : BorderSide.none,
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 40,
-                child: Text(
-                  '#${standing.rank}',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: accent?.textColor,
-                  ),
-                ),
-              ),
-              if (standing.user case final user?) UserAvatar(user: user),
-              if (standing.user == null)
-                const CircleAvatar(child: Icon(Icons.person_outline)),
-              const Gap(12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      standing.username,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: accent?.textColor,
-                      ),
-                    ),
-                    Text('$drinkCount ${drinkCount == 1 ? 'drink' : 'drinks'}'),
-                  ],
-                ),
-              ),
-              const Gap(8),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    points,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 40,
+                  child: Text(
+                    '#${standing.rank}',
                     style: theme.textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: accent?.textColor,
@@ -123,7 +92,9 @@ class PartyStandingCard extends StatelessWidget {
                           color: accent?.textColor,
                         ),
                       ),
-                      Text('$drinks ${drinks == 1 ? 'drink' : 'drinks'}'),
+                      Text(
+                        '$drinkCount ${drinkCount == 1 ? 'drink' : 'drinks'}',
+                      ),
                     ],
                   ),
                 ),
