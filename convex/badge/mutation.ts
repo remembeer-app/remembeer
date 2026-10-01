@@ -1,12 +1,18 @@
 import { ConvexError, v } from "convex/values";
+import { WithZod } from "fluent-convex/zod";
 import { authMutation } from "../lib/authenticated";
 import { convex } from "../lib/builder";
+import {
+  setBadgeVisibilityInputValidator,
+  unlockBadgeInputValidator,
+} from "./schema";
 
 const maxBadgesShown = 6;
 
 export const unlockForUser = convex
   .mutation()
-  .input({ userId: v.id("user"), badgeKey: v.string() })
+  .extend(WithZod)
+  .input(unlockBadgeInputValidator)
   .returns(v.id("badge"))
   .handler(async (ctx, { userId, badgeKey }) => {
     if (!(await ctx.db.get("user", userId))) {
@@ -38,7 +44,8 @@ export const unlockForUser = convex
   });
 
 export const setVisibility = authMutation
-  .input({ badgeKey: v.string(), isShown: v.boolean() })
+  .extend(WithZod)
+  .input(setBadgeVisibilityInputValidator)
   .returns(v.null())
   .handler(async (ctx, { badgeKey, isShown }) => {
     const badge = await ctx.db

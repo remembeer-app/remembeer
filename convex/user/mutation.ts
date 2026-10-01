@@ -1,20 +1,16 @@
 import { ConvexError, v } from "convex/values";
+import { WithZod } from "fluent-convex/zod";
 import { authMutation } from "../lib/authenticated";
 import { convex } from "../lib/builder";
 import { getCurrentUserSafe } from "./currentUser";
-import { userTable } from "./schema";
+import {
+  normalizeUsername,
+  updateEndOfDayBoundaryInputValidator,
+  updateUsernameInputValidator,
+  userTable,
+} from "./schema";
 
-const minUsernameLength = 3;
-const maxUsernameLength = 20;
 const defaultEndOfDayBoundary = 6 * 60;
-
-function normalizeUsername(username: string) {
-  return username
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/\s/g, "");
-}
 
 export const ensureCurrent = convex
   .mutation()
@@ -40,22 +36,13 @@ export const ensureCurrent = convex
   });
 
 export const updateUsername = authMutation
-  .input({ username: v.string() })
+  .extend(WithZod)
+  .input(updateUsernameInputValidator)
   .returns(v.null())
   .handler(async (ctx, { username }) => {
-    const trimmed = username.trim();
-    if (
-      trimmed.length < minUsernameLength ||
-      trimmed.length > maxUsernameLength
-    ) {
-      throw new ConvexError(
-        `Username must be between ${minUsernameLength} and ${maxUsernameLength} characters`,
-      );
-    }
-
     await ctx.db.patch("user", ctx.user._id, {
-      username: trimmed,
-      normalizedUsername: normalizeUsername(trimmed),
+      username,
+      normalizedUsername: normalizeUsername(username),
     });
     return null;
   });
@@ -77,17 +64,10 @@ export const updateAvatarUrl = authMutation
   });
 
 export const updateEndOfDayBoundary = authMutation
-  .input({ endOfDayBoundary: v.number() })
+  .extend(WithZod)
+  .input(updateEndOfDayBoundaryInputValidator)
   .returns(v.null())
   .handler(async (ctx, { endOfDayBoundary }) => {
-    if (
-      !Number.isInteger(endOfDayBoundary) ||
-      endOfDayBoundary < 0 ||
-      endOfDayBoundary >= 24 * 60
-    ) {
-      throw new ConvexError("End-of-day boundary must be a minute of the day");
-    }
-
     await ctx.db.patch("user", ctx.user._id, { endOfDayBoundary });
     return null;
   });
