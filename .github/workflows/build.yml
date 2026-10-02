@@ -73,6 +73,54 @@ jobs:
       - name: Run tests
         run: flutter test --coverage
 
+  convex_generated:
+    name: Convex Generated Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          flutter pub get
+
+      - name: Start local Convex backend
+        run: |
+          cp .env.example .env
+          docker compose up -d --wait backend
+          echo 'CONVEX_SELF_HOSTED_URL=http://127.0.0.1:3210' >> "$GITHUB_ENV"
+          admin_key="$(docker compose exec -T backend ./generate_admin_key.sh)"
+          echo "::add-mask::$admin_key"
+          echo "CONVEX_SELF_HOSTED_ADMIN_KEY=$admin_key" >> "$GITHUB_ENV"
+
+      - name: Check Convex generated files are up to date
+        run: |
+          npx convex dev --once --typecheck enable
+          npm run dartvex:codegen
+          dart format lib/convex_api
+          if [ -n "$(git status --porcelain -- convex/_generated lib/convex_api)" ]; then
+            echo "::error::Convex generated files are out of date. Run 'npx convex dev --once' followed by 'npm run convex:generate' and commit the changes."
+            git status --short -- convex/_generated lib/convex_api
+            exit 1
+          fi
+
+      - name: Stop local Convex backend
+        if: always()
+        run: docker compose down -v
+
   android_build:
     name: Build Android
     runs-on: ubuntu-latest
@@ -224,6 +272,7 @@ jobs:
     if: always()
     needs:
       - checks
+      - convex_generated
       - python_checks
       - firestore_rules
       - android_build
