@@ -9,6 +9,7 @@ class SettingsPageTemplate extends StatelessWidget {
   final Widget child;
   final String? hint;
   final VoidCallback? onFabPressed;
+  final bool isSubmitting;
   final IconData fabIcon;
   final EdgeInsetsGeometry padding;
 
@@ -18,6 +19,7 @@ class SettingsPageTemplate extends StatelessWidget {
     required this.child,
     this.hint,
     this.onFabPressed,
+    this.isSubmitting = false,
     this.fabIcon = Icons.save,
     this.padding = const EdgeInsets.all(8.0),
   });
@@ -36,8 +38,13 @@ class SettingsPageTemplate extends StatelessWidget {
               ),
               child: FloatingActionButton(
                 heroTag: null,
-                onPressed: onFabPressed,
-                child: Icon(fabIcon),
+                onPressed: isSubmitting ? null : onFabPressed,
+                child: isSubmitting
+                    ? const SizedBox.square(
+                        dimension: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Icon(fabIcon),
               ),
             )
           : null,

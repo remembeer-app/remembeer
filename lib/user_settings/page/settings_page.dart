@@ -124,11 +124,6 @@ class SettingsPage extends StatelessWidget {
           title: 'Default drink',
           onTap: () => const DefaultDrinkSettingsRoute().push<void>(context),
         ),
-        _divider,
-        _buildSettingsCard(
-          title: 'Drink list order',
-          onTap: () => const DrinkLogSortSettingsRoute().push<void>(context),
-        ),
       ],
     );
   }
@@ -172,6 +167,11 @@ class SettingsPage extends StatelessWidget {
         _buildSettingsCard(
           title: 'End of day boundary',
           onTap: () => const EndOfDaySettingsRoute().push<void>(context),
+        ),
+        _divider,
+        _buildSettingsCard(
+          title: 'Drink list order',
+          onTap: () => const DrinkLogSortSettingsRoute().push<void>(context),
         ),
       ],
     );

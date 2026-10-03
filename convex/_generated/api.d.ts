@@ -8,6 +8,8 @@
  * @module
  */
 
+import type * as badge from "../badge.js";
+import type * as badge_mutation from "../badge/mutation.js";
 import type * as drink from "../drink.js";
 import type * as drink_mutation from "../drink/mutation.js";
 import type * as drink_query from "../drink/query.js";
@@ -18,6 +20,7 @@ import type * as lib_builder from "../lib/builder.js";
 import type * as user from "../user.js";
 import type * as user_currentUser from "../user/currentUser.js";
 import type * as user_mutation from "../user/mutation.js";
+import type * as user_query from "../user/query.js";
 
 import type {
   ApiFromModules,
@@ -26,6 +29,8 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  badge: typeof badge;
+  "badge/mutation": typeof badge_mutation;
   drink: typeof drink;
   "drink/mutation": typeof drink_mutation;
   "drink/query": typeof drink_query;
@@ -36,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   user: typeof user;
   "user/currentUser": typeof user_currentUser;
   "user/mutation": typeof user_mutation;
+  "user/query": typeof user_query;
 }>;
 
 /**
