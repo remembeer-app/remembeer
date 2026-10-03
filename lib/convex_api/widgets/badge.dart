@@ -28,6 +28,7 @@ class BadgeSetVisibilityMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -44,11 +45,15 @@ class BadgeSetVisibilityMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<SetVisibilityArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) => ConvexMutation<SetVisibilityArgs, void>(
     mutation: setVisibilityMutationReference,
     client: client,
     typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
     builder: (context, mutate, snapshot) =>
         builder(context, BadgeSetVisibilityMutationExecutor(mutate), snapshot),
   );

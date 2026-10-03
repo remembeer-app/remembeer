@@ -27,6 +27,7 @@ class UserEnsureCurrentMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -43,11 +44,15 @@ class UserEnsureCurrentMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<NoArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) => ConvexMutation<NoArgs, UserId>(
     mutation: ensureCurrentMutationReference,
     client: client,
     typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
     builder: (context, mutate, snapshot) =>
         builder(context, UserEnsureCurrentMutationExecutor(mutate), snapshot),
   );
@@ -73,6 +78,7 @@ class UserUpdateAccentColorMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -89,12 +95,16 @@ class UserUpdateAccentColorMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<UpdateAccentColorArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) =>
       ConvexMutation<UpdateAccentColorArgs, void>(
         mutation: updateAccentColorMutationReference,
         client: client,
         typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
         builder: (context, mutate, snapshot) => builder(
           context,
           UserUpdateAccentColorMutationExecutor(mutate),
@@ -123,6 +133,7 @@ class UserUpdateAvatarUrlMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -139,12 +150,16 @@ class UserUpdateAvatarUrlMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<UpdateAvatarUrlArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) =>
       ConvexMutation<UpdateAvatarUrlArgs, void>(
         mutation: updateAvatarUrlMutationReference,
         client: client,
         typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
         builder: (context, mutate, snapshot) => builder(
           context,
           UserUpdateAvatarUrlMutationExecutor(mutate),
@@ -173,6 +188,7 @@ class UserUpdateDefaultDrinkMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -189,12 +205,16 @@ class UserUpdateDefaultDrinkMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<UpdateDefaultDrinkArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) =>
       ConvexMutation<UpdateDefaultDrinkArgs, void>(
         mutation: updateDefaultDrinkMutationReference,
         client: client,
         typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
         builder: (context, mutate, snapshot) => builder(
           context,
           UserUpdateDefaultDrinkMutationExecutor(mutate),
@@ -224,6 +244,7 @@ class UserUpdateDrinkLogSortOrderMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -240,12 +261,16 @@ class UserUpdateDrinkLogSortOrderMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<UpdateDrinkLogSortOrderArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) =>
       ConvexMutation<UpdateDrinkLogSortOrderArgs, void>(
         mutation: updateDrinkLogSortOrderMutationReference,
         client: client,
         typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
         builder: (context, mutate, snapshot) => builder(
           context,
           UserUpdateDrinkLogSortOrderMutationExecutor(mutate),
@@ -274,6 +299,7 @@ class UserUpdateEndOfDayBoundaryMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -290,12 +316,16 @@ class UserUpdateEndOfDayBoundaryMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<UpdateEndOfDayBoundaryArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) =>
       ConvexMutation<UpdateEndOfDayBoundaryArgs, void>(
         mutation: updateEndOfDayBoundaryMutationReference,
         client: client,
         typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
         builder: (context, mutate, snapshot) => builder(
           context,
           UserUpdateEndOfDayBoundaryMutationExecutor(mutate),
@@ -324,6 +354,7 @@ class UserUpdateUsernameMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -340,12 +371,16 @@ class UserUpdateUsernameMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<UpdateUsernameArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) =>
       ConvexMutation<UpdateUsernameArgs, void>(
         mutation: updateUsernameMutationReference,
         client: client,
         typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
         builder: (context, mutate, snapshot) => builder(
           context,
           UserUpdateUsernameMutationExecutor(mutate),

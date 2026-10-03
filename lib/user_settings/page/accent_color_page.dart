@@ -1,4 +1,5 @@
 import 'package:dartvex/dartvex.dart';
+import 'package:dartvex_flutter/dartvex_flutter.dart' show MutationMode;
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/error_message_box.dart';
@@ -19,6 +20,7 @@ class AccentColorPage extends StatelessWidget {
           'Your accent identifies you in Party Mode and can be changed anytime.',
       child: UserCurrentQuery(
         builder: (context, user) => UserUpdateAccentColorMutation(
+          mode: MutationMode.latest,
           optimisticUpdate: _optimisticUpdateAccentColor,
           builder: (context, mutate, snapshot) => SingleChildScrollView(
             child: Column(
@@ -28,7 +30,6 @@ class AccentColorPage extends StatelessWidget {
                   value: AccentColorKey.values.byName(
                     user.accentColor.value! as String,
                   ),
-                  enabled: !snapshot.isLoading,
                   onChanged: (color) {
                     if (color.name == user.accentColor.value) return;
                     mutate(
