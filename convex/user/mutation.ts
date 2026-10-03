@@ -11,6 +11,9 @@ import {
 } from "./schema";
 
 const defaultEndOfDayBoundary = 6 * 60;
+const accentColors = userTable.validator.fields.accentColor.members.map(
+  (color) => color.value,
+);
 
 export const ensureCurrent = convex
   .mutation()
@@ -27,7 +30,7 @@ export const ensureCurrent = convex
       authUserId: authUser._id,
       username,
       normalizedUsername: normalizeUsername(username),
-      accentColor: "amber",
+      accentColor: accentColors[Math.floor(Math.random() * accentColors.length)]!,
       avatarUrl: null,
       endOfDayBoundary: defaultEndOfDayBoundary,
       defaultDrink: null,
