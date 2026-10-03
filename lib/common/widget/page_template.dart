@@ -10,6 +10,7 @@ class PageTemplate extends StatelessWidget {
   final Color? appBarBackgroundColor;
   final Color? appBarForegroundColor;
   final List<Widget>? actions;
+  final bool automaticallyImplyLeading;
 
   const PageTemplate({
     super.key,
@@ -20,6 +21,7 @@ class PageTemplate extends StatelessWidget {
     this.appBarBackgroundColor,
     this.appBarForegroundColor,
     this.actions,
+    this.automaticallyImplyLeading = true,
   });
 
   @override
@@ -27,6 +29,7 @@ class PageTemplate extends StatelessWidget {
     return Scaffold(
       appBar: title != null
           ? AppBar(
+              automaticallyImplyLeading: automaticallyImplyLeading,
               backgroundColor:
                   appBarBackgroundColor ??
                   Theme.of(context).colorScheme.secondaryContainer,

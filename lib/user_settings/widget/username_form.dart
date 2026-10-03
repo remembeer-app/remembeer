@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/app_form.dart';
 import 'package:remembeer/user_settings/widget/username_field.dart';
 
@@ -47,20 +46,10 @@ class _UsernameFormState extends State<UsernameForm> {
       submittingLabel: 'Saving...',
       onSubmit: () => widget.onSubmit(_usernameController.text),
       onBack: widget.onBack,
-      builder: (context, submit) => Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Text(
-            'This is your displayed username. Other users can find you by '
-            'searching for this username.',
-          ),
-          const Gap(16),
-          UsernameField(
-            controller: _usernameController,
-            enabled: !widget.isSubmitting,
-            onFieldSubmitted: (_) => submit(),
-          ),
-        ],
+      builder: (context, submit) => UsernameField(
+        controller: _usernameController,
+        enabled: !widget.isSubmitting,
+        onFieldSubmitted: (_) => submit(),
       ),
     );
   }

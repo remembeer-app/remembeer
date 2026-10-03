@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
+import 'package:remembeer/user_settings/widget/settings_page.dart';
 import 'package:remembeer/user_settings/widget/username_form.dart';
 
 class UserNamePage extends StatelessWidget {
@@ -9,8 +9,11 @@ class UserNamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PageTemplate(
-      title: const Text('Change your username'),
+    return SettingsPage(
+      title: 'Change your username',
+      hint:
+          'This is your displayed username. Other users can find you by '
+          'searching for this username.',
       child: UserCurrentQuery(
         builder: (context, user) => UserUpdateUsernameMutation(
           builder: (context, mutate, snapshot) => UsernameForm(

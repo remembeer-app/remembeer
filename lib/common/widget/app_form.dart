@@ -53,21 +53,24 @@ class AppForm extends StatelessWidget {
               ),
               const Gap(16),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton.outlined(
                     onPressed: isSubmitting ? null : onBack,
                     tooltip: 'Back',
                     style: IconButton.styleFrom(
-                      minimumSize: const Size.square(48),
+                      fixedSize: const Size(104, 48),
+                      shape: const StadiumBorder(),
                     ),
                     icon: const Icon(Icons.arrow_back),
                   ),
+                  const Gap(12),
                   IconButton.filled(
                     onPressed: isSubmitting ? null : submit,
                     tooltip: isSubmitting ? submittingLabel : submitLabel,
                     style: IconButton.styleFrom(
-                      minimumSize: const Size.square(48),
+                      fixedSize: const Size(168, 48),
+                      shape: const StadiumBorder(),
                     ),
                     icon: isSubmitting
                         ? const SizedBox.square(
