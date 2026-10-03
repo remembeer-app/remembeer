@@ -64,7 +64,7 @@ class AppForm extends StatelessWidget {
                     ),
                     icon: const Icon(Icons.arrow_back),
                   ),
-                  const Gap(12),
+                  const Gap(24),
                   IconButton.filled(
                     onPressed: isSubmitting ? null : submit,
                     tooltip: isSubmitting ? submittingLabel : submitLabel,

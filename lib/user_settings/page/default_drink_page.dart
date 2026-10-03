@@ -65,7 +65,6 @@ class _DefaultDrinkForm extends StatefulWidget {
 }
 
 class _DefaultDrinkFormState extends State<_DefaultDrinkForm> {
-  late final TextEditingController _volumeController;
   late DrinkId? _selectedDrinkId;
 
   @override
@@ -79,7 +78,6 @@ class _DefaultDrinkFormState extends State<_DefaultDrinkForm> {
 
   @override
   void dispose() {
-    _volumeController.dispose();
     super.dispose();
   }
 
@@ -126,20 +124,6 @@ class _DefaultDrinkFormState extends State<_DefaultDrinkForm> {
                   : (drinkId) => _selectedDrinkId = drinkId,
               validator: (drinkId) =>
                   drinkId == null ? 'Please select a drink' : null,
-            ),
-            const Gap(16),
-            form.buildTextField(
-              controller: _volumeController,
-              label: 'Default Volume (ml)',
-              keyboardType: TextInputType.number,
-              isLastField: true,
-              validator: (value) {
-                final volume = int.tryParse(value?.trim() ?? '');
-                if (volume == null || volume <= 0) {
-                  return 'Please enter a positive whole number';
-                }
-                return null;
-              },
             ),
             form.buildErrorMessage(),
           ],

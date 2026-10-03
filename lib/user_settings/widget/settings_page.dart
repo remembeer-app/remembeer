@@ -6,12 +6,14 @@ import 'package:remembeer/user_settings/widget/hint_box.dart';
 class SettingsPage extends StatelessWidget {
   final String title;
   final String? hint;
+  final bool autmaticallyImplyLeading;
   final Widget child;
 
   const SettingsPage({
     super.key,
     required this.title,
     this.hint,
+    this.autmaticallyImplyLeading = false,
     required this.child,
   });
 
@@ -19,7 +21,7 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return PageTemplate(
       title: Text(title),
-      automaticallyImplyLeading: false,
+      automaticallyImplyLeading: autmaticallyImplyLeading,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

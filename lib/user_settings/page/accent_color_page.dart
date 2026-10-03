@@ -16,6 +16,7 @@ class AccentColorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return SettingsPage(
       title: 'Accent Color',
+      autmaticallyImplyLeading: true,
       hint:
           'Your accent identifies you in Party Mode and can be changed anytime.',
       child: UserCurrentQuery(
