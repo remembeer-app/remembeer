@@ -1,12 +1,14 @@
 {
   "files": [
     "api.dart",
+    "modules/badge.dart",
     "modules/drink.dart",
     "modules/user.dart",
     "runtime.dart",
     "schema.dart",
     "types.dart",
     "widgets.dart",
+    "widgets/badge.dart",
     "widgets/drink.dart",
     "widgets/user.dart"
   ]

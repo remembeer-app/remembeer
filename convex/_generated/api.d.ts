@@ -20,6 +20,7 @@ import type * as lib_builder from "../lib/builder.js";
 import type * as user from "../user.js";
 import type * as user_currentUser from "../user/currentUser.js";
 import type * as user_mutation from "../user/mutation.js";
+import type * as user_query from "../user/query.js";
 
 import type {
   ApiFromModules,
@@ -40,6 +41,7 @@ declare const fullApi: ApiFromModules<{
   user: typeof user;
   "user/currentUser": typeof user_currentUser;
   "user/mutation": typeof user_mutation;
+  "user/query": typeof user_query;
 }>;
 
 /**

@@ -20,6 +20,7 @@ export const userTable = defineTable({
   avatarUrl: v.nullable(v.string()),
   endOfDayBoundary: v.number(),
   defaultDrink: v.nullable(v.id("drink")),
+  defaultDrinkVolumeMl: v.number(),
   drinkLogSortOrder: v.union(v.literal("asc"), v.literal("desc")),
 }).index("by_authUserId", ["authUserId"]);
 
@@ -52,4 +53,10 @@ export const updateEndOfDayBoundaryInputValidator = convexToZod(
     .int()
     .min(0)
     .max(24 * 60 - 1),
+});
+
+export const updateDefaultDrinkInputValidator = convexToZod(
+  userTable.validator.pick("defaultDrink", "defaultDrinkVolumeMl"),
+).extend({
+  defaultDrinkVolumeMl: z.number().int().positive(),
 });
