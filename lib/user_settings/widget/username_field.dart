@@ -20,7 +20,9 @@ class UsernameField extends StatelessWidget {
       controller: controller,
       decoration: const InputDecoration(
         labelText: 'Username',
-        border: OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
+        ),
         prefixIcon: Icon(Icons.person_outline),
       ),
       maxLength: maxUsernameLength,
