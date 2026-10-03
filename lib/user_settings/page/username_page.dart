@@ -18,6 +18,7 @@ class UserNamePage extends StatelessWidget {
             initialUsername: user.username,
             isSubmitting: snapshot.isLoading,
             error: snapshot.error,
+            onBack: () => context.pop(),
             onSubmit: (username) {
               mutate(username: username).then((_) {
                 if (context.mounted) context.pop();

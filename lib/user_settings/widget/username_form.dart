@@ -8,6 +8,7 @@ class UsernameForm extends StatefulWidget {
   final bool isSubmitting;
   final Object? error;
   final ValueChanged<String> onSubmit;
+  final VoidCallback onBack;
 
   const UsernameForm({
     super.key,
@@ -15,6 +16,7 @@ class UsernameForm extends StatefulWidget {
     required this.isSubmitting,
     required this.error,
     required this.onSubmit,
+    required this.onBack,
   });
 
   @override
@@ -44,6 +46,7 @@ class _UsernameFormState extends State<UsernameForm> {
       submitLabel: 'Save username',
       submittingLabel: 'Saving...',
       onSubmit: () => widget.onSubmit(_usernameController.text),
+      onBack: widget.onBack,
       builder: (context, submit) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

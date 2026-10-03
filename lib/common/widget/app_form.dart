@@ -6,6 +6,7 @@ class AppForm extends StatelessWidget {
   final bool isSubmitting;
   final Object? error;
   final VoidCallback onSubmit;
+  final VoidCallback onBack;
   final String submitLabel;
   final String submittingLabel;
 
@@ -17,6 +18,7 @@ class AppForm extends StatelessWidget {
     required this.isSubmitting,
     this.error,
     required this.onSubmit,
+    required this.onBack,
     required this.submitLabel,
     this.submittingLabel = 'Submitting...',
     required this.builder,
@@ -32,34 +34,51 @@ class AppForm extends StatelessWidget {
             onSubmit();
           }
 
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                builder(context, submit),
-                if (error case final error?) ...[
-                  const Gap(16),
-                  ErrorMessageBox(message: error.toString()),
-                ],
-                const Gap(16),
-                FilledButton(
-                  onPressed: isSubmitting ? null : submit,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (isSubmitting) ...[
-                        const SizedBox.square(
-                          dimension: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                        const Gap(8),
+                      builder(context, submit),
+                      if (error case final error?) ...[
+                        const Gap(16),
+                        ErrorMessageBox(message: error.toString()),
                       ],
-                      Text(isSubmitting ? submittingLabel : submitLabel),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+              const Gap(16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton.outlined(
+                    onPressed: isSubmitting ? null : onBack,
+                    tooltip: 'Back',
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size.square(48),
+                    ),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
+                  IconButton.filled(
+                    onPressed: isSubmitting ? null : submit,
+                    tooltip: isSubmitting ? submittingLabel : submitLabel,
+                    style: IconButton.styleFrom(
+                      minimumSize: const Size.square(48),
+                    ),
+                    icon: isSubmitting
+                        ? const SizedBox.square(
+                            dimension: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.arrow_forward),
+                  ),
+                ],
+              ),
+            ],
           );
         },
       ),
