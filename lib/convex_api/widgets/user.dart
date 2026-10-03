@@ -161,13 +161,8 @@ class UserUpdateDefaultDrinkMutationExecutor {
   final Future<void> Function(UpdateDefaultDrinkArgs) _mutate;
 
   /// Runs the mutation.
-  Future<void> call({
-    required DrinkId? defaultDrink,
-    required double defaultDrinkVolumeMl,
-  }) => _mutate((
-    defaultDrink: defaultDrink,
-    defaultDrinkVolumeMl: defaultDrinkVolumeMl,
-  ));
+  Future<void> call({required DrinkId? defaultDrink}) =>
+      _mutate((defaultDrink: defaultDrink));
 }
 
 /// Flutter widget for user:updateDefaultDrink.

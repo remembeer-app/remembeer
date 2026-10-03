@@ -78,16 +78,10 @@ class UserApi {
   ConvexMutationReference<UpdateAvatarUrlArgs, void>
   get updateAvatarUrlMutation => updateAvatarUrlMutationReference;
 
-  Future<Null> updateDefaultDrink({
-    required DrinkId? defaultDrink,
-    required double defaultDrinkVolumeMl,
-  }) async {
+  Future<Null> updateDefaultDrink({required DrinkId? defaultDrink}) async {
     await _client.mutate(
       'user:updateDefaultDrink',
-      _encodeUpdateDefaultDrinkArgs((
-        defaultDrink: defaultDrink,
-        defaultDrinkVolumeMl: defaultDrinkVolumeMl,
-      )),
+      _encodeUpdateDefaultDrinkArgs((defaultDrink: defaultDrink)),
     );
     return null;
   }
@@ -203,7 +197,6 @@ typedef CurrentResult = ({
   String authUserId,
   String? avatarUrl,
   DrinkId? defaultDrink,
-  double defaultDrinkVolumeMl,
   CurrentResultDrinkLogSortOrder drinkLogSortOrder,
   double endOfDayBoundary,
   String normalizedUsername,
@@ -218,7 +211,6 @@ Map<String, dynamic> _encodeCurrentResult(CurrentResult value$) {
     authUserId: authUserId,
     avatarUrl: avatarUrl,
     defaultDrink: defaultDrink,
-    defaultDrinkVolumeMl: defaultDrinkVolumeMl,
     drinkLogSortOrder: drinkLogSortOrder,
     endOfDayBoundary: endOfDayBoundary,
     normalizedUsername: normalizedUsername,
@@ -234,7 +226,6 @@ Map<String, dynamic> _encodeCurrentResult(CurrentResult value$) {
       null => null,
       final v$ => v$.value,
     },
-    'defaultDrinkVolumeMl': defaultDrinkVolumeMl,
     'drinkLogSortOrder': drinkLogSortOrder.value,
     'endOfDayBoundary': endOfDayBoundary,
     'normalizedUsername': normalizedUsername,
@@ -270,11 +261,6 @@ CurrentResult _decodeCurrentResult(dynamic raw) {
   if (!map.containsKey('defaultDrink')) {
     throw FormatException(
       'Missing required field "defaultDrink" for CurrentResult',
-    );
-  }
-  if (!map.containsKey('defaultDrinkVolumeMl')) {
-    throw FormatException(
-      'Missing required field "defaultDrinkVolumeMl" for CurrentResult',
     );
   }
   if (!map.containsKey('drinkLogSortOrder')) {
@@ -319,10 +305,6 @@ CurrentResult _decodeCurrentResult(dynamic raw) {
               label: 'CurrentResultDefaultDrink',
             ),
           ),
-    defaultDrinkVolumeMl: expectDouble(
-      map['defaultDrinkVolumeMl'],
-      label: 'CurrentResultDefaultDrinkVolumeMl',
-    ),
     drinkLogSortOrder: CurrentResultDrinkLogSortOrder.fromJson(
       map['drinkLogSortOrder'],
     ),
@@ -421,24 +403,17 @@ UpdateAvatarUrlArgs _decodeUpdateAvatarUrlArgs(dynamic raw) {
   );
 }
 
-typedef UpdateDefaultDrinkArgs = ({
-  DrinkId? defaultDrink,
-  double defaultDrinkVolumeMl,
-});
+typedef UpdateDefaultDrinkArgs = ({DrinkId? defaultDrink});
 
 Map<String, dynamic> _encodeUpdateDefaultDrinkArgs(
   UpdateDefaultDrinkArgs value$,
 ) {
-  final (
-    defaultDrink: defaultDrink,
-    defaultDrinkVolumeMl: defaultDrinkVolumeMl,
-  ) = value$;
+  final (defaultDrink: defaultDrink) = value$;
   return <String, dynamic>{
     'defaultDrink': switch (defaultDrink) {
       null => null,
       final v$ => v$.value,
     },
-    'defaultDrinkVolumeMl': defaultDrinkVolumeMl,
   };
 }
 
@@ -447,11 +422,6 @@ UpdateDefaultDrinkArgs _decodeUpdateDefaultDrinkArgs(dynamic raw) {
   if (!map.containsKey('defaultDrink')) {
     throw FormatException(
       'Missing required field "defaultDrink" for UpdateDefaultDrinkArgs',
-    );
-  }
-  if (!map.containsKey('defaultDrinkVolumeMl')) {
-    throw FormatException(
-      'Missing required field "defaultDrinkVolumeMl" for UpdateDefaultDrinkArgs',
     );
   }
   return (
@@ -463,10 +433,6 @@ UpdateDefaultDrinkArgs _decodeUpdateDefaultDrinkArgs(dynamic raw) {
               label: 'UpdateDefaultDrinkArgsDefaultDrink',
             ),
           ),
-    defaultDrinkVolumeMl: expectDouble(
-      map['defaultDrinkVolumeMl'],
-      label: 'UpdateDefaultDrinkArgsDefaultDrinkVolumeMl',
-    ),
   );
 }
 

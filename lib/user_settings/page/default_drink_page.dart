@@ -75,9 +75,6 @@ class _DefaultDrinkFormState extends State<_DefaultDrinkForm> {
         widget.drinks.any((drink) => drink.id == widget.user.defaultDrink)
         ? widget.user.defaultDrink
         : null;
-    _volumeController = TextEditingController(
-      text: widget.user.defaultDrinkVolumeMl.toInt().toString(),
-    );
   }
 
   @override
@@ -155,12 +152,7 @@ class _DefaultDrinkFormState extends State<_DefaultDrinkForm> {
     if (!form.validate()) return;
 
     await form.runAction(() async {
-      await widget.api.user.updateDefaultDrink(
-        defaultDrink: _selectedDrinkId,
-        defaultDrinkVolumeMl: int.parse(
-          _volumeController.text.trim(),
-        ).toDouble(),
-      );
+      await widget.api.user.updateDefaultDrink(defaultDrink: _selectedDrinkId);
       if (mounted) context.pop();
     });
   }

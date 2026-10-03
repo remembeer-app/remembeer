@@ -5,14 +5,12 @@ import { convex } from "../lib/builder";
 import { getCurrentUserSafe } from "./currentUser";
 import {
   normalizeUsername,
-  updateDefaultDrinkInputValidator,
   updateEndOfDayBoundaryInputValidator,
   updateUsernameInputValidator,
   userTable,
 } from "./schema";
 
 const defaultEndOfDayBoundary = 6 * 60;
-const defaultDrinkVolumeMl = 500;
 
 export const ensureCurrent = convex
   .mutation()
@@ -33,7 +31,6 @@ export const ensureCurrent = convex
       avatarUrl: null,
       endOfDayBoundary: defaultEndOfDayBoundary,
       defaultDrink: null,
-      defaultDrinkVolumeMl,
       drinkLogSortOrder: "desc",
     });
   });
@@ -76,10 +73,9 @@ export const updateEndOfDayBoundary = authMutation
   });
 
 export const updateDefaultDrink = authMutation
-  .extend(WithZod)
-  .input(updateDefaultDrinkInputValidator)
+  .input({ defaultDrink: userTable.validator.fields.defaultDrink })
   .returns(v.null())
-  .handler(async (ctx, { defaultDrink, defaultDrinkVolumeMl }) => {
+  .handler(async (ctx, { defaultDrink }) => {
     if (defaultDrink !== null) {
       const drink = await ctx.db.get("drink", defaultDrink);
       if (
@@ -93,7 +89,6 @@ export const updateDefaultDrink = authMutation
 
     await ctx.db.patch("user", ctx.user._id, {
       defaultDrink,
-      defaultDrinkVolumeMl,
     });
     return null;
   });
