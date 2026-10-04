@@ -50,7 +50,7 @@ import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
 import 'package:remembeer/user_settings/page/default_drink_page.dart';
 import 'package:remembeer/user_settings/page/drink_log_list_sort_page.dart';
 import 'package:remembeer/user_settings/page/end_of_day_page.dart';
-import 'package:remembeer/user_settings/page/settings_page.dart';
+import 'package:remembeer/user_settings/page/user_settings_page.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
 
 part 'routes.g.dart';
@@ -304,7 +304,7 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return SettingsPage();
+    return UserSettingsPage();
   }
 }
 

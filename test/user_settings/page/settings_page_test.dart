@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/user_settings/page/settings_page.dart';
+import 'package:remembeer/user_settings/page/user_settings_page.dart';
 
 void main() {
   testWidgets('shows the about section with privacy policy and support link', (
@@ -16,7 +16,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    await tester.pumpWidget(MaterialApp(home: SettingsPage()));
+    await tester.pumpWidget(MaterialApp(home: UserSettingsPage()));
     await tester.pump();
 
     expect(find.text('About'), findsOneWidget);

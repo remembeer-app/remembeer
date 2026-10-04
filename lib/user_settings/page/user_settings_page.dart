@@ -9,8 +9,8 @@ import 'package:remembeer/routes.dart';
 
 const _divider = Divider(height: 1);
 
-class SettingsPage extends StatelessWidget {
-  SettingsPage({super.key});
+class UserSettingsPage extends StatelessWidget {
+  UserSettingsPage({super.key});
 
   final _convexAuthService = get<ConvexAuthService>();
 
@@ -35,7 +35,6 @@ class SettingsPage extends StatelessWidget {
                   _buildHeading('About'),
                   _buildAboutBox(context),
                   const Gap(8),
-                  const Spacer(),
                   _buildSignOutButton(context),
                   _buildDeleteAccountButton(context),
                 ],
