@@ -64,21 +64,6 @@ class AuthService {
     await _firebaseAuth.sendPasswordResetEmail(email: email);
   }
 
-  Future<void> updatePassword({
-    required String currentPassword,
-    required String newPassword,
-  }) async {
-    final user = authenticatedUser;
-    final email = user.email ?? never('User does not have an email.');
-
-    final credential = EmailAuthProvider.credential(
-      email: email,
-      password: currentPassword,
-    );
-    await user.reauthenticateWithCredential(credential);
-    await user.updatePassword(newPassword);
-  }
-
   Future<void> reauthenticateWithPassword(String password) async {
     final user = authenticatedUser;
     final email = user.email ?? never('User does not have an email.');

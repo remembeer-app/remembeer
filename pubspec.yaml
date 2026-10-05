@@ -38,7 +38,11 @@ dependencies:
       url: https://github.com/ohtenkay/dartvex.git
       ref: eeefc765b414bbad0bcd14b297f98a2459809185
       path: packages/dartvex
-  dartvex_auth_better: ^0.2.0
+  dartvex_auth_better:
+    git:
+      url: https://github.com/ohtenkay/dartvex.git
+      ref: 6951f6ba9812df26440fea21bf4481c1f4bc8eff
+      path: packages/dartvex_auth_better
   dartvex_flutter:
     git:
       url: https://github.com/ohtenkay/dartvex.git
@@ -85,6 +89,7 @@ dev_dependencies:
     sdk: flutter
   freezed: ^4.0.2
   go_router_builder: ^4.4.0
+  http: ^1.6.0
   json_serializable: ^6.14.0
   meta: ^1.16.0
 

@@ -1,10 +1,9 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/auth/constants.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/auth/util/firebase_error_mapper.dart';
+import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
@@ -19,7 +18,7 @@ class ChangePasswordPage extends StatefulWidget {
 }
 
 class _ChangePasswordPageState extends State<ChangePasswordPage> {
-  final _authService = get<AuthService>();
+  final _authService = get<ConvexAuthService>();
 
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
@@ -42,9 +41,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       title: const Text('Change Password'),
       padding: const EdgeInsets.all(24),
       child: LoadingForm(
-        errorMapper: (e) => e is FirebaseAuthException
-            ? mapFirebaseAuthError(e.code)
-            : e.toString(),
+        errorMapper: (e) => switch (e) {
+          BetterAuthException(:final message) => message,
+          _ => e.toString(),
+        },
         builder: (form) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -114,7 +114,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
       onToggleVisibility: () =>
           setState(() => _obscureNewPassword = !_obscureNewPassword),
       isLastField: true,
-      onFieldSubmitted: () => _changePassword(context),
+      onFieldSubmitted: () {
+        if (form.isLoading || !form.validate()) return;
+        form.runAction(() => _changePassword(context));
+      },
       validator: (value) {
         if (value == null || value.isEmpty) {
           return 'Please confirm your new password.';
