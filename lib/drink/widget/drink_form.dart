@@ -7,6 +7,7 @@ import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/formatter/alcohol_percentage_formatter.dart';
 import 'package:remembeer/drink/widget/alcohol_percentage_field.dart';
 import 'package:remembeer/drink/widget/drink_category_field.dart';
+import 'package:remembeer/drink/widget/drink_name_field.dart';
 
 class DrinkForm extends StatefulWidget {
   final String initialName;
@@ -74,16 +75,9 @@ class _DrinkFormState extends State<DrinkForm> {
       builder: (context, submit) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          TextFormField(
+          DrinkNameField(
             controller: _nameController,
             enabled: !widget.isLoading,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Name',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) =>
-                value == null || value.isEmpty ? 'Please enter a name.' : null,
           ),
           const Gap(16),
           AlcoholPercentageField(
