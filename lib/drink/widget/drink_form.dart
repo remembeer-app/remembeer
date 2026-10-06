@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/app_form.dart';
 import 'package:remembeer/convex_api/types.dart';
-import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
+import 'package:remembeer/drink/widget/drink_category_field.dart';
 
 class DrinkForm extends StatefulWidget {
   final String initialName;
@@ -102,26 +102,12 @@ class _DrinkFormState extends State<DrinkForm> {
             },
           ),
           const Gap(16),
-          DropdownButtonFormField<DrinkCategory>(
+          DrinkCategoryField(
             initialValue: _selectedCategory,
-            hint: const Text('Select Category'),
-            items: convexDrinkCategories
-                .map(
-                  (category) => DropdownMenuItem(
-                    value: category,
-                    child: Text(category.displayName),
-                  ),
-                )
-                .toList(),
-            onChanged: widget.isLoading
-                ? null
-                : (value) => setState(() => _selectedCategory = value),
-            validator: (value) =>
-                value == null ? 'Please select a category.' : null,
-            decoration: const InputDecoration(
-              labelText: 'Category',
-              border: OutlineInputBorder(),
-            ),
+            enabled: !widget.isLoading,
+            onChanged: (category) =>
+                setState(() => _selectedCategory = category),
+            onFieldSubmitted: submit,
           ),
         ],
       ),
