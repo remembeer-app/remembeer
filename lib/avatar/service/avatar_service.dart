@@ -1,27 +1,19 @@
 import 'dart:io';
 
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:dartvex/dartvex.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/constants.dart';
-import 'package:remembeer/user/controller/user_controller.dart';
+import 'package:remembeer/convex_api/api.dart';
 
 class AvatarService {
-  final AuthService authService;
-  final UserController userController;
-
-  final FirebaseStorage _storage;
+  final ConvexApi api;
+  final ConvexStorage storage;
   final ImagePicker _imagePicker;
 
-  AvatarService({required this.authService, required this.userController})
-    : _storage = FirebaseStorage.instance,
-      _imagePicker = ImagePicker();
-
-  String get _userId => authService.authenticatedUser.uid;
-
-  String get _avatarPath => 'avatars/$_userId.jpg';
+  AvatarService({required this.api, required this.storage})
+    : _imagePicker = ImagePicker();
 
   Future<String?> changeAvatar(BuildContext context, ImageSource source) async {
     final pickedImage = await _pickImage(source);
@@ -34,27 +26,24 @@ class AvatarService {
       return null;
     }
 
-    final downloadUrl = await _uploadAvatar(croppedImage);
+    return uploadAvatar(croppedImage);
+  }
 
-    await _updateUserAvatar(downloadUrl);
-
-    return downloadUrl;
+  Future<String?> uploadAvatar(File image) async {
+    final storageId = await storage.uploadFile(
+      uploadUrlAction: 'user:generateAvatarUploadUrl',
+      bytes: await image.readAsBytes(),
+      filename: 'avatar.jpg',
+      contentType: 'image/jpeg',
+    );
+    return api.user.updateAvatar(storageId: StorageId(storageId));
   }
 
   Future<void> deleteAvatar() async {
-    await deleteAvatarFile();
-    await _updateUserAvatar(null);
+    await api.user.updateAvatar(storageId: null);
   }
 
-  Future<void> deleteAvatarFile() async {
-    try {
-      await _storage.ref().child(_avatarPath).delete();
-    } on FirebaseException catch (e) {
-      if (e.code != 'object-not-found') {
-        rethrow;
-      }
-    }
-  }
+  Future<void> deleteAvatarFile() => deleteAvatar();
 
   Future<File?> _pickImage(ImageSource source) async {
     final pickedFile = await _imagePicker.pickImage(source: source);
@@ -77,7 +66,7 @@ class AvatarService {
         AndroidUiSettings(
           toolbarTitle: 'Crop Avatar',
           toolbarColor: Theme.of(context).primaryColor,
-          toolbarWidgetColor: Colors.white,
+          toolbarWidgetColor: Theme.of(context).colorScheme.onPrimary,
           initAspectRatio: CropAspectRatioPreset.square,
           lockAspectRatio: true,
           cropStyle: CropStyle.circle,
@@ -95,24 +84,5 @@ class AvatarService {
     }
 
     return File(croppedFile.path);
-  }
-
-  Future<String> _uploadAvatar(File image) async {
-    final ref = _storage.ref().child(_avatarPath);
-
-    final snapshot = await ref.putFile(image);
-
-    final downloadUrl = await snapshot.ref.getDownloadURL();
-    return downloadUrl;
-  }
-
-  Future<void> _updateUserAvatar(String? avatarUrl) async {
-    final currentUser = await userController.currentUser;
-    if (currentUser.avatarUrl == avatarUrl) {
-      return;
-    }
-
-    final updatedUser = currentUser.copyWith(avatarUrl: avatarUrl);
-    await userController.createOrUpdateUser(updatedUser);
   }
 }

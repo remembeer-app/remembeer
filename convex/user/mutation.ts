@@ -31,7 +31,7 @@ export const ensureCurrent = convex
       username,
       normalizedUsername: normalizeUsername(username),
       accentColor: accentColors[Math.floor(Math.random() * accentColors.length)]!,
-      avatarUrl: null,
+      avatarStorageId: null,
       endOfDayBoundary: defaultEndOfDayBoundary,
       defaultDrink: null,
       drinkLogSortOrder: "desc",
@@ -58,12 +58,41 @@ export const updateAccentColor = authMutation
     return null;
   });
 
-export const updateAvatarUrl = authMutation
-  .input({ avatarUrl: userTable.validator.fields.avatarUrl })
-  .returns(v.null())
-  .handler(async (ctx, { avatarUrl }) => {
-    await ctx.db.patch("user", ctx.user._id, { avatarUrl });
-    return null;
+export const generateAvatarUploadUrl = authMutation
+  .input({})
+  .returns(v.string())
+  .handler(async (ctx) => ctx.storage.generateUploadUrl());
+
+export const updateAvatar = authMutation
+  .input({ storageId: v.nullable(v.id("_storage")) })
+  .returns(v.nullable(v.string()))
+  .handler(async (ctx, { storageId }) => {
+    let avatarUrl: string | null = null;
+    if (storageId !== null) {
+      const owner = await ctx.db
+        .query("user")
+        .withIndex("by_avatarStorageId", (q) => q.eq("avatarStorageId", storageId))
+        .first();
+      if (owner && owner._id !== ctx.user._id) {
+        throw new ConvexError("Avatar belongs to another user");
+      }
+      const metadata = await ctx.db.system.get(storageId);
+      if (!metadata || metadata.contentType !== "image/jpeg") {
+        throw new ConvexError("Avatar must be an uploaded JPEG image");
+      }
+      avatarUrl = await ctx.storage.getUrl(storageId);
+      if (avatarUrl === null) {
+        throw new ConvexError("Avatar file is not available");
+      }
+    }
+
+    await ctx.db.patch("user", ctx.user._id, {
+      avatarStorageId: storageId,
+    });
+    if (ctx.user.avatarStorageId && ctx.user.avatarStorageId !== storageId) {
+      await ctx.storage.delete(ctx.user.avatarStorageId);
+    }
+    return avatarUrl;
   });
 
 export const updateEndOfDayBoundary = authMutation

@@ -58,6 +58,59 @@ class UserEnsureCurrentMutation extends StatelessWidget {
   );
 }
 
+/// Callable typed mutation for user:generateAvatarUploadUrl.
+class UserGenerateAvatarUploadUrlMutationExecutor {
+  /// Creates an executor backed by the mutation widget.
+  const UserGenerateAvatarUploadUrlMutationExecutor(this._mutate);
+
+  final Future<String> Function(NoArgs) _mutate;
+
+  /// Runs the mutation.
+  Future<String> call() => _mutate(const NoArgs());
+}
+
+/// Flutter widget for user:generateAvatarUploadUrl.
+class UserGenerateAvatarUploadUrlMutation extends StatelessWidget {
+  /// Creates a typed mutation widget.
+  const UserGenerateAvatarUploadUrlMutation({
+    super.key,
+    required this.builder,
+    this.client,
+    this.optimisticUpdate,
+    this.mode = MutationMode.single,
+  });
+
+  /// Builds the UI with the callable mutation and current request state.
+  final Widget Function(
+    BuildContext,
+    UserGenerateAvatarUploadUrlMutationExecutor,
+    ConvexRequestSnapshot<String>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  /// Optional optimistic update for the mutation.
+  final TypedOptimisticUpdate<NoArgs>? optimisticUpdate;
+
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
+  @override
+  Widget build(BuildContext context) => ConvexMutation<NoArgs, String>(
+    mutation: generateAvatarUploadUrlMutationReference,
+    client: client,
+    typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
+    builder: (context, mutate, snapshot) => builder(
+      context,
+      UserGenerateAvatarUploadUrlMutationExecutor(mutate),
+      snapshot,
+    ),
+  );
+}
+
 /// Callable typed mutation for user:updateAccentColor.
 class UserUpdateAccentColorMutationExecutor {
   /// Creates an executor backed by the mutation widget.
@@ -113,22 +166,22 @@ class UserUpdateAccentColorMutation extends StatelessWidget {
       );
 }
 
-/// Callable typed mutation for user:updateAvatarUrl.
-class UserUpdateAvatarUrlMutationExecutor {
+/// Callable typed mutation for user:updateAvatar.
+class UserUpdateAvatarMutationExecutor {
   /// Creates an executor backed by the mutation widget.
-  const UserUpdateAvatarUrlMutationExecutor(this._mutate);
+  const UserUpdateAvatarMutationExecutor(this._mutate);
 
-  final Future<void> Function(UpdateAvatarUrlArgs) _mutate;
+  final Future<String?> Function(UpdateAvatarArgs) _mutate;
 
   /// Runs the mutation.
-  Future<void> call({required String? avatarUrl}) =>
-      _mutate((avatarUrl: avatarUrl));
+  Future<String?> call({required StorageId? storageId}) =>
+      _mutate((storageId: storageId));
 }
 
-/// Flutter widget for user:updateAvatarUrl.
-class UserUpdateAvatarUrlMutation extends StatelessWidget {
+/// Flutter widget for user:updateAvatar.
+class UserUpdateAvatarMutation extends StatelessWidget {
   /// Creates a typed mutation widget.
-  const UserUpdateAvatarUrlMutation({
+  const UserUpdateAvatarMutation({
     super.key,
     required this.builder,
     this.client,
@@ -139,8 +192,8 @@ class UserUpdateAvatarUrlMutation extends StatelessWidget {
   /// Builds the UI with the callable mutation and current request state.
   final Widget Function(
     BuildContext,
-    UserUpdateAvatarUrlMutationExecutor,
-    ConvexRequestSnapshot<void>,
+    UserUpdateAvatarMutationExecutor,
+    ConvexRequestSnapshot<String?>,
   )
   builder;
 
@@ -148,21 +201,21 @@ class UserUpdateAvatarUrlMutation extends StatelessWidget {
   final ConvexRuntimeClient? client;
 
   /// Optional optimistic update for the mutation.
-  final TypedOptimisticUpdate<UpdateAvatarUrlArgs>? optimisticUpdate;
+  final TypedOptimisticUpdate<UpdateAvatarArgs>? optimisticUpdate;
 
   /// Whether overlapping calls are rejected or coalesced to the latest value.
   final MutationMode mode;
 
   @override
   Widget build(BuildContext context) =>
-      ConvexMutation<UpdateAvatarUrlArgs, void>(
-        mutation: updateAvatarUrlMutationReference,
+      ConvexMutation<UpdateAvatarArgs, String?>(
+        mutation: updateAvatarMutationReference,
         client: client,
         typedOptimisticUpdate: optimisticUpdate,
         mode: mode,
         builder: (context, mutate, snapshot) => builder(
           context,
-          UserUpdateAvatarUrlMutationExecutor(mutate),
+          UserUpdateAvatarMutationExecutor(mutate),
           snapshot,
         ),
       );

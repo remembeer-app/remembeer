@@ -54,6 +54,17 @@ class UserApi {
   ConvexMutationReference<NoArgs, UserId> get ensureCurrentMutation =>
       ensureCurrentMutationReference;
 
+  Future<String> generateAvatarUploadUrl() async {
+    final raw$ = await _client.mutate(
+      'user:generateAvatarUploadUrl',
+      const <String, dynamic>{},
+    );
+    return expectString(raw$, label: 'GenerateAvatarUploadUrlResult');
+  }
+
+  ConvexMutationReference<NoArgs, String> get generateAvatarUploadUrlMutation =>
+      generateAvatarUploadUrlMutationReference;
+
   Future<Null> updateAccentColor({
     required UpdateAccentColorArgsAccentColor accentColor,
   }) async {
@@ -67,16 +78,18 @@ class UserApi {
   ConvexMutationReference<UpdateAccentColorArgs, void>
   get updateAccentColorMutation => updateAccentColorMutationReference;
 
-  Future<Null> updateAvatarUrl({required String? avatarUrl}) async {
-    await _client.mutate(
-      'user:updateAvatarUrl',
-      _encodeUpdateAvatarUrlArgs((avatarUrl: avatarUrl)),
+  Future<String?> updateAvatar({required StorageId? storageId}) async {
+    final raw$ = await _client.mutate(
+      'user:updateAvatar',
+      _encodeUpdateAvatarArgs((storageId: storageId)),
     );
-    return null;
+    return raw$ == null
+        ? null
+        : expectString(raw$, label: 'UpdateAvatarResult');
   }
 
-  ConvexMutationReference<UpdateAvatarUrlArgs, void>
-  get updateAvatarUrlMutation => updateAvatarUrlMutationReference;
+  ConvexMutationReference<UpdateAvatarArgs, String?> get updateAvatarMutation =>
+      updateAvatarMutationReference;
 
   Future<Null> updateDefaultDrink({required DrinkId? defaultDrink}) async {
     await _client.mutate(
@@ -382,24 +395,31 @@ UpdateAccentColorArgs _decodeUpdateAccentColorArgs(dynamic raw) {
   );
 }
 
-typedef UpdateAvatarUrlArgs = ({String? avatarUrl});
+typedef UpdateAvatarArgs = ({StorageId? storageId});
 
-Map<String, dynamic> _encodeUpdateAvatarUrlArgs(UpdateAvatarUrlArgs value$) {
-  final (avatarUrl: avatarUrl) = value$;
-  return <String, dynamic>{'avatarUrl': avatarUrl};
+Map<String, dynamic> _encodeUpdateAvatarArgs(UpdateAvatarArgs value$) {
+  final (storageId: storageId) = value$;
+  return <String, dynamic>{
+    'storageId': switch (storageId) {
+      null => null,
+      final v$ => v$.value,
+    },
+  };
 }
 
-UpdateAvatarUrlArgs _decodeUpdateAvatarUrlArgs(dynamic raw) {
-  final map = expectMap(raw, label: 'UpdateAvatarUrlArgs');
-  if (!map.containsKey('avatarUrl')) {
+UpdateAvatarArgs _decodeUpdateAvatarArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateAvatarArgs');
+  if (!map.containsKey('storageId')) {
     throw FormatException(
-      'Missing required field "avatarUrl" for UpdateAvatarUrlArgs',
+      'Missing required field "storageId" for UpdateAvatarArgs',
     );
   }
   return (
-    avatarUrl: map['avatarUrl'] == null
+    storageId: map['storageId'] == null
         ? null
-        : expectString(map['avatarUrl'], label: 'UpdateAvatarUrlArgsAvatarUrl'),
+        : StorageId(
+            expectString(map['storageId'], label: 'UpdateAvatarArgsStorageId'),
+          ),
   );
 }
 
@@ -544,6 +564,13 @@ final ConvexMutationReference<NoArgs, UserId> ensureCurrentMutationReference =
       decode: (raw) => UserId(expectString(raw, label: 'EnsureCurrentResult')),
     );
 
+final ConvexMutationReference<NoArgs, String>
+generateAvatarUploadUrlMutationReference = ConvexMutationReference(
+  name: 'user:generateAvatarUploadUrl',
+  encode: (args) => const <String, dynamic>{},
+  decode: (raw) => expectString(raw, label: 'GenerateAvatarUploadUrlResult'),
+);
+
 final ConvexMutationReference<UpdateAccentColorArgs, void>
 updateAccentColorMutationReference = ConvexMutationReference(
   name: 'user:updateAccentColor',
@@ -551,11 +578,12 @@ updateAccentColorMutationReference = ConvexMutationReference(
   decode: (raw) => null,
 );
 
-final ConvexMutationReference<UpdateAvatarUrlArgs, void>
-updateAvatarUrlMutationReference = ConvexMutationReference(
-  name: 'user:updateAvatarUrl',
-  encode: (args) => _encodeUpdateAvatarUrlArgs(args),
-  decode: (raw) => null,
+final ConvexMutationReference<UpdateAvatarArgs, String?>
+updateAvatarMutationReference = ConvexMutationReference(
+  name: 'user:updateAvatar',
+  encode: (args) => _encodeUpdateAvatarArgs(args),
+  decode: (raw) =>
+      raw == null ? null : expectString(raw, label: 'UpdateAvatarResult'),
 );
 
 final ConvexMutationReference<UpdateDefaultDrinkArgs, void>

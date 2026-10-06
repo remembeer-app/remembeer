@@ -17,11 +17,13 @@ export const userTable = defineTable({
     v.literal("orange"),
     v.literal("fuchsia"),
   ),
-  avatarUrl: v.nullable(v.string()),
+  avatarStorageId: v.optional(v.nullable(v.id("_storage"))),
   endOfDayBoundary: v.number(),
   defaultDrink: v.nullable(v.id("drink")),
   drinkLogSortOrder: v.union(v.literal("asc"), v.literal("desc")),
-}).index("by_authUserId", ["authUserId"]);
+})
+  .index("by_authUserId", ["authUserId"])
+  .index("by_avatarStorageId", ["avatarStorageId"]);
 
 export function normalizeUsername(username: string) {
   return username

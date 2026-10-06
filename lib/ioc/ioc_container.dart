@@ -194,8 +194,10 @@ class IoCContainer {
       )
       ..registerSingleton(
         AvatarService(
-          authService: get<AuthService>(),
-          userController: get<UserController>(),
+          api: get<ConvexApi>(),
+          storage: ConvexStorage(
+            get<ConvexClientWithAuth<BetterAuthSession>>(),
+          ),
         ),
       )
       ..registerSingleton(
