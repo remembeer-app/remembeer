@@ -1,12 +1,14 @@
+import 'dart:async';
+
 import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
-import 'package:remembeer/auth/constants.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
+import 'package:remembeer/auth/widget/password_field.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/widget/loading_form.dart';
+import 'package:remembeer/common/widget/app_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 
@@ -26,6 +28,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   var _obscureCurrentPassword = true;
   var _obscureNewPassword = true;
+  var _isSubmitting = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -39,27 +43,45 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Change Password'),
-      padding: const EdgeInsets.all(24),
-      child: LoadingForm(
-        errorMapper: (e) => switch (e) {
-          BetterAuthException(:final message) => message,
-          _ => e.toString(),
-        },
-        builder: (form) => Column(
+      child: AppForm(
+        isSubmitting: _isSubmitting,
+        error: _error,
+        submitLabel: 'Change Password',
+        submittingLabel: 'Changing password...',
+        onSubmit: () => unawaited(_changePassword()),
+        onBack: () => context.pop(),
+        builder: (context, submit) => Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _buildCurrentPasswordField(form),
+            PasswordField.current(
+              enabled: !_isSubmitting,
+              controller: _currentPasswordController,
+              obscureText: _obscureCurrentPassword,
+              onToggleVisibility: () => setState(
+                () => _obscureCurrentPassword = !_obscureCurrentPassword,
+              ),
+            ),
             const Gap(16),
-            _buildNewPasswordField(form),
+            PasswordField.newPassword(
+              currentPasswordController: _currentPasswordController,
+              enabled: !_isSubmitting,
+              controller: _newPasswordController,
+              obscureText: _obscureNewPassword,
+              onToggleVisibility: () =>
+                  setState(() => _obscureNewPassword = !_obscureNewPassword),
+              onChanged: (_) => setState(() {}),
+            ),
             const Gap(8),
             PasswordRequirements(password: _newPasswordController.text),
             const Gap(16),
-            _buildConfirmPasswordField(form),
-            form.buildErrorMessage(),
-            const Gap(24),
-            form.buildSubmitButton(
-              text: 'Change Password',
-              onSubmit: () => _changePassword(context),
+            PasswordField.confirmation(
+              passwordController: _newPasswordController,
+              enabled: !_isSubmitting,
+              controller: _confirmPasswordController,
+              obscureText: _obscureNewPassword,
+              onToggleVisibility: () =>
+                  setState(() => _obscureNewPassword = !_obscureNewPassword),
+              onFieldSubmitted: (_) => submit(),
             ),
           ],
         ),
@@ -67,78 +89,32 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     );
   }
 
-  Widget _buildCurrentPasswordField(LoadingFormState form) {
-    return form.buildPasswordField(
-      controller: _currentPasswordController,
-      label: 'Current Password',
-      obscureText: _obscureCurrentPassword,
-      onToggleVisibility: () =>
-          setState(() => _obscureCurrentPassword = !_obscureCurrentPassword),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your current password.';
-        }
-        return null;
-      },
-    );
-  }
+  Future<void> _changePassword() async {
+    if (_isSubmitting) return;
+    setState(() {
+      _isSubmitting = true;
+      _error = null;
+    });
+    try {
+      await _authService.updatePassword(
+        currentPassword: _currentPasswordController.text,
+        newPassword: _newPasswordController.text,
+      );
 
-  Widget _buildNewPasswordField(LoadingFormState form) {
-    return form.buildPasswordField(
-      controller: _newPasswordController,
-      label: 'New Password',
-      obscureText: _obscureNewPassword,
-      onToggleVisibility: () =>
-          setState(() => _obscureNewPassword = !_obscureNewPassword),
-      onChanged: (_) => setState(() {}),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter a new password.';
-        }
-        if (!isPasswordValid(value)) {
-          return 'Password does not meet requirements.';
-        }
-        if (value == _currentPasswordController.text) {
-          return 'New password must be different from current.';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildConfirmPasswordField(LoadingFormState form) {
-    return form.buildPasswordField(
-      controller: _confirmPasswordController,
-      label: 'Confirm New Password',
-      obscureText: _obscureNewPassword,
-      onToggleVisibility: () =>
-          setState(() => _obscureNewPassword = !_obscureNewPassword),
-      isLastField: true,
-      onFieldSubmitted: () {
-        if (form.isLoading || !form.validate()) return;
-        form.runAction(() => _changePassword(context));
-      },
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please confirm your new password.';
-        }
-        if (value != _newPasswordController.text) {
-          return 'Passwords do not match.';
-        }
-        return null;
-      },
-    );
-  }
-
-  Future<void> _changePassword(BuildContext context) async {
-    await _authService.updatePassword(
-      currentPassword: _currentPasswordController.text,
-      newPassword: _newPasswordController.text,
-    );
-
-    if (context.mounted) {
-      showSuccessNotification('Password changed successfully.');
-      context.pop();
+      if (mounted) {
+        showSuccessNotification('Password changed successfully.');
+        context.pop();
+      }
+    } on Exception catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = switch (error) {
+          BetterAuthException(:final message) => message,
+          _ => error.toString(),
+        };
+      });
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
     }
   }
 }
