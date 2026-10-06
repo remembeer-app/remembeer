@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/widget/app_form.dart';
 import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/formatter/alcohol_percentage_formatter.dart';
+import 'package:remembeer/drink/widget/alcohol_percentage_field.dart';
 import 'package:remembeer/drink/widget/drink_category_field.dart';
 
 class DrinkForm extends StatefulWidget {
@@ -39,7 +41,9 @@ class _DrinkFormState extends State<DrinkForm> {
   void initState() {
     super.initState();
     _nameController.text = widget.initialName;
-    _percentageController.text = widget.initialAlcoholPercentage.toString();
+    _percentageController.text = AlcoholPercentageFormatter.formatPercentage(
+      widget.initialAlcoholPercentage,
+    );
   }
 
   @override
@@ -82,24 +86,9 @@ class _DrinkFormState extends State<DrinkForm> {
                 value == null || value.isEmpty ? 'Please enter a name.' : null,
           ),
           const Gap(16),
-          TextFormField(
+          AlcoholPercentageField(
             controller: _percentageController,
             enabled: !widget.isLoading,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
-            decoration: const InputDecoration(
-              labelText: 'Alcohol Percentage (%)',
-              border: OutlineInputBorder(),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter an alcohol percentage.';
-              }
-              final percentage = double.tryParse(value);
-              return percentage == null || percentage < 1 || percentage > 100
-                  ? 'Please enter a valid number.'
-                  : null;
-            },
           ),
           const Gap(16),
           DrinkCategoryField(
