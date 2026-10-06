@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/auth/constants.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
+import 'package:remembeer/auth/widget/email_field.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
@@ -79,22 +80,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Widget _buildEmailField(LoadingFormState form) {
-    return form.buildTextField(
-      controller: _emailController,
-      label: 'Email',
-      prefixIcon: Icons.email_outlined,
-      keyboardType: TextInputType.emailAddress,
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return 'Please enter your email.';
-        }
-        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-        if (!emailRegex.hasMatch(value.trim())) {
-          return 'Please enter a valid email address.';
-        }
-        return null;
-      },
-    );
+    return EmailField(controller: _emailController, enabled: !form.isLoading);
   }
 
   Widget _buildPasswordField(LoadingFormState form) {

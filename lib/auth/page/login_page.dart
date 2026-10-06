@@ -2,6 +2,7 @@ import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
+import 'package:remembeer/auth/widget/email_field.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
@@ -93,18 +94,7 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        form.buildTextField(
-          controller: _emailController,
-          label: 'Email',
-          prefixIcon: Icons.email_outlined,
-          keyboardType: TextInputType.emailAddress,
-          validator: (value) {
-            if (value == null || value.trim().isEmpty) {
-              return 'Please enter your email.';
-            }
-            return null;
-          },
-        ),
+        EmailField(controller: _emailController, enabled: !form.isLoading),
         const Gap(16),
         _buildPasswordField(form),
         form.buildErrorMessage(),
