@@ -1,19 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/user/constants.dart';
 
 /// Plausible alcohol percentage window per category. A value outside its window
 /// means either a typo or an entry filed under the wrong category.
-const alcoholRangeByCategory = <DrinkCategory, (double, double)>{
-  DrinkCategory.beer: (0.0, 12.0),
-  DrinkCategory.cider: (0.0, 8.0),
-  DrinkCategory.cocktail: (3.0, 35.0),
-  DrinkCategory.spirit: (10.0, 80.0),
-  DrinkCategory.wine: (4.0, 22.0),
+const alcoholRangeByCategory = <String, (double, double)>{
+  'beer': (0.0, 12.0),
+  'cider': (0.0, 8.0),
+  'cocktail': (3.0, 35.0),
+  'spirit': (10.0, 80.0),
+  'wine': (4.0, 22.0),
 };
 
 void main() {
@@ -24,7 +23,14 @@ void main() {
     final content = File('assets/seed_data/drinks.json').readAsStringSync();
     rawDrinks = (jsonDecode(content) as List<dynamic>)
         .cast<Map<String, dynamic>>();
-    drinks = rawDrinks.map(Drink.fromJson).toList();
+    drinks = rawDrinks
+        .map(
+          (drink) => Drink.fromJson({
+            ...drink,
+            'category': {'kind': drink['category']},
+          }),
+        )
+        .toList();
   });
 
   test('every entry parses into a Drink', () {
@@ -46,7 +52,7 @@ void main() {
       );
       expect(
         drink.id,
-        startsWith('global-${drink.category.name}-'),
+        startsWith('global-${drink.category.kind}-'),
         reason: '${drink.name} id does not match its category',
       );
     }
@@ -71,21 +77,24 @@ void main() {
 
   test('alcohol percentage is plausible for the category', () {
     for (final drink in drinks) {
-      final (min, max) = alcoholRangeByCategory[drink.category]!;
+      final (min, max) = alcoholRangeByCategory[drink.category.kind]!;
 
       expect(
         drink.alcoholPercentage,
         inInclusiveRange(min, max),
         reason:
-            '${drink.name} (${drink.category.name}) has an implausible '
+            '${drink.name} (${drink.category.kind}) has an implausible '
             'alcohol percentage',
       );
     }
   });
 
   test('every category is represented', () {
-    final categories = drinks.map((drink) => drink.category).toSet();
+    final categories = drinks.map((drink) => drink.category.kind).toSet();
 
-    expect(categories, containsAll(DrinkCategory.values));
+    expect(
+      categories,
+      containsAll(convexDrinkCategories.map((category) => category.kind)),
+    );
   });
 }

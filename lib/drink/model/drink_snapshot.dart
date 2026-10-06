@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/converter/drink_category_converter.dart';
 
 part 'drink_snapshot.freezed.dart';
 part 'drink_snapshot.g.dart';
@@ -8,7 +9,7 @@ part 'drink_snapshot.g.dart';
 abstract class DrinkSnapshot with _$DrinkSnapshot {
   const factory DrinkSnapshot({
     required String name,
-    required DrinkCategory category,
+    @DrinkCategoryConverter() required DrinkCategory category,
     required double alcoholPercentage,
   }) = _DrinkSnapshot;
 

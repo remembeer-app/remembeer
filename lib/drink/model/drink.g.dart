@@ -20,7 +20,9 @@ _Drink _$DrinkFromJson(Map<String, dynamic> json) => _Drink(
     const TimestampConverter().fromJson,
   ),
   name: json['name'] as String,
-  category: $enumDecode(_$DrinkCategoryEnumMap, json['category']),
+  category: const DrinkCategoryConverter().fromJson(
+    json['category'] as Map<String, dynamic>,
+  ),
   alcoholPercentage: (json['alcoholPercentage'] as num).toDouble(),
 );
 
@@ -34,7 +36,7 @@ Map<String, dynamic> _$DrinkToJson(_Drink instance) => <String, dynamic>{
     const TimestampConverter().toJson,
   ),
   'name': instance.name,
-  'category': _$DrinkCategoryEnumMap[instance.category]!,
+  'category': const DrinkCategoryConverter().toJson(instance.category),
   'alcoholPercentage': instance.alcoholPercentage,
 };
 
@@ -42,14 +44,6 @@ Value? _$JsonConverterFromJson<Json, Value>(
   Object? json,
   Value? Function(Json json) fromJson,
 ) => json == null ? null : fromJson(json as Json);
-
-const _$DrinkCategoryEnumMap = {
-  DrinkCategory.beer: 'beer',
-  DrinkCategory.cider: 'cider',
-  DrinkCategory.cocktail: 'cocktail',
-  DrinkCategory.spirit: 'spirit',
-  DrinkCategory.wine: 'wine',
-};
 
 Json? _$JsonConverterToJson<Json, Value>(
   Value? value,

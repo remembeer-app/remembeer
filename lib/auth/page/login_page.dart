@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
@@ -10,7 +9,7 @@ import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/app_form.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/legal/widget/privacy_policy_notice.dart';
 import 'package:remembeer/routes.dart';
@@ -86,7 +85,7 @@ class _LoginPageState extends State<LoginPage> {
     return Column(
       children: [
         DrinkIcon(
-          category: DrinkCategory.beer,
+          category: const Beer(),
           size: 100,
           color: theme.colorScheme.primary,
         ),

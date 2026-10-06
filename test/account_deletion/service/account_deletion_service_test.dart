@@ -4,9 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/account_deletion/service/account_deletion_service.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
@@ -349,7 +349,7 @@ Drink _drink(String id) => Drink(
   createdAt: DateTime.utc(2026),
   updatedAt: DateTime.utc(2026),
   name: 'IPA',
-  category: DrinkCategory.beer,
+  category: const Beer(),
   alcoholPercentage: 6,
 );
 
@@ -400,7 +400,7 @@ Session _session(
       consumedAt: DateTime.utc(2026),
       drink: const DrinkSnapshot(
         name: 'Beer',
-        category: DrinkCategory.beer,
+        category: Beer(),
         alcoholPercentage: 4.5,
       ),
       volumeInMilliliters: 500,

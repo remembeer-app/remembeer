@@ -5,7 +5,6 @@ import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/convex_api/modules/drink.dart';
 import 'package:remembeer/convex_api/widgets.dart';
-import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/routes.dart';
 
 class DrinkTile extends StatelessWidget {
@@ -18,7 +17,7 @@ class DrinkTile extends StatelessWidget {
     return DrinkSoftDeleteMutation(
       optimisticUpdate: _optimisticDeleteDrink,
       builder: (context, softDelete, _) => ListTile(
-        leading: DrinkIcon(category: drink.drinkCategory.legacyCategory),
+        leading: DrinkIcon(category: drink.drinkCategory),
         title: Text(drink.name),
         subtitle: Text('ABV: ${drink.alcoholPercentage}%'),
         trailing: Transform.translate(

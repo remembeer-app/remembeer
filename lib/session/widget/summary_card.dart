@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 
 class SummaryCard extends StatelessWidget {
@@ -75,12 +76,10 @@ class SummaryCard extends StatelessWidget {
     );
   }
 
-  Map<DrinkCategory, List<DrinkLog>> _groupByCategory(
-    List<DrinkLog> drinkLogs,
-  ) {
-    final map = <DrinkCategory, List<DrinkLog>>{};
+  Map<String, List<DrinkLog>> _groupByCategory(List<DrinkLog> drinkLogs) {
+    final map = <String, List<DrinkLog>>{};
     for (final drinkLog in drinkLogs) {
-      final category = drinkLog.drink.category;
+      final category = drinkLog.drink.category.kind;
       map.putIfAbsent(category, () => []).add(drinkLog);
     }
     return map;
@@ -88,16 +87,21 @@ class SummaryCard extends StatelessWidget {
 
   List<Widget> _buildCategorySections(
     BuildContext context,
-    Map<DrinkCategory, List<DrinkLog>> drinkLogsByCategory,
+    Map<String, List<DrinkLog>> drinkLogsByCategory,
   ) {
     final widgets = <Widget>[];
-    final sortedCategories = drinkLogsByCategory.keys.toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
+    final sortedCategories = drinkLogsByCategory.keys.toList()..sort();
 
     for (final category in sortedCategories) {
       final categoryDrinkLogs = drinkLogsByCategory[category]!;
       widgets
-        ..add(_buildCategorySection(context, category, categoryDrinkLogs))
+        ..add(
+          _buildCategorySection(
+            context,
+            categoryDrinkLogs.first.drink.category,
+            categoryDrinkLogs,
+          ),
+        )
         ..add(const Gap(8));
     }
 

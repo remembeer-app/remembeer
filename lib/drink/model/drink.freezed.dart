@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Drink {
 
- String get id; String get userId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;@TimestampConverter() DateTime? get deletedAt; String get name; DrinkCategory get category; double get alcoholPercentage;
+ String get id; String get userId;@TimestampConverterOptimistic() DateTime get createdAt;@TimestampConverterOptimistic() DateTime get updatedAt;@TimestampConverter() DateTime? get deletedAt; String get name;@DrinkCategoryConverter() DrinkCategory get category; double get alcoholPercentage;
 /// Create a copy of Drink
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $DrinkCopyWith<$Res>  {
   factory $DrinkCopyWith(Drink value, $Res Function(Drink) _then) = _$DrinkCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, String name, DrinkCategory category, double alcoholPercentage
+ String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, String name,@DrinkCategoryConverter() DrinkCategory category, double alcoholPercentage
 });
 
 
@@ -166,7 +166,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name,  DrinkCategory category,  double alcoholPercentage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name, @DrinkCategoryConverter()  DrinkCategory category,  double alcoholPercentage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Drink() when $default != null:
 return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.name,_that.category,_that.alcoholPercentage);case _:
@@ -187,7 +187,7 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name,  DrinkCategory category,  double alcoholPercentage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name, @DrinkCategoryConverter()  DrinkCategory category,  double alcoholPercentage)  $default,) {final _that = this;
 switch (_that) {
 case _Drink():
 return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.name,_that.category,_that.alcoholPercentage);case _:
@@ -207,7 +207,7 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name,  DrinkCategory category,  double alcoholPercentage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @TimestampConverterOptimistic()  DateTime createdAt, @TimestampConverterOptimistic()  DateTime updatedAt, @TimestampConverter()  DateTime? deletedAt,  String name, @DrinkCategoryConverter()  DrinkCategory category,  double alcoholPercentage)?  $default,) {final _that = this;
 switch (_that) {
 case _Drink() when $default != null:
 return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.deletedAt,_that.name,_that.category,_that.alcoholPercentage);case _:
@@ -222,7 +222,7 @@ return $default(_that.id,_that.userId,_that.createdAt,_that.updatedAt,_that.dele
 @JsonSerializable()
 
 class _Drink implements Drink {
-  const _Drink({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required this.name, required this.category, required this.alcoholPercentage});
+  const _Drink({required this.id, required this.userId, @TimestampConverterOptimistic() required this.createdAt, @TimestampConverterOptimistic() required this.updatedAt, @TimestampConverter() this.deletedAt, required this.name, @DrinkCategoryConverter() required this.category, required this.alcoholPercentage});
   factory _Drink.fromJson(Map<String, dynamic> json) => _$DrinkFromJson(json);
 
 @override final  String id;
@@ -231,7 +231,7 @@ class _Drink implements Drink {
 @override@TimestampConverterOptimistic() final  DateTime updatedAt;
 @override@TimestampConverter() final  DateTime? deletedAt;
 @override final  String name;
-@override final  DrinkCategory category;
+@override@DrinkCategoryConverter() final  DrinkCategory category;
 @override final  double alcoholPercentage;
 
 /// Create a copy of Drink
@@ -269,7 +269,7 @@ abstract mixin class _$DrinkCopyWith<$Res> implements $DrinkCopyWith<$Res> {
   factory _$DrinkCopyWith(_Drink value, $Res Function(_Drink) _then) = __$DrinkCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, String name, DrinkCategory category, double alcoholPercentage
+ String id, String userId,@TimestampConverterOptimistic() DateTime createdAt,@TimestampConverterOptimistic() DateTime updatedAt,@TimestampConverter() DateTime? deletedAt, String name,@DrinkCategoryConverter() DrinkCategory category, double alcoholPercentage
 });
 
 

@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/party_challenge.dart';

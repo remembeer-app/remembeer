@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/drink_log/page/update_drink_log_page.dart';
@@ -45,7 +45,7 @@ class _ArchivedDrinkLogService implements DrinkLogService {
       consumedAt: DateTime.utc(2026, 9, 2, 18, 30),
       drink: const DrinkSnapshot(
         name: 'Beer',
-        category: DrinkCategory.beer,
+        category: Beer(),
         alcoholPercentage: 5,
       ),
       volumeInMilliliters: 500,

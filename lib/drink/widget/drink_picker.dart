@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/convex_api/modules/drink.dart';
-import 'package:remembeer/convex_api/schema.dart';
-import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink/widget/drink_picker_sheet.dart';
 import 'package:remembeer/drink/widget/selected_drink_display.dart';
 
 class DrinkPicker extends StatelessWidget {
-  final DrinkSnapshot? selectedDrink;
-  final DrinkId? selectedDrinkId;
+  final ListAvailableResultItem? selectedDrink;
   final bool enabled;
   final ValueChanged<ListAvailableResultItem> onChanged;
 
@@ -15,7 +12,6 @@ class DrinkPicker extends StatelessWidget {
     super.key,
     required this.selectedDrink,
     required this.onChanged,
-    this.selectedDrinkId,
     this.enabled = true,
   });
 
@@ -25,10 +21,7 @@ class DrinkPicker extends StatelessWidget {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Theme.of(context).colorScheme.surface,
-      builder: (context) => DrinkPickerSheet(
-        selectedDrink: selectedDrink,
-        selectedDrinkId: selectedDrinkId,
-      ),
+      builder: (context) => DrinkPickerSheet(selectedDrink: selectedDrink),
     ).then((drink) {
       if (context.mounted && drink != null) {
         onChanged(drink);

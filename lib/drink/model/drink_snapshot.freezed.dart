@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DrinkSnapshot {
 
- String get name; DrinkCategory get category; double get alcoholPercentage;
+ String get name;@DrinkCategoryConverter() DrinkCategory get category; double get alcoholPercentage;
 /// Create a copy of DrinkSnapshot
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -54,7 +54,7 @@ abstract mixin class $DrinkSnapshotCopyWith<$Res>  {
   factory $DrinkSnapshotCopyWith(DrinkSnapshot value, $Res Function(DrinkSnapshot) _then) = _$DrinkSnapshotCopyWithImpl;
 @useResult
 $Res call({
- String name, DrinkCategory category, double alcoholPercentage
+ String name,@DrinkCategoryConverter() DrinkCategory category, double alcoholPercentage
 });
 
 
@@ -161,7 +161,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name,  DrinkCategory category,  double alcoholPercentage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String name, @DrinkCategoryConverter()  DrinkCategory category,  double alcoholPercentage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DrinkSnapshot() when $default != null:
 return $default(_that.name,_that.category,_that.alcoholPercentage);case _:
@@ -182,7 +182,7 @@ return $default(_that.name,_that.category,_that.alcoholPercentage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name,  DrinkCategory category,  double alcoholPercentage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String name, @DrinkCategoryConverter()  DrinkCategory category,  double alcoholPercentage)  $default,) {final _that = this;
 switch (_that) {
 case _DrinkSnapshot():
 return $default(_that.name,_that.category,_that.alcoholPercentage);case _:
@@ -202,7 +202,7 @@ return $default(_that.name,_that.category,_that.alcoholPercentage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name,  DrinkCategory category,  double alcoholPercentage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String name, @DrinkCategoryConverter()  DrinkCategory category,  double alcoholPercentage)?  $default,) {final _that = this;
 switch (_that) {
 case _DrinkSnapshot() when $default != null:
 return $default(_that.name,_that.category,_that.alcoholPercentage);case _:
@@ -217,11 +217,11 @@ return $default(_that.name,_that.category,_that.alcoholPercentage);case _:
 @JsonSerializable()
 
 class _DrinkSnapshot implements DrinkSnapshot {
-  const _DrinkSnapshot({required this.name, required this.category, required this.alcoholPercentage});
+  const _DrinkSnapshot({required this.name, @DrinkCategoryConverter() required this.category, required this.alcoholPercentage});
   factory _DrinkSnapshot.fromJson(Map<String, dynamic> json) => _$DrinkSnapshotFromJson(json);
 
 @override final  String name;
-@override final  DrinkCategory category;
+@override@DrinkCategoryConverter() final  DrinkCategory category;
 @override final  double alcoholPercentage;
 
 /// Create a copy of DrinkSnapshot
@@ -259,7 +259,7 @@ abstract mixin class _$DrinkSnapshotCopyWith<$Res> implements $DrinkSnapshotCopy
   factory _$DrinkSnapshotCopyWith(_DrinkSnapshot value, $Res Function(_DrinkSnapshot) _then) = __$DrinkSnapshotCopyWithImpl;
 @override @useResult
 $Res call({
- String name, DrinkCategory category, double alcoholPercentage
+ String name,@DrinkCategoryConverter() DrinkCategory category, double alcoholPercentage
 });
 
 

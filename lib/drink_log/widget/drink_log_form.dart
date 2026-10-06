@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
-import 'package:remembeer/drink/extension/convex_drink_extension.dart';
-import 'package:remembeer/drink/model/drink_snapshot.dart';
+import 'package:remembeer/convex_api/modules/drink.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/drink/widget/drink_picker.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/location/service/location_service.dart';
@@ -13,12 +13,12 @@ import 'package:remembeer/routes.dart';
 const _defaultPosition = GeoPoint(49.2099, 16.5990);
 
 class DrinkLogForm extends StatefulWidget {
-  final DrinkSnapshot initialDrink;
+  final ListAvailableResultItem? initialDrink;
   final DateTime initialConsumedAt;
   final int initialVolume;
   final GeoPoint? initialLocation;
   final Future<void> Function(
-    DrinkSnapshot drink,
+    ListAvailableResultItem drink,
     DateTime consumedAt,
     int volumeInMilliliters,
     GeoPoint? location,
@@ -41,7 +41,7 @@ class DrinkLogForm extends StatefulWidget {
 class _DrinkLogFormState extends State<DrinkLogForm> {
   final _locationService = get<LocationService>();
 
-  late DrinkSnapshot _selectedDrink = widget.initialDrink;
+  late ListAvailableResultItem? _selectedDrink = widget.initialDrink;
   late DateTime _selectedConsumedAt = widget.initialConsumedAt;
   final _volumeController = TextEditingController();
   final _consumedAtController = TextEditingController();
@@ -187,12 +187,12 @@ class _DrinkLogFormState extends State<DrinkLogForm> {
     return DrinkPicker(
       selectedDrink: _selectedDrink,
       onChanged: (drink) {
-        final newValue = drink.snapshot;
         setState(() {
-          if (newValue.category != _selectedDrink.category) {
-            _volumeController.text = newValue.category.defaultVolume.toString();
+          if (drink.drinkCategory.kind != _selectedDrink?.drinkCategory.kind) {
+            _volumeController.text = drink.drinkCategory.defaultVolume
+                .toString();
           }
-          _selectedDrink = newValue;
+          _selectedDrink = drink;
         });
       },
     );
@@ -234,7 +234,9 @@ class _DrinkLogFormState extends State<DrinkLogForm> {
   }
 
   Widget _buildPredefinedVolumesRow() {
-    final volumes = _selectedDrink.category.predefinedVolumes;
+    final volumes =
+        _selectedDrink?.drinkCategory.predefinedVolumes ??
+        const <String, int>{};
     final buttons = <Widget>[];
     volumes.forEach((name, volume) {
       buttons
@@ -269,9 +271,10 @@ class _DrinkLogFormState extends State<DrinkLogForm> {
   Widget _buildSubmitButton(LoadingFormState form) {
     return form.buildSubmitButton(
       text: 'Submit',
+      enabled: _selectedDrink != null,
       margin: const EdgeInsets.only(bottom: 16),
       onSubmit: () => widget.onSubmit(
-        _selectedDrink,
+        _selectedDrink!,
         _selectedConsumedAt,
         int.parse(_volumeController.text),
         _location,

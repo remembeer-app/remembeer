@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 
 class DrinkIcon extends StatelessWidget {
   final DrinkCategory category;

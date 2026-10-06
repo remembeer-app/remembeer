@@ -1,8 +1,8 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/party_quest.dart';
 
@@ -204,7 +204,7 @@ String partyQuestInstructionsForUser(
   }
   final className = quest.eligibilityRuleSnapshot.substring(prefix.length);
   final classMetadata = partyClasses
-      .where((metadata) => metadata.category.name == className)
+      .where((metadata) => metadata.category.kind == className)
       .firstOrNull;
   if (classMetadata == null) {
     return quest.instructionsSnapshot;

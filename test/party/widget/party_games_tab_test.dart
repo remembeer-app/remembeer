@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/party/model/party.dart';
 import 'package:remembeer/party/model/party_challenge.dart';
 import 'package:remembeer/party/model/party_member.dart';
@@ -98,7 +98,7 @@ void main() {
   testWidgets('shows the selected class without the notice', (tester) async {
     final state = _state(
       settings: const PartyModuleSettings(socialQuestsEnabled: true),
-      selectedClass: DrinkCategory.wine,
+      selectedClass: const Wine(),
     );
 
     await tester.pumpWidget(
@@ -143,7 +143,7 @@ void main() {
         beerpongEnabled: true,
       ),
       activeChallengeId: active.id,
-      selectedClass: DrinkCategory.beer,
+      selectedClass: const Beer(),
     );
 
     await tester.pumpWidget(

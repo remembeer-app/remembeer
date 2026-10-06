@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/party/controller/party_command_client.dart';
@@ -104,7 +104,7 @@ void main() {
       consumedAt: DateTime(2026, 9, 2, 20),
       drink: const DrinkSnapshot(
         name: 'Wine',
-        category: DrinkCategory.wine,
+        category: Wine(),
         alcoholPercentage: 12,
       ),
       volumeInMilliliters: 200,

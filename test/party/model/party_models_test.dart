@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/beerpong_match.dart';
 import 'package:remembeer/party/model/beerpong_team.dart';
@@ -43,7 +44,7 @@ void main() {
     final member = PartyMember(
       id: 'user-1',
       userId: 'user-1',
-      selectedClass: DrinkCategory.cider,
+      selectedClass: const Cider(),
       classChangedAt: now,
       joinedAt: now,
       updatedAt: now,
@@ -55,7 +56,7 @@ void main() {
     expect(member.scoreUnits, 0);
     expect(member.drinkCount, 0);
     expect(member.isActive, isTrue);
-    expect(member.toJson()['selectedClass'], 'cider');
+    expect(member.toJson()['selectedClass'], {'kind': 'cider'});
   });
 
   test('event round trips with audit payload and optional references', () {
@@ -230,9 +231,9 @@ void main() {
   test('class metadata covers every drink category once', () {
     expect(
       partyClasses.map((partyClass) => partyClass.category).toSet(),
-      DrinkCategory.values.toSet(),
+      convexDrinkCategories.toSet(),
     );
-    expect(partyClasses.length, DrinkCategory.values.length);
+    expect(partyClasses.length, convexDrinkCategories.length);
   });
 
   test('score units format as trimmed decimal points', () {

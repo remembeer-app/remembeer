@@ -1,11 +1,11 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 
 void main() {
   const drinkJson = {
     'name': 'Beer',
-    'category': 'beer',
+    'category': {'kind': 'beer'},
     'alcoholPercentage': 5.0,
   };
   final baseJson = <String, dynamic>{
@@ -20,7 +20,7 @@ void main() {
     final drink = DrinkLog.fromJson({...baseJson, 'partyRevision': 3});
 
     expect(drink.partyRevision, 3);
-    expect(drink.drink.category, DrinkCategory.beer);
+    expect(drink.drink.category, const Beer());
     expect(drink.toJson(), isNot(contains('partyRevision')));
   });
 

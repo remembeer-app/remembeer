@@ -8,21 +8,15 @@ part of 'drink_create.dart';
 
 _DrinkCreate _$DrinkCreateFromJson(Map<String, dynamic> json) => _DrinkCreate(
   name: json['name'] as String,
-  category: $enumDecode(_$DrinkCategoryEnumMap, json['category']),
+  category: const DrinkCategoryConverter().fromJson(
+    json['category'] as Map<String, dynamic>,
+  ),
   alcoholPercentage: (json['alcoholPercentage'] as num).toDouble(),
 );
 
 Map<String, dynamic> _$DrinkCreateToJson(_DrinkCreate instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'category': _$DrinkCategoryEnumMap[instance.category]!,
+      'category': const DrinkCategoryConverter().toJson(instance.category),
       'alcoholPercentage': instance.alcoholPercentage,
     };
-
-const _$DrinkCategoryEnumMap = {
-  DrinkCategory.beer: 'beer',
-  DrinkCategory.cider: 'cider',
-  DrinkCategory.cocktail: 'cocktail',
-  DrinkCategory.spirit: 'spirit',
-  DrinkCategory.wine: 'wine',
-};

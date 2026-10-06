@@ -1,8 +1,7 @@
 import 'dart:async';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
@@ -11,7 +10,7 @@ import 'package:remembeer/user_settings/model/user_settings.dart';
 
 const _defaultDrink = DrinkSnapshot(
   name: 'Beer',
-  category: DrinkCategory.beer,
+  category: Beer(),
   alcoholPercentage: 4.5,
 );
 const _defaultDrinkSize = 500;

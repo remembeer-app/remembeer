@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/party/widget/party_class_selector.dart';
 
 void main() {
@@ -34,7 +34,37 @@ void main() {
     await tester.tap(find.text('Choose class'));
     await tester.pumpAndSettle();
 
-    expect(submittedClass, DrinkCategory.wine);
+    expect(submittedClass, const Wine());
+  });
+
+  testWidgets('an equivalent category instance is not a class change', (
+    tester,
+  ) async {
+    // A fresh instance verifies that selection compares category kinds.
+    // ignore: prefer_const_constructors
+    final category = Wine();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: PartyClassSelector(
+              selectedClass: category,
+              onSubmit: (_) async {},
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('Wine Warrior'));
+    await tester.pump();
+    expect(
+      tester
+          .widget<FilledButton>(
+            find.widgetWithText(FilledButton, 'Choose class'),
+          )
+          .onPressed,
+      isNull,
+    );
   });
 
   testWidgets('states that the class bonus applies to Party points', (

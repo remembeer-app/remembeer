@@ -3,7 +3,6 @@ import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/convex_api/widgets/drink.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
-import 'package:remembeer/drink/extension/convex_drink_extension.dart';
 import 'package:remembeer/drink/widget/drink_picker.dart';
 import 'package:remembeer/user_settings/widget/settings_page.dart';
 
@@ -31,8 +30,7 @@ class DefaultDrinkPage extends StatelessWidget {
                       const Center(child: Text('No drinks available'))
                     else
                       DrinkPicker(
-                        selectedDrink: selectedDrink?.snapshot,
-                        selectedDrinkId: selectedDrink?.id,
+                        selectedDrink: selectedDrink,
                         enabled: !snapshot.isLoading,
                         onChanged: (drink) {
                           if (drink.id == user.defaultDrink) return;

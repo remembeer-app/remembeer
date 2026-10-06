@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/model/party.dart';
@@ -38,12 +38,12 @@ void main() {
       partyController: partyController,
     );
 
-    await service.selectClass('session-1', DrinkCategory.wine);
-    await service.setMemberClass('session-1', 'user-2', DrinkCategory.spirit);
+    await service.selectClass('session-1', const Wine());
+    await service.setMemberClass('session-1', 'user-2', const Spirit());
 
-    expect(partyController.selectedClass, DrinkCategory.wine);
+    expect(partyController.selectedClass, const Wine());
     expect(partyController.changedMemberId, 'user-2');
-    expect(partyController.changedMemberClass, DrinkCategory.spirit);
+    expect(partyController.changedMemberClass, const Spirit());
     expect(partyController.classCommandIds, everyElement('command-1'));
   });
 

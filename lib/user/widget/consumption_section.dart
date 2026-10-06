@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/user_model.dart';
@@ -69,14 +69,14 @@ class ConsumptionSection extends StatelessWidget {
         _buildStatTile(
           label: 'Beers Consumed',
           value: _formatBeerCount(beersConsumed),
-          icon: const DrinkIcon(category: DrinkCategory.beer, size: _iconSize),
+          icon: const DrinkIcon(category: Beer(), size: _iconSize),
         ),
         _buildStatTile(
           // Removed specific unit from label since it is now dynamic in the value
           label: 'Alcohol Consumed',
           value: _formatVolume(alcoholConsumed),
           // TODO(metju-ac): Better icon for alcohol volume
-          icon: const DrinkIcon(category: DrinkCategory.wine, size: _iconSize),
+          icon: const DrinkIcon(category: Wine(), size: _iconSize),
         ),
       ],
     );

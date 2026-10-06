@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/party.dart';
@@ -169,7 +170,7 @@ class _PartyGamesTabState extends State<PartyGamesTab> {
       return [];
     }
     final classMetadata = partyClasses.singleWhere(
-      (metadata) => metadata.category == selectedClass,
+      (metadata) => metadata.category.kind == selectedClass.kind,
     );
     return [
       Column(

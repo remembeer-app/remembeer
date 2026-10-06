@@ -1,4 +1,4 @@
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 
 const partySchemaVersion = 1;
 
@@ -65,11 +65,11 @@ class PartyClassMetadata {
 }
 
 const partyClasses = <PartyClassMetadata>[
-  PartyClassMetadata(category: DrinkCategory.beer, title: 'Beer Paladin'),
-  PartyClassMetadata(category: DrinkCategory.cider, title: 'Cider Sentinel'),
-  PartyClassMetadata(category: DrinkCategory.cocktail, title: 'Cocktail Druid'),
-  PartyClassMetadata(category: DrinkCategory.spirit, title: 'Spirit Shaman'),
-  PartyClassMetadata(category: DrinkCategory.wine, title: 'Wine Warrior'),
+  PartyClassMetadata(category: Beer(), title: 'Beer Paladin'),
+  PartyClassMetadata(category: Cider(), title: 'Cider Sentinel'),
+  PartyClassMetadata(category: Cocktail(), title: 'Cocktail Druid'),
+  PartyClassMetadata(category: Spirit(), title: 'Spirit Shaman'),
+  PartyClassMetadata(category: Wine(), title: 'Wine Warrior'),
 ];
 
 String formatPartyScore(int scoreUnits) {
