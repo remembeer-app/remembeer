@@ -5,7 +5,7 @@ import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/service/party_quest_service.dart';
 import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/party/widget/party_quest_management_section.dart';
-import 'package:remembeer/user_settings/widget/settings_page_template.dart';
+import 'package:remembeer/user_settings/widget/settings_page.dart';
 
 class PartyQuestManagementPage extends StatelessWidget {
   PartyQuestManagementPage({
@@ -21,8 +21,9 @@ class PartyQuestManagementPage extends StatelessWidget {
   final PartyQuestService _questService;
 
   @override
-  Widget build(BuildContext context) => SettingsPageTemplate(
-    title: const Text('Quest catalog'),
+  Widget build(BuildContext context) => SettingsPage(
+    title: 'Quest catalog',
+    autmaticallyImplyLeading: true,
     hint: 'Enable the built-in quests available to this Party.',
     padding: const EdgeInsets.all(16),
     child: AsyncBuilder<PartyState>(

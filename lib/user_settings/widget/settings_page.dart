@@ -7,6 +7,8 @@ class SettingsPage extends StatelessWidget {
   final String title;
   final String? hint;
   final bool autmaticallyImplyLeading;
+  final EdgeInsetsGeometry padding;
+  final List<Widget>? actions;
   final Widget child;
 
   const SettingsPage({
@@ -14,6 +16,8 @@ class SettingsPage extends StatelessWidget {
     required this.title,
     this.hint,
     this.autmaticallyImplyLeading = false,
+    this.padding = const EdgeInsets.all(8),
+    this.actions,
     required this.child,
   });
 
@@ -22,6 +26,8 @@ class SettingsPage extends StatelessWidget {
     return PageTemplate(
       title: Text(title),
       automaticallyImplyLeading: autmaticallyImplyLeading,
+      padding: padding,
+      actions: actions,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

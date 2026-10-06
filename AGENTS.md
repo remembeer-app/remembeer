@@ -128,7 +128,7 @@ A one-tap "+1" widget that logs the user's default drink. Both platforms end up 
 
 ### Page Structure
 
-Every page wraps its content in `PageTemplate` (Scaffold + AppBar + SafeArea + padding). Settings-style pages use `SettingsPageTemplate` which adds a hint box and optional save FAB.
+Every page wraps its content in `PageTemplate` (Scaffold + AppBar + SafeArea + padding). Settings-style pages use `SettingsPage` which adds an optional hint box, supports app-bar actions and configurable padding, and fills the remaining space with its child.
 
 Typical page skeleton:
 

@@ -20,7 +20,7 @@ import 'package:remembeer/party/widget/party_module_settings.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/service/session_service.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user_settings/widget/settings_page_template.dart';
+import 'package:remembeer/user_settings/widget/settings_page.dart';
 
 typedef PartyManagementSectionBuilder =
     Widget Function(BuildContext context, PartyState state);
@@ -52,8 +52,9 @@ class PartyManagementPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SettingsPageTemplate(
-      title: const Text('Manage Party'),
+    return SettingsPage(
+      title: 'Manage Party',
+      autmaticallyImplyLeading: true,
       hint: 'Module changes affect this Party only.',
       padding: const EdgeInsets.all(16),
       child: AsyncBuilder<PartyState>(
