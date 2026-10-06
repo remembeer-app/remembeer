@@ -9,8 +9,8 @@ import 'package:remembeer/auth/widget/password_field.dart';
 import 'package:remembeer/auth/widget/password_requirements.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/app_form.dart';
-import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/user_settings/widget/settings_page.dart';
 
 class ChangePasswordPage extends StatefulWidget {
   const ChangePasswordPage({super.key});
@@ -41,8 +41,11 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    return PageTemplate(
-      title: const Text('Change Password'),
+    return SettingsPage(
+      title: 'Change Password',
+      hint:
+          'Enter your current password, then choose and confirm a new password. '
+          'Your new password must be different from your current password.',
       child: AppForm(
         isSubmitting: _isSubmitting,
         error: _error,
