@@ -1,11 +1,14 @@
+import 'dart:async';
+
 import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/auth/widget/email_field.dart';
+import 'package:remembeer/auth/widget/password_field.dart';
 import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/common/widget/app_form.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/common/widget/loading_form.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -26,6 +29,8 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordController = TextEditingController();
 
   var _obscurePassword = true;
+  var _isSubmitting = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -40,24 +45,38 @@ class _LoginPageState extends State<LoginPage> {
 
     return PageTemplate(
       padding: const EdgeInsets.all(24),
-      child: LoadingForm(
-        errorMapper: (e) => switch (e) {
-          BetterAuthException(:final message) => message,
-          _ => e.toString(),
-        },
-        builder: (form) => SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _buildHeader(theme),
-              const Gap(48),
-              _buildFormContent(form),
-              const Gap(12),
-              const PrivacyPolicyNotice(),
-              const Gap(16),
-              _buildRegisterLink(context, form),
-            ],
-          ),
+      child: AppForm(
+        isSubmitting: _isSubmitting,
+        error: _error,
+        submitLabel: 'Sign In',
+        submitButtonLabel: 'Sign In',
+        submittingLabel: 'Signing in...',
+        onSubmit: () => unawaited(_login()),
+        builder: (context, submit) => Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildHeader(theme),
+            const Gap(48),
+            EmailField(controller: _emailController, enabled: !_isSubmitting),
+            const Gap(16),
+            PasswordField.login(
+              controller: _passwordController,
+              enabled: !_isSubmitting,
+              obscureText: _obscurePassword,
+              onToggleVisibility: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
+              onFieldSubmitted: (_) => submit(),
+            ),
+            const Gap(12),
+            const PrivacyPolicyNotice(),
+            const Gap(16),
+            TextButton(
+              onPressed: _isSubmitting
+                  ? null
+                  : () => const RegisterRoute().push<void>(context),
+              child: const Text("Don't have an account? Register"),
+            ),
+          ],
         ),
       ),
     );
@@ -90,52 +109,28 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildFormContent(LoadingFormState form) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        EmailField(controller: _emailController, enabled: !form.isLoading),
-        const Gap(16),
-        _buildPasswordField(form),
-        form.buildErrorMessage(),
-        const Gap(16),
-        form.buildSubmitButton(text: 'Login', onSubmit: _login),
-      ],
-    );
-  }
-
-  Widget _buildPasswordField(LoadingFormState form) {
-    return form.buildPasswordField(
-      controller: _passwordController,
-      label: 'Password',
-      obscureText: _obscurePassword,
-      onToggleVisibility: () =>
-          setState(() => _obscurePassword = !_obscurePassword),
-      isLastField: true,
-      onFieldSubmitted: () => form.runAction(_login),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter your password.';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildRegisterLink(BuildContext context, LoadingFormState form) {
-    return TextButton(
-      onPressed: form.isLoading
-          ? null
-          : () => const RegisterRoute().push<void>(context),
-      child: const Text("Don't have an account? Register"),
-    );
-  }
-
   Future<void> _login() async {
-    await _convexAuthService.signIn(
-      email: _emailController.text.trim(),
-      password: _passwordController.text,
-    );
-    showSuccessNotification('Logged in with Better Auth.');
+    if (_isSubmitting) return;
+    setState(() {
+      _isSubmitting = true;
+      _error = null;
+    });
+    try {
+      await _convexAuthService.signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+      if (mounted) showSuccessNotification('Logged in with Better Auth.');
+    } on Exception catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _error = switch (error) {
+          BetterAuthException(:final message) => message,
+          _ => error.toString(),
+        };
+      });
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/auth/constants.dart';
 
-enum _PasswordFieldType { current, newPassword, confirmation }
+enum _PasswordFieldType { login, current, newPassword, confirmation }
 
 class PasswordField extends StatelessWidget {
   final TextEditingController controller;
@@ -14,6 +14,19 @@ class PasswordField extends StatelessWidget {
   final ValueChanged<String>? onFieldSubmitted;
   final _PasswordFieldType _type;
   final TextEditingController? _comparisonController;
+
+  const PasswordField.login({
+    super.key,
+    required this.controller,
+    this.label = 'Password',
+    required this.obscureText,
+    required this.onToggleVisibility,
+    this.enabled = true,
+    this.textInputAction = TextInputAction.done,
+    this.onChanged,
+    this.onFieldSubmitted,
+  }) : _type = _PasswordFieldType.login,
+       _comparisonController = null;
 
   const PasswordField.current({
     super.key,
@@ -83,12 +96,14 @@ class PasswordField extends StatelessWidget {
   String? _validate(String? value) {
     if (value == null || value.isEmpty) {
       return switch (_type) {
+        _PasswordFieldType.login => 'Please enter your password.',
         _PasswordFieldType.current => 'Please enter your current password.',
         _PasswordFieldType.newPassword => 'Please enter a new password.',
         _PasswordFieldType.confirmation => 'Please confirm your new password.',
       };
     }
     switch (_type) {
+      case _PasswordFieldType.login:
       case _PasswordFieldType.current:
         return null;
       case _PasswordFieldType.newPassword:

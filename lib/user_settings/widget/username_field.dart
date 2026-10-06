@@ -5,12 +5,14 @@ import 'package:remembeer/user/constants.dart';
 class UsernameField extends StatelessWidget {
   final TextEditingController controller;
   final bool enabled;
+  final TextInputAction textInputAction;
   final ValueChanged<String>? onFieldSubmitted;
 
   const UsernameField({
     super.key,
     required this.controller,
     this.enabled = true,
+    this.textInputAction = TextInputAction.done,
     this.onFieldSubmitted,
   });
 
@@ -26,7 +28,7 @@ class UsernameField extends StatelessWidget {
         prefixIcon: Icon(Icons.person_outline),
       ),
       maxLength: maxUsernameLength,
-      textInputAction: TextInputAction.done,
+      textInputAction: textInputAction,
       enabled: enabled,
       onFieldSubmitted: onFieldSubmitted,
       validator: _validateUsername,

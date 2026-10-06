@@ -7,6 +7,7 @@ import 'package:remembeer/common/widget/error_message_box.dart';
 
 const _appFormButtonHeight = 56.0;
 const _appFormButtonGap = 12.0;
+const _appFormSubmitLabelFontSize = 16.0;
 
 class AppFormAction {
   final String label;
@@ -26,7 +27,7 @@ class AppForm extends StatefulWidget {
   final bool isSubmitting;
   final Object? error;
   final VoidCallback onSubmit;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final String submitLabel;
   final String submittingLabel;
 
@@ -42,7 +43,7 @@ class AppForm extends StatefulWidget {
     required this.isSubmitting,
     this.error,
     required this.onSubmit,
-    required this.onBack,
+    this.onBack,
     required this.submitLabel,
     this.submittingLabel = 'Submitting...',
     this.submitButtonLabel,
@@ -222,7 +223,7 @@ class _FormActionBar extends StatelessWidget {
   final String submittingLabel;
   final String? submitButtonLabel;
   final ({FocusNode back, FocusNode more, FocusNode submit}) focusNodes;
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final VoidCallback onForward;
   final VoidCallback onMore;
 
@@ -248,23 +249,29 @@ class _FormActionBar extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final hasActions = actions.isNotEmpty;
-        final gapCount = hasActions ? 2 : 1;
+        final hasBack = onBack != null;
+        final secondaryButtonCount = (hasBack ? 1 : 0) + (hasActions ? 1 : 0);
+        final gapCount = secondaryButtonCount;
         final buttonSpace = constraints.maxWidth - _appFormButtonGap * gapCount;
-        final normalWidth = buttonSpace / (hasActions ? 4 : 3);
-        final submitWidth = canAdvance ? normalWidth : normalWidth * 2;
-        final gap =
-            (constraints.maxWidth -
-                normalWidth -
-                submitWidth -
-                (hasActions ? normalWidth : 0)) /
-            gapCount;
+        final normalWidth = buttonSpace / (secondaryButtonCount + 2);
+        final submitWidth = secondaryButtonCount == 0
+            ? constraints.maxWidth
+            : canAdvance
+            ? normalWidth
+            : normalWidth * 2;
+        final gap = gapCount == 0
+            ? 0.0
+            : (constraints.maxWidth -
+                      normalWidth * secondaryButtonCount -
+                      submitWidth) /
+                  gapCount;
         return SizedBox(
           height: _appFormButtonHeight,
           child: Stack(
             children: [
               if (hasActions)
                 _FormActionButton(
-                  left: normalWidth + gap,
+                  left: hasBack ? normalWidth + gap : 0,
                   width: normalWidth,
                   focusNode: focusNodes.more,
                   enabled: !isSubmitting,
@@ -273,20 +280,21 @@ class _FormActionBar extends StatelessWidget {
                   isDestructive: directAction != null,
                   child: Icon(directAction?.icon ?? Icons.more_horiz),
                 ),
-              _FormActionButton(
-                left: 0,
-                width: normalWidth,
-                focusNode: focusNodes.back,
-                enabled: !isSubmitting,
-                onPressed: onBack,
-                tooltip: canGoBack ? 'Previous field' : 'Back',
-                child: AnimatedRotation(
-                  turns: canGoBack ? 0.25 : 0,
-                  duration: kThemeAnimationDuration,
-                  curve: Curves.easeInOutCubic,
-                  child: const Icon(Icons.arrow_back),
+              if (hasBack)
+                _FormActionButton(
+                  left: 0,
+                  width: normalWidth,
+                  focusNode: focusNodes.back,
+                  enabled: !isSubmitting,
+                  onPressed: onBack!,
+                  tooltip: canGoBack ? 'Previous field' : 'Back',
+                  child: AnimatedRotation(
+                    turns: canGoBack ? 0.25 : 0,
+                    duration: kThemeAnimationDuration,
+                    curve: Curves.easeInOutCubic,
+                    child: const Icon(Icons.arrow_back),
+                  ),
                 ),
-              ),
               _FormActionButton(
                 left: constraints.maxWidth - submitWidth,
                 width: submitWidth,
@@ -311,10 +319,16 @@ class _FormActionBar extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
                                 ),
-                                child: Text(
-                                  submitButtonLabel!,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                child: Builder(
+                                  builder: (context) => Text(
+                                    submitButtonLabel!,
+                                    style: TextStyle(
+                                      color: IconTheme.of(context).color,
+                                      fontSize: _appFormSubmitLabelFontSize,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               )
                             : AnimatedRotation(
