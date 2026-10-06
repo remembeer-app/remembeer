@@ -40,3 +40,28 @@ or action.
 The Flutter client includes the complete Dartvex stack: the core client,
 Flutter widgets, Better Auth integration, generated API bindings, and optional
 SQLite-backed offline support through `dartvex_local`.
+
+## Seed global drinks
+
+The internal `drink:seedGlobal` mutation reads the bundled
+`assets/seed_data/drinks.json` catalog. Run `npm run convex:dev` for development
+(or deploy the backend for production) after editing the seed file.
+
+```bash
+npm run seed:drinks -- '{"dryRun":true}'  # Preview changes
+npm run seed:drinks                     # Seed development
+npm run seed:drinks -- --prod           # Seed production
+npm run test:seed:drinks                # Validate seed data
+```
+
+Alternatively, select `drink:seedGlobal` in the Convex dashboard's Functions
+page and run it with `{}` or `{"dryRun":true}`. The function is internal and is
+not exposed to app clients.
+
+Runs are idempotent: entries are matched by their stable seed IDs, changed
+entries are updated, returning entries are restored, and removed entries are
+soft-deleted. Custom drinks and global drinks without a `seedKey` are untouched.
+The returned counts show created, updated, restored, retired, and unchanged
+entries. A dry run performs no writes. Unchanged drinks retain their timestamps.
+
+`npm run seed` remains the legacy Firestore seeder.

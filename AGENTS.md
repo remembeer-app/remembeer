@@ -84,21 +84,32 @@ Python 3.13 functions in `functions/main.py` — push notification triggers for 
 
 ### Seeding Global Drinks
 
-`assets/seed_data/drinks.json` holds the global drinks. Firestore rules forbid *every* client from writing documents with `userId: "global"`, so seeding runs through the Admin SDK instead:
+`assets/seed_data/drinks.json` holds the global catalog bundled into the internal
+Convex mutation `drink:seedGlobal`. Deploy changes to the JSON before running it.
 
 ```bash
-# Against production (service account key from the Firebase console, keep it out of the repo)
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account.json npm run seed
+# Preview changes on the configured development deployment
+npm run seed:drinks -- '{"dryRun":true}'
 
-# Against the emulator, no credentials needed
-firebase emulators:start --only firestore
-FIRESTORE_EMULATOR_HOST=localhost:8080 npm run seed
+# Apply them on the configured development deployment
+npm run seed:drinks
 
-# Preview without writing
-npm run seed -- --dry-run
+# Apply them on production after deploying the updated backend
+npm run seed:drinks -- --prod
+
+# Validate the seed data
+npm run test:seed:drinks
 ```
 
-The script is idempotent: it upserts every entry (preserving `createdAt`) and soft-deletes global drinks that are no longer in the seed file. Drink logs embed their own copy of the name, category and alcohol percentage, so retiring a drink never changes anyone's history. `test/drink/seed_data/drinks_seed_test.dart` validates the JSON before it can be seeded.
+The same internal mutation can be run from the Convex dashboard's Functions page
+with `{}` or `{"dryRun":true}`. It cannot be called by Flutter clients.
+
+Seed-managed global drinks have `ownerId: null` and a stable `seedKey` taken from
+the seed file's `id`. Seeding inserts missing entries, updates changed entries,
+restores returning entries, and soft-deletes seed-managed entries removed from
+the file. Unchanged rows retain their timestamps; custom drinks and unmanaged
+global drinks are untouched. The mutation returns counts for every operation.
+The legacy `npm run seed` script still targets Firestore.
 
 ### Dynamic App Icon
 

@@ -14,6 +14,8 @@ import type * as badge_query from "../badge/query.js";
 import type * as drink from "../drink.js";
 import type * as drink_mutation from "../drink/mutation.js";
 import type * as drink_query from "../drink/query.js";
+import type * as drink_seed from "../drink/seed.js";
+import type * as drink_seedData from "../drink/seedData.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_authenticated from "../lib/authenticated.js";
@@ -36,6 +38,8 @@ declare const fullApi: ApiFromModules<{
   drink: typeof drink;
   "drink/mutation": typeof drink_mutation;
   "drink/query": typeof drink_query;
+  "drink/seed": typeof drink_seed;
+  "drink/seedData": typeof drink_seedData;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/authenticated": typeof lib_authenticated;

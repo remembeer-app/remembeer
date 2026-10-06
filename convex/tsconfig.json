@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "allowJs": false,
+    "resolveJsonModule": true,
 
     "strict": true,
     "exactOptionalPropertyTypes": true,

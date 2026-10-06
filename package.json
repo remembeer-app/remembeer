@@ -11,7 +11,9 @@
     "convex:typecheck": "tsc -p convex/tsconfig.json",
     "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api --flutter-widgets",
     "test": "node --test test/firestore-rules.test.js",
-    "seed": "node scripts/seed_drinks.mjs"
+    "test:seed:drinks": "node --test test/drink/seed_data/convex_seed_test.mjs",
+    "seed": "node scripts/seed_drinks.mjs",
+    "seed:drinks": "convex run drink:seedGlobal"
   },
   "dependencies": {
     "@convex-dev/better-auth": "0.12.3",

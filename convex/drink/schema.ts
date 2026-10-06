@@ -13,6 +13,7 @@ const drinkCategoryValidator = v.union(
 
 export const drinkTable = defineTable({
   ownerId: v.nullable(v.id("user")),
+  seedKey: v.optional(v.string()),
   name: v.string(),
   drinkCategory: drinkCategoryValidator,
   alcoholPercentage: v.number(),
