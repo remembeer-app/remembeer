@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/controller/drink_controller.dart';
+import 'package:remembeer/convex_api/modules/drink.dart';
+import 'package:remembeer/convex_api/schema.dart';
+import 'package:remembeer/convex_api/widgets/drink.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
+import 'package:remembeer/drink/extension/convex_drink_extension.dart';
 import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 
 class DrinkPickerSheet extends StatefulWidget {
-  final DrinkSnapshot selectedDrink;
+  final DrinkSnapshot? selectedDrink;
+  final DrinkId? selectedDrinkId;
 
-  const DrinkPickerSheet({super.key, required this.selectedDrink});
+  const DrinkPickerSheet({
+    super.key,
+    required this.selectedDrink,
+    this.selectedDrinkId,
+  });
 
   @override
   State<DrinkPickerSheet> createState() => _DrinkPickerSheetState();
 }
 
 class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
-  final _drinkController = get<DrinkController>();
-
   final _searchController = TextEditingController();
   var _searchQuery = '';
   Set<DrinkCategory> _selectedCategories = {};
@@ -29,7 +34,9 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
     super.dispose();
   }
 
-  Iterable<DrinkSnapshot> _filterDrinks(Set<DrinkSnapshot> drinks) {
+  Iterable<ListAvailableResultItem> _filterDrinks(
+    List<ListAvailableResultItem> drinks,
+  ) {
     return drinks.where((drink) {
       if (_searchQuery.isNotEmpty) {
         final matchesSearch = drink.name.toLowerCase().contains(
@@ -41,7 +48,7 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
       }
 
       if (_selectedCategories.isNotEmpty) {
-        if (!_selectedCategories.contains(drink.category)) {
+        if (!_selectedCategories.contains(drink.drinkCategory.legacyCategory)) {
           return false;
         }
       }
@@ -55,11 +62,10 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-      ),
+    return Material(
+      color: colorScheme.surface,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+      clipBehavior: Clip.antiAlias,
       child: DraggableScrollableSheet(
         initialChildSize: 0.75,
         minChildSize: 0.5,
@@ -236,30 +242,19 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
   }
 
   Widget _buildDrinkList(ScrollController scrollController) {
-    return AsyncBuilder(
-      stream: _drinkController.allAvailableDrinksStream.map(
-        (drinks) => drinks
-            .map(
-              (drink) => DrinkSnapshot(
-                name: drink.name,
-                category: drink.category,
-                alcoholPercentage: drink.alcoholPercentage,
-              ),
-            )
-            .toSet(),
-      ),
+    return DrinkListAvailableQuery(
       builder: (context, drinks) {
-        drinks.add(widget.selectedDrink);
-
         final filteredDrinks = _filterDrinks(drinks);
 
         if (filteredDrinks.isEmpty) {
           return _buildEmptyState();
         }
 
-        final groupedDrinks = <DrinkCategory, List<DrinkSnapshot>>{};
+        final groupedDrinks = <DrinkCategory, List<ListAvailableResultItem>>{};
         for (final drink in filteredDrinks) {
-          groupedDrinks.putIfAbsent(drink.category, () => []).add(drink);
+          groupedDrinks
+              .putIfAbsent(drink.drinkCategory.legacyCategory, () => [])
+              .add(drink);
         }
 
         final sortedCategories = DrinkCategory.values
@@ -283,7 +278,7 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
 
   Widget _buildCategorySection(
     DrinkCategory category,
-    List<DrinkSnapshot> drinks,
+    List<ListAvailableResultItem> drinks,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -318,20 +313,24 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
     );
   }
 
-  Widget _buildDrinkTile(DrinkSnapshot drink) {
-    final isSelected = widget.selectedDrink == drink;
+  Widget _buildDrinkTile(ListAvailableResultItem drink) {
+    final isSelected = widget.selectedDrinkId != null
+        ? widget.selectedDrinkId == drink.id
+        : widget.selectedDrink == drink.snapshot;
+    final category = drink.drinkCategory.legacyCategory;
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return ListTile(
+      key: ValueKey(drink.id),
       leading: Container(
         width: 44,
         height: 44,
         decoration: BoxDecoration(
-          color: drink.category.defaultColor.withValues(alpha: 0.1),
+          color: category.defaultColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Center(child: DrinkIcon(category: drink.category, size: 26)),
+        child: Center(child: DrinkIcon(category: category, size: 26)),
       ),
       title: Text(
         drink.name,

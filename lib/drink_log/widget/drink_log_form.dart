@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
+import 'package:remembeer/drink/extension/convex_drink_extension.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink/widget/drink_picker.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
@@ -185,7 +186,8 @@ class _DrinkLogFormState extends State<DrinkLogForm> {
   Widget _buildDrinkDropdown() {
     return DrinkPicker(
       selectedDrink: _selectedDrink,
-      onChanged: (newValue) {
+      onChanged: (drink) {
+        final newValue = drink.snapshot;
         setState(() {
           if (newValue.category != _selectedDrink.category) {
             _volumeController.text = newValue.category.defaultVolume.toString();

@@ -1,8 +1,10 @@
-import 'package:dartvex_flutter/dartvex_flutter.dart' show MutationMode;
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/convex_api/widgets/drink.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
-import 'package:remembeer/user_settings/widget/drink_picker.dart';
+import 'package:remembeer/drink/extension/convex_drink_extension.dart';
+import 'package:remembeer/drink/widget/drink_picker.dart';
 import 'package:remembeer/user_settings/widget/settings_page.dart';
 
 class DefaultDrinkPage extends StatelessWidget {
@@ -17,17 +19,34 @@ class DefaultDrinkPage extends StatelessWidget {
       child: UserCurrentQuery(
         builder: (context, user) => DrinkListAvailableQuery(
           builder: (context, drinks) => UserUpdateDefaultDrinkMutation(
-            mode: MutationMode.latest,
-            builder: (context, mutate, snapshot) => DrinkPicker(
-              key: ValueKey(user.id),
-              value: user.defaultDrink,
-              drinks: drinks,
-              error: snapshot.error,
-              onChanged: (drinkId) {
-                if (!snapshot.isLoading && drinkId == user.defaultDrink) return;
-                mutate(defaultDrink: drinkId).ignore();
-              },
-            ),
+            builder: (context, mutate, snapshot) {
+              final selectedDrink = drinks
+                  .where((drink) => drink.id == user.defaultDrink)
+                  .firstOrNull;
+              return SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (drinks.isEmpty)
+                      const Center(child: Text('No drinks available'))
+                    else
+                      DrinkPicker(
+                        selectedDrink: selectedDrink?.snapshot,
+                        selectedDrinkId: selectedDrink?.id,
+                        enabled: !snapshot.isLoading,
+                        onChanged: (drink) {
+                          if (drink.id == user.defaultDrink) return;
+                          mutate(defaultDrink: drink.id).ignore();
+                        },
+                      ),
+                    if (snapshot.error case final error?) ...[
+                      const Gap(16),
+                      ErrorMessageBox(message: error.toString()),
+                    ],
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
