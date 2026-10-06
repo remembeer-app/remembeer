@@ -9,6 +9,12 @@ class StorageId extends ConvexTableId {
   static const String tableName = '_storage';
 }
 
+class BadgeId extends ConvexTableId {
+  const BadgeId(super.value);
+
+  static const String tableName = 'badge';
+}
+
 class DrinkId extends ConvexTableId {
   const DrinkId(super.value);
 

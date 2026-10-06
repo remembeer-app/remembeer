@@ -58,3 +58,64 @@ class BadgeSetVisibilityMutation extends StatelessWidget {
         builder(context, BadgeSetVisibilityMutationExecutor(mutate), snapshot),
   );
 }
+
+/// Flutter widget for badge:listCurrent.
+class BadgeListCurrentQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const BadgeListCurrentQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const BadgeListCurrentQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, List<ListCurrentResultItem>)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(
+    BuildContext,
+    ConvexQuerySnapshot<List<ListCurrentResultItem>>,
+  )?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<NoArgs, List<ListCurrentResultItem>>.snapshot(
+        query: listCurrentQueryReference,
+        args: const NoArgs(),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<NoArgs, List<ListCurrentResultItem>>(
+      query: listCurrentQueryReference,
+      args: const NoArgs(),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}

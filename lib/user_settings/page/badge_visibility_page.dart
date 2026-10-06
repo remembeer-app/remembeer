@@ -1,117 +1,117 @@
+import 'package:dartvex/dartvex.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
-import 'package:remembeer/badge/model/unlocked_badge.dart';
-import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/badge/widget/badge_icon.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
+import 'package:remembeer/convex_api/modules/badge.dart';
+import 'package:remembeer/convex_api/widgets/badge.dart';
 import 'package:remembeer/user/constants.dart';
-import 'package:remembeer/user/service/user_service.dart';
-import 'package:remembeer/user_settings/widget/settings_page_template.dart';
+import 'package:remembeer/user_settings/widget/settings_page.dart';
 
-class BadgeVisibilityPage extends StatefulWidget {
+class BadgeVisibilityPage extends StatelessWidget {
   const BadgeVisibilityPage({super.key});
 
   @override
-  State<BadgeVisibilityPage> createState() => _BadgeVisibilityPageState();
-}
-
-class _BadgeVisibilityPageState extends State<BadgeVisibilityPage> {
-  final _userService = get<UserService>();
-  Set<String>? _localVisibleIds;
-
-  @override
   Widget build(BuildContext context) {
-    return SettingsPageTemplate(
-      title: const Text('Badges Visibility'),
+    return SettingsPage(
+      title: 'Badges Visibility',
+      autmaticallyImplyLeading: true,
       hint:
           'Select which badges you want to display on your profile. '
           'You can show up to $maxBadgesShown badges at a time.',
-      child: AsyncBuilder(
-        stream: _userService.currentUserStream,
-        builder: (context, user) {
-          final unlockedBadges = user.allBadges;
-
-          if (unlockedBadges.isEmpty) {
-            return _buildNoBadgesYet();
-          }
-
-          _localVisibleIds = user.shownBadges.map((b) => b.badgeId).toSet();
-          final currentVisibleCount = _localVisibleIds!.length;
-
-          return ListView.builder(
-            itemCount: unlockedBadges.length,
-            itemBuilder: (context, index) {
-              final unlockedBadge = unlockedBadges[index];
-              final badgeDef = getBadgeById(unlockedBadge.badgeId);
-
-              final isShown = _localVisibleIds!.contains(unlockedBadge.badgeId);
-
-              final canToggle = _isToggleAllowed(
-                isCurrentlyShown: isShown,
-                totalShownCount: currentVisibleCount,
-              );
-
-              return _buildBadgeCard(
-                isShown,
-                canToggle,
-                unlockedBadge,
-                badgeDef,
-              );
-            },
+      child: BadgeListCurrentQuery(
+        builder: (context, badges) {
+          if (badges.isEmpty) return _buildNoBadgesYet(context);
+          final shownCount = badges.where((badge) => badge.isShown).length;
+          return BadgeSetVisibilityMutation(
+            optimisticUpdate: _optimisticUpdateVisibility,
+            builder: (context, mutate, snapshot) => Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: badges.length,
+                    itemBuilder: (context, index) {
+                      final badge = badges[index];
+                      final definition = getBadgeByIdOrNull(badge.badgeKey);
+                      final canToggle =
+                          !snapshot.isLoading &&
+                          (badge.isShown
+                              ? shownCount > 1
+                              : shownCount < maxBadgesShown);
+                      return Card(
+                        key: ValueKey(badge.id),
+                        child: CheckboxListTile(
+                          value: badge.isShown,
+                          onChanged: canToggle
+                              ? (value) {
+                                  if (value == null || value == badge.isShown) {
+                                    return;
+                                  }
+                                  mutate(
+                                    badgeKey: badge.badgeKey,
+                                    isShown: value,
+                                  ).ignore();
+                                }
+                              : null,
+                          title: Text(definition?.name ?? badge.badgeKey),
+                          subtitle: definition == null
+                              ? null
+                              : Text(definition.description),
+                          secondary: definition == null
+                              ? const Icon(
+                                  Icons.emoji_events_outlined,
+                                  size: 48,
+                                )
+                              : BadgeIcon(
+                                  badgeDefinition: definition,
+                                  size: 48,
+                                  padding: 8,
+                                ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                if (snapshot.error case final error?) ...[
+                  const Gap(16),
+                  ErrorMessageBox(message: error.toString()),
+                ],
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  bool _isToggleAllowed({
-    required bool isCurrentlyShown,
-    required int totalShownCount,
-  }) {
-    if (isCurrentlyShown) {
-      return totalShownCount > 1;
-    } else {
-      return totalShownCount < maxBadgesShown;
-    }
-  }
-
-  Future<void> _onBadgeVisibilityChanged(String badgeId, bool isShown) async {
-    setState(() {
-      if (isShown) {
-        _localVisibleIds?.add(badgeId);
-      } else {
-        _localVisibleIds?.remove(badgeId);
-      }
-    });
-
-    await _userService.updateBadgeVisibility(badgeId, isShown);
-  }
-
-  Widget _buildBadgeCard(
-    bool isShown,
-    bool canToggle,
-    UnlockedBadge unlockedBadge,
-    BadgeDefinition badgeDef,
+  void _optimisticUpdateVisibility(
+    TypedOptimisticLocalStore store,
+    SetVisibilityArgs args,
+    OptimisticMutationContext _,
   ) {
-    return Card(
-      child: CheckboxListTile(
-        value: isShown,
-        onChanged: canToggle
-            ? (value) => _onBadgeVisibilityChanged(
-                unlockedBadge.badgeId,
-                value ?? false,
-              )
-            : null,
-        title: Text(badgeDef.name),
-        subtitle: Text(badgeDef.description),
-        secondary: BadgeIcon(badgeDefinition: badgeDef, size: 48, padding: 8),
-      ),
+    store.updateQuery(
+      listCurrentQueryReference,
+      const NoArgs(),
+      (badges) => [
+        for (final badge in badges)
+          (
+            creationTime: badge.creationTime,
+            id: badge.id,
+            userId: badge.userId,
+            badgeKey: badge.badgeKey,
+            unlockedAt: badge.unlockedAt,
+            isShown: badge.badgeKey == args.badgeKey
+                ? args.isShown
+                : badge.isShown,
+          ),
+      ],
     );
   }
 
-  Widget _buildNoBadgesYet() {
+  Widget _buildNoBadgesYet(BuildContext context) {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -119,12 +119,14 @@ class _BadgeVisibilityPageState extends State<BadgeVisibilityPage> {
           Icon(
             Icons.emoji_events_outlined,
             size: 64,
-            color: Colors.grey.shade400,
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           const Gap(16),
           Text(
             'No badges unlocked yet',
-            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),

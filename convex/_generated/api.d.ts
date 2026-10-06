@@ -10,6 +10,7 @@
 
 import type * as badge from "../badge.js";
 import type * as badge_mutation from "../badge/mutation.js";
+import type * as badge_query from "../badge/query.js";
 import type * as drink from "../drink.js";
 import type * as drink_mutation from "../drink/mutation.js";
 import type * as drink_query from "../drink/query.js";
@@ -31,6 +32,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   badge: typeof badge;
   "badge/mutation": typeof badge_mutation;
+  "badge/query": typeof badge_query;
   drink: typeof drink;
   "drink/mutation": typeof drink_mutation;
   "drink/query": typeof drink_query;
