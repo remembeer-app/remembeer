@@ -14,11 +14,11 @@ class DrinkLogListSortPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SettingsPage(
-      title: 'Drink List Order',
+      title: 'Drink Log Order',
       autmaticallyImplyLeading: true,
       hint:
-          'Choose how drinks and sessions are sorted in the list. '
-          '"Newest first" shows your most recent drinks and sessions at the top, '
+          'Choose how drink logs and sessions are sorted in the list. '
+          '"Newest first" shows your most recent drink logs and sessions at the top, '
           'while "Oldest first" shows them at the bottom.',
       child: UserCurrentQuery(
         builder: (context, user) => UserUpdateDrinkLogSortOrderMutation(

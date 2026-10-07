@@ -169,7 +169,7 @@ class UserSettingsPage extends StatelessWidget {
         ),
         _divider,
         _buildSettingsCard(
-          title: 'Drink list order',
+          title: 'Drink log order',
           onTap: () => const DrinkLogSortSettingsRoute().push<void>(context),
         ),
       ],
