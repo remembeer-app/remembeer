@@ -4,11 +4,9 @@ import 'package:gap/gap.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/controller/party_event_controller.dart';
-import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/service/party_activity_service.dart';
 import 'package:remembeer/party/widget/party_activity_filters.dart';
 import 'package:remembeer/party/widget/party_event_card.dart';
-import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
 
 class PartyActivityTab extends StatefulWidget {
@@ -168,48 +166,8 @@ class _PartyActivityTabState extends State<PartyActivityTab> {
           );
         }
         final group = groups[index];
-        final editableDrinkLog = _editableDrinkLog(group);
-        return PartyEventCard(
-          group: group,
-          membersById: membersById,
-          onEdit: editableDrinkLog == null
-              ? null
-              : () => _editDrinkLog(context, editableDrinkLog.id),
-        );
+        return PartyEventCard(group: group, membersById: membersById);
       },
     );
-  }
-
-  DrinkLog? _editableDrinkLog(PartyEventGroup group) {
-    final event = group.events.first;
-    if (!widget.isPartyActive ||
-        group.isReversed ||
-        event.kind != PartyEventKind.drinkLog ||
-        event.sourceCollection != PartyEventSourceCollection.drinkLogs ||
-        event.recipientUserId != widget.currentUserId) {
-      return null;
-    }
-    final revision = event.payload['revision'];
-    if (revision is! int) {
-      return null;
-    }
-    for (final drinkLog in widget.drinkLogs) {
-      if (drinkLog.id == event.sourceId &&
-          drinkLog.consumedByUserId == widget.currentUserId &&
-          drinkLog.partyRevision == revision) {
-        return drinkLog;
-      }
-    }
-    return null;
-  }
-
-  Future<void> _editDrinkLog(BuildContext context, String drinkLogId) async {
-    final updated = await UpdateDrinkLogRoute(
-      sessionId: widget.sessionId,
-      drinkLogId: drinkLogId,
-    ).push<bool>(context);
-    if (updated ?? false) {
-      await _service.loadInitial();
-    }
   }
 }

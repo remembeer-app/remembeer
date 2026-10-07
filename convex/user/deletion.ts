@@ -7,6 +7,14 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     .unique();
   if (!user) return;
 
+  const logs = await ctx.db
+    .query("drinkLog")
+    .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) => q.eq("userId", user._id))
+    .collect();
+  for (const log of logs) {
+    await ctx.db.delete("drinkLog", log._id);
+  }
+
   const drinks = await ctx.db
     .query("drink")
     .withIndex("by_ownerId_and_deletedAt", (q) => q.eq("ownerId", user._id))

@@ -28,7 +28,10 @@ export const update = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, ...input }) => {
     const drinkLog = await getDrinkLogHandler(ctx, { id });
-    await checkReferences(ctx, input);
+    await checkReferences(ctx, {
+      sessionId: input.sessionId,
+      drinkId: input.drinkId === drinkLog.drinkId ? undefined : input.drinkId,
+    });
     await ctx.db.patch("drinkLog", id, {
       sessionId:
         input.sessionId === undefined ? drinkLog.sessionId : input.sessionId,

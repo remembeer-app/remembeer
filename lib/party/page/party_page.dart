@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/model/party_state.dart';
 import 'package:remembeer/party/model/party_tab.dart';
@@ -31,7 +30,6 @@ class PartyPage extends StatefulWidget {
 
 class _PartyPageState extends State<PartyPage>
     with SingleTickerProviderStateMixin {
-  final _drinkLogService = get<DrinkLogService>();
   final _partyService = get<PartyService>();
   final _sessionService = get<SessionService>();
   late final TabController _tabController;
@@ -132,20 +130,6 @@ class _PartyPageState extends State<PartyPage>
       appBarBackgroundColor: headerBackgroundColor,
       appBarForegroundColor: headerForegroundColor,
       padding: EdgeInsets.zero,
-      floatingActionButton: state.isActive && session.hasFreeSpace
-          ? GestureDetector(
-              onLongPress: () => _drinkLogService.addDefaultDrinkLog(
-                targetSessionId: session.id,
-              ),
-              child: FloatingActionButton(
-                heroTag: 'party_add_drink_fab',
-                onPressed: () => AddDrinkLogRoute(
-                  targetSessionId: session.id,
-                ).push<void>(context),
-                child: const Icon(Icons.add),
-              ),
-            )
-          : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

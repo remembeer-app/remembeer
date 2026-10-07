@@ -110,25 +110,23 @@ class IoCContainer {
 
   static void _registerServices() {
     get
-      ..registerSingleton(DateService(userController: get<UserController>()))
+      ..registerSingleton(
+        DateService(
+          api: get<ConvexApi>(),
+          authService: get<ConvexAuthService>(),
+        ),
+        dispose: (service) => service.dispose(),
+      )
+      ..registerSingleton(
+        DrinkLogService(
+          api: get<ConvexApi>(),
+          locationService: get<LocationService>(),
+        ),
+      )
       ..registerSingleton(
         AppIconService(
           authService: get<AuthService>(),
           userController: get<UserController>(),
-        ),
-      )
-      ..registerSingleton(
-        DrinkLogService(
-          authService: get<AuthService>(),
-          userController: get<UserController>(),
-          userSettingsController: get<UserSettingsController>(),
-          sessionController: get<SessionController>(),
-          dateService: get<DateService>(),
-          locationService: get<LocationService>(),
-          userStatsService: get<UserStatsService>(),
-          badgeService: get<BadgeService>(),
-          drinkController: get<DrinkController>(),
-          partyController: get<PartyController>(),
         ),
       )
       ..registerSingleton(
@@ -159,7 +157,6 @@ class IoCContainer {
           authService: get<AuthService>(),
           sessionController: get<SessionController>(),
           userSettingsController: get<UserSettingsController>(),
-          dateService: get<DateService>(),
           userService: get<UserService>(),
           notificationService: get<NotificationService>(),
           partyController: get<PartyController>(),

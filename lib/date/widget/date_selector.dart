@@ -131,7 +131,7 @@ class DateSelector extends StatelessWidget {
       initialDate: dateState.selectedDate,
       firstDate: DateTime(2020),
       lastDate: dateState.effectiveToday,
-      currentDate: dateState.selectedDate,
+      currentDate: dateState.effectiveToday,
     );
 
     if (pickedDate != null) {

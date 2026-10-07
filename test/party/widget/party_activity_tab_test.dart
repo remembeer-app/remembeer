@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
 import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
@@ -55,87 +54,60 @@ void main() {
     expect(fetches, 2);
   });
 
-  testWidgets(
-    'only current own drink revision edits and refreshes on success',
-    (tester) async {
-      var fetches = 0;
-      final events = [
-        _event('current', sourceId: 'current', revision: 2),
-        _event('historic', sourceId: 'current', revision: 1),
-        _event('other', sourceId: 'other', revision: 1, recipientId: 'other'),
-        _event('deleted', sourceId: 'deleted', revision: 1),
-        _event('reversed', sourceId: 'reversed', revision: 1),
-        _event(
-          'reversal',
-          sourceId: 'reversed',
-          revision: 1,
-          kind: PartyEventKind.reversal,
-          reversesEventId: 'reversed',
+  testWidgets('legacy Party activity does not expose drink editing', (
+    tester,
+  ) async {
+    var fetches = 0;
+    final events = [
+      _event('current', sourceId: 'current', revision: 2),
+      _event('historic', sourceId: 'current', revision: 1),
+      _event('other', sourceId: 'other', revision: 1, recipientId: 'other'),
+      _event('deleted', sourceId: 'deleted', revision: 1),
+      _event('reversed', sourceId: 'reversed', revision: 1),
+      _event(
+        'reversal',
+        sourceId: 'reversed',
+        revision: 1,
+        kind: PartyEventKind.reversal,
+        reversesEventId: 'reversed',
+      ),
+    ];
+    final service = PartyActivityService(
+      sessionId: 'party-1',
+      fetchPage:
+          ({
+            required sessionId,
+            required kinds,
+            required participantIds,
+            startAfter,
+          }) async {
+            fetches += 1;
+            return PartyEventPage(events: events, hasMore: false);
+          },
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: PartyActivityTab(
+            sessionId: 'party-1',
+            members: const [_user, _otherUser],
+            drinkLogs: [
+              _drinkLog('current', revision: 2),
+              _drinkLog('other', ownerId: 'other'),
+              _drinkLog('reversed'),
+            ],
+            currentUserId: 'user-1',
+            isPartyActive: true,
+            service: service,
+          ),
         ),
-      ];
-      final service = PartyActivityService(
-        sessionId: 'party-1',
-        fetchPage:
-            ({
-              required sessionId,
-              required kinds,
-              required participantIds,
-              startAfter,
-            }) async {
-              fetches += 1;
-              return PartyEventPage(events: events, hasMore: false);
-            },
-      );
-
-      final router = GoRouter(
-        routes: [
-          GoRoute(
-            path: '/',
-            builder: (context, state) => Scaffold(
-              body: PartyActivityTab(
-                sessionId: 'party-1',
-                members: const [_user, _otherUser],
-                drinkLogs: [
-                  _drinkLog('current', revision: 2),
-                  _drinkLog('other', ownerId: 'other'),
-                  _drinkLog('reversed'),
-                ],
-                currentUserId: 'user-1',
-                isPartyActive: true,
-                service: service,
-              ),
-            ),
-          ),
-          GoRoute(
-            path: '/drink-logs/sessions/:sessionId/drink-logs/:drinkLogId/edit',
-            builder: (context, state) => Scaffold(
-              body: FilledButton(
-                onPressed: () => context.pop(true),
-                child: Text(
-                  'Save ${state.pathParameters['sessionId']}/'
-                  '${state.pathParameters['drinkLogId']}',
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-      addTearDown(router.dispose);
-
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Edit'), findsOneWidget);
-      await tester.tap(find.text('Edit'));
-      await tester.pumpAndSettle();
-      expect(find.text('Save party-1/current'), findsOneWidget);
-
-      await tester.tap(find.text('Save party-1/current'));
-      await tester.pumpAndSettle();
-
-      expect(fetches, 2);
-    },
-  );
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Edit'), findsNothing);
+    expect(fetches, 1);
+  });
 
   testWidgets('archived Party activity does not expose drink editing', (
     tester,

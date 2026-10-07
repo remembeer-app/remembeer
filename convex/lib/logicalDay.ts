@@ -26,3 +26,12 @@ export function logicalDayBoundaries(
     end: day.add({ days: 1 }).toZonedDateTime(options).epochMilliseconds,
   };
 }
+
+export function logicalDayAt(at: number, endOfDayBoundary: number, timeZone: string) {
+  const local = Temporal.Instant.fromEpochMilliseconds(at).toZonedDateTimeISO(timeZone);
+  const date = at < logicalDayBoundaries(local.toPlainDate().toString(), endOfDayBoundary, timeZone).start
+    ? local.toPlainDate().subtract({ days: 1 })
+    : local.toPlainDate();
+  const today = date.toString();
+  return { today, nextBoundary: logicalDayBoundaries(today, endOfDayBoundary, timeZone).end };
+}

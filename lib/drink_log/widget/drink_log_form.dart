@@ -254,7 +254,7 @@ class _DrinkLogFormState extends State<DrinkLogForm> {
   Widget _buildConsumedAtInput(LoadingFormState form) {
     return form.buildDateTimeField(
       controller: _consumedAtController,
-      label: 'Consumed at',
+      label: 'Consumed at (device time)',
       selectedDateTime: _selectedConsumedAt,
       onChanged: (newDateTime) =>
           setState(() => _selectedConsumedAt = newDateTime),

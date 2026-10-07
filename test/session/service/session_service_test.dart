@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
@@ -53,7 +52,6 @@ void main() {
 SessionService _service(PartyController partyController) => SessionService(
   authService: _FakeAuthService(),
   sessionController: _FakeSessionController(),
-  dateService: _FakeDateService(),
   userSettingsController: _FakeUserSettingsController(),
   userService: _FakeUserService(),
   notificationService: _FakeNotificationService(),
@@ -127,11 +125,6 @@ class _FakePartyController implements PartyController {
 }
 
 class _FakeSessionController implements SessionController {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _FakeDateService implements DateService {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

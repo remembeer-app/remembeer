@@ -14,6 +14,8 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/common/widget/nav_bar.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/modules/drinkLog.dart' as convex_log;
 import 'package:remembeer/drink/page/add_drink_page.dart';
 import 'package:remembeer/drink/page/custom_drinks_page.dart';
 import 'package:remembeer/drink/page/update_drink_page.dart';
@@ -141,6 +143,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
           path: '/drink-logs',
           routes: [
             TypedGoRoute<AddDrinkLogRoute>(path: 'new'),
+            TypedGoRoute<UpdateDrinkLogRoute>(path: ':drinkLogId/edit'),
             TypedGoRoute<PartyRoute>(
               path: 'parties/:sessionId',
               routes: [
@@ -169,9 +172,6 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             ),
             TypedGoRoute<AddSessionFriendsRoute>(
               path: 'sessions/:sessionId/friends/add',
-            ),
-            TypedGoRoute<UpdateDrinkLogRoute>(
-              path: 'sessions/:sessionId/drink-logs/:drinkLogId/edit',
             ),
           ],
         ),
@@ -410,6 +410,18 @@ class AddDrinkLogRoute extends GoRouteData with $AddDrinkLogRoute {
   }
 }
 
+class UpdateDrinkLogRoute extends GoRouteData with $UpdateDrinkLogRoute {
+  const UpdateDrinkLogRoute({required this.drinkLogId, this.$extra});
+
+  final String drinkLogId;
+  final convex_log.ListForDayResultItem? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return UpdateDrinkLogPage(log: $extra);
+  }
+}
+
 class PartyRoute extends GoRouteData with $PartyRoute {
   final String sessionId;
   final PartyTab tab;
@@ -530,7 +542,7 @@ class SessionSummaryRoute extends GoRouteData with $SessionSummaryRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return SummaryPage();
+    return const SummaryPage();
   }
 }
 
@@ -574,21 +586,6 @@ class AddSessionFriendsRoute extends GoRouteData with $AddSessionFriendsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return AddFriendsToSessionPage(sessionId: sessionId);
-  }
-}
-
-class UpdateDrinkLogRoute extends GoRouteData with $UpdateDrinkLogRoute {
-  final String sessionId;
-  final String drinkLogId;
-
-  const UpdateDrinkLogRoute({
-    required this.sessionId,
-    required this.drinkLogId,
-  });
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return UpdateDrinkLogPage(sessionId: sessionId, drinkLogId: drinkLogId);
   }
 }
 

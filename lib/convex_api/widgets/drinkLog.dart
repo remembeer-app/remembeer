@@ -250,6 +250,68 @@ class DrinkLogUpdateMutation extends StatelessWidget {
   );
 }
 
+/// Flutter widget for drinkLog:dayContext.
+class DrinkLogDayContextQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const DrinkLogDayContextQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+    required this.at,
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const DrinkLogDayContextQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    required this.at,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, DayContextResult)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(BuildContext, ConvexQuerySnapshot<DayContextResult>)?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final double at;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<DayContextArgs, DayContextResult>.snapshot(
+        query: dayContextQueryReference,
+        args: (at: at),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<DayContextArgs, DayContextResult>(
+      query: dayContextQueryReference,
+      args: (at: at),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}
+
 /// Flutter widget for drinkLog:listForDay.
 class DrinkLogListForDayQuery extends StatelessWidget {
   /// Creates a typed query widget with default loading and error UI.
