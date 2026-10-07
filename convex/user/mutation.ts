@@ -1,5 +1,7 @@
+import { APIError } from "better-auth/api";
 import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
+import { authComponent, createAuth } from "../lib/auth";
 import { authMutation } from "../lib/authenticated";
 import { convex } from "../lib/builder";
 import { getCurrentUserSafe } from "./currentUser";
@@ -130,5 +132,24 @@ export const updateDrinkLogSortOrder = authMutation
   .returns(v.null())
   .handler(async (ctx, { drinkLogSortOrder }) => {
     await ctx.db.patch("user", ctx.user._id, { drinkLogSortOrder });
+    return null;
+  });
+
+export const deleteCurrent = authMutation
+  .input({ password: v.string() })
+  .returns(v.null())
+  .handler(async (ctx, { password }) => {
+    if (!password) throw new ConvexError("Please enter your password.");
+    const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
+    try {
+      await auth.api.deleteUser({ body: { password }, headers });
+    } catch (error) {
+      if (error instanceof APIError) {
+        throw new ConvexError(
+          error.body?.message ?? "Could not delete account.",
+        );
+      }
+      throw error;
+    }
     return null;
   });

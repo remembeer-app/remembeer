@@ -49,6 +49,17 @@ class ConvexAuthService extends ChangeNotifier {
 
   Future<void> signOut() => _client.logout();
 
+  Future<void> deleteAccount({required String password}) async {
+    await _api.user.deleteCurrent(password: password);
+    try {
+      await signOut();
+    } on Exception catch (error) {
+      // Dartvex clears local authentication even if remote sign-out fails.
+      // The account has already been deleted, so report deletion as successful.
+      debugPrint('Sign-out after account deletion failed: $error');
+    }
+  }
+
   Future<void> updatePassword({
     required String currentPassword,
     required String newPassword,

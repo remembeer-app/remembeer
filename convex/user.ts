@@ -10,3 +10,5 @@ export const updateAvatar = mutation.updateAvatar.public();
 export const updateEndOfDayBoundary = mutation.updateEndOfDayBoundary.public();
 export const updateDefaultDrink = mutation.updateDefaultDrink.public();
 export const updateDrinkLogSortOrder = mutation.updateDrinkLogSortOrder.public();
+
+export const deleteCurrent = mutation.deleteCurrent.public();

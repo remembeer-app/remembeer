@@ -10,6 +10,69 @@ import 'dart:async';
 import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/widgets.dart';
 
+/// Callable typed mutation for user:deleteCurrent.
+class UserDeleteCurrentMutationExecutor {
+  /// Creates an executor backed by the mutation widget.
+  const UserDeleteCurrentMutationExecutor(this._mutate);
+
+  final Future<void> Function(DeleteCurrentArgs) _mutate;
+
+  /// Runs the mutation.
+  Future<void> call({required String password}) =>
+      _mutate((password: password));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({required String password, void Function(void result)? onSuccess}) {
+    unawaited(
+      _mutate((password: password)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
+}
+
+/// Flutter widget for user:deleteCurrent.
+class UserDeleteCurrentMutation extends StatelessWidget {
+  /// Creates a typed mutation widget.
+  const UserDeleteCurrentMutation({
+    super.key,
+    required this.builder,
+    this.client,
+    this.optimisticUpdate,
+    this.mode = MutationMode.single,
+  });
+
+  /// Builds the UI with the callable mutation and current request state.
+  final Widget Function(
+    BuildContext,
+    UserDeleteCurrentMutationExecutor,
+    ConvexRequestSnapshot<void>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  /// Optional optimistic update for the mutation.
+  final TypedOptimisticUpdate<DeleteCurrentArgs>? optimisticUpdate;
+
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
+  @override
+  Widget build(BuildContext context) => ConvexMutation<DeleteCurrentArgs, void>(
+    mutation: deleteCurrentMutationReference,
+    client: client,
+    typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
+    builder: (context, mutate, snapshot) =>
+        builder(context, UserDeleteCurrentMutationExecutor(mutate), snapshot),
+  );
+}
+
 /// Callable typed mutation for user:ensureCurrent.
 class UserEnsureCurrentMutationExecutor {
   /// Creates an executor backed by the mutation widget.

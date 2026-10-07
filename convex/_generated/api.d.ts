@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as auth from "../auth.js";
 import type * as badge from "../badge.js";
 import type * as badge_mutation from "../badge/mutation.js";
 import type * as badge_query from "../badge/query.js";
@@ -22,6 +23,7 @@ import type * as lib_authenticated from "../lib/authenticated.js";
 import type * as lib_builder from "../lib/builder.js";
 import type * as user from "../user.js";
 import type * as user_currentUser from "../user/currentUser.js";
+import type * as user_deletion from "../user/deletion.js";
 import type * as user_mutation from "../user/mutation.js";
 import type * as user_query from "../user/query.js";
 
@@ -32,6 +34,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   badge: typeof badge;
   "badge/mutation": typeof badge_mutation;
   "badge/query": typeof badge_query;
@@ -46,6 +49,7 @@ declare const fullApi: ApiFromModules<{
   "lib/builder": typeof lib_builder;
   user: typeof user;
   "user/currentUser": typeof user_currentUser;
+  "user/deletion": typeof user_deletion;
   "user/mutation": typeof user_mutation;
   "user/query": typeof user_query;
 }>;

@@ -43,6 +43,17 @@ class UserApi {
   ConvexQueryReference<NoArgs, CurrentResult> get currentQuery =>
       currentQueryReference;
 
+  Future<Null> deleteCurrent({required String password}) async {
+    await _client.mutate(
+      'user:deleteCurrent',
+      _encodeDeleteCurrentArgs((password: password)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<DeleteCurrentArgs, void> get deleteCurrentMutation =>
+      deleteCurrentMutationReference;
+
   Future<UserId> ensureCurrent() async {
     final raw$ = await _client.mutate(
       'user:ensureCurrent',
@@ -333,6 +344,25 @@ CurrentResult _decodeCurrentResult(dynamic raw) {
   );
 }
 
+typedef DeleteCurrentArgs = ({String password});
+
+Map<String, dynamic> _encodeDeleteCurrentArgs(DeleteCurrentArgs value$) {
+  final (password: password) = value$;
+  return <String, dynamic>{'password': password};
+}
+
+DeleteCurrentArgs _decodeDeleteCurrentArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'DeleteCurrentArgs');
+  if (!map.containsKey('password')) {
+    throw FormatException(
+      'Missing required field "password" for DeleteCurrentArgs',
+    );
+  }
+  return (
+    password: expectString(map['password'], label: 'DeleteCurrentArgsPassword'),
+  );
+}
+
 enum UpdateAccentColorArgsAccentColor {
   amberValue('amber'),
   roseValue('rose'),
@@ -556,6 +586,13 @@ final ConvexQueryReference<NoArgs, CurrentResult> currentQueryReference =
       decode: (raw) => _decodeCurrentResult(raw),
       encodeResult: (value) => _encodeCurrentResult(value),
     );
+
+final ConvexMutationReference<DeleteCurrentArgs, void>
+deleteCurrentMutationReference = ConvexMutationReference(
+  name: 'user:deleteCurrent',
+  encode: (args) => _encodeDeleteCurrentArgs(args),
+  decode: (raw) => null,
+);
 
 final ConvexMutationReference<NoArgs, UserId> ensureCurrentMutationReference =
     ConvexMutationReference(
