@@ -11,7 +11,7 @@ const location = v.object({
 
 export const drinkLogTable = defineTable({
   userId: v.id("user"),
-  sessionId: v.id("session"),
+  sessionId: v.nullable(v.id("session")),
   drinkId: v.id("drink"),
   consumedAt: v.number(),
   volumeMl: v.number(),

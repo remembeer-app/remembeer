@@ -22,7 +22,7 @@ class DrinkLogCreateMutationExecutor {
     required double consumedAt,
     required DrinkId drinkId,
     required CreateArgsLocation? location,
-    required SessionId sessionId,
+    required SessionId? sessionId,
     required double volumeMl,
   }) => _mutate((
     consumedAt: consumedAt,
@@ -40,7 +40,7 @@ class DrinkLogCreateMutationExecutor {
     required double consumedAt,
     required DrinkId drinkId,
     required CreateArgsLocation? location,
-    required SessionId sessionId,
+    required SessionId? sessionId,
     required double volumeMl,
     void Function(DrinkLogId result)? onSuccess,
   }) {
@@ -172,7 +172,7 @@ class DrinkLogUpdateMutationExecutor {
     Optional<DrinkId> drinkId = const Optional.absent(),
     required DrinkLogId id,
     Optional<UpdateArgsLocation?> location = const Optional.absent(),
-    Optional<SessionId> sessionId = const Optional.absent(),
+    Optional<SessionId?> sessionId = const Optional.absent(),
     Optional<double> volumeMl = const Optional.absent(),
   }) => _mutate((
     consumedAt: consumedAt,
@@ -192,7 +192,7 @@ class DrinkLogUpdateMutationExecutor {
     Optional<DrinkId> drinkId = const Optional.absent(),
     required DrinkLogId id,
     Optional<UpdateArgsLocation?> location = const Optional.absent(),
-    Optional<SessionId> sessionId = const Optional.absent(),
+    Optional<SessionId?> sessionId = const Optional.absent(),
     Optional<double> volumeMl = const Optional.absent(),
     void Function(void result)? onSuccess,
   }) {

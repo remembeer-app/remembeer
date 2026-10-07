@@ -15,7 +15,7 @@ class DrinkLogApi {
     required double consumedAt,
     required DrinkId drinkId,
     required CreateArgsLocation? location,
-    required SessionId sessionId,
+    required SessionId? sessionId,
     required double volumeMl,
   }) async {
     final raw$ = await _client.mutate(
@@ -98,7 +98,7 @@ class DrinkLogApi {
     Optional<DrinkId> drinkId = const Optional.absent(),
     required DrinkLogId id,
     Optional<UpdateArgsLocation?> location = const Optional.absent(),
-    Optional<SessionId> sessionId = const Optional.absent(),
+    Optional<SessionId?> sessionId = const Optional.absent(),
     Optional<double> volumeMl = const Optional.absent(),
   }) async {
     await _client.mutate(
@@ -170,7 +170,7 @@ typedef CreateArgs = ({
   double consumedAt,
   DrinkId drinkId,
   CreateArgsLocation? location,
-  SessionId sessionId,
+  SessionId? sessionId,
   double volumeMl,
 });
 
@@ -189,7 +189,10 @@ Map<String, dynamic> _encodeCreateArgs(CreateArgs value$) {
       null => null,
       final v$ => _encodeCreateArgsLocation(v$),
     },
-    'sessionId': sessionId.value,
+    'sessionId': switch (sessionId) {
+      null => null,
+      final v$ => v$.value,
+    },
     'volumeMl': volumeMl,
   };
 }
@@ -217,9 +220,11 @@ CreateArgs _decodeCreateArgs(dynamic raw) {
     location: map['location'] == null
         ? null
         : _decodeCreateArgsLocation(map['location']),
-    sessionId: SessionId(
-      expectString(map['sessionId'], label: 'CreateArgsSessionId'),
-    ),
+    sessionId: map['sessionId'] == null
+        ? null
+        : SessionId(
+            expectString(map['sessionId'], label: 'CreateArgsSessionId'),
+          ),
     volumeMl: expectDouble(map['volumeMl'], label: 'CreateArgsVolumeMl'),
   );
 }
@@ -283,7 +288,7 @@ typedef ListForDayResultItem = ({
   double? deletedAt,
   DrinkId drinkId,
   ListForDayResultItemLocation? location,
-  SessionId sessionId,
+  SessionId? sessionId,
   double updatedAt,
   UserId userId,
   double volumeMl,
@@ -312,7 +317,10 @@ Map<String, dynamic> _encodeListForDayResultItem(ListForDayResultItem value$) {
       null => null,
       final v$ => _encodeListForDayResultItemLocation(v$),
     },
-    'sessionId': sessionId.value,
+    'sessionId': switch (sessionId) {
+      null => null,
+      final v$ => v$.value,
+    },
     'updatedAt': updatedAt,
     'userId': userId.value,
     'volumeMl': volumeMl,
@@ -393,9 +401,14 @@ ListForDayResultItem _decodeListForDayResultItem(dynamic raw) {
     location: map['location'] == null
         ? null
         : _decodeListForDayResultItemLocation(map['location']),
-    sessionId: SessionId(
-      expectString(map['sessionId'], label: 'ListForDayResultItemSessionId'),
-    ),
+    sessionId: map['sessionId'] == null
+        ? null
+        : SessionId(
+            expectString(
+              map['sessionId'],
+              label: 'ListForDayResultItemSessionId',
+            ),
+          ),
     updatedAt: expectDouble(
       map['updatedAt'],
       label: 'ListForDayResultItemUpdatedAt',
@@ -492,7 +505,7 @@ typedef UpdateArgs = ({
   Optional<DrinkId> drinkId,
   DrinkLogId id,
   Optional<UpdateArgsLocation?> location,
-  Optional<SessionId> sessionId,
+  Optional<SessionId?> sessionId,
   Optional<double> volumeMl,
 });
 
@@ -514,7 +527,11 @@ Map<String, dynamic> _encodeUpdateArgs(UpdateArgs value$) {
         null => null,
         final v$ => _encodeUpdateArgsLocation(v$),
       },
-    if (sessionId.isDefined) 'sessionId': sessionId.value.value,
+    if (sessionId.isDefined)
+      'sessionId': switch (sessionId.value) {
+        null => null,
+        final v$ => v$.value,
+      },
     if (volumeMl.isDefined) 'volumeMl': volumeMl.value,
   };
 }
@@ -545,9 +562,14 @@ UpdateArgs _decodeUpdateArgs(dynamic raw) {
         : const Optional.absent(),
     sessionId: map.containsKey('sessionId')
         ? Optional.of(
-            SessionId(
-              expectString(map['sessionId'], label: 'UpdateArgsSessionId'),
-            ),
+            map['sessionId'] == null
+                ? null
+                : SessionId(
+                    expectString(
+                      map['sessionId'],
+                      label: 'UpdateArgsSessionId',
+                    ),
+                  ),
           )
         : const Optional.absent(),
     volumeMl: map.containsKey('volumeMl')

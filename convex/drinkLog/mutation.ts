@@ -30,7 +30,8 @@ export const update = authMutation
     const drinkLog = await getDrinkLogHandler(ctx, { id });
     await checkReferences(ctx, input);
     await ctx.db.patch("drinkLog", id, {
-      sessionId: input.sessionId ?? drinkLog.sessionId,
+      sessionId:
+        input.sessionId === undefined ? drinkLog.sessionId : input.sessionId,
       drinkId: input.drinkId ?? drinkLog.drinkId,
       consumedAt: input.consumedAt ?? drinkLog.consumedAt,
       volumeMl: input.volumeMl ?? drinkLog.volumeMl,
@@ -63,7 +64,9 @@ async function getDrinkLogHandler(
     throw new ConvexError("Drink log not found");
   }
   if (drinkLog.userId !== ctx.user._id) {
-    throw new ConvexError("You do not have permission to access this drink log");
+    throw new ConvexError(
+      "You do not have permission to access this drink log",
+    );
   }
   if (drinkLog.deletedAt !== null) {
     throw new ConvexError("Drink log has been deleted");
@@ -73,8 +76,11 @@ async function getDrinkLogHandler(
 
 async function checkReferences(
   ctx: AuthMutationCtx,
-  { sessionId, drinkId }: {
-    sessionId?: Id<"session"> | undefined;
+  {
+    sessionId,
+    drinkId,
+  }: {
+    sessionId?: Id<"session"> | null | undefined;
     drinkId?: Id<"drink"> | undefined;
   },
 ) {
@@ -87,7 +93,7 @@ async function checkReferences(
       throw new ConvexError("You do not have permission to use this drink");
     }
   }
-  if (sessionId !== undefined) {
+  if (sessionId !== undefined && sessionId !== null) {
     const session = await ctx.db.get("session", sessionId);
     if (!session || session.deletedAt !== null) {
       throw new ConvexError("Session not found");
