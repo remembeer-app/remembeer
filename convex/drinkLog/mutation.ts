@@ -3,7 +3,6 @@ import { WithZod } from "fluent-convex/zod";
 import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
 import { schema } from "../schema";
 import type { Id } from "../_generated/dataModel";
-import { getDrinkLogHandler } from "./query";
 import {
   createDrinkLogInputValidator,
   updateDrinkLogInputValidator,
@@ -54,6 +53,23 @@ export const softDelete = authMutation
     });
     return null;
   });
+
+async function getDrinkLogHandler(
+  ctx: AuthMutationCtx,
+  { id }: { id: Id<"drinkLog"> },
+) {
+  const drinkLog = await ctx.db.get("drinkLog", id);
+  if (!drinkLog) {
+    throw new ConvexError("Drink log not found");
+  }
+  if (drinkLog.userId !== ctx.user._id) {
+    throw new ConvexError("You do not have permission to access this drink log");
+  }
+  if (drinkLog.deletedAt !== null) {
+    throw new ConvexError("Drink log has been deleted");
+  }
+  return drinkLog;
+}
 
 async function checkReferences(
   ctx: AuthMutationCtx,

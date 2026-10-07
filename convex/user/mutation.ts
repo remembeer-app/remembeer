@@ -8,6 +8,7 @@ import { getCurrentUserSafe } from "./currentUser";
 import {
   normalizeUsername,
   updateEndOfDayBoundaryInputValidator,
+  updateTimeZoneInputValidator,
   updateUsernameInputValidator,
   userTable,
 } from "./schema";
@@ -19,8 +20,10 @@ const accentColors = userTable.validator.fields.accentColor.members.map(
 
 export const ensureCurrent = convex
   .mutation()
+  .extend(WithZod)
+  .input(updateTimeZoneInputValidator.partial())
   .returns(v.id("user"))
-  .handler(async (ctx) => {
+  .handler(async (ctx, { timeZone }) => {
     const { user, authUser } = await getCurrentUserSafe(ctx);
     if (user) {
       return user._id;
@@ -35,6 +38,7 @@ export const ensureCurrent = convex
       accentColor: accentColors[Math.floor(Math.random() * accentColors.length)]!,
       avatarStorageId: null,
       endOfDayBoundary: defaultEndOfDayBoundary,
+      timeZone: timeZone ?? "UTC",
       defaultDrink: null,
       drinkLogSortOrder: "desc",
     });
@@ -103,6 +107,15 @@ export const updateEndOfDayBoundary = authMutation
   .returns(v.null())
   .handler(async (ctx, { endOfDayBoundary }) => {
     await ctx.db.patch("user", ctx.user._id, { endOfDayBoundary });
+    return null;
+  });
+
+export const updateTimeZone = authMutation
+  .extend(WithZod)
+  .input(updateTimeZoneInputValidator)
+  .returns(v.null())
+  .handler(async (ctx, { timeZone }) => {
+    await ctx.db.patch("user", ctx.user._id, { timeZone });
     return null;
   });
 

@@ -15,7 +15,7 @@
     "moduleResolution": "Bundler",
     "moduleDetection": "force",
     "target": "ESNext",
-    "lib": ["ES2021", "DOM"],
+    "lib": ["ES2021", "DOM", "ES2022.Intl", "ESNext.Temporal"],
     "types": ["node"],
 
     "isolatedModules": true,

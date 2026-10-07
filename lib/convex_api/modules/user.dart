@@ -54,16 +54,18 @@ class UserApi {
   ConvexMutationReference<DeleteCurrentArgs, void> get deleteCurrentMutation =>
       deleteCurrentMutationReference;
 
-  Future<UserId> ensureCurrent() async {
+  Future<UserId> ensureCurrent({
+    Optional<String> timeZone = const Optional.absent(),
+  }) async {
     final raw$ = await _client.mutate(
       'user:ensureCurrent',
-      const <String, dynamic>{},
+      _encodeEnsureCurrentArgs((timeZone: timeZone)),
     );
     return UserId(expectString(raw$, label: 'EnsureCurrentResult'));
   }
 
-  ConvexMutationReference<NoArgs, UserId> get ensureCurrentMutation =>
-      ensureCurrentMutationReference;
+  ConvexMutationReference<EnsureCurrentArgs, UserId>
+  get ensureCurrentMutation => ensureCurrentMutationReference;
 
   Future<String> generateAvatarUploadUrl() async {
     final raw$ = await _client.mutate(
@@ -75,6 +77,52 @@ class UserApi {
 
   ConvexMutationReference<NoArgs, String> get generateAvatarUploadUrlMutation =>
       generateAvatarUploadUrlMutationReference;
+
+  Future<List<String>> searchTimeZones({required String search}) async {
+    final raw$ = await _client.query(
+      'user:searchTimeZones',
+      _encodeSearchTimeZonesArgs((search: search)),
+    );
+    return expectList(raw$, label: 'SearchTimeZonesResult')
+        .map((item) => expectString(item, label: 'SearchTimeZonesResultItem'))
+        .toList();
+  }
+
+  TypedConvexSubscription<List<String>> searchTimeZonesSubscribe({
+    required String search,
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:searchTimeZones',
+      _encodeSearchTimeZonesArgs((search: search)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<List<String>>(
+            expectList(value, label: 'SearchTimeZonesResult')
+                .map(
+                  (item) =>
+                      expectString(item, label: 'SearchTimeZonesResultItem'),
+                )
+                .toList(),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<List<String>>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<List<String>>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<List<String>>(subscription$, typedStream$);
+  }
+
+  ConvexQueryReference<SearchTimeZonesArgs, List<String>>
+  get searchTimeZonesQuery => searchTimeZonesQueryReference;
 
   Future<Null> updateAccentColor({
     required UpdateAccentColorArgsAccentColor accentColor,
@@ -141,6 +189,17 @@ class UserApi {
 
   ConvexMutationReference<UpdateEndOfDayBoundaryArgs, void>
   get updateEndOfDayBoundaryMutation => updateEndOfDayBoundaryMutationReference;
+
+  Future<Null> updateTimeZone({required String timeZone}) async {
+    await _client.mutate(
+      'user:updateTimeZone',
+      _encodeUpdateTimeZoneArgs((timeZone: timeZone)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<UpdateTimeZoneArgs, void>
+  get updateTimeZoneMutation => updateTimeZoneMutationReference;
 
   Future<Null> updateUsername({required String username}) async {
     await _client.mutate(
@@ -224,6 +283,7 @@ typedef CurrentResult = ({
   CurrentResultDrinkLogSortOrder drinkLogSortOrder,
   double endOfDayBoundary,
   String normalizedUsername,
+  String timeZone,
   String username,
 });
 
@@ -238,6 +298,7 @@ Map<String, dynamic> _encodeCurrentResult(CurrentResult value$) {
     drinkLogSortOrder: drinkLogSortOrder,
     endOfDayBoundary: endOfDayBoundary,
     normalizedUsername: normalizedUsername,
+    timeZone: timeZone,
     username: username,
   ) = value$;
   return <String, dynamic>{
@@ -253,6 +314,7 @@ Map<String, dynamic> _encodeCurrentResult(CurrentResult value$) {
     'drinkLogSortOrder': drinkLogSortOrder.value,
     'endOfDayBoundary': endOfDayBoundary,
     'normalizedUsername': normalizedUsername,
+    'timeZone': timeZone,
     'username': username,
   };
 }
@@ -302,6 +364,11 @@ CurrentResult _decodeCurrentResult(dynamic raw) {
       'Missing required field "normalizedUsername" for CurrentResult',
     );
   }
+  if (!map.containsKey('timeZone')) {
+    throw FormatException(
+      'Missing required field "timeZone" for CurrentResult',
+    );
+  }
   if (!map.containsKey('username')) {
     throw FormatException(
       'Missing required field "username" for CurrentResult',
@@ -340,6 +407,7 @@ CurrentResult _decodeCurrentResult(dynamic raw) {
       map['normalizedUsername'],
       label: 'CurrentResultNormalizedUsername',
     ),
+    timeZone: expectString(map['timeZone'], label: 'CurrentResultTimeZone'),
     username: expectString(map['username'], label: 'CurrentResultUsername'),
   );
 }
@@ -360,6 +428,43 @@ DeleteCurrentArgs _decodeDeleteCurrentArgs(dynamic raw) {
   }
   return (
     password: expectString(map['password'], label: 'DeleteCurrentArgsPassword'),
+  );
+}
+
+typedef EnsureCurrentArgs = ({Optional<String> timeZone});
+
+Map<String, dynamic> _encodeEnsureCurrentArgs(EnsureCurrentArgs value$) {
+  final (timeZone: timeZone) = value$;
+  return <String, dynamic>{if (timeZone.isDefined) 'timeZone': timeZone.value};
+}
+
+EnsureCurrentArgs _decodeEnsureCurrentArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'EnsureCurrentArgs');
+  return (
+    timeZone: map.containsKey('timeZone')
+        ? Optional.of(
+            expectString(map['timeZone'], label: 'EnsureCurrentArgsTimeZone'),
+          )
+        : const Optional.absent(),
+  );
+}
+
+typedef SearchTimeZonesArgs = ({String search});
+
+Map<String, dynamic> _encodeSearchTimeZonesArgs(SearchTimeZonesArgs value$) {
+  final (search: search) = value$;
+  return <String, dynamic>{'search': search};
+}
+
+SearchTimeZonesArgs _decodeSearchTimeZonesArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SearchTimeZonesArgs');
+  if (!map.containsKey('search')) {
+    throw FormatException(
+      'Missing required field "search" for SearchTimeZonesArgs',
+    );
+  }
+  return (
+    search: expectString(map['search'], label: 'SearchTimeZonesArgsSearch'),
   );
 }
 
@@ -556,6 +661,28 @@ UpdateEndOfDayBoundaryArgs _decodeUpdateEndOfDayBoundaryArgs(dynamic raw) {
   );
 }
 
+typedef UpdateTimeZoneArgs = ({String timeZone});
+
+Map<String, dynamic> _encodeUpdateTimeZoneArgs(UpdateTimeZoneArgs value$) {
+  final (timeZone: timeZone) = value$;
+  return <String, dynamic>{'timeZone': timeZone};
+}
+
+UpdateTimeZoneArgs _decodeUpdateTimeZoneArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateTimeZoneArgs');
+  if (!map.containsKey('timeZone')) {
+    throw FormatException(
+      'Missing required field "timeZone" for UpdateTimeZoneArgs',
+    );
+  }
+  return (
+    timeZone: expectString(
+      map['timeZone'],
+      label: 'UpdateTimeZoneArgsTimeZone',
+    ),
+  );
+}
+
 typedef UpdateUsernameArgs = ({String username});
 
 Map<String, dynamic> _encodeUpdateUsernameArgs(UpdateUsernameArgs value$) {
@@ -594,18 +721,29 @@ deleteCurrentMutationReference = ConvexMutationReference(
   decode: (raw) => null,
 );
 
-final ConvexMutationReference<NoArgs, UserId> ensureCurrentMutationReference =
-    ConvexMutationReference(
-      name: 'user:ensureCurrent',
-      encode: (args) => const <String, dynamic>{},
-      decode: (raw) => UserId(expectString(raw, label: 'EnsureCurrentResult')),
-    );
+final ConvexMutationReference<EnsureCurrentArgs, UserId>
+ensureCurrentMutationReference = ConvexMutationReference(
+  name: 'user:ensureCurrent',
+  encode: (args) => _encodeEnsureCurrentArgs(args),
+  decode: (raw) => UserId(expectString(raw, label: 'EnsureCurrentResult')),
+);
 
 final ConvexMutationReference<NoArgs, String>
 generateAvatarUploadUrlMutationReference = ConvexMutationReference(
   name: 'user:generateAvatarUploadUrl',
   encode: (args) => const <String, dynamic>{},
   decode: (raw) => expectString(raw, label: 'GenerateAvatarUploadUrlResult'),
+);
+
+final ConvexQueryReference<SearchTimeZonesArgs, List<String>>
+searchTimeZonesQueryReference = ConvexQueryReference(
+  name: 'user:searchTimeZones',
+  encode: (args) => _encodeSearchTimeZonesArgs(args),
+  decodeArgs: (raw) => _decodeSearchTimeZonesArgs(raw),
+  decode: (raw) => expectList(raw, label: 'SearchTimeZonesResult')
+      .map((item) => expectString(item, label: 'SearchTimeZonesResultItem'))
+      .toList(),
+  encodeResult: (value) => value.map((item) => item).toList(),
 );
 
 final ConvexMutationReference<UpdateAccentColorArgs, void>
@@ -641,6 +779,13 @@ final ConvexMutationReference<UpdateEndOfDayBoundaryArgs, void>
 updateEndOfDayBoundaryMutationReference = ConvexMutationReference(
   name: 'user:updateEndOfDayBoundary',
   encode: (args) => _encodeUpdateEndOfDayBoundaryArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<UpdateTimeZoneArgs, void>
+updateTimeZoneMutationReference = ConvexMutationReference(
+  name: 'user:updateTimeZone',
+  encode: (args) => _encodeUpdateTimeZoneArgs(args),
   decode: (raw) => null,
 );
 

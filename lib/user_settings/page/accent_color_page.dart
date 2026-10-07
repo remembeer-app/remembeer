@@ -70,6 +70,7 @@ class AccentColorPage extends StatelessWidget {
         drinkLogSortOrder: user.drinkLogSortOrder,
         endOfDayBoundary: user.endOfDayBoundary,
         normalizedUsername: user.normalizedUsername,
+        timeZone: user.timeZone,
         username: user.username,
       ),
     );

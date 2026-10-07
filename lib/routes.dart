@@ -50,6 +50,7 @@ import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
 import 'package:remembeer/user_settings/page/default_drink_page.dart';
 import 'package:remembeer/user_settings/page/drink_log_list_sort_page.dart';
 import 'package:remembeer/user_settings/page/end_of_day_page.dart';
+import 'package:remembeer/user_settings/page/time_zone_page.dart';
 import 'package:remembeer/user_settings/page/user_settings_page.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
 
@@ -213,6 +214,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             TypedGoRoute<BadgeVisibilityRoute>(path: 'badge-visibility'),
             TypedGoRoute<ChangePasswordRoute>(path: 'password'),
             TypedGoRoute<EndOfDaySettingsRoute>(path: 'end-of-day'),
+            TypedGoRoute<TimeZoneSettingsRoute>(path: 'time-zone'),
             TypedGoRoute<DeleteAccountRoute>(path: 'delete-account'),
           ],
         ),
@@ -751,6 +753,15 @@ class EndOfDaySettingsRoute extends GoRouteData with $EndOfDaySettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const EndOfDayPage();
+  }
+}
+
+class TimeZoneSettingsRoute extends GoRouteData with $TimeZoneSettingsRoute {
+  const TimeZoneSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return TimeZonePage();
   }
 }
 

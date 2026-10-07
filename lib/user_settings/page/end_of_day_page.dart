@@ -157,6 +157,7 @@ class EndOfDayPage extends StatelessWidget {
         drinkLogSortOrder: user.drinkLogSortOrder,
         endOfDayBoundary: args.endOfDayBoundary,
         normalizedUsername: user.normalizedUsername,
+        timeZone: user.timeZone,
         username: user.username,
       ),
     );

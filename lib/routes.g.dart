@@ -327,6 +327,11 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               factory: $EndOfDaySettingsRoute._fromState,
             ),
             GoRouteData.$route(
+              path: 'time-zone',
+              hasOverriddenOnExit: false,
+              factory: $TimeZoneSettingsRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'delete-account',
               hasOverriddenOnExit: false,
               factory: $DeleteAccountRoute._fromState,
@@ -1429,6 +1434,27 @@ mixin $EndOfDaySettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/end-of-day');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TimeZoneSettingsRoute on GoRouteData {
+  static TimeZoneSettingsRoute _fromState(GoRouterState state) =>
+      const TimeZoneSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/time-zone');
 
   @override
   void go(BuildContext context) => context.go(location);
