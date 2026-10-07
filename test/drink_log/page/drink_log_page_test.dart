@@ -22,9 +22,10 @@ void main() {
   ) async {
     final client = _Runtime();
     final mutations = _Mutations();
+    final quickAdds = _Logs();
     get
       ..registerSingleton<DateService>(_Dates())
-      ..registerSingleton<DrinkLogService>(_Logs())
+      ..registerSingleton<DrinkLogService>(quickAdds)
       ..registerSingleton(ConvexApi(mutations))
       ..registerSingleton(LocationService());
     addTearDown(get.reset);
@@ -70,14 +71,27 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Edited beer'), findsOneWidget);
 
+    await tester.longPress(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+    expect(quickAdds.count, 1);
+    expect(find.text('Drinks'), findsOneWidget);
+    expect(find.byType(AddDrinkLogPage), findsNothing);
+
     await tester.tap(find.text('Edited beer'));
     await tester.pumpAndSettle();
     expect(find.text('Catalogue beer'), findsOneWidget);
+    await tester.tap(find.widgetWithText(TextFormField, 'Volume (ml)'));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Volume (ml)'),
       '330',
     );
-    await tester.tap(find.text('Submit'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Next field'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Next field'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Submit'));
     await tester.pumpAndSettle();
     expect(mutations.name, 'drinkLog:update');
     expect(mutations.args['id'], 'log');
@@ -97,11 +111,18 @@ void main() {
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextFormField, 'Volume (ml)'));
+    await tester.pumpAndSettle();
     await tester.enterText(
       find.widgetWithText(TextFormField, 'Volume (ml)'),
       '250',
     );
-    await tester.tap(find.text('Submit'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Next field'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Next field'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Submit'));
     await tester.pumpAndSettle();
     expect(mutations.name, 'drinkLog:create');
     expect(mutations.args['drinkId'], 'drink');
@@ -214,6 +235,11 @@ class _Dates implements DateService {
 }
 
 class _Logs implements DrinkLogService {
+  var count = 0;
+
+  @override
+  Future<void> addDefaultDrinkLog() async => count++;
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

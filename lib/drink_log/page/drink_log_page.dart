@@ -27,7 +27,6 @@ class DrinkLogPage extends StatelessWidget {
         onLongPress: _quickAdd,
         child: FloatingActionButton(
           heroTag: 'add_drink_fab',
-          tooltip: 'Record a drink; hold to quick add',
           onPressed: () => const AddDrinkLogRoute().push<void>(context),
           child: const Icon(Icons.add),
         ),

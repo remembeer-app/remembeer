@@ -27,7 +27,7 @@ export const update = authMutation
   .input(updateDrinkLogInputValidator)
   .returns(v.null())
   .handler(async (ctx, { id, ...input }) => {
-    const drinkLog = await getDrinkLogHandler(ctx, { id });
+    const drinkLog = await getDrinkLog(ctx, { id });
     await checkReferences(ctx, {
       sessionId: input.sessionId,
       drinkId: input.drinkId === drinkLog.drinkId ? undefined : input.drinkId,
@@ -49,7 +49,7 @@ export const softDelete = authMutation
   .input({ id: v.id("drinkLog") })
   .returns(v.null())
   .handler(async (ctx, { id }) => {
-    await getDrinkLogHandler(ctx, { id });
+    await getDrinkLog(ctx, { id });
     const now = Date.now();
     await ctx.db.patch("drinkLog", id, {
       updatedAt: now,
@@ -58,7 +58,7 @@ export const softDelete = authMutation
     return null;
   });
 
-async function getDrinkLogHandler(
+async function getDrinkLog(
   ctx: AuthMutationCtx,
   { id }: { id: Id<"drinkLog"> },
 ) {
