@@ -73,7 +73,7 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   @override
   String? redirect(BuildContext context, GoRouterState state) {
     return _convexAuthService.isAuthenticated
-        ? const SettingsRoute().location
+        ? const DrinkLogRoute().location
         : null;
   }
 
@@ -90,7 +90,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
   @override
   String? redirect(BuildContext context, GoRouterState state) {
     return _convexAuthService.isAuthenticated
-        ? const SettingsRoute().location
+        ? const DrinkLogRoute().location
         : null;
   }
 
