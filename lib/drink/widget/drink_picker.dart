@@ -1,27 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/drink/model/drink_snapshot.dart';
+import 'package:remembeer/convex_api/modules/drink.dart';
 import 'package:remembeer/drink/widget/drink_picker_sheet.dart';
 import 'package:remembeer/drink/widget/selected_drink_display.dart';
 
 class DrinkPicker extends StatelessWidget {
-  final DrinkSnapshot selectedDrink;
-  final void Function(DrinkSnapshot) onChanged;
+  final ListAvailableResultItem? selectedDrink;
+  final bool enabled;
+  final ValueChanged<ListAvailableResultItem> onChanged;
 
   const DrinkPicker({
     super.key,
     required this.selectedDrink,
     required this.onChanged,
+    this.enabled = true,
   });
 
   void _openPicker(BuildContext context) {
-    showModalBottomSheet<DrinkSnapshot>(
+    showModalBottomSheet<ListAvailableResultItem>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      backgroundColor: Colors.transparent,
+      backgroundColor: Theme.of(context).colorScheme.surface,
       builder: (context) => DrinkPickerSheet(selectedDrink: selectedDrink),
     ).then((drink) {
-      if (drink != null) {
+      if (context.mounted && drink != null) {
         onChanged(drink);
       }
     });
@@ -30,15 +32,20 @@ class DrinkPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => _openPicker(context),
+      onTap: enabled ? () => _openPicker(context) : null,
       borderRadius: BorderRadius.circular(4),
       child: InputDecorator(
-        decoration: const InputDecoration(
+        decoration: InputDecoration(
+          enabled: enabled,
           labelText: 'Drink',
-          border: OutlineInputBorder(),
-          suffixIcon: Icon(Icons.arrow_drop_down),
+          border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(12)),
+          ),
+          suffixIcon: const Icon(Icons.arrow_drop_down),
         ),
-        child: SelectedDrinkDisplay(drink: selectedDrink),
+        child: selectedDrink != null
+            ? SelectedDrinkDisplay(drink: selectedDrink!)
+            : const Text('Choose a drink'),
       ),
     );
   }

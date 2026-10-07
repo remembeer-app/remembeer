@@ -5,6 +5,8 @@
 import '../api.dart';
 import '../modules/drink.dart';
 
+import 'dart:async';
+
 import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/widgets.dart';
 
@@ -25,6 +27,27 @@ class DrinkCreateMutationExecutor {
     drinkCategory: drinkCategory,
     name: name,
   ));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required double alcoholPercentage,
+    required DrinkCategory drinkCategory,
+    required String name,
+    void Function(DrinkId result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((
+        alcoholPercentage: alcoholPercentage,
+        drinkCategory: drinkCategory,
+        name: name,
+      )).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for drink:create.
@@ -35,6 +58,7 @@ class DrinkCreateMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -51,11 +75,15 @@ class DrinkCreateMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<CreateArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) => ConvexMutation<CreateArgs, DrinkId>(
     mutation: createMutationReference,
     client: client,
     typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
     builder: (context, mutate, snapshot) =>
         builder(context, DrinkCreateMutationExecutor(mutate), snapshot),
   );
@@ -70,6 +98,18 @@ class DrinkSoftDeleteMutationExecutor {
 
   /// Runs the mutation.
   Future<void> call({required DrinkId id}) => _mutate((id: id));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({required DrinkId id, void Function(void result)? onSuccess}) {
+    unawaited(
+      _mutate((id: id)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for drink:softDelete.
@@ -80,6 +120,7 @@ class DrinkSoftDeleteMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -96,11 +137,15 @@ class DrinkSoftDeleteMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<SoftDeleteArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) => ConvexMutation<SoftDeleteArgs, void>(
     mutation: softDeleteMutationReference,
     client: client,
     typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
     builder: (context, mutate, snapshot) =>
         builder(context, DrinkSoftDeleteMutationExecutor(mutate), snapshot),
   );
@@ -125,6 +170,29 @@ class DrinkUpdateMutationExecutor {
     id: id,
     name: name,
   ));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    Optional<double> alcoholPercentage = const Optional.absent(),
+    Optional<DrinkCategory> drinkCategory = const Optional.absent(),
+    required DrinkId id,
+    Optional<String> name = const Optional.absent(),
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((
+        alcoholPercentage: alcoholPercentage,
+        drinkCategory: drinkCategory,
+        id: id,
+        name: name,
+      )).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for drink:update.
@@ -135,6 +203,7 @@ class DrinkUpdateMutation extends StatelessWidget {
     required this.builder,
     this.client,
     this.optimisticUpdate,
+    this.mode = MutationMode.single,
   });
 
   /// Builds the UI with the callable mutation and current request state.
@@ -151,11 +220,15 @@ class DrinkUpdateMutation extends StatelessWidget {
   /// Optional optimistic update for the mutation.
   final TypedOptimisticUpdate<UpdateArgs>? optimisticUpdate;
 
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
   @override
   Widget build(BuildContext context) => ConvexMutation<UpdateArgs, void>(
     mutation: updateMutationReference,
     client: client,
     typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
     builder: (context, mutate, snapshot) =>
         builder(context, DrinkUpdateMutationExecutor(mutate), snapshot),
   );

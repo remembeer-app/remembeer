@@ -1,68 +1,103 @@
+import 'package:dartvex/dartvex.dart';
+import 'package:dartvex_flutter/dartvex_flutter.dart' show MutationMode;
 import 'package:flutter/material.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:gap/gap.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
+import 'package:remembeer/convex_api/modules/user.dart';
+import 'package:remembeer/convex_api/widgets/user.dart';
 import 'package:remembeer/user_settings/model/drink_log_list_sort.dart';
-import 'package:remembeer/user_settings/service/user_settings_service.dart';
-import 'package:remembeer/user_settings/widget/settings_page_template.dart';
+import 'package:remembeer/user_settings/widget/settings_page.dart';
 
-class DrinkLogListSortPage extends StatefulWidget {
+class DrinkLogListSortPage extends StatelessWidget {
   const DrinkLogListSortPage({super.key});
 
   @override
-  State<DrinkLogListSortPage> createState() => _DrinkLogListSortPageState();
-}
-
-class _DrinkLogListSortPageState extends State<DrinkLogListSortPage> {
-  final _userSettingsService = get<UserSettingsService>();
-
-  DrinkLogListSortOrder? _selectedSort;
-
-  @override
   Widget build(BuildContext context) {
-    return SettingsPageTemplate(
-      title: const Text('Drink List Order'),
+    return SettingsPage(
+      title: 'Drink Log Order',
+      autmaticallyImplyLeading: true,
       hint:
-          'Choose how drinks and sessions are sorted in the list. '
-          '"Newest first" shows your most recent drinks and sessions at the top, '
+          'Choose how drink logs and sessions are sorted in the list. '
+          '"Newest first" shows your most recent drink logs and sessions at the top, '
           'while "Oldest first" shows them at the bottom.',
-      child: AsyncBuilder(
-        future: _userSettingsService.currentUserSettings,
-        builder: (context, userSettings) {
-          _selectedSort ??= userSettings.drinkLogListSortOrder;
+      child: UserCurrentQuery(
+        builder: (context, user) => UserUpdateDrinkLogSortOrderMutation(
+          mode: MutationMode.latest,
+          optimisticUpdate: _optimisticUpdateSortOrder,
+          builder: (context, mutate, snapshot) {
+            final selectedSort = switch (user.drinkLogSortOrder.value) {
+              'asc' => DrinkLogListSortOrder.ascending,
+              _ => DrinkLogListSortOrder.descending,
+            };
+            void onChanged(DrinkLogListSortOrder? value) {
+              if (value == null || value == selectedSort) return;
+              mutate.run(
+                drinkLogSortOrder:
+                    UpdateDrinkLogSortOrderArgsDrinkLogSortOrder.fromJson(
+                      value == DrinkLogListSortOrder.ascending ? 'asc' : 'desc',
+                    ),
+              );
+            }
 
-          return RadioGroup<DrinkLogListSortOrder>(
-            groupValue: _selectedSort,
-            onChanged: _onSortChanged,
-            child: Column(
-              children: DrinkLogListSortOrder.values
-                  .map(_buildSortOption)
-                  .toList(),
-            ),
-          );
-        },
+            return SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  RadioGroup<DrinkLogListSortOrder>(
+                    groupValue: selectedSort,
+                    onChanged: onChanged,
+                    child: Column(
+                      children: [
+                        for (final sort in DrinkLogListSortOrder.values)
+                          Card(
+                            child: ListTile(
+                              leading: Radio<DrinkLogListSortOrder>(
+                                value: sort,
+                              ),
+                              title: Text(sort.displayName),
+                              subtitle: Text(sort.description),
+                              selected: selectedSort == sort,
+                              onTap: () => onChanged(sort),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (snapshot.error case final error?) ...[
+                    const Gap(16),
+                    ErrorMessageBox(message: error.toString()),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildSortOption(DrinkLogListSortOrder sort) {
-    final isSelected = _selectedSort == sort;
-
-    return Card(
-      child: ListTile(
-        leading: Radio<DrinkLogListSortOrder>(value: sort),
-        title: Text(sort.displayName),
-        subtitle: Text(sort.description),
-        selected: isSelected,
-        onTap: () => _onSortChanged(sort),
+  void _optimisticUpdateSortOrder(
+    TypedOptimisticLocalStore store,
+    UpdateDrinkLogSortOrderArgs args,
+    OptimisticMutationContext _,
+  ) {
+    store.updateQuery(
+      currentQueryReference,
+      const NoArgs(),
+      (user) => (
+        creationTime: user.creationTime,
+        id: user.id,
+        accentColor: user.accentColor,
+        authUserId: user.authUserId,
+        avatarUrl: user.avatarUrl,
+        defaultDrink: user.defaultDrink,
+        drinkLogSortOrder: CurrentResultDrinkLogSortOrder.fromJson(
+          args.drinkLogSortOrder.value,
+        ),
+        endOfDayBoundary: user.endOfDayBoundary,
+        normalizedUsername: user.normalizedUsername,
+        username: user.username,
       ),
     );
-  }
-
-  Future<void> _onSortChanged(DrinkLogListSortOrder? value) async {
-    if (value == null) return;
-    setState(() {
-      _selectedSort = value;
-    });
-    await _userSettingsService.updateDrinkLogListSort(value);
   }
 }

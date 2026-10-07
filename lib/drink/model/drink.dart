@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/converter/timestamp_converter.dart';
 import 'package:remembeer/common/model/entity.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/converter/drink_category_converter.dart';
 
 part 'drink.freezed.dart';
 part 'drink.g.dart';
@@ -17,7 +18,7 @@ abstract class Drink with _$Drink implements Entity {
     @TimestampConverter() DateTime? deletedAt,
 
     required String name,
-    required DrinkCategory category,
+    @DrinkCategoryConverter() required DrinkCategory category,
     required double alcoholPercentage,
   }) = _Drink;
 

@@ -4,10 +4,11 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/util/invariant.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/date/util/date_utils.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink_log/constants.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
@@ -416,7 +417,7 @@ class DrinkLogService {
     required DrinkCategory category,
     required int volumeInMilliliters,
   }) {
-    if (category != DrinkCategory.beer) return 0;
+    if (category is! Beer) return 0;
     return volumeInMilliliters / beerVolumeMl;
   }
 
@@ -490,7 +491,7 @@ class DrinkLogService {
     final available = await drinkController.allAvailableDrinksStream.first;
     for (final candidate in available) {
       if (candidate.name == drink.name &&
-          candidate.category == drink.category &&
+          candidate.category.kind == drink.category.kind &&
           candidate.alcoholPercentage == drink.alcoholPercentage) {
         return candidate.id;
       }

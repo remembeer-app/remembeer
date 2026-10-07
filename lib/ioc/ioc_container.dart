@@ -4,7 +4,6 @@ import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
-import 'package:remembeer/account_deletion/service/account_deletion_service.dart';
 import 'package:remembeer/activity/service/activity_service.dart';
 import 'package:remembeer/app_icon/service/app_icon_service.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
@@ -194,8 +193,10 @@ class IoCContainer {
       )
       ..registerSingleton(
         AvatarService(
-          authService: get<AuthService>(),
-          userController: get<UserController>(),
+          api: get<ConvexApi>(),
+          storage: ConvexStorage(
+            get<ConvexClientWithAuth<BetterAuthSession>>(),
+          ),
         ),
       )
       ..registerSingleton(
@@ -209,20 +210,6 @@ class IoCContainer {
         SessionPictureService(
           authService: get<AuthService>(),
           sessionController: get<SessionController>(),
-        ),
-      )
-      ..registerSingleton(
-        AccountDeletionService(
-          authService: get<AuthService>(),
-          drinkController: get<DrinkController>(),
-          sessionController: get<SessionController>(),
-          leaderboardController: get<LeaderboardController>(),
-          friendRequestController: get<FriendRequestController>(),
-          userController: get<UserController>(),
-          userSettingsController: get<UserSettingsController>(),
-          avatarService: get<AvatarService>(),
-          sessionPictureService: get<SessionPictureService>(),
-          partyController: get<PartyController>(),
         ),
       );
   }

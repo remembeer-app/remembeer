@@ -6,7 +6,7 @@ import 'package:remembeer/activity/model/session_with_members.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/routes.dart';
 
 class SessionCard extends StatelessWidget {
@@ -210,7 +210,7 @@ class SessionCard extends StatelessWidget {
     return Row(
       children: [
         DrinkIcon(
-          category: DrinkCategory.beer,
+          category: const Beer(),
           size: iconSize,
           color: theme.colorScheme.onSurfaceVariant,
         ),
@@ -224,7 +224,7 @@ class SessionCard extends StatelessWidget {
         const Gap(12),
         // TODO(metju-ac): Better icon for alcohol volume
         DrinkIcon(
-          category: DrinkCategory.wine,
+          category: const Wine(),
           size: iconSize,
           color: theme.colorScheme.onSurfaceVariant,
         ),

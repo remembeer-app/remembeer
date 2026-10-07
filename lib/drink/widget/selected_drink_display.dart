@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink_snapshot.dart';
+import 'package:remembeer/convex_api/modules/drink.dart';
 
 class SelectedDrinkDisplay extends StatelessWidget {
-  final DrinkSnapshot drink;
+  final ListAvailableResultItem drink;
 
   const SelectedDrinkDisplay({super.key, required this.drink});
 
@@ -12,7 +12,7 @@ class SelectedDrinkDisplay extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        DrinkIcon(category: drink.category, size: 24),
+        DrinkIcon(category: drink.drinkCategory, size: 24),
         const Gap(12),
         Expanded(
           child: Text(

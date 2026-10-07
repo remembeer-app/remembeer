@@ -1,52 +1,68 @@
+import 'package:dartvex/dartvex.dart';
+import 'package:dartvex_flutter/dartvex_flutter.dart' show MutationMode;
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
+import 'package:remembeer/convex_api/modules/user.dart';
+import 'package:remembeer/convex_api/widgets/user.dart';
 import 'package:remembeer/user/constants.dart';
-import 'package:remembeer/user/service/user_service.dart';
-import 'package:remembeer/user_settings/widget/settings_page_template.dart';
+import 'package:remembeer/user_settings/widget/settings_page.dart';
 
-class EndOfDayPage extends StatefulWidget {
+class EndOfDayPage extends StatelessWidget {
   const EndOfDayPage({super.key});
 
   @override
-  State<EndOfDayPage> createState() => _EndOfDayPageState();
-}
-
-class _EndOfDayPageState extends State<EndOfDayPage> {
-  final _userService = get<UserService>();
-
-  TimeOfDay? _selectedEndOfDayBoundary;
-
-  @override
   Widget build(BuildContext context) {
-    return SettingsPageTemplate(
-      title: const Text('End of Day'),
+    return SettingsPage(
+      title: 'End of Day',
+      autmaticallyImplyLeading: true,
       hint:
           'This time defines when a day ends. For example, if set to 6:00 AM '
           'and viewing the 10th, drinks from 10th 6:00 AM to 11th 6:00 AM '
           'will be shown. This also determines stats and streak calculations.',
-      child: AsyncBuilder(
-        future: _userService.currentUser,
-        builder: (context, user) {
-          _selectedEndOfDayBoundary ??= user.endOfDayBoundary;
+      child: UserCurrentQuery(
+        builder: (context, user) => UserUpdateEndOfDayBoundaryMutation(
+          mode: MutationMode.latest,
+          optimisticUpdate: _optimisticUpdateBoundary,
+          builder: (context, mutate, snapshot) {
+            final boundary = TimeOfDay(
+              hour: user.endOfDayBoundary.toInt() ~/ TimeOfDay.minutesPerHour,
+              minute: user.endOfDayBoundary.toInt() % TimeOfDay.minutesPerHour,
+            );
+            void onChanged(TimeOfDay value) {
+              final minutes =
+                  value.hour * TimeOfDay.minutesPerHour + value.minute;
+              if (minutes == user.endOfDayBoundary) return;
+              mutate.run(endOfDayBoundary: minutes.toDouble());
+            }
 
-          return Column(
-            children: [
-              _buildTimeCard(context),
-              const Gap(24),
-              _buildResetButton(context),
-            ],
-          );
-        },
+            return SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildTimeCard(context, boundary, onChanged),
+                  const Gap(24),
+                  _buildResetButton(context, boundary, onChanged),
+                  if (snapshot.error case final error?) ...[
+                    const Gap(16),
+                    ErrorMessageBox(message: error.toString()),
+                  ],
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildTimeCard(BuildContext context) {
+  Widget _buildTimeCard(
+    BuildContext context,
+    TimeOfDay boundary,
+    ValueChanged<TimeOfDay> onChanged,
+  ) {
     return Card(
       child: InkWell(
-        onTap: _pickTime,
+        onTap: () => _pickTime(context, boundary, onChanged),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -77,7 +93,7 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
                     ),
                     const Gap(4),
                     Text(
-                      _selectedEndOfDayBoundary!.format(context),
+                      boundary.format(context),
                       style: Theme.of(context).textTheme.headlineMedium
                           ?.copyWith(fontWeight: FontWeight.bold),
                     ),
@@ -92,39 +108,57 @@ class _EndOfDayPageState extends State<EndOfDayPage> {
     );
   }
 
-  Widget _buildResetButton(BuildContext context) {
-    final isDefault = _selectedEndOfDayBoundary == defaultEndOfDayBoundary;
+  Widget _buildResetButton(
+    BuildContext context,
+    TimeOfDay boundary,
+    ValueChanged<TimeOfDay> onChanged,
+  ) {
+    final isDefault = boundary == defaultEndOfDayBoundary;
+    final defaultTime = defaultEndOfDayBoundary.format(context);
 
     return OutlinedButton.icon(
-      onPressed: isDefault ? null : _resetToDefault,
+      onPressed: isDefault ? null : () => onChanged(defaultEndOfDayBoundary),
       icon: const Icon(Icons.restore),
       label: Text(
         isDefault
-            ? 'Already at default (6:00 AM)'
-            : 'Reset to default (6:00 AM)',
+            ? 'Already at default ($defaultTime)'
+            : 'Reset to default ($defaultTime)',
       ),
     );
   }
 
-  void _resetToDefault() {
-    _onTimeChanged(defaultEndOfDayBoundary);
-  }
-
-  Future<void> _pickTime() async {
+  Future<void> _pickTime(
+    BuildContext context,
+    TimeOfDay boundary,
+    ValueChanged<TimeOfDay> onChanged,
+  ) async {
     final pickedTime = await showTimePicker(
       context: context,
-      initialTime: _selectedEndOfDayBoundary!,
+      initialTime: boundary,
     );
-    if (pickedTime != null) {
-      await _onTimeChanged(pickedTime);
-    }
+    if (context.mounted && pickedTime != null) onChanged(pickedTime);
   }
 
-  Future<void> _onTimeChanged(TimeOfDay value) async {
-    setState(() {
-      _selectedEndOfDayBoundary = value;
-    });
-
-    await _userService.updateEndOfDayBoundary(value);
+  void _optimisticUpdateBoundary(
+    TypedOptimisticLocalStore store,
+    UpdateEndOfDayBoundaryArgs args,
+    OptimisticMutationContext _,
+  ) {
+    store.updateQuery(
+      currentQueryReference,
+      const NoArgs(),
+      (user) => (
+        creationTime: user.creationTime,
+        id: user.id,
+        accentColor: user.accentColor,
+        authUserId: user.authUserId,
+        avatarUrl: user.avatarUrl,
+        defaultDrink: user.defaultDrink,
+        drinkLogSortOrder: user.drinkLogSortOrder,
+        endOfDayBoundary: args.endOfDayBoundary,
+        normalizedUsername: user.normalizedUsername,
+        username: user.username,
+      ),
+    );
   }
 }

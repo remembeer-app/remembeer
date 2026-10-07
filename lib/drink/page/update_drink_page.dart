@@ -28,19 +28,23 @@ class UpdateDrinkPage extends StatelessWidget {
             isLoading: updateSnapshot.isLoading || deleteSnapshot.isLoading,
             error: updateSnapshot.error ?? deleteSnapshot.error,
             onSubmit: (name, alcoholPercentage, drinkCategory) {
-              update(
+              update.run(
                 id: drink.id,
                 name: Optional.of(name),
                 alcoholPercentage: Optional.of(alcoholPercentage),
                 drinkCategory: Optional.of(drinkCategory),
-              ).then((_) {
-                if (context.mounted) context.pop();
-              }).ignore();
+                onSuccess: (_) {
+                  if (context.mounted) context.pop();
+                },
+              );
             },
             onDelete: () {
-              softDelete(id: drink.id).then((_) {
-                if (context.mounted) context.pop();
-              }).ignore();
+              softDelete.run(
+                id: drink.id,
+                onSuccess: (_) {
+                  if (context.mounted) context.pop();
+                },
+              );
             },
           ),
         ),

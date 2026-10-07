@@ -20,13 +20,14 @@ class AddDrinkPage extends StatelessWidget {
           isLoading: snapshot.isLoading,
           error: snapshot.error,
           onSubmit: (name, alcoholPercentage, drinkCategory) {
-            mutate(
+            mutate.run(
               name: name,
               drinkCategory: drinkCategory,
               alcoholPercentage: alcoholPercentage,
-            ).then((_) {
-              if (context.mounted) context.pop();
-            }).ignore();
+              onSuccess: (_) {
+                if (context.mounted) context.pop();
+              },
+            );
           },
         ),
       ),

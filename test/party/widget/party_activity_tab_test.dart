@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/party/model/party_event.dart';
@@ -202,7 +202,7 @@ DrinkLog _drinkLog(String id, {int revision = 1, String ownerId = 'user-1'}) =>
       consumedAt: DateTime.utc(2026, 9, 2, 18, 30),
       drink: const DrinkSnapshot(
         name: 'Beer',
-        category: DrinkCategory.beer,
+        category: Beer(),
         alcoholPercentage: 5,
       ),
       volumeInMilliliters: 500,

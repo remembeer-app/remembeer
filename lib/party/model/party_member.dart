@@ -2,7 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:remembeer/common/converter/timestamp_converter.dart';
 import 'package:remembeer/common/model/document.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/converter/drink_category_converter.dart';
 
 part 'party_member.freezed.dart';
 part 'party_member.g.dart';
@@ -12,7 +13,7 @@ abstract class PartyMember with _$PartyMember implements Document {
   const factory PartyMember({
     required String id,
     required String userId,
-    DrinkCategory? selectedClass,
+    @DrinkCategoryConverter() DrinkCategory? selectedClass,
     @Default(0) int classVersion,
     @TimestampConverter() DateTime? classChangedAt,
     @Default(false) bool beerpongOptIn,

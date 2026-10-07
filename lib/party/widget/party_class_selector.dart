@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/party/constants.dart';
 
 class PartyClassSelector extends StatefulWidget {
@@ -28,7 +29,7 @@ class _PartyClassSelectorState extends State<PartyClassSelector> {
   @override
   void didUpdateWidget(covariant PartyClassSelector oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedClass != widget.selectedClass) {
+    if (oldWidget.selectedClass?.kind != widget.selectedClass?.kind) {
       _selectedClass = widget.selectedClass;
     }
   }
@@ -39,7 +40,7 @@ class _PartyClassSelectorState extends State<PartyClassSelector> {
     final canSubmit =
         _selectedClass != null &&
         !_isLoading &&
-        (_selectedClass != widget.selectedClass ||
+        (_selectedClass?.kind != widget.selectedClass?.kind ||
             widget.selectedClass == null);
 
     return Column(
@@ -64,7 +65,7 @@ class _PartyClassSelectorState extends State<PartyClassSelector> {
           physics: const NeverScrollableScrollPhysics(),
           children: partyClasses.map((metadata) {
             final category = metadata.category;
-            final isSelected = category == _selectedClass;
+            final isSelected = category.kind == _selectedClass?.kind;
             return Card(
               clipBehavior: Clip.hardEdge,
               color: isSelected ? colorScheme.primaryContainer : null,

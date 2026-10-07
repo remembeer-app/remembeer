@@ -2,10 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink/model/drink.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
 import 'package:remembeer/drink/model/drink_snapshot.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/drink_log/model/drink_log_create.dart';
@@ -23,7 +23,7 @@ void main() {
   final consumedAt = DateTime.utc(2026, 9, 2, 18);
   const drink = DrinkSnapshot(
     name: 'Lager',
-    category: DrinkCategory.beer,
+    category: Beer(),
     alcoholPercentage: 4.5,
   );
 
@@ -290,7 +290,7 @@ class _FakeDrinkController implements DrinkController {
             createdAt: DateTime.utc(2026),
             updatedAt: DateTime.utc(2026),
             name: 'Lager',
-            category: DrinkCategory.beer,
+            category: const Beer(),
             alcoholPercentage: 4.5,
           ),
         ]);

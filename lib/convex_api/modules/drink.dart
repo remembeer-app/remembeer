@@ -279,6 +279,7 @@ typedef GetTypeResult = ({
   DrinkCategory drinkCategory,
   String name,
   UserId? ownerId,
+  Optional<String> seedKey,
   double updatedAt,
 });
 
@@ -291,6 +292,7 @@ Map<String, dynamic> _encodeGetTypeResult(GetTypeResult value$) {
     drinkCategory: drinkCategory,
     name: name,
     ownerId: ownerId,
+    seedKey: seedKey,
     updatedAt: updatedAt,
   ) = value$;
   return <String, dynamic>{
@@ -304,6 +306,7 @@ Map<String, dynamic> _encodeGetTypeResult(GetTypeResult value$) {
       null => null,
       final v$ => v$.value,
     },
+    if (seedKey.isDefined) 'seedKey': seedKey.value,
     'updatedAt': updatedAt,
   };
 }
@@ -362,6 +365,11 @@ GetTypeResult _decodeGetTypeResult(dynamic raw) {
     ownerId: map['ownerId'] == null
         ? null
         : UserId(expectString(map['ownerId'], label: 'GetTypeResultOwnerId')),
+    seedKey: map.containsKey('seedKey')
+        ? Optional.of(
+            expectString(map['seedKey'], label: 'GetTypeResultSeedKey'),
+          )
+        : const Optional.absent(),
     updatedAt: expectDouble(map['updatedAt'], label: 'GetTypeResultUpdatedAt'),
   );
 }
@@ -389,6 +397,7 @@ typedef ListAvailableResultItem = ({
   DrinkCategory drinkCategory,
   String name,
   UserId? ownerId,
+  Optional<String> seedKey,
   double updatedAt,
 });
 
@@ -403,6 +412,7 @@ Map<String, dynamic> _encodeListAvailableResultItem(
     drinkCategory: drinkCategory,
     name: name,
     ownerId: ownerId,
+    seedKey: seedKey,
     updatedAt: updatedAt,
   ) = value$;
   return <String, dynamic>{
@@ -416,6 +426,7 @@ Map<String, dynamic> _encodeListAvailableResultItem(
       null => null,
       final v$ => v$.value,
     },
+    if (seedKey.isDefined) 'seedKey': seedKey.value,
     'updatedAt': updatedAt,
   };
 }
@@ -488,6 +499,14 @@ ListAvailableResultItem _decodeListAvailableResultItem(dynamic raw) {
               label: 'ListAvailableResultItemOwnerId',
             ),
           ),
+    seedKey: map.containsKey('seedKey')
+        ? Optional.of(
+            expectString(
+              map['seedKey'],
+              label: 'ListAvailableResultItemSeedKey',
+            ),
+          )
+        : const Optional.absent(),
     updatedAt: expectDouble(
       map['updatedAt'],
       label: 'ListAvailableResultItemUpdatedAt',
@@ -503,6 +522,7 @@ typedef ListCustomResultItem = ({
   DrinkCategory drinkCategory,
   String name,
   UserId? ownerId,
+  Optional<String> seedKey,
   double updatedAt,
 });
 
@@ -515,6 +535,7 @@ Map<String, dynamic> _encodeListCustomResultItem(ListCustomResultItem value$) {
     drinkCategory: drinkCategory,
     name: name,
     ownerId: ownerId,
+    seedKey: seedKey,
     updatedAt: updatedAt,
   ) = value$;
   return <String, dynamic>{
@@ -528,6 +549,7 @@ Map<String, dynamic> _encodeListCustomResultItem(ListCustomResultItem value$) {
       null => null,
       final v$ => v$.value,
     },
+    if (seedKey.isDefined) 'seedKey': seedKey.value,
     'updatedAt': updatedAt,
   };
 }
@@ -597,6 +619,11 @@ ListCustomResultItem _decodeListCustomResultItem(dynamic raw) {
         : UserId(
             expectString(map['ownerId'], label: 'ListCustomResultItemOwnerId'),
           ),
+    seedKey: map.containsKey('seedKey')
+        ? Optional.of(
+            expectString(map['seedKey'], label: 'ListCustomResultItemSeedKey'),
+          )
+        : const Optional.absent(),
     updatedAt: expectDouble(
       map['updatedAt'],
       label: 'ListCustomResultItemUpdatedAt',

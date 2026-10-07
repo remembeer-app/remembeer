@@ -1,7 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/util/invariant.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/controller/party_command_client.dart';
@@ -151,7 +152,7 @@ class PartyController {
     commandName: 'select_party_class',
     sessionId: sessionId,
     commandId: commandId,
-    data: {'selectedClass': selectedClass.name},
+    data: {'selectedClass': selectedClass.kind},
   );
 
   Future<PartyCommandResult> setPartyMemberClass({
@@ -163,7 +164,7 @@ class PartyController {
     commandName: 'set_party_member_class',
     sessionId: sessionId,
     commandId: commandId,
-    data: {'memberId': memberId, 'selectedClass': selectedClass.name},
+    data: {'memberId': memberId, 'selectedClass': selectedClass.kind},
   );
 
   Future<PartyCommandResult> setBeerpongOptIn({

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/service/party_activity_service.dart';
@@ -191,7 +192,9 @@ class PartyEventCard extends StatelessWidget {
     }
     final category = event.payload['category'];
     return category is String
-        ? DrinkCategory.values.asNameMap()[category]
+        ? convexDrinkCategories
+              .where((value) => value.kind == category)
+              .firstOrNull
         : null;
   }
 

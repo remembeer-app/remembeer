@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/drink/model/drink_category.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/party/model/party_event.dart';
 import 'package:remembeer/party/service/party_activity_service.dart';
 import 'package:remembeer/party/widget/party_event_card.dart';
@@ -31,7 +31,7 @@ void main() {
     expect(find.byIcon(Icons.edit_outlined), findsOneWidget);
     expect(find.text('Edit'), findsOneWidget);
     final drinkIcon = tester.widget<DrinkIcon>(find.byType(DrinkIcon));
-    expect(drinkIcon.category, DrinkCategory.beer);
+    expect(drinkIcon.category, const Beer());
     expect(drinkIcon.color, Colors.black);
     final card = tester.widget<Card>(find.byType(Card));
     expect(card.color, accentColorPalette[AccentColorKey.amber]!.softColor);

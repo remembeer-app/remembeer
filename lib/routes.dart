@@ -45,12 +45,12 @@ import 'package:remembeer/session/page/summary_page.dart';
 import 'package:remembeer/user/page/friends_list_page.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user/page/search_user_page.dart';
+import 'package:remembeer/user_settings/page/accent_color_page.dart';
 import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
 import 'package:remembeer/user_settings/page/default_drink_page.dart';
 import 'package:remembeer/user_settings/page/drink_log_list_sort_page.dart';
 import 'package:remembeer/user_settings/page/end_of_day_page.dart';
-import 'package:remembeer/user_settings/page/profile_details_page.dart';
-import 'package:remembeer/user_settings/page/settings_page.dart';
+import 'package:remembeer/user_settings/page/user_settings_page.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
 
 part 'routes.g.dart';
@@ -304,7 +304,7 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return SettingsPage();
+    return UserSettingsPage();
   }
 }
 
@@ -704,7 +704,7 @@ class ProfileDetailsSettingsRoute extends GoRouteData
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ProfileDetailsPage();
+    return const AccentColorPage();
   }
 }
 

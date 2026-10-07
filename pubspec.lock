@@ -317,25 +317,26 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/dartvex"
-      ref: "2a84cd46a8cc294b23dde0e0bcd6c11418d9815d"
-      resolved-ref: "2a84cd46a8cc294b23dde0e0bcd6c11418d9815d"
+      ref: "4841abccb4f0d2612aeda3b34b4ebbf35a465163"
+      resolved-ref: "4841abccb4f0d2612aeda3b34b4ebbf35a465163"
       url: "https://github.com/ohtenkay/dartvex.git"
     source: git
     version: "0.2.0"
   dartvex_auth_better:
     dependency: "direct main"
     description:
-      name: dartvex_auth_better
-      sha256: "315b1d525f909725154ec5a421d347aaf0c8a7cdab7a3035a40dbdc94a406345"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/dartvex_auth_better"
+      ref: "6951f6ba9812df26440fea21bf4481c1f4bc8eff"
+      resolved-ref: "6951f6ba9812df26440fea21bf4481c1f4bc8eff"
+      url: "https://github.com/ohtenkay/dartvex.git"
+    source: git
     version: "0.2.0"
   dartvex_codegen:
     dependency: "direct dev"
     description:
       path: "packages/dartvex_codegen"
-      ref: "2a84cd46a8cc294b23dde0e0bcd6c11418d9815d"
-      resolved-ref: "2a84cd46a8cc294b23dde0e0bcd6c11418d9815d"
+      ref: "4841abccb4f0d2612aeda3b34b4ebbf35a465163"
+      resolved-ref: "4841abccb4f0d2612aeda3b34b4ebbf35a465163"
       url: "https://github.com/ohtenkay/dartvex.git"
     source: git
     version: "0.2.0"
@@ -343,8 +344,8 @@ packages:
     dependency: "direct main"
     description:
       path: "packages/dartvex_flutter"
-      ref: "2a84cd46a8cc294b23dde0e0bcd6c11418d9815d"
-      resolved-ref: "2a84cd46a8cc294b23dde0e0bcd6c11418d9815d"
+      ref: "4841abccb4f0d2612aeda3b34b4ebbf35a465163"
+      resolved-ref: "4841abccb4f0d2612aeda3b34b4ebbf35a465163"
       url: "https://github.com/ohtenkay/dartvex.git"
     source: git
     version: "0.2.0"
@@ -849,7 +850,7 @@ packages:
     source: hosted
     version: "2.2.0"
   http:
-    dependency: transitive
+    dependency: "direct dev"
     description:
       name: http
       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"

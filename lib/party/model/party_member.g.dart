@@ -9,9 +9,9 @@ part of 'party_member.dart';
 _PartyMember _$PartyMemberFromJson(Map<String, dynamic> json) => _PartyMember(
   id: json['id'] as String,
   userId: json['userId'] as String,
-  selectedClass: $enumDecodeNullable(
-    _$DrinkCategoryEnumMap,
+  selectedClass: _$JsonConverterFromJson<Map<String, dynamic>, DrinkCategory>(
     json['selectedClass'],
+    const DrinkCategoryConverter().fromJson,
   ),
   classVersion: (json['classVersion'] as num?)?.toInt() ?? 0,
   classChangedAt: _$JsonConverterFromJson<Timestamp, DateTime>(
@@ -33,7 +33,10 @@ Map<String, dynamic> _$PartyMemberToJson(
 ) => <String, dynamic>{
   'id': instance.id,
   'userId': instance.userId,
-  'selectedClass': _$DrinkCategoryEnumMap[instance.selectedClass],
+  'selectedClass': _$JsonConverterToJson<Map<String, dynamic>, DrinkCategory>(
+    instance.selectedClass,
+    const DrinkCategoryConverter().toJson,
+  ),
   'classVersion': instance.classVersion,
   'classChangedAt': _$JsonConverterToJson<Timestamp, DateTime>(
     instance.classChangedAt,
@@ -45,14 +48,6 @@ Map<String, dynamic> _$PartyMemberToJson(
   'isActive': instance.isActive,
   'joinedAt': const TimestampConverter().toJson(instance.joinedAt),
   'updatedAt': const TimestampConverterOptimistic().toJson(instance.updatedAt),
-};
-
-const _$DrinkCategoryEnumMap = {
-  DrinkCategory.beer: 'beer',
-  DrinkCategory.cider: 'cider',
-  DrinkCategory.cocktail: 'cocktail',
-  DrinkCategory.spirit: 'spirit',
-  DrinkCategory.wine: 'wine',
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(
