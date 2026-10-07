@@ -6,8 +6,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/drinkLog.dart' as logs;
-import 'package:remembeer/date/service/date_service.dart';
-import 'package:remembeer/date/type/date_state.dart';
 import 'package:remembeer/drink_log/page/add_drink_log_page.dart';
 import 'package:remembeer/drink_log/page/drink_log_page.dart';
 import 'package:remembeer/drink_log/page/update_drink_log_page.dart';
@@ -17,6 +15,64 @@ import 'package:remembeer/location/service/location_service.dart';
 import 'package:toastification/toastification.dart';
 
 void main() {
+  testWidgets(
+    'selected day is local and Today refreshes on tab entry and resume',
+    (tester) async {
+      final client = _Runtime()..emptyLogs = true;
+      final api = _Mutations();
+      final active = ValueNotifier(true);
+      get
+        ..registerSingleton(ConvexApi(api))
+        ..registerSingleton<DrinkLogService>(_Logs());
+      addTearDown(get.reset);
+      await tester.pumpWidget(
+        ConvexProvider(
+          client: client,
+          child: MaterialApp(
+            home: ValueListenableBuilder<bool>(
+              valueListenable: active,
+              builder: (context, enabled, child) =>
+                  TickerMode(enabled: enabled, child: child!),
+              child: const DrinkLogPage(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(api.dayRequests, 1);
+      expect(client.requests.last.args, {'date': '2026-01-01'});
+      await tester.tap(find.byIcon(Icons.chevron_left));
+      await tester.pumpAndSettle();
+      expect(client.requests.last.args, {'date': '2025-12-31'});
+      expect(find.text('Return to today'), findsOneWidget);
+      expect(api.dayRequests, 1);
+
+      active.value = false;
+      await tester.pump();
+      api.today = '2026-01-02';
+      active.value = true;
+      await tester.pumpAndSettle();
+      expect(api.dayRequests, 2);
+      expect(client.requests.last.args, {'date': '2025-12-31'});
+      await tester.tap(find.text('Return to today'));
+      await tester.pumpAndSettle();
+      expect(client.requests.last.args, {'date': '2026-01-02'});
+      expect(find.text('Return to today'), findsNothing);
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      api.today = '2026-01-03';
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(api.dayRequests, 3);
+      expect(client.requests.last.args, {'date': '2026-01-03'});
+      await tester.pump(const Duration(days: 1));
+      expect(api.dayRequests, 3);
+      await tester.pumpWidget(const SizedBox.shrink());
+      active.dispose();
+      await client.events.close();
+    },
+  );
+
   testWidgets('daily list, add, edit and delete use the generated Convex API', (
     tester,
   ) async {
@@ -24,7 +80,6 @@ void main() {
     final mutations = _Mutations();
     final quickAdds = _Logs();
     get
-      ..registerSingleton<DateService>(_Dates())
       ..registerSingleton<DrinkLogService>(quickAdds)
       ..registerSingleton(ConvexApi(mutations))
       ..registerSingleton(LocationService());
@@ -34,7 +89,7 @@ void main() {
       routes: [
         GoRoute(
           path: '/drink-logs',
-          builder: (context, state) => DrinkLogPage(),
+          builder: (context, state) => const DrinkLogPage(),
           routes: [
             GoRoute(
               path: 'new',
@@ -149,6 +204,11 @@ Map<String, dynamic> _drink(String name) => {
 };
 
 class _Runtime implements ConvexRuntimeClient {
+  var emptyLogs = false;
+
+  @override
+  ConvexConnectionState get currentConnectionState =>
+      ConvexConnectionState.connected;
   final events = StreamController<ConvexRuntimeQueryEvent>.broadcast();
   final requests = <({String name, Map<String, dynamic> args})>[];
   var name = 'Recorded beer';
@@ -180,6 +240,11 @@ class _Runtime implements ConvexRuntimeClient {
   ]) {
     requests.add((name: name, args: args));
     if (name == 'drinkLog:listForDay') {
+      if (emptyLogs) {
+        return _Subscription(
+          Stream.value(const ConvexRuntimeQuerySuccess(<Object?>[])),
+        );
+      }
       return _Subscription(events.stream);
     }
     if (name == 'user:current') {
@@ -223,17 +288,6 @@ class _Subscription implements ConvexRuntimeSubscription {
   void cancel() {}
 }
 
-class _Dates implements DateService {
-  @override
-  Stream<DateState> get selectedDateStateStream => Stream.value((
-    selectedDate: DateTime.utc(2026),
-    effectiveToday: DateTime.utc(2026),
-  ));
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
 class _Logs implements DrinkLogService {
   var count = 0;
 
@@ -245,8 +299,22 @@ class _Logs implements DrinkLogService {
 }
 
 class _Mutations implements ConvexFunctionCaller {
+  var dayRequests = 0;
+  var today = '2026-01-01';
   String? name;
   Map<String, dynamic> args = {};
+
+  @override
+  Future<dynamic> query(
+    String name, [
+    Map<String, dynamic> args = const {},
+  ]) async {
+    if (name != 'drinkLog:dayContext') {
+      throw StateError('Unexpected query: $name');
+    }
+    dayRequests++;
+    return {'today': today, 'nextBoundary': 0};
+  }
 
   @override
   Future<dynamic> mutate(
