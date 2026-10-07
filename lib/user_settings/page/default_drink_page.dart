@@ -34,7 +34,7 @@ class DefaultDrinkPage extends StatelessWidget {
                         enabled: !snapshot.isLoading,
                         onChanged: (drink) {
                           if (drink.id == user.defaultDrink) return;
-                          mutate(defaultDrink: drink.id).ignore();
+                          mutate.run(defaultDrink: drink.id);
                         },
                       ),
                     if (snapshot.error case final error?) ...[

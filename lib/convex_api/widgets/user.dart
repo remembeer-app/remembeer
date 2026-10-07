@@ -5,6 +5,8 @@
 import '../api.dart';
 import '../modules/user.dart';
 
+import 'dart:async';
+
 import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/widgets.dart';
 
@@ -17,6 +19,18 @@ class UserEnsureCurrentMutationExecutor {
 
   /// Runs the mutation.
   Future<UserId> call() => _mutate(const NoArgs());
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({void Function(UserId result)? onSuccess}) {
+    unawaited(
+      _mutate(const NoArgs()).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for user:ensureCurrent.
@@ -67,6 +81,18 @@ class UserGenerateAvatarUploadUrlMutationExecutor {
 
   /// Runs the mutation.
   Future<String> call() => _mutate(const NoArgs());
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({void Function(String result)? onSuccess}) {
+    unawaited(
+      _mutate(const NoArgs()).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for user:generateAvatarUploadUrl.
@@ -121,6 +147,21 @@ class UserUpdateAccentColorMutationExecutor {
   /// Runs the mutation.
   Future<void> call({required UpdateAccentColorArgsAccentColor accentColor}) =>
       _mutate((accentColor: accentColor));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required UpdateAccentColorArgsAccentColor accentColor,
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((accentColor: accentColor)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for user:updateAccentColor.
@@ -176,6 +217,21 @@ class UserUpdateAvatarMutationExecutor {
   /// Runs the mutation.
   Future<String?> call({required StorageId? storageId}) =>
       _mutate((storageId: storageId));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required StorageId? storageId,
+    void Function(String? result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((storageId: storageId)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for user:updateAvatar.
@@ -231,6 +287,21 @@ class UserUpdateDefaultDrinkMutationExecutor {
   /// Runs the mutation.
   Future<void> call({required DrinkId? defaultDrink}) =>
       _mutate((defaultDrink: defaultDrink));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required DrinkId? defaultDrink,
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((defaultDrink: defaultDrink)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for user:updateDefaultDrink.
@@ -287,6 +358,21 @@ class UserUpdateDrinkLogSortOrderMutationExecutor {
   Future<void> call({
     required UpdateDrinkLogSortOrderArgsDrinkLogSortOrder drinkLogSortOrder,
   }) => _mutate((drinkLogSortOrder: drinkLogSortOrder));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required UpdateDrinkLogSortOrderArgsDrinkLogSortOrder drinkLogSortOrder,
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((drinkLogSortOrder: drinkLogSortOrder)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for user:updateDrinkLogSortOrder.
@@ -342,6 +428,21 @@ class UserUpdateEndOfDayBoundaryMutationExecutor {
   /// Runs the mutation.
   Future<void> call({required double endOfDayBoundary}) =>
       _mutate((endOfDayBoundary: endOfDayBoundary));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required double endOfDayBoundary,
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((endOfDayBoundary: endOfDayBoundary)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for user:updateEndOfDayBoundary.
@@ -397,6 +498,18 @@ class UserUpdateUsernameMutationExecutor {
   /// Runs the mutation.
   Future<void> call({required String username}) =>
       _mutate((username: username));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({required String username, void Function(void result)? onSuccess}) {
+    unawaited(
+      _mutate((username: username)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for user:updateUsername.

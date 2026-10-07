@@ -31,12 +31,12 @@ class DrinkLogListSortPage extends StatelessWidget {
             };
             void onChanged(DrinkLogListSortOrder? value) {
               if (value == null || value == selectedSort) return;
-              mutate(
+              mutate.run(
                 drinkLogSortOrder:
                     UpdateDrinkLogSortOrderArgsDrinkLogSortOrder.fromJson(
                       value == DrinkLogListSortOrder.ascending ? 'asc' : 'desc',
                     ),
-              ).ignore();
+              );
             }
 
             return SingleChildScrollView(

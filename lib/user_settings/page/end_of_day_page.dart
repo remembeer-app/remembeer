@@ -33,7 +33,7 @@ class EndOfDayPage extends StatelessWidget {
               final minutes =
                   value.hour * TimeOfDay.minutesPerHour + value.minute;
               if (minutes == user.endOfDayBoundary) return;
-              mutate(endOfDayBoundary: minutes.toDouble()).ignore();
+              mutate.run(endOfDayBoundary: minutes.toDouble());
             }
 
             return SingleChildScrollView(

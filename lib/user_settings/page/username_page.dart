@@ -23,9 +23,12 @@ class UserNamePage extends StatelessWidget {
             error: snapshot.error,
             onBack: () => context.pop(),
             onSubmit: (username) {
-              mutate(username: username).then((_) {
-                if (context.mounted) context.pop();
-              }).ignore();
+              mutate.run(
+                username: username,
+                onSuccess: (_) {
+                  if (context.mounted) context.pop();
+                },
+              );
             },
           ),
         ),

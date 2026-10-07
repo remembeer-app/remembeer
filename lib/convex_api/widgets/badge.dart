@@ -5,6 +5,8 @@
 import '../api.dart';
 import '../modules/badge.dart';
 
+import 'dart:async';
+
 import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/widgets.dart';
 
@@ -18,6 +20,22 @@ class BadgeSetVisibilityMutationExecutor {
   /// Runs the mutation.
   Future<void> call({required String badgeKey, required bool isShown}) =>
       _mutate((badgeKey: badgeKey, isShown: isShown));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required String badgeKey,
+    required bool isShown,
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((badgeKey: badgeKey, isShown: isShown)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
 }
 
 /// Flutter widget for badge:setVisibility.

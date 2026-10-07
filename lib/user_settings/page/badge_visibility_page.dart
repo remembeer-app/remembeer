@@ -49,10 +49,10 @@ class BadgeVisibilityPage extends StatelessWidget {
                                   if (value == null || value == badge.isShown) {
                                     return;
                                   }
-                                  mutate(
+                                  mutate.run(
                                     badgeKey: badge.badgeKey,
                                     isShown: value,
-                                  ).ignore();
+                                  );
                                 }
                               : null,
                           title: Text(definition?.name ?? badge.badgeKey),

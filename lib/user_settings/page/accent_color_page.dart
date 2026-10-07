@@ -33,11 +33,11 @@ class AccentColorPage extends StatelessWidget {
                   ),
                   onChanged: (color) {
                     if (color.name == user.accentColor.value) return;
-                    mutate(
+                    mutate.run(
                       accentColor: UpdateAccentColorArgsAccentColor.fromJson(
                         color.name,
                       ),
-                    ).ignore();
+                    );
                   },
                 ),
                 if (snapshot.error case final error?) ...[
