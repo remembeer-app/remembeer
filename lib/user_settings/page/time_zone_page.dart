@@ -3,6 +3,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/error_message_box.dart';
+import 'package:remembeer/convex_api/widgets/lib/timeZone.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
 import 'package:remembeer/user_settings/widget/settings_page.dart';
 
@@ -60,7 +61,7 @@ class TimeZonePage extends StatelessWidget {
                       ];
                     }
                     return [
-                      UserSearchTimeZonesQuery(
+                      LibTimeZoneSearchTimeZonesQuery(
                         key: ValueKey(search),
                         search: search,
                         builder: (context, timeZones) => Column(

@@ -4,6 +4,8 @@
     "modules/badge.dart",
     "modules/drink.dart",
     "modules/drinkLog.dart",
+    "modules/lib.dart",
+    "modules/lib/timeZone.dart",
     "modules/user.dart",
     "runtime.dart",
     "schema.dart",
@@ -12,6 +14,7 @@
     "widgets/badge.dart",
     "widgets/drink.dart",
     "widgets/drinkLog.dart",
+    "widgets/lib/timeZone.dart",
     "widgets/user.dart"
   ]
 }

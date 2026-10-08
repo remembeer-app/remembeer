@@ -2,7 +2,7 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { convexToZod } from "convex-helpers/server/zod4";
 import { z } from "zod";
-import { isValidTimeZone } from "../lib/logicalDay";
+import { isValidTimeZone } from "../lib/timeZone";
 
 export const userTable = defineTable({
   authUserId: v.string(),

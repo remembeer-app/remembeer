@@ -78,52 +78,6 @@ class UserApi {
   ConvexMutationReference<NoArgs, String> get generateAvatarUploadUrlMutation =>
       generateAvatarUploadUrlMutationReference;
 
-  Future<List<String>> searchTimeZones({required String search}) async {
-    final raw$ = await _client.query(
-      'user:searchTimeZones',
-      _encodeSearchTimeZonesArgs((search: search)),
-    );
-    return expectList(raw$, label: 'SearchTimeZonesResult')
-        .map((item) => expectString(item, label: 'SearchTimeZonesResultItem'))
-        .toList();
-  }
-
-  TypedConvexSubscription<List<String>> searchTimeZonesSubscribe({
-    required String search,
-  }) {
-    final subscription$ = _client.subscribe(
-      'user:searchTimeZones',
-      _encodeSearchTimeZonesArgs((search: search)),
-    );
-    final typedStream$ = subscription$.stream.map((event) {
-      switch (event) {
-        case QuerySuccess(:final value):
-          return TypedQuerySuccess<List<String>>(
-            expectList(value, label: 'SearchTimeZonesResult')
-                .map(
-                  (item) =>
-                      expectString(item, label: 'SearchTimeZonesResultItem'),
-                )
-                .toList(),
-          );
-        case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<List<String>>(
-            hasPendingWrites: hasPendingWrites,
-          );
-        case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<List<String>>(
-            message,
-            data: data,
-            logLines: logLines,
-          );
-      }
-    });
-    return TypedConvexSubscription<List<String>>(subscription$, typedStream$);
-  }
-
-  ConvexQueryReference<SearchTimeZonesArgs, List<String>>
-  get searchTimeZonesQuery => searchTimeZonesQueryReference;
-
   Future<Null> updateAccentColor({
     required UpdateAccentColorArgsAccentColor accentColor,
   }) async {
@@ -449,25 +403,6 @@ EnsureCurrentArgs _decodeEnsureCurrentArgs(dynamic raw) {
   );
 }
 
-typedef SearchTimeZonesArgs = ({String search});
-
-Map<String, dynamic> _encodeSearchTimeZonesArgs(SearchTimeZonesArgs value$) {
-  final (search: search) = value$;
-  return <String, dynamic>{'search': search};
-}
-
-SearchTimeZonesArgs _decodeSearchTimeZonesArgs(dynamic raw) {
-  final map = expectMap(raw, label: 'SearchTimeZonesArgs');
-  if (!map.containsKey('search')) {
-    throw FormatException(
-      'Missing required field "search" for SearchTimeZonesArgs',
-    );
-  }
-  return (
-    search: expectString(map['search'], label: 'SearchTimeZonesArgsSearch'),
-  );
-}
-
 enum UpdateAccentColorArgsAccentColor {
   amberValue('amber'),
   roseValue('rose'),
@@ -733,17 +668,6 @@ generateAvatarUploadUrlMutationReference = ConvexMutationReference(
   name: 'user:generateAvatarUploadUrl',
   encode: (args) => const <String, dynamic>{},
   decode: (raw) => expectString(raw, label: 'GenerateAvatarUploadUrlResult'),
-);
-
-final ConvexQueryReference<SearchTimeZonesArgs, List<String>>
-searchTimeZonesQueryReference = ConvexQueryReference(
-  name: 'user:searchTimeZones',
-  encode: (args) => _encodeSearchTimeZonesArgs(args),
-  decodeArgs: (raw) => _decodeSearchTimeZonesArgs(raw),
-  decode: (raw) => expectList(raw, label: 'SearchTimeZonesResult')
-      .map((item) => expectString(item, label: 'SearchTimeZonesResultItem'))
-      .toList(),
-  encodeResult: (value) => value.map((item) => item).toList(),
 );
 
 final ConvexMutationReference<UpdateAccentColorArgs, void>
