@@ -32,6 +32,5 @@ export function logicalDayAt(at: number, endOfDayBoundary: number, timeZone: str
   const date = at < logicalDayBoundaries(local.toPlainDate().toString(), endOfDayBoundary, timeZone).start
     ? local.toPlainDate().subtract({ days: 1 })
     : local.toPlainDate();
-  const today = date.toString();
-  return { today, nextBoundary: logicalDayBoundaries(today, endOfDayBoundary, timeZone).end };
+  return date.toString();
 }

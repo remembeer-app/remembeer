@@ -35,95 +35,51 @@ class DrinkLogApi {
   ConvexMutationReference<CreateArgs, DrinkLogId> get createMutation =>
       createMutationReference;
 
-  Future<DayContextResult> dayContext({required double at}) async {
-    final raw$ = await _client.query(
-      'drinkLog:dayContext',
-      _encodeDayContextArgs((at: at)),
-    );
-    return _decodeDayContextResult(raw$);
-  }
-
-  TypedConvexSubscription<DayContextResult> dayContextSubscribe({
+  Future<ListForDayResult> listForDay({
     required double at,
-  }) {
-    final subscription$ = _client.subscribe(
-      'drinkLog:dayContext',
-      _encodeDayContextArgs((at: at)),
-    );
-    final typedStream$ = subscription$.stream.map((event) {
-      switch (event) {
-        case QuerySuccess(:final value):
-          return TypedQuerySuccess<DayContextResult>(
-            _decodeDayContextResult(value),
-          );
-        case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<DayContextResult>(
-            hasPendingWrites: hasPendingWrites,
-          );
-        case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<DayContextResult>(
-            message,
-            data: data,
-            logLines: logLines,
-          );
-      }
-    });
-    return TypedConvexSubscription<DayContextResult>(
-      subscription$,
-      typedStream$,
-    );
-  }
-
-  ConvexQueryReference<DayContextArgs, DayContextResult> get dayContextQuery =>
-      dayContextQueryReference;
-
-  Future<List<ListForDayResultItem>> listForDay({required String date}) async {
+    Optional<String> date = const Optional.absent(),
+  }) async {
     final raw$ = await _client.query(
       'drinkLog:listForDay',
-      _encodeListForDayArgs((date: date)),
+      _encodeListForDayArgs((at: at, date: date)),
     );
-    return expectList(
-      raw$,
-      label: 'ListForDayResult',
-    ).map((item) => _decodeListForDayResultItem(item)).toList();
+    return _decodeListForDayResult(raw$);
   }
 
-  TypedConvexSubscription<List<ListForDayResultItem>> listForDaySubscribe({
-    required String date,
+  TypedConvexSubscription<ListForDayResult> listForDaySubscribe({
+    required double at,
+    Optional<String> date = const Optional.absent(),
   }) {
     final subscription$ = _client.subscribe(
       'drinkLog:listForDay',
-      _encodeListForDayArgs((date: date)),
+      _encodeListForDayArgs((at: at, date: date)),
     );
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
         case QuerySuccess(:final value):
-          return TypedQuerySuccess<List<ListForDayResultItem>>(
-            expectList(
-              value,
-              label: 'ListForDayResult',
-            ).map((item) => _decodeListForDayResultItem(item)).toList(),
+          return TypedQuerySuccess<ListForDayResult>(
+            _decodeListForDayResult(value),
           );
         case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<List<ListForDayResultItem>>(
+          return TypedQueryLoading<ListForDayResult>(
             hasPendingWrites: hasPendingWrites,
           );
         case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<List<ListForDayResultItem>>(
+          return TypedQueryError<ListForDayResult>(
             message,
             data: data,
             logLines: logLines,
           );
       }
     });
-    return TypedConvexSubscription<List<ListForDayResultItem>>(
+    return TypedConvexSubscription<ListForDayResult>(
       subscription$,
       typedStream$,
     );
   }
 
-  ConvexQueryReference<ListForDayArgs, List<ListForDayResultItem>>
-  get listForDayQuery => listForDayQueryReference;
+  ConvexQueryReference<ListForDayArgs, ListForDayResult> get listForDayQuery =>
+      listForDayQueryReference;
 
   Future<Null> softDelete({required DrinkLogId id}) async {
     await _client.mutate(
@@ -272,49 +228,6 @@ CreateArgs _decodeCreateArgs(dynamic raw) {
   );
 }
 
-typedef DayContextResult = ({double nextBoundary, String today});
-
-Map<String, dynamic> _encodeDayContextResult(DayContextResult value$) {
-  final (nextBoundary: nextBoundary, today: today) = value$;
-  return <String, dynamic>{'nextBoundary': nextBoundary, 'today': today};
-}
-
-DayContextResult _decodeDayContextResult(dynamic raw) {
-  final map = expectMap(raw, label: 'DayContextResult');
-  if (!map.containsKey('nextBoundary')) {
-    throw FormatException(
-      'Missing required field "nextBoundary" for DayContextResult',
-    );
-  }
-  if (!map.containsKey('today')) {
-    throw FormatException(
-      'Missing required field "today" for DayContextResult',
-    );
-  }
-  return (
-    nextBoundary: expectDouble(
-      map['nextBoundary'],
-      label: 'DayContextResultNextBoundary',
-    ),
-    today: expectString(map['today'], label: 'DayContextResultToday'),
-  );
-}
-
-typedef DayContextArgs = ({double at});
-
-Map<String, dynamic> _encodeDayContextArgs(DayContextArgs value$) {
-  final (at: at) = value$;
-  return <String, dynamic>{'at': at};
-}
-
-DayContextArgs _decodeDayContextArgs(dynamic raw) {
-  final map = expectMap(raw, label: 'DayContextArgs');
-  if (!map.containsKey('at')) {
-    throw FormatException('Missing required field "at" for DayContextArgs');
-  }
-  return (at: expectDouble(map['at'], label: 'DayContextArgsAt'));
-}
-
 Map<String, dynamic> _encodeDrinkCategory(DrinkCategory value) {
   switch (value) {
     case Beer():
@@ -354,7 +267,7 @@ DrinkCategory _decodeDrinkCategory(dynamic raw) {
   }
 }
 
-typedef ListForDayResultItemDrink = ({
+typedef ListForDayResultLogsItemDrink = ({
   double creationTime,
   DrinkId id,
   double alcoholPercentage,
@@ -366,8 +279,8 @@ typedef ListForDayResultItemDrink = ({
   double updatedAt,
 });
 
-Map<String, dynamic> _encodeListForDayResultItemDrink(
-  ListForDayResultItemDrink value$,
+Map<String, dynamic> _encodeListForDayResultLogsItemDrink(
+  ListForDayResultLogsItemDrink value$,
 ) {
   final (
     creationTime: creationTime,
@@ -396,97 +309,101 @@ Map<String, dynamic> _encodeListForDayResultItemDrink(
   };
 }
 
-ListForDayResultItemDrink _decodeListForDayResultItemDrink(dynamic raw) {
-  final map = expectMap(raw, label: 'ListForDayResultItemDrink');
+ListForDayResultLogsItemDrink _decodeListForDayResultLogsItemDrink(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListForDayResultLogsItemDrink');
   if (!map.containsKey('_creationTime')) {
     throw FormatException(
-      'Missing required field "_creationTime" for ListForDayResultItemDrink',
+      'Missing required field "_creationTime" for ListForDayResultLogsItemDrink',
     );
   }
   if (!map.containsKey('_id')) {
     throw FormatException(
-      'Missing required field "_id" for ListForDayResultItemDrink',
+      'Missing required field "_id" for ListForDayResultLogsItemDrink',
     );
   }
   if (!map.containsKey('alcoholPercentage')) {
     throw FormatException(
-      'Missing required field "alcoholPercentage" for ListForDayResultItemDrink',
+      'Missing required field "alcoholPercentage" for ListForDayResultLogsItemDrink',
     );
   }
   if (!map.containsKey('deletedAt')) {
     throw FormatException(
-      'Missing required field "deletedAt" for ListForDayResultItemDrink',
+      'Missing required field "deletedAt" for ListForDayResultLogsItemDrink',
     );
   }
   if (!map.containsKey('drinkCategory')) {
     throw FormatException(
-      'Missing required field "drinkCategory" for ListForDayResultItemDrink',
+      'Missing required field "drinkCategory" for ListForDayResultLogsItemDrink',
     );
   }
   if (!map.containsKey('name')) {
     throw FormatException(
-      'Missing required field "name" for ListForDayResultItemDrink',
+      'Missing required field "name" for ListForDayResultLogsItemDrink',
     );
   }
   if (!map.containsKey('ownerId')) {
     throw FormatException(
-      'Missing required field "ownerId" for ListForDayResultItemDrink',
+      'Missing required field "ownerId" for ListForDayResultLogsItemDrink',
     );
   }
   if (!map.containsKey('updatedAt')) {
     throw FormatException(
-      'Missing required field "updatedAt" for ListForDayResultItemDrink',
+      'Missing required field "updatedAt" for ListForDayResultLogsItemDrink',
     );
   }
   return (
     creationTime: expectDouble(
       map['_creationTime'],
-      label: 'ListForDayResultItemDrinkCreationTime',
+      label: 'ListForDayResultLogsItemDrinkCreationTime',
     ),
-    id: DrinkId(expectString(map['_id'], label: 'ListForDayResultItemDrinkId')),
+    id: DrinkId(
+      expectString(map['_id'], label: 'ListForDayResultLogsItemDrinkId'),
+    ),
     alcoholPercentage: expectDouble(
       map['alcoholPercentage'],
-      label: 'ListForDayResultItemDrinkAlcoholPercentage',
+      label: 'ListForDayResultLogsItemDrinkAlcoholPercentage',
     ),
     deletedAt: map['deletedAt'] == null
         ? null
         : expectDouble(
             map['deletedAt'],
-            label: 'ListForDayResultItemDrinkDeletedAt',
+            label: 'ListForDayResultLogsItemDrinkDeletedAt',
           ),
     drinkCategory: _decodeDrinkCategory(map['drinkCategory']),
-    name: expectString(map['name'], label: 'ListForDayResultItemDrinkName'),
+    name: expectString(map['name'], label: 'ListForDayResultLogsItemDrinkName'),
     ownerId: map['ownerId'] == null
         ? null
         : UserId(
             expectString(
               map['ownerId'],
-              label: 'ListForDayResultItemDrinkOwnerId',
+              label: 'ListForDayResultLogsItemDrinkOwnerId',
             ),
           ),
     seedKey: map.containsKey('seedKey')
         ? Optional.of(
             expectString(
               map['seedKey'],
-              label: 'ListForDayResultItemDrinkSeedKey',
+              label: 'ListForDayResultLogsItemDrinkSeedKey',
             ),
           )
         : const Optional.absent(),
     updatedAt: expectDouble(
       map['updatedAt'],
-      label: 'ListForDayResultItemDrinkUpdatedAt',
+      label: 'ListForDayResultLogsItemDrinkUpdatedAt',
     ),
   );
 }
 
-typedef ListForDayResultItemLocation = ({
+typedef ListForDayResultLogsItemLocation = ({
   double? accuracy,
   double latitude,
   double longitude,
 });
 
-Map<String, dynamic> _encodeListForDayResultItemLocation(
-  ListForDayResultItemLocation value$,
+Map<String, dynamic> _encodeListForDayResultLogsItemLocation(
+  ListForDayResultLogsItemLocation value$,
 ) {
   final (accuracy: accuracy, latitude: latitude, longitude: longitude) = value$;
   return <String, dynamic>{
@@ -496,21 +413,23 @@ Map<String, dynamic> _encodeListForDayResultItemLocation(
   };
 }
 
-ListForDayResultItemLocation _decodeListForDayResultItemLocation(dynamic raw) {
-  final map = expectMap(raw, label: 'ListForDayResultItemLocation');
+ListForDayResultLogsItemLocation _decodeListForDayResultLogsItemLocation(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'ListForDayResultLogsItemLocation');
   if (!map.containsKey('accuracy')) {
     throw FormatException(
-      'Missing required field "accuracy" for ListForDayResultItemLocation',
+      'Missing required field "accuracy" for ListForDayResultLogsItemLocation',
     );
   }
   if (!map.containsKey('latitude')) {
     throw FormatException(
-      'Missing required field "latitude" for ListForDayResultItemLocation',
+      'Missing required field "latitude" for ListForDayResultLogsItemLocation',
     );
   }
   if (!map.containsKey('longitude')) {
     throw FormatException(
-      'Missing required field "longitude" for ListForDayResultItemLocation',
+      'Missing required field "longitude" for ListForDayResultLogsItemLocation',
     );
   }
   return (
@@ -518,35 +437,37 @@ ListForDayResultItemLocation _decodeListForDayResultItemLocation(dynamic raw) {
         ? null
         : expectDouble(
             map['accuracy'],
-            label: 'ListForDayResultItemLocationAccuracy',
+            label: 'ListForDayResultLogsItemLocationAccuracy',
           ),
     latitude: expectDouble(
       map['latitude'],
-      label: 'ListForDayResultItemLocationLatitude',
+      label: 'ListForDayResultLogsItemLocationLatitude',
     ),
     longitude: expectDouble(
       map['longitude'],
-      label: 'ListForDayResultItemLocationLongitude',
+      label: 'ListForDayResultLogsItemLocationLongitude',
     ),
   );
 }
 
-typedef ListForDayResultItem = ({
+typedef ListForDayResultLogsItem = ({
   double creationTime,
   DrinkLogId id,
   double consumedAt,
   String consumedAtLocal,
   double? deletedAt,
-  ListForDayResultItemDrink? drink,
+  ListForDayResultLogsItemDrink? drink,
   DrinkId drinkId,
-  ListForDayResultItemLocation? location,
+  ListForDayResultLogsItemLocation? location,
   SessionId? sessionId,
   double updatedAt,
   UserId userId,
   double volumeMl,
 });
 
-Map<String, dynamic> _encodeListForDayResultItem(ListForDayResultItem value$) {
+Map<String, dynamic> _encodeListForDayResultLogsItem(
+  ListForDayResultLogsItem value$,
+) {
   final (
     creationTime: creationTime,
     id: id,
@@ -569,12 +490,12 @@ Map<String, dynamic> _encodeListForDayResultItem(ListForDayResultItem value$) {
     'deletedAt': deletedAt,
     'drink': switch (drink) {
       null => null,
-      final v$ => _encodeListForDayResultItemDrink(v$),
+      final v$ => _encodeListForDayResultLogsItemDrink(v$),
     },
     'drinkId': drinkId.value,
     'location': switch (location) {
       null => null,
-      final v$ => _encodeListForDayResultItemLocation(v$),
+      final v$ => _encodeListForDayResultLogsItemLocation(v$),
     },
     'sessionId': switch (sessionId) {
       null => null,
@@ -586,132 +507,177 @@ Map<String, dynamic> _encodeListForDayResultItem(ListForDayResultItem value$) {
   };
 }
 
-ListForDayResultItem _decodeListForDayResultItem(dynamic raw) {
-  final map = expectMap(raw, label: 'ListForDayResultItem');
+ListForDayResultLogsItem _decodeListForDayResultLogsItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ListForDayResultLogsItem');
   if (!map.containsKey('_creationTime')) {
     throw FormatException(
-      'Missing required field "_creationTime" for ListForDayResultItem',
+      'Missing required field "_creationTime" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('_id')) {
     throw FormatException(
-      'Missing required field "_id" for ListForDayResultItem',
+      'Missing required field "_id" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('consumedAt')) {
     throw FormatException(
-      'Missing required field "consumedAt" for ListForDayResultItem',
+      'Missing required field "consumedAt" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('consumedAtLocal')) {
     throw FormatException(
-      'Missing required field "consumedAtLocal" for ListForDayResultItem',
+      'Missing required field "consumedAtLocal" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('deletedAt')) {
     throw FormatException(
-      'Missing required field "deletedAt" for ListForDayResultItem',
+      'Missing required field "deletedAt" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('drink')) {
     throw FormatException(
-      'Missing required field "drink" for ListForDayResultItem',
+      'Missing required field "drink" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('drinkId')) {
     throw FormatException(
-      'Missing required field "drinkId" for ListForDayResultItem',
+      'Missing required field "drinkId" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('location')) {
     throw FormatException(
-      'Missing required field "location" for ListForDayResultItem',
+      'Missing required field "location" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('sessionId')) {
     throw FormatException(
-      'Missing required field "sessionId" for ListForDayResultItem',
+      'Missing required field "sessionId" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('updatedAt')) {
     throw FormatException(
-      'Missing required field "updatedAt" for ListForDayResultItem',
+      'Missing required field "updatedAt" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('userId')) {
     throw FormatException(
-      'Missing required field "userId" for ListForDayResultItem',
+      'Missing required field "userId" for ListForDayResultLogsItem',
     );
   }
   if (!map.containsKey('volumeMl')) {
     throw FormatException(
-      'Missing required field "volumeMl" for ListForDayResultItem',
+      'Missing required field "volumeMl" for ListForDayResultLogsItem',
     );
   }
   return (
     creationTime: expectDouble(
       map['_creationTime'],
-      label: 'ListForDayResultItemCreationTime',
+      label: 'ListForDayResultLogsItemCreationTime',
     ),
-    id: DrinkLogId(expectString(map['_id'], label: 'ListForDayResultItemId')),
+    id: DrinkLogId(
+      expectString(map['_id'], label: 'ListForDayResultLogsItemId'),
+    ),
     consumedAt: expectDouble(
       map['consumedAt'],
-      label: 'ListForDayResultItemConsumedAt',
+      label: 'ListForDayResultLogsItemConsumedAt',
     ),
     consumedAtLocal: expectString(
       map['consumedAtLocal'],
-      label: 'ListForDayResultItemConsumedAtLocal',
+      label: 'ListForDayResultLogsItemConsumedAtLocal',
     ),
     deletedAt: map['deletedAt'] == null
         ? null
         : expectDouble(
             map['deletedAt'],
-            label: 'ListForDayResultItemDeletedAt',
+            label: 'ListForDayResultLogsItemDeletedAt',
           ),
     drink: map['drink'] == null
         ? null
-        : _decodeListForDayResultItemDrink(map['drink']),
+        : _decodeListForDayResultLogsItemDrink(map['drink']),
     drinkId: DrinkId(
-      expectString(map['drinkId'], label: 'ListForDayResultItemDrinkId'),
+      expectString(map['drinkId'], label: 'ListForDayResultLogsItemDrinkId'),
     ),
     location: map['location'] == null
         ? null
-        : _decodeListForDayResultItemLocation(map['location']),
+        : _decodeListForDayResultLogsItemLocation(map['location']),
     sessionId: map['sessionId'] == null
         ? null
         : SessionId(
             expectString(
               map['sessionId'],
-              label: 'ListForDayResultItemSessionId',
+              label: 'ListForDayResultLogsItemSessionId',
             ),
           ),
     updatedAt: expectDouble(
       map['updatedAt'],
-      label: 'ListForDayResultItemUpdatedAt',
+      label: 'ListForDayResultLogsItemUpdatedAt',
     ),
     userId: UserId(
-      expectString(map['userId'], label: 'ListForDayResultItemUserId'),
+      expectString(map['userId'], label: 'ListForDayResultLogsItemUserId'),
     ),
     volumeMl: expectDouble(
       map['volumeMl'],
-      label: 'ListForDayResultItemVolumeMl',
+      label: 'ListForDayResultLogsItemVolumeMl',
     ),
   );
 }
 
-typedef ListForDayArgs = ({String date});
+typedef ListForDayResult = ({
+  String date,
+  List<ListForDayResultLogsItem> logs,
+  String today,
+});
+
+Map<String, dynamic> _encodeListForDayResult(ListForDayResult value$) {
+  final (date: date, logs: logs, today: today) = value$;
+  return <String, dynamic>{
+    'date': date,
+    'logs': logs.map((item) => _encodeListForDayResultLogsItem(item)).toList(),
+    'today': today,
+  };
+}
+
+ListForDayResult _decodeListForDayResult(dynamic raw) {
+  final map = expectMap(raw, label: 'ListForDayResult');
+  if (!map.containsKey('date')) {
+    throw FormatException('Missing required field "date" for ListForDayResult');
+  }
+  if (!map.containsKey('logs')) {
+    throw FormatException('Missing required field "logs" for ListForDayResult');
+  }
+  if (!map.containsKey('today')) {
+    throw FormatException(
+      'Missing required field "today" for ListForDayResult',
+    );
+  }
+  return (
+    date: expectString(map['date'], label: 'ListForDayResultDate'),
+    logs: expectList(
+      map['logs'],
+      label: 'ListForDayResultLogs',
+    ).map((item) => _decodeListForDayResultLogsItem(item)).toList(),
+    today: expectString(map['today'], label: 'ListForDayResultToday'),
+  );
+}
+
+typedef ListForDayArgs = ({double at, Optional<String> date});
 
 Map<String, dynamic> _encodeListForDayArgs(ListForDayArgs value$) {
-  final (date: date) = value$;
-  return <String, dynamic>{'date': date};
+  final (at: at, date: date) = value$;
+  return <String, dynamic>{'at': at, if (date.isDefined) 'date': date.value};
 }
 
 ListForDayArgs _decodeListForDayArgs(dynamic raw) {
   final map = expectMap(raw, label: 'ListForDayArgs');
-  if (!map.containsKey('date')) {
-    throw FormatException('Missing required field "date" for ListForDayArgs');
+  if (!map.containsKey('at')) {
+    throw FormatException('Missing required field "at" for ListForDayArgs');
   }
-  return (date: expectString(map['date'], label: 'ListForDayArgsDate'));
+  return (
+    at: expectDouble(map['at'], label: 'ListForDayArgsAt'),
+    date: map.containsKey('date')
+        ? Optional.of(expectString(map['date'], label: 'ListForDayArgsDate'))
+        : const Optional.absent(),
+  );
 }
 
 typedef SoftDeleteArgs = ({DrinkLogId id});
@@ -863,26 +829,13 @@ final ConvexMutationReference<CreateArgs, DrinkLogId> createMutationReference =
       decode: (raw) => DrinkLogId(expectString(raw, label: 'CreateResult')),
     );
 
-final ConvexQueryReference<DayContextArgs, DayContextResult>
-dayContextQueryReference = ConvexQueryReference(
-  name: 'drinkLog:dayContext',
-  encode: (args) => _encodeDayContextArgs(args),
-  decodeArgs: (raw) => _decodeDayContextArgs(raw),
-  decode: (raw) => _decodeDayContextResult(raw),
-  encodeResult: (value) => _encodeDayContextResult(value),
-);
-
-final ConvexQueryReference<ListForDayArgs, List<ListForDayResultItem>>
+final ConvexQueryReference<ListForDayArgs, ListForDayResult>
 listForDayQueryReference = ConvexQueryReference(
   name: 'drinkLog:listForDay',
   encode: (args) => _encodeListForDayArgs(args),
   decodeArgs: (raw) => _decodeListForDayArgs(raw),
-  decode: (raw) => expectList(
-    raw,
-    label: 'ListForDayResult',
-  ).map((item) => _decodeListForDayResultItem(item)).toList(),
-  encodeResult: (value) =>
-      value.map((item) => _encodeListForDayResultItem(item)).toList(),
+  decode: (raw) => _decodeListForDayResult(raw),
+  encodeResult: (value) => _encodeListForDayResult(value),
 );
 
 final ConvexMutationReference<SoftDeleteArgs, void>

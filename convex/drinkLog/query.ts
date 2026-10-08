@@ -9,14 +9,21 @@ export const listForDay = authQuery
   .extend(WithZod)
   .input(
     z.object({
-      date: z.iso.date(),
+      date: z.iso.date().optional(),
+      at: z.number().int(),
     }),
   )
-  .returns(v.array(schema.doc("drinkLog").extend({
-    drink: v.nullable(schema.doc("drink")),
-    consumedAtLocal: v.string(),
-  })))
-  .handler(async (ctx, { date }) => {
+  .returns(v.object({
+    today: v.string(),
+    date: v.string(),
+    logs: v.array(schema.doc("drinkLog").extend({
+      drink: v.nullable(schema.doc("drink")),
+      consumedAtLocal: v.string(),
+    })),
+  }))
+  .handler(async (ctx, { date: selectedDate, at }) => {
+    const today = logicalDayAt(at, ctx.user.endOfDayBoundary, ctx.user.timeZone);
+    const date = selectedDate === undefined || selectedDate > today ? today : selectedDate;
     const { start, end } = logicalDayBoundaries(
       date,
       ctx.user.endOfDayBoundary,
@@ -33,20 +40,14 @@ export const listForDay = authQuery
       )
       .order(ctx.user.drinkLogSortOrder)
       .collect();
-    return await Promise.all(logs.map(async (log) => ({
-      ...log,
-      drink: await ctx.db.get("drink", log.drinkId),
-      consumedAtLocal: Temporal.Instant.fromEpochMilliseconds(log.consumedAt)
-        .toZonedDateTimeISO(ctx.user.timeZone).toPlainDateTime().toString(),
-    })));
+    return {
+      today,
+      date,
+      logs: await Promise.all(logs.map(async (log) => ({
+        ...log,
+        drink: await ctx.db.get("drink", log.drinkId),
+        consumedAtLocal: Temporal.Instant.fromEpochMilliseconds(log.consumedAt)
+          .toZonedDateTimeISO(ctx.user.timeZone).toPlainDateTime().toString(),
+      }))),
+    };
   });
-
-export const dayContext = authQuery
-  .extend(WithZod)
-  .input(z.object({ at: z.number().int() }))
-  .returns(v.object({ today: v.string(), nextBoundary: v.number() }))
-  .handler(async (ctx, { at }) => logicalDayAt(
-    at,
-    ctx.user.endOfDayBoundary,
-    ctx.user.timeZone,
-  ));

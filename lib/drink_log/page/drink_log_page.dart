@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
-import 'package:remembeer/convex_api/modules/drinkLog.dart';
 import 'package:remembeer/convex_api/widgets/drinkLog.dart';
 import 'package:remembeer/date/widget/date_selector.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
@@ -20,21 +18,15 @@ class DrinkLogPage extends StatefulWidget {
 }
 
 class _DrinkLogPageState extends State<DrinkLogPage> {
-  final _api = get<ConvexApi>();
   final _logs = get<DrinkLogService>();
-  late Future<DayContextResult> _dayContext;
+  double _at = DateTime.now().millisecondsSinceEpoch.toDouble();
   late final AppLifecycleListener _lifecycle;
   DateTime? _selectedDate;
   var _isActive = true;
 
-  Future<DayContextResult> _loadDay() => _api.drinkLog.dayContext(
-    at: DateTime.now().millisecondsSinceEpoch.toDouble(),
-  );
-
   @override
   void initState() {
     super.initState();
-    _dayContext = _loadDay();
     _lifecycle = AppLifecycleListener(onResume: _refreshDay);
   }
 
@@ -44,14 +36,16 @@ class _DrinkLogPageState extends State<DrinkLogPage> {
     // The router keeps inactive tabs mounted and disables their TickerMode.
     // Refresh on returning to this tab to pick up day-boundary or time-zone changes.
     final isActive = TickerMode.valuesOf(context).enabled;
-    if (isActive && !_isActive) _dayContext = _loadDay();
+    if (isActive && !_isActive) {
+      _at = DateTime.now().millisecondsSinceEpoch.toDouble();
+    }
     _isActive = isActive;
   }
 
   void _refreshDay() {
     if (_isActive) {
       setState(() {
-        _dayContext = _loadDay();
+        _at = DateTime.now().millisecondsSinceEpoch.toDouble();
       });
     }
   }
@@ -75,8 +69,11 @@ class _DrinkLogPageState extends State<DrinkLogPage> {
           child: const Icon(Icons.add),
         ),
       ),
-      child: AsyncBuilder<DayContextResult>(
-        future: _dayContext,
+      child: DrinkLogListForDayQuery(
+        at: _at,
+        date: _selectedDate == null
+            ? const Optional.absent()
+            : Optional.of(DateFormat('yyyy-MM-dd').format(_selectedDate!)),
         errorBuilder: (context, error) => Center(
           child: TextButton(
             onPressed: _refreshDay,
@@ -85,37 +82,32 @@ class _DrinkLogPageState extends State<DrinkLogPage> {
         ),
         builder: (context, day) {
           final today = DateTime.parse('${day.today}T00:00:00Z');
-          final selected = _selectedDate;
-          final date = selected == null || selected.isAfter(today)
-              ? today
-              : selected;
+          final date = DateTime.parse('${day.date}T00:00:00Z');
+          final logs = day.logs;
           return Column(
             children: [
               DateSelector(
                 dateState: (selectedDate: date, effectiveToday: today),
                 onDateChanged: (value) => setState(() {
-                  final selected = value == null
+                  _selectedDate =
+                      value == null || DateUtils.isSameDay(value, today)
                       ? null
-                      : DateTime.utc(value.year, value.month, value.day);
-                  _selectedDate = selected == today ? null : selected;
+                      : value;
                 }),
               ),
               Expanded(
-                child: DrinkLogListForDayQuery(
-                  date: DateFormat('yyyy-MM-dd').format(date),
-                  builder: (context, logs) => logs.isEmpty
-                      ? const Center(
-                          child: Text('No drinks recorded for this day.'),
-                        )
-                      : ListView.builder(
-                          padding: const EdgeInsets.all(8),
-                          itemCount: logs.length,
-                          itemBuilder: (context, index) => DrinkLogCard(
-                            key: ValueKey(logs[index].id),
-                            log: logs[index],
-                          ),
+                child: logs.isEmpty
+                    ? const Center(
+                        child: Text('No drinks recorded for this day.'),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(8),
+                        itemCount: logs.length,
+                        itemBuilder: (context, index) => DrinkLogCard(
+                          key: ValueKey(logs[index].id),
+                          log: logs[index],
                         ),
-                ),
+                      ),
               ),
             ],
           );

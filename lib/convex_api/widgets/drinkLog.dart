@@ -250,33 +250,35 @@ class DrinkLogUpdateMutation extends StatelessWidget {
   );
 }
 
-/// Flutter widget for drinkLog:dayContext.
-class DrinkLogDayContextQuery extends StatelessWidget {
+/// Flutter widget for drinkLog:listForDay.
+class DrinkLogListForDayQuery extends StatelessWidget {
   /// Creates a typed query widget with default loading and error UI.
-  const DrinkLogDayContextQuery({
+  const DrinkLogListForDayQuery({
     super.key,
     required this.builder,
     this.client,
     this.waitingBuilder,
     this.errorBuilder,
     required this.at,
+    this.date = const Optional.absent(),
   }) : snapshotBuilder = null;
 
   /// Creates a query widget whose builder handles every snapshot state.
-  const DrinkLogDayContextQuery.snapshot({
+  const DrinkLogListForDayQuery.snapshot({
     super.key,
     required this.snapshotBuilder,
     this.client,
     required this.at,
+    this.date = const Optional.absent(),
   }) : builder = null,
        waitingBuilder = null,
        errorBuilder = null;
 
   /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, DayContextResult)? builder;
+  final Widget Function(BuildContext, ListForDayResult)? builder;
 
   /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(BuildContext, ConvexQuerySnapshot<DayContextResult>)?
+  final Widget Function(BuildContext, ConvexQuerySnapshot<ListForDayResult>)?
   snapshotBuilder;
 
   /// Overrides the initial loading UI.
@@ -289,89 +291,22 @@ class DrinkLogDayContextQuery extends StatelessWidget {
   final ConvexRuntimeClient? client;
 
   final double at;
+  final Optional<String> date;
 
   @override
   Widget build(BuildContext context) {
     final buildSnapshot = snapshotBuilder;
     if (buildSnapshot != null) {
-      return ConvexTypedQuery<DayContextArgs, DayContextResult>.snapshot(
-        query: dayContextQueryReference,
-        args: (at: at),
-        client: client,
-        snapshotBuilder: buildSnapshot,
-      );
-    }
-    return ConvexTypedQuery<DayContextArgs, DayContextResult>(
-      query: dayContextQueryReference,
-      args: (at: at),
-      client: client,
-      builder: builder!,
-      waitingBuilder: waitingBuilder,
-      errorBuilder: errorBuilder,
-    );
-  }
-}
-
-/// Flutter widget for drinkLog:listForDay.
-class DrinkLogListForDayQuery extends StatelessWidget {
-  /// Creates a typed query widget with default loading and error UI.
-  const DrinkLogListForDayQuery({
-    super.key,
-    required this.builder,
-    this.client,
-    this.waitingBuilder,
-    this.errorBuilder,
-    required this.date,
-  }) : snapshotBuilder = null;
-
-  /// Creates a query widget whose builder handles every snapshot state.
-  const DrinkLogListForDayQuery.snapshot({
-    super.key,
-    required this.snapshotBuilder,
-    this.client,
-    required this.date,
-  }) : builder = null,
-       waitingBuilder = null,
-       errorBuilder = null;
-
-  /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, List<ListForDayResultItem>)? builder;
-
-  /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(
-    BuildContext,
-    ConvexQuerySnapshot<List<ListForDayResultItem>>,
-  )?
-  snapshotBuilder;
-
-  /// Overrides the initial loading UI.
-  final WidgetBuilder? waitingBuilder;
-
-  /// Overrides the error UI.
-  final Widget Function(BuildContext, Object)? errorBuilder;
-
-  /// Optional runtime client override.
-  final ConvexRuntimeClient? client;
-
-  final String date;
-
-  @override
-  Widget build(BuildContext context) {
-    final buildSnapshot = snapshotBuilder;
-    if (buildSnapshot != null) {
-      return ConvexTypedQuery<
-        ListForDayArgs,
-        List<ListForDayResultItem>
-      >.snapshot(
+      return ConvexTypedQuery<ListForDayArgs, ListForDayResult>.snapshot(
         query: listForDayQueryReference,
-        args: (date: date),
+        args: (at: at, date: date),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
-    return ConvexTypedQuery<ListForDayArgs, List<ListForDayResultItem>>(
+    return ConvexTypedQuery<ListForDayArgs, ListForDayResult>(
       query: listForDayQueryReference,
-      args: (date: date),
+      args: (at: at, date: date),
       client: client,
       builder: builder!,
       waitingBuilder: waitingBuilder,

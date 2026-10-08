@@ -11,7 +11,7 @@ import 'package:remembeer/routes.dart';
 class DrinkLogCard extends StatelessWidget {
   DrinkLogCard({super.key, required this.log});
 
-  final ListForDayResultItem log;
+  final ListForDayResultLogsItem log;
   final _api = get<ConvexApi>();
 
   @override

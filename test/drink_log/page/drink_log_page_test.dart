@@ -39,34 +39,37 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(api.dayRequests, 1);
-      expect(client.requests.last.args, {'date': '2026-01-01'});
+      expect(client.requests.length, 1);
+      expect(client.requests.last.args.containsKey('date'), isFalse);
+      expect(client.requests.last.args['at'], isA<double>());
       await tester.tap(find.byIcon(Icons.chevron_left));
       await tester.pumpAndSettle();
-      expect(client.requests.last.args, {'date': '2025-12-31'});
+      expect(client.requests.last.args['date'], '2025-12-31');
       expect(find.text('Return to today'), findsOneWidget);
-      expect(api.dayRequests, 1);
+      expect(client.requests.length, 2);
 
       active.value = false;
       await tester.pump();
-      api.today = '2026-01-02';
+      client.today = '2026-01-02';
       active.value = true;
       await tester.pumpAndSettle();
-      expect(api.dayRequests, 2);
-      expect(client.requests.last.args, {'date': '2025-12-31'});
+      expect(client.requests.length, 3);
+      expect(client.requests.last.args['date'], '2025-12-31');
       await tester.tap(find.text('Return to today'));
       await tester.pumpAndSettle();
-      expect(client.requests.last.args, {'date': '2026-01-02'});
+      expect(client.requests.last.args.containsKey('date'), isFalse);
+      expect(find.text('Today'), findsOneWidget);
       expect(find.text('Return to today'), findsNothing);
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-      api.today = '2026-01-03';
+      client.today = '2026-01-03';
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
-      expect(api.dayRequests, 3);
-      expect(client.requests.last.args, {'date': '2026-01-03'});
+      expect(client.requests.length, 5);
+      expect(client.requests.last.args.containsKey('date'), isFalse);
+      expect(find.text('Today'), findsOneWidget);
       await tester.pump(const Duration(days: 1));
-      expect(api.dayRequests, 3);
+      expect(client.requests.length, 5);
       await tester.pumpWidget(const SizedBox.shrink());
       active.dispose();
       await client.events.close();
@@ -98,7 +101,7 @@ void main() {
             GoRoute(
               path: ':drinkLogId/edit',
               builder: (context, state) => UpdateDrinkLogPage(
-                log: state.extra as logs.ListForDayResultItem?,
+                log: state.extra as logs.ListForDayResultLogsItem?,
               ),
             ),
           ],
@@ -115,7 +118,8 @@ void main() {
     );
     await tester.pump();
     expect(client.requests.single.name, 'drinkLog:listForDay');
-    expect(client.requests.single.args, {'date': '2026-01-01'});
+    expect(client.requests.single.args.containsKey('date'), isFalse);
+    expect(client.requests.single.args['at'], isA<double>());
     client.emit();
     await tester.pumpAndSettle();
     expect(find.text('Recorded beer'), findsOneWidget);
@@ -205,6 +209,16 @@ Map<String, dynamic> _drink(String name) => {
 
 class _Runtime implements ConvexRuntimeClient {
   var emptyLogs = false;
+  var today = '2026-01-01';
+
+  String get date {
+    final selected =
+        requests
+                .lastWhere((request) => request.name == 'drinkLog:listForDay')
+                .args['date']
+            as String?;
+    return selected == null || selected.compareTo(today) > 0 ? today : selected;
+  }
 
   @override
   ConvexConnectionState get currentConnectionState =>
@@ -214,23 +228,27 @@ class _Runtime implements ConvexRuntimeClient {
   var name = 'Recorded beer';
 
   void emit() => events.add(
-    ConvexRuntimeQuerySuccess([
-      for (final missing in [false, true])
-        {
-          '_id': missing ? 'missing' : 'log',
-          '_creationTime': 1,
-          'userId': 'user',
-          'sessionId': null,
-          'drinkId': missing ? 'missing-drink' : 'drink',
-          'consumedAt': DateTime.utc(2026, 1, 1, 5).millisecondsSinceEpoch,
-          'consumedAtLocal': '2026-01-01T06:00:00',
-          'volumeMl': 500,
-          'location': null,
-          'updatedAt': 1,
-          'deletedAt': null,
-          'drink': missing ? null : _drink(name),
-        },
-    ]),
+    ConvexRuntimeQuerySuccess({
+      'today': today,
+      'date': date,
+      'logs': [
+        for (final missing in [false, true])
+          {
+            '_id': missing ? 'missing' : 'log',
+            '_creationTime': 1,
+            'userId': 'user',
+            'sessionId': null,
+            'drinkId': missing ? 'missing-drink' : 'drink',
+            'consumedAt': DateTime.utc(2026, 1, 1, 5).millisecondsSinceEpoch,
+            'consumedAtLocal': '2026-01-01T06:00:00',
+            'volumeMl': 500,
+            'location': null,
+            'updatedAt': 1,
+            'deletedAt': null,
+            'drink': missing ? null : _drink(name),
+          },
+      ],
+    }),
   );
 
   @override
@@ -242,7 +260,13 @@ class _Runtime implements ConvexRuntimeClient {
     if (name == 'drinkLog:listForDay') {
       if (emptyLogs) {
         return _Subscription(
-          Stream.value(const ConvexRuntimeQuerySuccess(<Object?>[])),
+          Stream.value(
+            ConvexRuntimeQuerySuccess({
+              'today': today,
+              'date': date,
+              'logs': <Object?>[],
+            }),
+          ),
         );
       }
       return _Subscription(events.stream);
@@ -299,22 +323,8 @@ class _Logs implements DrinkLogService {
 }
 
 class _Mutations implements ConvexFunctionCaller {
-  var dayRequests = 0;
-  var today = '2026-01-01';
   String? name;
   Map<String, dynamic> args = {};
-
-  @override
-  Future<dynamic> query(
-    String name, [
-    Map<String, dynamic> args = const {},
-  ]) async {
-    if (name != 'drinkLog:dayContext') {
-      throw StateError('Unexpected query: $name');
-    }
-    dayRequests++;
-    return {'today': today, 'nextBoundary': 0};
-  }
 
   @override
   Future<dynamic> mutate(

@@ -11,7 +11,7 @@ import 'package:remembeer/ioc/ioc_container.dart';
 class UpdateDrinkLogPage extends StatelessWidget {
   UpdateDrinkLogPage({super.key, required this.log});
 
-  final ListForDayResultItem? log;
+  final ListForDayResultLogsItem? log;
   final _api = get<ConvexApi>();
 
   @override

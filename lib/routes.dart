@@ -414,7 +414,7 @@ class UpdateDrinkLogRoute extends GoRouteData with $UpdateDrinkLogRoute {
   const UpdateDrinkLogRoute({required this.drinkLogId, this.$extra});
 
   final String drinkLogId;
-  final convex_log.ListForDayResultItem? $extra;
+  final convex_log.ListForDayResultLogsItem? $extra;
 
   @override
   Widget build(BuildContext context, GoRouterState state) {

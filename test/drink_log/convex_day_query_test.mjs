@@ -3,7 +3,7 @@ import test from "node:test";
 import { build } from "esbuild";
 
 const { outputFiles } = await build({
-  stdin: { contents: 'export { listForDay, dayContext } from "./convex/drinkLog/query"; export { update } from "./convex/drinkLog/mutation"; export { deleteUserData } from "./convex/user/deletion";', resolveDir: process.cwd() },
+  stdin: { contents: 'export { listForDay } from "./convex/drinkLog/query"; export { update } from "./convex/drinkLog/mutation"; export { deleteUserData } from "./convex/user/deletion";', resolveDir: process.cwd() },
   bundle: true, platform: "node", format: "esm", write: false,
   plugins: [{ name: "authenticated-context", setup(builder) {
     builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
@@ -11,7 +11,7 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { listForDay, dayContext, update, deleteUserData } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
+const { listForDay, update, deleteUserData } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
 
 test("daily reads use live catalogue data and keep missing or deleted drinks visible", async () => {
   const start = Date.parse("2026-01-01T05:00Z");
@@ -46,27 +46,37 @@ test("daily reads use live catalogue data and keep missing or deleted drinks vis
       };
     },
   } };
-  const input = { date: "2026-01-01" };
+  const input = { date: "2026-01-01", at: Date.parse("2026-01-02T04:59:59Z") };
   let result = await listForDay(ctx, input);
-  assert.deepEqual(result.map((log) => log._id), ["first", "last"]);
-  assert.equal(result[0].consumedAtLocal, "2026-01-01T06:00:00");
+  assert.equal(result.today, "2026-01-01");
+  assert.equal(result.date, "2026-01-01");
+  assert.deepEqual(await listForDay(ctx, { at: input.at }), result);
+  assert.deepEqual(await listForDay(ctx, { ...input, date: "2026-01-03" }), result);
+  assert.deepEqual(result.logs.map((log) => log._id), ["first", "last"]);
+  assert.equal(result.logs[0].consumedAtLocal, "2026-01-01T06:00:00");
   drink.name = "Edited beer"; drink.alcoholPercentage = 7; drink.deletedAt = 1;
   result = await listForDay(ctx, input);
-  assert.equal(result[0].drink.name, "Edited beer");
-  assert.equal(result[0].drink.alcoholPercentage, 7);
+  assert.equal(result.logs[0].drink.name, "Edited beer");
+  assert.equal(result.logs[0].drink.alcoholPercentage, 7);
   catalogueDrink = null;
   result = await listForDay(ctx, input);
-  assert.equal(result.length, 2);
-  assert.equal(result[0].drink, null);
-  await assert.rejects(listForDay(ctx, { date: "2026-02-30" }));
+  assert.equal(result.logs.length, 2);
+  assert.equal(result.logs[0].drink, null);
+  await assert.rejects(listForDay(ctx, { ...input, date: "2026-02-30" }));
 });
 
 test("Today respects account timezone, exact boundaries, DST gaps and overlaps", async () => {
-  const ctx = { user: { timeZone: "Europe/Prague", endOfDayBoundary: 360 } };
-  const day = async (instant) => dayContext(ctx, { at: Date.parse(instant) });
+  const ctx = { user: { _id: "owner", timeZone: "Europe/Prague", endOfDayBoundary: 360, drinkLogSortOrder: "asc" }, db: {
+    query() { return { withIndex() { return this; }, order() { return this; }, async collect() { return []; } }; },
+  } };
+  const day = async (instant) => listForDay(ctx, { at: Date.parse(instant) });
   assert.equal((await day("2026-01-02T04:59:59Z")).today, "2026-01-01");
   assert.equal((await day("2026-01-02T05:00:00Z")).today, "2026-01-02");
-  assert.equal((await day("2026-03-28T05:00:00Z")).nextBoundary, Date.parse("2026-03-29T04:00:00Z"));
+  const empty = await day("2026-03-28T05:00:00Z");
+  assert.deepEqual(empty, { today: "2026-03-28", date: "2026-03-28", logs: [] });
+  const past = await listForDay(ctx, { at: Date.parse("2026-01-02T05:00:00Z"), date: "2026-01-01" });
+  assert.equal(past.today, "2026-01-02");
+  assert.equal(past.date, "2026-01-01");
   ctx.user.endOfDayBoundary = 150;
   assert.equal((await day("2026-03-29T01:15:00Z")).today, "2026-03-28");
   assert.equal((await day("2026-03-29T01:30:00Z")).today, "2026-03-29");
