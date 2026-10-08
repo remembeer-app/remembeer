@@ -16,66 +16,72 @@ class AddFriendsToSessionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
+    // The stream builders must stay outside the lazy ListView: it disposes
+    // off-screen children and rebuilding one would re-listen to the same
+    // single-subscription stream.
     return PageTemplate(
       title: const Text('Add Friends'),
-      child: ListView(
-        children: [
-          const SectionHeader(title: 'Current Members'),
-          AsyncBuilder<List<UserModel>>(
-            stream: _sessionService.sessionMembersStream(sessionId),
-            builder: (context, members) {
-              if (members.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('No members yet'),
-                );
-              }
-              return Column(
-                children: [
-                  for (final member in members)
-                    UserListTile(
-                      user: member,
-                      trailing: Icon(
-                        Icons.check_circle,
-                        color: theme.colorScheme.primary,
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          const SectionHeader(title: 'Your Friends'),
-          AsyncBuilder<List<UserModel>>(
+      child: AsyncBuilder<List<UserModel>>(
+        stream: _sessionService.sessionMembersStream(sessionId),
+        builder: (context, members) {
+          return AsyncBuilder<List<UserModel>>(
             stream: _sessionService.availableFriendsForSessionStream(sessionId),
             builder: (context, friends) {
-              if (friends.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text('No friends available to add'),
-                );
-              }
-              return Column(
+              return ListView(
                 children: [
-                  for (final friend in friends)
-                    UserListTile(
-                      user: friend,
-                      trailing: IconButton(
-                        icon: const Icon(Icons.person_add),
-                        onPressed: () => _sessionService.addMemberToSession(
-                          sessionId: sessionId,
-                          memberId: friend.id,
-                        ),
-                        tooltip: 'Add to session',
-                      ),
-                    ),
+                  const SectionHeader(title: 'Current Members'),
+                  ..._buildMembers(context, members),
+                  const SectionHeader(title: 'Your Friends'),
+                  ..._buildFriends(friends),
                 ],
               );
             },
-          ),
-        ],
+          );
+        },
       ),
     );
+  }
+
+  List<Widget> _buildMembers(BuildContext context, List<UserModel> members) {
+    if (members.isEmpty) {
+      return const [
+        Padding(padding: EdgeInsets.all(16.0), child: Text('No members yet')),
+      ];
+    }
+
+    final theme = Theme.of(context);
+    return [
+      for (final member in members)
+        UserListTile(
+          user: member,
+          trailing: Icon(Icons.check_circle, color: theme.colorScheme.primary),
+        ),
+    ];
+  }
+
+  List<Widget> _buildFriends(List<UserModel> friends) {
+    if (friends.isEmpty) {
+      return const [
+        Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text('No friends available to add'),
+        ),
+      ];
+    }
+
+    return [
+      for (final friend in friends)
+        UserListTile(
+          user: friend,
+          trailing: IconButton(
+            icon: const Icon(Icons.person_add),
+            onPressed: () => _sessionService.addMemberToSession(
+              sessionId: sessionId,
+              memberId: friend.id,
+            ),
+            tooltip: 'Add to session',
+          ),
+        ),
+    ];
   }
 }
