@@ -29,6 +29,7 @@ test("daily reads use live catalogue data and keep missing or deleted drinks vis
   const ctx = { user: { _id: "owner", timeZone: "Europe/Prague", endOfDayBoundary: 360, drinkLogSortOrder: "asc" }, db: {
     async get(table, id) { assert.equal(table, "drink"); assert.equal(id, "drink"); return catalogueDrink; },
     query(table) {
+      if (table !== "drinkLog") return { withIndex() { return this; }, async collect() { return []; } };
       assert.equal(table, "drinkLog");
       let rows = logs;
       return {
@@ -73,7 +74,7 @@ test("Today respects account timezone, exact boundaries, DST gaps and overlaps",
   assert.equal((await day("2026-01-02T04:59:59Z")).today, "2026-01-01");
   assert.equal((await day("2026-01-02T05:00:00Z")).today, "2026-01-02");
   const empty = await day("2026-03-28T05:00:00Z");
-  assert.deepEqual(empty, { today: "2026-03-28", date: "2026-03-28", logs: [] });
+  assert.deepEqual(empty, { today: "2026-03-28", date: "2026-03-28", logs: [], sessions: [] });
   const past = await listForDay(ctx, { at: Date.parse("2026-01-02T05:00:00Z"), date: "2026-01-01" });
   assert.equal(past.today, "2026-01-02");
   assert.equal(past.date, "2026-01-01");
@@ -120,4 +121,78 @@ test("account deletion removes all owned logs, including soft-deleted ones", asy
   assert.deepEqual(tables.drinkLog.map((log) => log._id), ["other-log"]);
   assert.deepEqual(tables.drink.map((drink) => drink._id), ["global"]);
   assert.equal(tables.user.length, 0);
+});
+
+test("day sessions enforce access, overlap, deduplication and preserve linked out-of-range sessions", async () => {
+  const start = Date.parse("2026-01-01T05:00Z");
+  const end = Date.parse("2026-01-02T05:00Z");
+  const session = (_id, fields = {}) => ({ _id, ownerId: "owner", kind: "session", name: _id, description: "", startedAt: start, endedAt: null, deletedAt: null, ...fields });
+  const tables = {
+    session: [
+      session("owned"), session("party", { kind: "party", startedAt: start + 1 }),
+      session("joined", { ownerId: "other", startedAt: start + 2 }),
+      session("ended", { endedAt: start }), session("future", { startedAt: end }),
+      session("linked", { startedAt: start - 100, endedAt: start - 1 }),
+      session("deleted", { deletedAt: 1 }), session("private", { ownerId: "other" }),
+      ...["invited", "left", "banned", "declined"].map((status) => session(status, { ownerId: "other" })),
+    ],
+    sessionMember: [
+      { sessionId: "owned", userId: "owner", sessionMemberStatus: { kind: "joined" } },
+      { sessionId: "joined", userId: "owner", sessionMemberStatus: { kind: "joined" } },
+      { sessionId: "missing", userId: "owner", sessionMemberStatus: { kind: "joined" } },
+      { sessionId: "private", userId: "different-user", sessionMemberStatus: { kind: "joined" } },
+      ...["invited", "left", "banned", "declined"].map((status) => ({ sessionId: status, userId: "owner", sessionMemberStatus: { kind: status } })),
+    ],
+    drinkLog: ["linked", "private", "deleted", null].map((sessionId, i) => ({ _id: `log-${i}`, userId: "owner", sessionId, drinkId: "missing", consumedAt: start + i, deletedAt: null })),
+  };
+  const ctx = { user: { _id: "owner", timeZone: "Europe/Prague", endOfDayBoundary: 360, drinkLogSortOrder: "asc" }, db: {
+    async get(table, id) { return (tables[table] ?? []).find((row) => row._id === id) ?? null; },
+    query(table) {
+      let rows = tables[table];
+      return {
+        withIndex(name, range) {
+          assert.equal(name, { session: "by_ownerId_and_kind", sessionMember: "by_userId_and_sessionMemberStatus_kind", drinkLog: "by_userId_and_deletedAt_and_consumedAt" }[table]);
+          const valueAt = (row, field) => field.split(".").reduce((value, key) => value[key], row);
+          const q = {
+            eq(field, value) { rows = rows.filter((row) => valueAt(row, field) === value); return q; },
+            gte(field, value) { rows = rows.filter((row) => valueAt(row, field) >= value); return q; },
+            lt(field, value) { rows = rows.filter((row) => valueAt(row, field) < value); return q; },
+          };
+          range(q); return this;
+        },
+        order(direction) { rows = [...rows].sort((a, b) => (a.consumedAt - b.consumedAt) * (direction === "asc" ? 1 : -1)); return this; },
+        async collect() { return rows; },
+      };
+    },
+  } };
+  const input = { date: "2026-01-01", at: start };
+  const result = await listForDay(ctx, input);
+  assert.deepEqual(result.sessions.map((row) => row._id), ["linked", "owned", "party", "joined"]);
+  assert.equal(result.sessions[0].endedAtLocal, "2026-01-01T05:59:59.999");
+  assert.equal(result.sessions[1].startedAtLocal, "2026-01-01T06:00:00");
+  assert.equal(result.sessions[1].endedAtLocal, null);
+  assert.equal(result.sessions[2].kind, "party");
+  assert.equal(result.logs.length, 4);
+  ctx.user.drinkLogSortOrder = "desc";
+  const descending = await listForDay(ctx, input);
+  assert.deepEqual(descending.sessions.map((row) => row._id), ["joined", "party", "owned", "linked"]);
+  assert.deepEqual(descending.logs.map((row) => row._id), ["log-3", "log-2", "log-1", "log-0"]);
+  tables.sessionMember[1].sessionMemberStatus.kind = "left";
+  assert.equal((await listForDay(ctx, input)).sessions.some((row) => row._id === "joined"), false);
+
+  // A Prague logical day is 23 hours at spring DST and 25 at autumn DST.
+  for (const [date, dayStart, dayEnd] of [
+    ["2026-03-28", "2026-03-28T05:00Z", "2026-03-29T04:00Z"],
+    ["2026-10-24", "2026-10-24T04:00Z", "2026-10-25T05:00Z"],
+  ]) {
+    tables.drinkLog = [];
+    tables.sessionMember = [];
+    tables.session = [
+      session("inside", { startedAt: Date.parse(dayEnd) - 1 }),
+      session("end-excluded", { startedAt: Date.parse(dayEnd) }),
+      session("start-excluded", { startedAt: Date.parse(dayStart) - 1, endedAt: Date.parse(dayStart) }),
+    ];
+    const day = await listForDay(ctx, { date, at: Date.parse(dayStart) });
+    assert.deepEqual(day.sessions.map((row) => row._id), ["inside"]);
+  }
 });

@@ -10,6 +10,7 @@ import 'package:remembeer/drink_log/page/add_drink_log_page.dart';
 import 'package:remembeer/drink_log/page/drink_log_page.dart';
 import 'package:remembeer/drink_log/page/update_drink_log_page.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
+import 'package:remembeer/drink_log/widget/drink_log_group_section.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:toastification/toastification.dart';
@@ -194,6 +195,90 @@ void main() {
     router.dispose();
     await client.events.close();
   });
+
+  testWidgets(
+    'sessions group my drinks, retain empty groups and react to access changes',
+    (tester) async {
+      tester.view.physicalSize = const Size(800, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final client = _Runtime()
+        ..sessionId = 'session'
+        ..sessions = [
+          {
+            '_id': 'session',
+            'kind': 'session',
+            'name': 'Evening session',
+            'description': 'Session description',
+            'startedAtLocal': '2026-01-01T06:00:00',
+            'endedAtLocal': null,
+          },
+          {
+            '_id': 'party',
+            'kind': 'party',
+            'name': 'Empty party',
+            'description': '',
+            'startedAtLocal': '2026-01-01T20:00:00',
+            'endedAtLocal': '2026-01-02T02:00:00',
+          },
+        ];
+      get
+        ..registerSingleton(ConvexApi(_Mutations()))
+        ..registerSingleton<DrinkLogService>(_Logs());
+      addTearDown(get.reset);
+      await tester.pumpWidget(
+        ConvexProvider(
+          client: client,
+          child: const MaterialApp(home: DrinkLogPage()),
+        ),
+      );
+      await tester.pump();
+      client.emit();
+      await tester.pumpAndSettle();
+      expect(find.text('Evening session'), findsOneWidget);
+      expect(find.text('Party · Empty party'), findsOneWidget);
+      expect(find.text('1 drink this day'), findsOneWidget);
+      expect(find.text('0 drinks this day'), findsOneWidget);
+      expect(find.text('Recorded beer'), findsOneWidget);
+      expect(find.text('Unavailable drink'), findsOneWidget);
+      final sections = tester
+          .widgetList<DrinkLogGroupSection>(find.byType(DrinkLogGroupSection))
+          .toList();
+      expect(sections.map((section) => section.logs.length), [1, 0, 1]);
+      expect(sections.last.session, isNull);
+      expect(sections.last.logs.single.sessionId?.value, 'inaccessible');
+      await tester.tap(find.text('Evening session'));
+      await tester.pumpAndSettle();
+      expect(find.text('Session description'), findsOneWidget);
+      expect(find.text('Started Jan 1, 2026 06:00'), findsOneWidget);
+      expect(find.text('Still going'), findsOneWidget);
+      await tester.tap(find.text('Party · Empty party'));
+      await tester.pumpAndSettle();
+      expect(find.text('Ended Jan 2, 2026 02:00'), findsOneWidget);
+
+      client.sessions = [client.sessions.last];
+      client.emit();
+      await tester.pumpAndSettle();
+      expect(find.text('Evening session'), findsNothing);
+      expect(find.text('Recorded beer'), findsOneWidget);
+      expect(find.text('Unavailable drink'), findsOneWidget);
+      final other = tester
+          .widgetList<DrinkLogGroupSection>(find.byType(DrinkLogGroupSection))
+          .last;
+      expect(other.logs.map((log) => log.id.value), ['log', 'missing']);
+
+      client
+        ..emptyLogs = true
+        ..emit();
+      await tester.pumpAndSettle();
+      expect(find.text('Party · Empty party'), findsOneWidget);
+      expect(find.text('No drinks recorded for this day.'), findsOneWidget);
+      expect(find.text('Other drinks'), findsNothing);
+      await tester.pumpWidget(const SizedBox.shrink());
+      await client.events.close();
+    },
+  );
 }
 
 Map<String, dynamic> _drink(String name) => {
@@ -209,6 +294,8 @@ Map<String, dynamic> _drink(String name) => {
 
 class _Runtime implements ConvexRuntimeClient {
   var emptyLogs = false;
+  List<Map<String, dynamic>> sessions = [];
+  String? sessionId;
   var today = '2026-01-01';
 
   String get date {
@@ -231,22 +318,24 @@ class _Runtime implements ConvexRuntimeClient {
     ConvexRuntimeQuerySuccess({
       'today': today,
       'date': date,
+      'sessions': sessions,
       'logs': [
-        for (final missing in [false, true])
-          {
-            '_id': missing ? 'missing' : 'log',
-            '_creationTime': 1,
-            'userId': 'user',
-            'sessionId': null,
-            'drinkId': missing ? 'missing-drink' : 'drink',
-            'consumedAt': DateTime.utc(2026, 1, 1, 5).millisecondsSinceEpoch,
-            'consumedAtLocal': '2026-01-01T06:00:00',
-            'volumeMl': 500,
-            'location': null,
-            'updatedAt': 1,
-            'deletedAt': null,
-            'drink': missing ? null : _drink(name),
-          },
+        if (!emptyLogs)
+          for (final missing in [false, true])
+            {
+              '_id': missing ? 'missing' : 'log',
+              '_creationTime': 1,
+              'userId': 'user',
+              'sessionId': missing ? 'inaccessible' : sessionId,
+              'drinkId': missing ? 'missing-drink' : 'drink',
+              'consumedAt': DateTime.utc(2026, 1, 1, 5).millisecondsSinceEpoch,
+              'consumedAtLocal': '2026-01-01T06:00:00',
+              'volumeMl': 500,
+              'location': null,
+              'updatedAt': 1,
+              'deletedAt': null,
+              'drink': missing ? null : _drink(name),
+            },
       ],
     }),
   );
@@ -264,6 +353,7 @@ class _Runtime implements ConvexRuntimeClient {
             ConvexRuntimeQuerySuccess({
               'today': today,
               'date': date,
+              'sessions': sessions,
               'logs': <Object?>[],
             }),
           ),

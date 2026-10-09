@@ -6,7 +6,7 @@ import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/widgets/drinkLog.dart';
 import 'package:remembeer/date/widget/date_selector.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
-import 'package:remembeer/drink_log/widget/drink_log_card.dart';
+import 'package:remembeer/drink_log/widget/drink_log_group_list.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
 
@@ -83,7 +83,6 @@ class _DrinkLogPageState extends State<DrinkLogPage> {
         builder: (context, day) {
           final today = DateTime.parse('${day.today}T00:00:00Z');
           final date = DateTime.parse('${day.date}T00:00:00Z');
-          final logs = day.logs;
           return Column(
             children: [
               DateSelector(
@@ -95,20 +94,7 @@ class _DrinkLogPageState extends State<DrinkLogPage> {
                       : value;
                 }),
               ),
-              Expanded(
-                child: logs.isEmpty
-                    ? const Center(
-                        child: Text('No drinks recorded for this day.'),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(8),
-                        itemCount: logs.length,
-                        itemBuilder: (context, index) => DrinkLogCard(
-                          key: ValueKey(logs[index].id),
-                          log: logs[index],
-                        ),
-                      ),
-              ),
+              Expanded(child: DrinkLogGroupList(day: day)),
             ],
           );
         },

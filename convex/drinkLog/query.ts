@@ -16,6 +16,14 @@ export const listForDay = authQuery
   .returns(v.object({
     today: v.string(),
     date: v.string(),
+    sessions: v.array(v.object({
+      _id: v.id("session"),
+      kind: v.union(v.literal("session"), v.literal("party")),
+      name: v.string(),
+      description: v.string(),
+      startedAtLocal: v.string(),
+      endedAtLocal: v.nullable(v.string()),
+    })),
     logs: v.array(schema.doc("drinkLog").extend({
       drink: v.nullable(schema.doc("drink")),
       consumedAtLocal: v.string(),
@@ -40,14 +48,48 @@ export const listForDay = authQuery
       )
       .order(ctx.user.drinkLogSortOrder)
       .collect();
+    // shortcut: reads all accessible session history; add day-filtered indexes when history approaches Convex read limits.
+    const [ownedSessions, memberships] = await Promise.all([
+      ctx.db.query("session")
+        .withIndex("by_ownerId_and_kind", (q) => q.eq("ownerId", ctx.user._id))
+        .collect(),
+      ctx.db.query("sessionMember")
+        .withIndex("by_userId_and_sessionMemberStatus_kind", (q) =>
+          q.eq("userId", ctx.user._id).eq("sessionMemberStatus.kind", "joined"))
+        .collect(),
+    ]);
+    const joinedSessions = await Promise.all(
+      memberships.map((member) => ctx.db.get("session", member.sessionId)),
+    );
+    const referencedIds = new Set(logs.map((log) => log.sessionId));
+    const sessions = [...new Map(
+      [...ownedSessions, ...joinedSessions]
+        .filter((session) => session !== null)
+        .map((session) => [session._id, session] as const),
+    ).values()]
+      .filter((session) => session.deletedAt === null && (
+        referencedIds.has(session._id) ||
+        (session.startedAt < end && (session.endedAt === null || session.endedAt > start))
+      ))
+      .sort((a, b) => (a.startedAt - b.startedAt || a._id.localeCompare(b._id)) *
+        (ctx.user.drinkLogSortOrder === "asc" ? 1 : -1));
+    const localTime = (at: number) => Temporal.Instant.fromEpochMilliseconds(at)
+      .toZonedDateTimeISO(ctx.user.timeZone).toPlainDateTime().toString();
     return {
       today,
       date,
+      sessions: sessions.map((session) => ({
+        _id: session._id,
+        kind: session.kind,
+        name: session.name,
+        description: session.description,
+        startedAtLocal: localTime(session.startedAt),
+        endedAtLocal: session.endedAt === null ? null : localTime(session.endedAt),
+      })),
       logs: await Promise.all(logs.map(async (log) => ({
         ...log,
         drink: await ctx.db.get("drink", log.drinkId),
-        consumedAtLocal: Temporal.Instant.fromEpochMilliseconds(log.consumedAt)
-          .toZonedDateTimeISO(ctx.user.timeZone).toPlainDateTime().toString(),
+        consumedAtLocal: localTime(log.consumedAt),
       }))),
     };
   });

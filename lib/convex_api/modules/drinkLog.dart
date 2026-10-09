@@ -622,17 +622,127 @@ ListForDayResultLogsItem _decodeListForDayResultLogsItem(dynamic raw) {
   );
 }
 
+enum ListForDayResultSessionsItemKind {
+  sessionValue('session'),
+  partyValue('party');
+
+  const ListForDayResultSessionsItemKind(this.value);
+  final Object? value;
+
+  static ListForDayResultSessionsItemKind fromJson(dynamic raw) {
+    switch (raw) {
+      case 'session':
+        return ListForDayResultSessionsItemKind.sessionValue;
+      case 'party':
+        return ListForDayResultSessionsItemKind.partyValue;
+      default:
+        throw FormatException(
+          'Expected one of session, party for ListForDayResultSessionsItemKind',
+        );
+    }
+  }
+}
+
+typedef ListForDayResultSessionsItem = ({
+  SessionId id,
+  String description,
+  String? endedAtLocal,
+  ListForDayResultSessionsItemKind kind,
+  String name,
+  String startedAtLocal,
+});
+
+Map<String, dynamic> _encodeListForDayResultSessionsItem(
+  ListForDayResultSessionsItem value$,
+) {
+  final (
+    id: id,
+    description: description,
+    endedAtLocal: endedAtLocal,
+    kind: kind,
+    name: name,
+    startedAtLocal: startedAtLocal,
+  ) = value$;
+  return <String, dynamic>{
+    '_id': id.value,
+    'description': description,
+    'endedAtLocal': endedAtLocal,
+    'kind': kind.value,
+    'name': name,
+    'startedAtLocal': startedAtLocal,
+  };
+}
+
+ListForDayResultSessionsItem _decodeListForDayResultSessionsItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ListForDayResultSessionsItem');
+  if (!map.containsKey('_id')) {
+    throw FormatException(
+      'Missing required field "_id" for ListForDayResultSessionsItem',
+    );
+  }
+  if (!map.containsKey('description')) {
+    throw FormatException(
+      'Missing required field "description" for ListForDayResultSessionsItem',
+    );
+  }
+  if (!map.containsKey('endedAtLocal')) {
+    throw FormatException(
+      'Missing required field "endedAtLocal" for ListForDayResultSessionsItem',
+    );
+  }
+  if (!map.containsKey('kind')) {
+    throw FormatException(
+      'Missing required field "kind" for ListForDayResultSessionsItem',
+    );
+  }
+  if (!map.containsKey('name')) {
+    throw FormatException(
+      'Missing required field "name" for ListForDayResultSessionsItem',
+    );
+  }
+  if (!map.containsKey('startedAtLocal')) {
+    throw FormatException(
+      'Missing required field "startedAtLocal" for ListForDayResultSessionsItem',
+    );
+  }
+  return (
+    id: SessionId(
+      expectString(map['_id'], label: 'ListForDayResultSessionsItemId'),
+    ),
+    description: expectString(
+      map['description'],
+      label: 'ListForDayResultSessionsItemDescription',
+    ),
+    endedAtLocal: map['endedAtLocal'] == null
+        ? null
+        : expectString(
+            map['endedAtLocal'],
+            label: 'ListForDayResultSessionsItemEndedAtLocal',
+          ),
+    kind: ListForDayResultSessionsItemKind.fromJson(map['kind']),
+    name: expectString(map['name'], label: 'ListForDayResultSessionsItemName'),
+    startedAtLocal: expectString(
+      map['startedAtLocal'],
+      label: 'ListForDayResultSessionsItemStartedAtLocal',
+    ),
+  );
+}
+
 typedef ListForDayResult = ({
   String date,
   List<ListForDayResultLogsItem> logs,
+  List<ListForDayResultSessionsItem> sessions,
   String today,
 });
 
 Map<String, dynamic> _encodeListForDayResult(ListForDayResult value$) {
-  final (date: date, logs: logs, today: today) = value$;
+  final (date: date, logs: logs, sessions: sessions, today: today) = value$;
   return <String, dynamic>{
     'date': date,
     'logs': logs.map((item) => _encodeListForDayResultLogsItem(item)).toList(),
+    'sessions': sessions
+        .map((item) => _encodeListForDayResultSessionsItem(item))
+        .toList(),
     'today': today,
   };
 }
@@ -645,6 +755,11 @@ ListForDayResult _decodeListForDayResult(dynamic raw) {
   if (!map.containsKey('logs')) {
     throw FormatException('Missing required field "logs" for ListForDayResult');
   }
+  if (!map.containsKey('sessions')) {
+    throw FormatException(
+      'Missing required field "sessions" for ListForDayResult',
+    );
+  }
   if (!map.containsKey('today')) {
     throw FormatException(
       'Missing required field "today" for ListForDayResult',
@@ -656,6 +771,10 @@ ListForDayResult _decodeListForDayResult(dynamic raw) {
       map['logs'],
       label: 'ListForDayResultLogs',
     ).map((item) => _decodeListForDayResultLogsItem(item)).toList(),
+    sessions: expectList(
+      map['sessions'],
+      label: 'ListForDayResultSessions',
+    ).map((item) => _decodeListForDayResultSessionsItem(item)).toList(),
     today: expectString(map['today'], label: 'ListForDayResultToday'),
   );
 }
