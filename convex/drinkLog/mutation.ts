@@ -15,6 +15,7 @@ export const create = authMutation
   .returns(schema.id("drinkLog"))
   .handler(async (ctx, input) => {
     await checkReferences(ctx, input);
+
     return await ctx.db.insert("drinkLog", {
       ...input,
       userId: ctx.user._id,
@@ -33,6 +34,7 @@ export const update = authMutation
       sessionId: input.sessionId,
       drinkId: input.drinkId === drinkLog.drinkId ? undefined : input.drinkId,
     });
+
     await ctx.db.patch("drinkLog", id, {
       sessionId:
         input.sessionId === undefined ? drinkLog.sessionId : input.sessionId,
@@ -43,6 +45,7 @@ export const update = authMutation
         input.location === undefined ? drinkLog.location : input.location,
       updatedAt: Date.now(),
     });
+
     return null;
   });
 
@@ -75,6 +78,7 @@ async function getDrinkLog(
   if (drinkLog.deletedAt !== null) {
     throw new ConvexError("Drink log has been deleted");
   }
+
   return drinkLog;
 }
 

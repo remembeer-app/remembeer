@@ -33,5 +33,8 @@ export const sessionMemberTable = defineTable({
     "sessionMemberStatus.kind",
   ])
   .index("by_userId_and_status_and_sessionDeletedAt_and_sessionEndedAt", [
-    "userId", "sessionMemberStatus.kind", "sessionDeletedAt", "sessionEndedAt",
+    "userId",
+    "sessionMemberStatus.kind",
+    "sessionDeletedAt",
+    "sessionEndedAt",
   ]);

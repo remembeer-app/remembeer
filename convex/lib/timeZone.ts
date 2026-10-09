@@ -21,6 +21,7 @@ export const searchTimeZones = convex
   .handler(async (_, { search }) => {
     const normalizedSearch = search.trim().toLowerCase().replace(/[_/]/g, " ");
     if (!normalizedSearch) return [];
+
     return ["UTC", ...Intl.supportedValuesOf("timeZone")]
       .filter((timeZone) =>
         timeZone.toLowerCase().replace(/[_/]/g, " ").includes(normalizedSearch),

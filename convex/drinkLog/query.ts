@@ -14,30 +14,44 @@ export const listForDay = authQuery
       at: z.number().int(),
     }),
   )
-  .returns(v.object({
-    today: v.string(),
-    date: v.string(),
-    sessions: v.array(v.object({
-      _id: v.id("session"),
-      kind: v.union(v.literal("session"), v.literal("party")),
-      name: v.string(),
-      description: v.string(),
-      startedAtLocal: v.string(),
-      endedAtLocal: v.nullable(v.string()),
-    })),
-    logs: v.array(schema.doc("drinkLog").extend({
-      drink: v.nullable(schema.doc("drink")),
-      consumedAtLocal: v.string(),
-    })),
-  }))
+  .returns(
+    v.object({
+      today: v.string(),
+      date: v.string(),
+      sessions: v.array(
+        v.object({
+          _id: v.id("session"),
+          kind: v.union(v.literal("session"), v.literal("party")),
+          name: v.string(),
+          description: v.string(),
+          startedAtLocal: v.string(),
+          endedAtLocal: v.nullable(v.string()),
+        }),
+      ),
+      logs: v.array(
+        schema.doc("drinkLog").extend({
+          drink: v.nullable(schema.doc("drink")),
+          consumedAtLocal: v.string(),
+        }),
+      ),
+    }),
+  )
   .handler(async (ctx, { date: selectedDate, at }) => {
-    const today = logicalDayAt(at, ctx.user.endOfDayBoundary, ctx.user.timeZone);
-    const date = selectedDate === undefined || selectedDate > today ? today : selectedDate;
+    const today = logicalDayAt(
+      at,
+      ctx.user.endOfDayBoundary,
+      ctx.user.timeZone,
+    );
+
+    const date =
+      selectedDate === undefined || selectedDate > today ? today : selectedDate;
+
     const { start, end } = logicalDayBoundaries(
       date,
       ctx.user.endOfDayBoundary,
       ctx.user.timeZone,
     );
+
     const logs = await ctx.db
       .query("drinkLog")
       .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) =>
@@ -49,10 +63,19 @@ export const listForDay = authQuery
       )
       .order(ctx.user.drinkLogSortOrder)
       .collect();
-    const referencedIds = new Set(logs.map((log) => log.sessionId).filter((id) => id !== null));
+
+    const referencedIds = new Set(
+      logs.map((log) => log.sessionId).filter((id) => id !== null),
+    );
+
     const sessions = await listForDayHandler(ctx, start, end, referencedIds);
-    const localTime = (at: number) => Temporal.Instant.fromEpochMilliseconds(at)
-      .toZonedDateTimeISO(ctx.user.timeZone).toPlainDateTime().toString();
+
+    const localTime = (at: number) =>
+      Temporal.Instant.fromEpochMilliseconds(at)
+        .toZonedDateTimeISO(ctx.user.timeZone)
+        .toPlainDateTime()
+        .toString();
+
     return {
       today,
       date,
@@ -62,12 +85,15 @@ export const listForDay = authQuery
         name: session.name,
         description: session.description,
         startedAtLocal: localTime(session.startedAt),
-        endedAtLocal: session.endedAt === null ? null : localTime(session.endedAt),
+        endedAtLocal:
+          session.endedAt === null ? null : localTime(session.endedAt),
       })),
-      logs: await Promise.all(logs.map(async (log) => ({
-        ...log,
-        drink: await ctx.db.get("drink", log.drinkId),
-        consumedAtLocal: localTime(log.consumedAt),
-      }))),
+      logs: await Promise.all(
+        logs.map(async (log) => ({
+          ...log,
+          drink: await ctx.db.get("drink", log.drinkId),
+          consumedAtLocal: localTime(log.consumedAt),
+        })),
+      ),
     };
   });

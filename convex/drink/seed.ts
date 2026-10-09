@@ -8,15 +8,17 @@ const seeds = globalDrinkSeeds(seedData);
 export const seedGlobal = convex
   .mutation()
   .input({ dryRun: v.optional(v.boolean()) })
-  .returns(v.object({
-    dryRun: v.boolean(),
-    total: v.number(),
-    created: v.number(),
-    updated: v.number(),
-    restored: v.number(),
-    retired: v.number(),
-    unchanged: v.number(),
-  }))
+  .returns(
+    v.object({
+      dryRun: v.boolean(),
+      total: v.number(),
+      created: v.number(),
+      updated: v.number(),
+      restored: v.number(),
+      retired: v.number(),
+      unchanged: v.number(),
+    }),
+  )
   .handler(async (ctx, { dryRun = false }) => {
     const existing = await ctx.db
       .query("drink")
@@ -26,7 +28,9 @@ export const seedGlobal = convex
     for (const drink of existing) {
       if (drink.seedKey === undefined) continue;
       if (byKey.has(drink.seedKey)) {
-        throw new ConvexError(`Duplicate global drink seed key: ${drink.seedKey}`);
+        throw new ConvexError(
+          `Duplicate global drink seed key: ${drink.seedKey}`,
+        );
       }
       byKey.set(drink.seedKey, drink);
     }

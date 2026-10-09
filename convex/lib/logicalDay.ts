@@ -11,6 +11,7 @@ export function logicalDayBoundaries(
       minute: endOfDayBoundary % 60,
     },
   };
+
   return {
     start: day.toZonedDateTime(options).epochMilliseconds,
     end: day.add({ days: 1 }).toZonedDateTime(options).epochMilliseconds,
@@ -33,5 +34,6 @@ export function logicalDayAt(
     ).start
       ? local.toPlainDate().subtract({ days: 1 })
       : local.toPlainDate();
+
   return date.toString();
 }

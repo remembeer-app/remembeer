@@ -25,8 +25,13 @@ export const partyValidator = v.object({
 
 export const sessionTable = defineTable(
   v.union(sessionValidator, partyValidator),
-).index("by_ownerId_and_kind", ["ownerId", "kind"])
-  .index("by_ownerId_and_deletedAt_and_endedAt", ["ownerId", "deletedAt", "endedAt"]);
+)
+  .index("by_ownerId_and_kind", ["ownerId", "kind"])
+  .index("by_ownerId_and_deletedAt_and_endedAt", [
+    "ownerId",
+    "deletedAt",
+    "endedAt",
+  ]);
 
 const timestamp = z.number().int().min(-8640000000000000).max(8640000000000000);
 
@@ -38,7 +43,9 @@ export const createSessionInputValidator = convexToZod(
   startedAt: timestamp,
 });
 
-export const updateSessionInputValidator = createSessionInputValidator.partial().extend({
-  id: convexToZod(v.id("session")),
-  endedAt: timestamp.nullable().optional(),
-});
+export const updateSessionInputValidator = createSessionInputValidator
+  .partial()
+  .extend({
+    id: convexToZod(v.id("session")),
+    endedAt: timestamp.nullable().optional(),
+  });
