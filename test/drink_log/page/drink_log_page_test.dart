@@ -11,6 +11,7 @@ import 'package:remembeer/drink_log/page/drink_log_page.dart';
 import 'package:remembeer/drink_log/page/update_drink_log_page.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/drink_log/widget/drink_log_group_section.dart';
+import 'package:remembeer/drink_log/widget/midnight_divider.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:toastification/toastification.dart';
@@ -217,6 +218,86 @@ void main() {
     await client.events.close();
   });
 
+  testWidgets('drag drinks into empty sessions and back out across midnight', (
+    tester,
+  ) async {
+    final mutations = _Mutations();
+    final client = _Runtime()
+      ..crossesMidnight = true
+      ..sessions = [
+        {
+          '_id': 'session',
+          'kind': 'session',
+          'name': 'Evening session',
+          'description': '',
+          'startedAtLocal': '2026-01-01T20:00:00',
+          'endedAtLocal': null,
+        },
+      ];
+    get
+      ..registerSingleton(ConvexApi(mutations))
+      ..registerSingleton<DrinkLogService>(_Logs());
+    addTearDown(get.reset);
+    await tester.pumpWidget(
+      ConvexProvider(
+        client: client,
+        child: const MaterialApp(home: DrinkLogPage()),
+      ),
+    );
+    await tester.pump();
+    client.emit();
+    await tester.pumpAndSettle();
+    expect(find.byType(MidnightDivider), findsOneWidget);
+    final section = tester.widget<DrinkLogGroupSection>(
+      find.byType(DrinkLogGroupSection).first,
+    );
+    final material = tester.widget<Material>(
+      find
+          .descendant(
+            of: find.byType(DrinkLogGroupSection).first,
+            matching: find.byType(Material),
+          )
+          .first,
+    );
+    expect(section.logs, isEmpty);
+    expect(
+      (material.shape! as RoundedRectangleBorder).side,
+      isNot(BorderSide.none),
+    );
+
+    Future<void> moveTo(Finder target) async {
+      final gesture = await tester.startGesture(
+        tester.getCenter(find.text('Recorded beer')),
+      );
+      await tester.pump(const Duration(milliseconds: 600));
+      await gesture.moveTo(tester.getCenter(target));
+      await tester.pump();
+      await gesture.up();
+      await tester.pumpAndSettle();
+    }
+
+    await moveTo(find.text('Evening session'));
+    expect(mutations.name, 'drinkLog:update');
+    expect(mutations.args, {'id': 'log', 'sessionId': 'session'});
+    client
+      ..sessionId = 'session'
+      ..emit();
+    await tester.pumpAndSettle();
+    expect(find.byType(MidnightDivider), findsNothing);
+    mutations.name = null;
+    await moveTo(find.text('Evening session'));
+    expect(mutations.name, isNull);
+    await moveTo(find.text('Other drinks'));
+    expect(mutations.args, {'id': 'log', 'sessionId': null});
+    client
+      ..sessionId = null
+      ..emit();
+    await tester.pumpAndSettle();
+    expect(find.byType(MidnightDivider), findsOneWidget);
+    await tester.pumpWidget(const SizedBox.shrink());
+    await client.events.close();
+  });
+
   testWidgets(
     'sessions group my drinks, retain empty groups and react to access changes',
     (tester) async {
@@ -295,7 +376,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Party · Empty party'), findsOneWidget);
       expect(find.text('No drinks recorded for this day.'), findsOneWidget);
-      expect(find.text('Other drinks'), findsNothing);
+      expect(find.text('Other drinks'), findsOneWidget);
       await tester.pumpWidget(const SizedBox.shrink());
       await client.events.close();
     },
@@ -315,6 +396,7 @@ Map<String, dynamic> _drink(String name) => {
 
 class _Runtime implements ConvexRuntimeClient {
   var emptyLogs = false;
+  var crossesMidnight = false;
   _Mutations? mutations;
   List<Map<String, dynamic>> sessions = [];
   List<Map<String, dynamic>> availableSessions = [];
@@ -352,7 +434,11 @@ class _Runtime implements ConvexRuntimeClient {
               'sessionId': missing ? 'inaccessible' : sessionId,
               'drinkId': missing ? 'missing-drink' : 'drink',
               'consumedAt': DateTime.utc(2026, 1, 1, 5).millisecondsSinceEpoch,
-              'consumedAtLocal': '2026-01-01T06:00:00',
+              'consumedAtLocal': crossesMidnight
+                  ? missing
+                        ? '2026-01-01T23:00:00'
+                        : '2026-01-02T02:00:00'
+                  : '2026-01-01T06:00:00',
               'volumeMl': 500,
               'location': null,
               'updatedAt': 1,
