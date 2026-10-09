@@ -20,6 +20,8 @@ export const sessionMemberTable = defineTable({
   sessionMemberStatus: sessionMemberStatusValidator,
   sessionMemberRole: sessionMemberRoleValidator,
   updatedAt: v.number(),
+  sessionEndedAt: v.nullable(v.number()),
+  sessionDeletedAt: v.nullable(v.number()),
 })
   .index("by_sessionId_and_userId", ["sessionId", "userId"])
   .index("by_sessionId_and_sessionMemberStatus_kind", [
@@ -29,4 +31,7 @@ export const sessionMemberTable = defineTable({
   .index("by_userId_and_sessionMemberStatus_kind", [
     "userId",
     "sessionMemberStatus.kind",
+  ])
+  .index("by_userId_and_status_and_sessionDeletedAt_and_sessionEndedAt", [
+    "userId", "sessionMemberStatus.kind", "sessionDeletedAt", "sessionEndedAt",
   ]);

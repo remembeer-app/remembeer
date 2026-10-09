@@ -147,16 +147,22 @@ test("day sessions enforce access, overlap, deduplication and preserve linked ou
     ],
     drinkLog: ["linked", "private", "deleted", null].map((sessionId, i) => ({ _id: `log-${i}`, userId: "owner", sessionId, drinkId: "missing", consumedAt: start + i, deletedAt: null })),
   };
+  for (const member of tables.sessionMember) {
+    const session = tables.session.find((row) => row._id === member.sessionId);
+    member.sessionEndedAt = session?.endedAt ?? null;
+    member.sessionDeletedAt = session ? session.deletedAt : 1;
+  }
   const ctx = { user: { _id: "owner", timeZone: "Europe/Prague", endOfDayBoundary: 360, drinkLogSortOrder: "asc" }, db: {
     async get(table, id) { return (tables[table] ?? []).find((row) => row._id === id) ?? null; },
     query(table) {
       let rows = tables[table];
       return {
         withIndex(name, range) {
-          assert.equal(name, { session: "by_ownerId_and_kind", sessionMember: "by_userId_and_sessionMemberStatus_kind", drinkLog: "by_userId_and_deletedAt_and_consumedAt" }[table]);
+          assert.ok({ session: ["by_ownerId_and_deletedAt_and_endedAt"], sessionMember: ["by_userId_and_status_and_sessionDeletedAt_and_sessionEndedAt", "by_sessionId_and_userId"], drinkLog: ["by_userId_and_deletedAt_and_consumedAt"] }[table].includes(name));
           const valueAt = (row, field) => field.split(".").reduce((value, key) => value[key], row);
           const q = {
             eq(field, value) { rows = rows.filter((row) => valueAt(row, field) === value); return q; },
+            gt(field, value) { rows = rows.filter((row) => typeof valueAt(row, field) === "number" && valueAt(row, field) > value); return q; },
             gte(field, value) { rows = rows.filter((row) => valueAt(row, field) >= value); return q; },
             lt(field, value) { rows = rows.filter((row) => valueAt(row, field) < value); return q; },
           };
@@ -164,6 +170,7 @@ test("day sessions enforce access, overlap, deduplication and preserve linked ou
         },
         order(direction) { rows = [...rows].sort((a, b) => (a.consumedAt - b.consumedAt) * (direction === "asc" ? 1 : -1)); return this; },
         async collect() { return rows; },
+        async unique() { assert.ok(rows.length <= 1); return rows[0] ?? null; },
       };
     },
   } };

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { authQuery } from "../lib/authenticated";
 import { logicalDayBoundaries, logicalDayAt } from "../lib/logicalDay";
 import { schema } from "../schema";
-import { listCurrentHandler } from "../session/query";
+import { listForDayHandler } from "../session/query";
 
 export const listForDay = authQuery
   .extend(WithZod)
@@ -49,10 +49,8 @@ export const listForDay = authQuery
       )
       .order(ctx.user.drinkLogSortOrder)
       .collect();
-    const referencedIds = new Set(logs.map((log) => log.sessionId));
-    const sessions = (await listCurrentHandler(ctx)).filter((session) =>
-      referencedIds.has(session._id) ||
-      (session.startedAt < end && (session.endedAt === null || session.endedAt > start)));
+    const referencedIds = new Set(logs.map((log) => log.sessionId).filter((id) => id !== null));
+    const sessions = await listForDayHandler(ctx, start, end, referencedIds);
     const localTime = (at: number) => Temporal.Instant.fromEpochMilliseconds(at)
       .toZonedDateTimeISO(ctx.user.timeZone).toPlainDateTime().toString();
     return {

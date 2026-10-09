@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { authMutation } from "../lib/authenticated";
 import { createSessionInputValidator, updateSessionInputValidator } from "./schema";
+import { syncSessionIndex } from "../sessionMember/sessionIndex";
 import { requireSessionAccess } from "./access";
 
 export const create = authMutation
@@ -17,7 +18,7 @@ export const create = authMutation
     await ctx.db.insert("sessionMember", {
       sessionId, userId: ctx.user._id,
       sessionMemberStatus: { kind: "joined" }, sessionMemberRole: { kind: "admin" },
-      updatedAt: now,
+      updatedAt: now, sessionEndedAt: null, sessionDeletedAt: null,
     });
     return sessionId;
   });
@@ -36,6 +37,9 @@ export const update = authMutation
       description: input.description ?? session.description,
       startedAt, endedAt, updatedAt: Date.now(),
     });
+    if (endedAt !== session.endedAt) {
+      await syncSessionIndex(ctx, { ...session, endedAt });
+    }
     return null;
   });
 
@@ -43,9 +47,10 @@ export const softDelete = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
   .handler(async (ctx, { id }) => {
-    await requireSessionAccess(ctx, id, "owner");
+    const { session } = await requireSessionAccess(ctx, id, "owner");
     const now = Date.now();
     await ctx.db.patch("session", id, { deletedAt: now, updatedAt: now });
+    await syncSessionIndex(ctx, { ...session, deletedAt: now });
     return null;
   });
 

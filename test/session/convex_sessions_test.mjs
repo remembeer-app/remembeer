@@ -22,21 +22,28 @@ const { sessions, sessionQueries, members, memberQueries, logs, deleteUserData }
 function fixture() {
   const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], drinkLog: [], drink: [], badge: [] };
   let sequence = 0;
+  const collected = [];
+  const sessionGets = [];
   const db = {
-    async get(table, id) { return tables[table].find((row) => row._id === id) ?? null; },
+    async get(table, id) { if (table === "session") sessionGets.push(id); return structuredClone(tables[table].find((row) => row._id === id) ?? null); },
     async insert(table, fields) { const id = `${table}-${++sequence}`; tables[table].push({ _id: id, _creationTime: 1, ...structuredClone(fields) }); return id; },
-    async patch(table, id, fields) { const row = await this.get(table, id); assert.ok(row); Object.assign(row, structuredClone(fields)); },
+    async patch(table, id, fields) { const row = tables[table].find((row) => row._id === id); assert.ok(row); Object.assign(row, structuredClone(fields)); },
     async delete(table, id) { tables[table] = tables[table].filter((row) => row._id !== id); },
     query(table) {
       let rows = tables[table];
       return {
         withIndex(name, range) {
-          const q = { eq(field, value) { rows = rows.filter((row) => field.split(".").reduce((v, key) => v[key], row) === value); return q; } };
+          const at = (row, field) => field.split(".").reduce((v, key) => v[key], row);
+          const q = {
+            eq(field, value) { rows = rows.filter((row) => at(row, field) === value); return q; },
+            gt(field, value) { rows = rows.filter((row) => typeof at(row, field) === "number" && at(row, field) > value); return q; },
+          };
           range(q); return this;
         },
         async unique() { assert.ok(rows.length <= 1); return rows[0] ?? null; },
-        async collect() { return rows; },
+        async collect() { collected.push({ table, count: rows.length }); return rows; },
         async take(count) { return rows.slice(0, count); },
+
       };
     },
   };
@@ -45,7 +52,7 @@ function fixture() {
   const create = () => sessions.create(owner, { name: " Evening ", description: " Test ", startedAt: 1000 });
   const member = (sessionId, userId) => tables.sessionMember.find((row) => row.sessionId === sessionId && row.userId === userId);
   const join = async (sessionId, userId) => { await members.invite(owner, { sessionId, userId }); await members.accept(ctx(userId), { sessionId }); };
-  return { tables, db, ctx, owner, create, member, join };
+  return { tables, db, ctx, owner, create, member, join, collected, sessionGets };
 }
 
 const target = (sessionId, userId) => ({ sessionId, userId });
@@ -243,4 +250,42 @@ test("invitation lookup requires admin access and only returns public identifier
   const roster = await memberQueries.listForSession(f.owner, { sessionId: id });
   assert.equal(roster[0].username, "owner");
   assert.equal(roster.some((row) => "authUserId" in row), false);
+});
+
+
+test("membership date indexes follow creation, invitation, ending, reopening and deletion", async () => {
+  const f = fixture(); const id = await f.create();
+  await members.invite(f.owner, target(id, "invitee"));
+  for (const member of f.tables.sessionMember) {
+    assert.equal(member.sessionEndedAt, null);
+    assert.equal(member.sessionDeletedAt, null);
+  }
+  await sessions.update(f.owner, { id, endedAt: 2000 });
+  assert.ok(f.tables.sessionMember.every((member) => member.sessionEndedAt === 2000));
+  await sessions.update(f.owner, { id, endedAt: null });
+  assert.ok(f.tables.sessionMember.every((member) => member.sessionEndedAt === null));
+  await sessions.softDelete(f.owner, { id });
+  const deletedAt = (await f.db.get("session", id)).deletedAt;
+  assert.ok(f.tables.sessionMember.every((member) => member.sessionDeletedAt === deletedAt));
+});
+
+test("account deletion synchronizes remaining members' session visibility", async () => {
+  const f = fixture(); const id = await f.create(); await f.join(id, "member");
+  await deleteUserData(f.owner, "auth-owner");
+  const session = await f.db.get("session", id);
+  assert.equal(f.member(id, "member").sessionDeletedAt, session.deletedAt);
+});
+
+test("day queries skip old owned and joined history before collecting or loading sessions", async () => {
+  const f = fixture();
+  const row = (_id, ownerId, endedAt) => ({ _id, ownerId, kind: "session", name: _id, description: "", startedAt: 0, endedAt, updatedAt: 1, deletedAt: null });
+  for (let i = 0; i < 1000; i++) {
+    f.tables.session.push(row(`owned-${i}`, "owner", 500), row(`joined-${i}`, "other", 500));
+    f.tables.sessionMember.push({ _id: `membership-${i}`, sessionId: `joined-${i}`, userId: "owner", sessionMemberStatus: { kind: "joined" }, sessionMemberRole: { kind: "member" }, sessionEndedAt: 500, sessionDeletedAt: null });
+  }
+  f.tables.session.push(row("ongoing", "owner", null), row("ends-today", "owner", 1500));
+  const result = await sessionQueries.listForDayHandler(f.owner, 1000, 2000, new Set(["owned-0"]));
+  assert.deepEqual(new Set(result.map((session) => session._id)), new Set(["ongoing", "ends-today", "owned-0"]));
+  assert.ok(f.collected.every((query) => query.count <= 1));
+  assert.deepEqual(f.sessionGets, ["owned-0"]);
 });

@@ -1,3 +1,4 @@
+import { syncSessionIndex } from "../sessionMember/sessionIndex";
 import type { MutationCtx } from "../_generated/server";
 
 export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
@@ -37,6 +38,7 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
   for (const session of sessions) {
     if (session.deletedAt === null) {
       await ctx.db.patch("session", session._id, { deletedAt: now, updatedAt: now });
+      await syncSessionIndex(ctx, { ...session, deletedAt: now });
     }
   }
   const memberships = await ctx.db.query("sessionMember")

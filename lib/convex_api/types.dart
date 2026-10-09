@@ -201,6 +201,8 @@ typedef SessionMemberDocument = ({
   SessionMemberStatus sessionMemberStatus,
   SessionMemberRole sessionMemberRole,
   double updatedAt,
+  double? sessionEndedAt,
+  double? sessionDeletedAt,
   SessionMemberId id,
   double creationTime,
 });

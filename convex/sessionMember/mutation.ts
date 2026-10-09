@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
 import { getMembership, requireSessionAccess } from "../session/access";
+import { sessionIndexFields } from "./sessionIndex";
 import { sessionMemberRoleValidator } from "./schema";
 
 const sessionInput = { sessionId: v.id("session") };
@@ -9,12 +10,13 @@ const targetInput = { ...sessionInput, userId: v.id("user") };
 
 export const invite = authMutation.input(targetInput).returns(v.null())
   .handler(async (ctx, { sessionId, userId }) => {
-    await requireSessionAccess(ctx, sessionId, "admin");
+    const { session } = await requireSessionAccess(ctx, sessionId, "admin");
     if (!await ctx.db.get("user", userId)) throw new ConvexError("User not found");
     const member = await getMembership(ctx, sessionId, userId);
     if (member?.sessionMemberStatus.kind === "banned") throw new ConvexError("Unban this user before inviting them");
     if (member?.sessionMemberStatus.kind === "invited" || member?.sessionMemberStatus.kind === "joined") return null;
     const fields = {
+      ...sessionIndexFields(session),
       sessionMemberStatus: { kind: "invited" as const },
       sessionMemberRole: { kind: "member" as const }, updatedAt: Date.now(),
     };

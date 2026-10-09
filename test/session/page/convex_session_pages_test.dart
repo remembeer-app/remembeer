@@ -192,6 +192,8 @@ Map<String, dynamic> _member(String id, String role) => {
   'sessionMemberStatus': {'kind': 'joined'},
   'sessionMemberRole': {'kind': role},
   'username': id,
+  'sessionEndedAt': null,
+  'sessionDeletedAt': null,
   'updatedAt': 1,
 };
 

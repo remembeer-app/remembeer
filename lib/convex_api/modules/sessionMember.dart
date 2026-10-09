@@ -508,6 +508,8 @@ SessionMemberStatus _decodeSessionMemberStatus(dynamic raw) {
 typedef ListForSessionResultItem = ({
   double creationTime,
   SessionMemberId id,
+  double? sessionDeletedAt,
+  double? sessionEndedAt,
   SessionId sessionId,
   SessionMemberRole sessionMemberRole,
   SessionMemberStatus sessionMemberStatus,
@@ -522,6 +524,8 @@ Map<String, dynamic> _encodeListForSessionResultItem(
   final (
     creationTime: creationTime,
     id: id,
+    sessionDeletedAt: sessionDeletedAt,
+    sessionEndedAt: sessionEndedAt,
     sessionId: sessionId,
     sessionMemberRole: sessionMemberRole,
     sessionMemberStatus: sessionMemberStatus,
@@ -532,6 +536,8 @@ Map<String, dynamic> _encodeListForSessionResultItem(
   return <String, dynamic>{
     '_creationTime': creationTime,
     '_id': id.value,
+    'sessionDeletedAt': sessionDeletedAt,
+    'sessionEndedAt': sessionEndedAt,
     'sessionId': sessionId.value,
     'sessionMemberRole': _encodeSessionMemberRole(sessionMemberRole),
     'sessionMemberStatus': _encodeSessionMemberStatus(sessionMemberStatus),
@@ -551,6 +557,16 @@ ListForSessionResultItem _decodeListForSessionResultItem(dynamic raw) {
   if (!map.containsKey('_id')) {
     throw FormatException(
       'Missing required field "_id" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('sessionDeletedAt')) {
+    throw FormatException(
+      'Missing required field "sessionDeletedAt" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('sessionEndedAt')) {
+    throw FormatException(
+      'Missing required field "sessionEndedAt" for ListForSessionResultItem',
     );
   }
   if (!map.containsKey('sessionId')) {
@@ -591,6 +607,18 @@ ListForSessionResultItem _decodeListForSessionResultItem(dynamic raw) {
     id: SessionMemberId(
       expectString(map['_id'], label: 'ListForSessionResultItemId'),
     ),
+    sessionDeletedAt: map['sessionDeletedAt'] == null
+        ? null
+        : expectDouble(
+            map['sessionDeletedAt'],
+            label: 'ListForSessionResultItemSessionDeletedAt',
+          ),
+    sessionEndedAt: map['sessionEndedAt'] == null
+        ? null
+        : expectDouble(
+            map['sessionEndedAt'],
+            label: 'ListForSessionResultItemSessionEndedAt',
+          ),
     sessionId: SessionId(
       expectString(
         map['sessionId'],
@@ -643,6 +671,8 @@ Map<String, dynamic> _encodeSessionMemberDocument(
     sessionMemberStatus: sessionMemberStatus,
     sessionMemberRole: sessionMemberRole,
     updatedAt: updatedAt,
+    sessionEndedAt: sessionEndedAt,
+    sessionDeletedAt: sessionDeletedAt,
     id: id,
     creationTime: creationTime,
   ) = value$;
@@ -652,6 +682,8 @@ Map<String, dynamic> _encodeSessionMemberDocument(
     'sessionMemberStatus': _encodeSessionMemberStatus(sessionMemberStatus),
     'sessionMemberRole': _encodeSessionMemberRole(sessionMemberRole),
     'updatedAt': updatedAt,
+    'sessionEndedAt': sessionEndedAt,
+    'sessionDeletedAt': sessionDeletedAt,
     '_id': id.value,
     '_creationTime': creationTime,
   };
@@ -684,6 +716,16 @@ SessionMemberDocument _decodeSessionMemberDocument(dynamic raw) {
       'Missing required field "updatedAt" for SessionMemberDocument',
     );
   }
+  if (!map.containsKey('sessionEndedAt')) {
+    throw FormatException(
+      'Missing required field "sessionEndedAt" for SessionMemberDocument',
+    );
+  }
+  if (!map.containsKey('sessionDeletedAt')) {
+    throw FormatException(
+      'Missing required field "sessionDeletedAt" for SessionMemberDocument',
+    );
+  }
   if (!map.containsKey('_id')) {
     throw FormatException(
       'Missing required field "_id" for SessionMemberDocument',
@@ -707,6 +749,18 @@ SessionMemberDocument _decodeSessionMemberDocument(dynamic raw) {
       map['updatedAt'],
       label: 'SessionMemberDocumentUpdatedAt',
     ),
+    sessionEndedAt: map['sessionEndedAt'] == null
+        ? null
+        : expectDouble(
+            map['sessionEndedAt'],
+            label: 'SessionMemberDocumentSessionEndedAt',
+          ),
+    sessionDeletedAt: map['sessionDeletedAt'] == null
+        ? null
+        : expectDouble(
+            map['sessionDeletedAt'],
+            label: 'SessionMemberDocumentSessionDeletedAt',
+          ),
     id: SessionMemberId(
       expectString(map['_id'], label: 'SessionMemberDocumentId'),
     ),
