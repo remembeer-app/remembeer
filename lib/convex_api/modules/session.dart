@@ -287,24 +287,32 @@ SessionDocument _decodeSessionDocument(dynamic raw) {
         );
       }
       return Session(
-        ownerId: UserId(expectString(map['ownerId'], label: 'SessionOwnerId')),
-        name: expectString(map['name'], label: 'SessionName'),
+        ownerId: UserId(
+          expectString(map['ownerId'], label: 'SessionDocumentOwnerId'),
+        ),
+        name: expectString(map['name'], label: 'SessionDocumentName'),
         description: expectString(
           map['description'],
-          label: 'SessionDescription',
+          label: 'SessionDocumentDescription',
         ),
-        startedAt: expectDouble(map['startedAt'], label: 'SessionStartedAt'),
+        startedAt: expectDouble(
+          map['startedAt'],
+          label: 'SessionDocumentStartedAt',
+        ),
         endedAt: map['endedAt'] == null
             ? null
-            : expectDouble(map['endedAt'], label: 'SessionEndedAt'),
-        updatedAt: expectDouble(map['updatedAt'], label: 'SessionUpdatedAt'),
+            : expectDouble(map['endedAt'], label: 'SessionDocumentEndedAt'),
+        updatedAt: expectDouble(
+          map['updatedAt'],
+          label: 'SessionDocumentUpdatedAt',
+        ),
         deletedAt: map['deletedAt'] == null
             ? null
-            : expectDouble(map['deletedAt'], label: 'SessionDeletedAt'),
-        id: SessionId(expectString(map['_id'], label: 'SessionId')),
+            : expectDouble(map['deletedAt'], label: 'SessionDocumentDeletedAt'),
+        id: SessionId(expectString(map['_id'], label: 'SessionDocumentId')),
         creationTime: expectDouble(
           map['_creationTime'],
-          label: 'SessionCreationTime',
+          label: 'SessionDocumentCreationTime',
         ),
       );
     case 'party':
@@ -338,24 +346,32 @@ SessionDocument _decodeSessionDocument(dynamic raw) {
         );
       }
       return Party(
-        ownerId: UserId(expectString(map['ownerId'], label: 'PartyOwnerId')),
-        name: expectString(map['name'], label: 'PartyName'),
+        ownerId: UserId(
+          expectString(map['ownerId'], label: 'SessionDocumentOwnerId'),
+        ),
+        name: expectString(map['name'], label: 'SessionDocumentName'),
         description: expectString(
           map['description'],
-          label: 'PartyDescription',
+          label: 'SessionDocumentDescription',
         ),
-        startedAt: expectDouble(map['startedAt'], label: 'PartyStartedAt'),
+        startedAt: expectDouble(
+          map['startedAt'],
+          label: 'SessionDocumentStartedAt',
+        ),
         endedAt: map['endedAt'] == null
             ? null
-            : expectDouble(map['endedAt'], label: 'PartyEndedAt'),
-        updatedAt: expectDouble(map['updatedAt'], label: 'PartyUpdatedAt'),
+            : expectDouble(map['endedAt'], label: 'SessionDocumentEndedAt'),
+        updatedAt: expectDouble(
+          map['updatedAt'],
+          label: 'SessionDocumentUpdatedAt',
+        ),
         deletedAt: map['deletedAt'] == null
             ? null
-            : expectDouble(map['deletedAt'], label: 'PartyDeletedAt'),
-        id: SessionId(expectString(map['_id'], label: 'PartyId')),
+            : expectDouble(map['deletedAt'], label: 'SessionDocumentDeletedAt'),
+        id: SessionId(expectString(map['_id'], label: 'SessionDocumentId')),
         creationTime: expectDouble(
           map['_creationTime'],
-          label: 'PartyCreationTime',
+          label: 'SessionDocumentCreationTime',
         ),
       );
     default:

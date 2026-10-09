@@ -48,6 +48,58 @@ class SessionMemberApi {
   ConvexMutationReference<DeclineArgs, void> get declineMutation =>
       declineMutationReference;
 
+  Future<List<FindInviteeResultItem>> findInvitee({
+    required SessionId sessionId,
+    required String username,
+  }) async {
+    final raw$ = await _client.query(
+      'sessionMember:findInvitee',
+      _encodeFindInviteeArgs((sessionId: sessionId, username: username)),
+    );
+    return expectList(
+      raw$,
+      label: 'FindInviteeResult',
+    ).map((item) => _decodeFindInviteeResultItem(item)).toList();
+  }
+
+  TypedConvexSubscription<List<FindInviteeResultItem>> findInviteeSubscribe({
+    required SessionId sessionId,
+    required String username,
+  }) {
+    final subscription$ = _client.subscribe(
+      'sessionMember:findInvitee',
+      _encodeFindInviteeArgs((sessionId: sessionId, username: username)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<List<FindInviteeResultItem>>(
+            expectList(
+              value,
+              label: 'FindInviteeResult',
+            ).map((item) => _decodeFindInviteeResultItem(item)).toList(),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<List<FindInviteeResultItem>>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<List<FindInviteeResultItem>>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<List<FindInviteeResultItem>>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<FindInviteeArgs, List<FindInviteeResultItem>>
+  get findInviteeQuery => findInviteeQueryReference;
+
   Future<Null> invite({
     required SessionId sessionId,
     required UserId userId,
@@ -73,7 +125,7 @@ class SessionMemberApi {
   ConvexMutationReference<LeaveArgs, void> get leaveMutation =>
       leaveMutationReference;
 
-  Future<List<SessionMemberDocument>> listForSession({
+  Future<List<ListForSessionResultItem>> listForSession({
     required SessionId sessionId,
   }) async {
     final raw$ = await _client.query(
@@ -83,12 +135,11 @@ class SessionMemberApi {
     return expectList(
       raw$,
       label: 'ListForSessionResult',
-    ).map((item) => _decodeSessionMemberDocument(item)).toList();
+    ).map((item) => _decodeListForSessionResultItem(item)).toList();
   }
 
-  TypedConvexSubscription<List<SessionMemberDocument>> listForSessionSubscribe({
-    required SessionId sessionId,
-  }) {
+  TypedConvexSubscription<List<ListForSessionResultItem>>
+  listForSessionSubscribe({required SessionId sessionId}) {
     final subscription$ = _client.subscribe(
       'sessionMember:listForSession',
       _encodeListForSessionArgs((sessionId: sessionId)),
@@ -96,31 +147,31 @@ class SessionMemberApi {
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
         case QuerySuccess(:final value):
-          return TypedQuerySuccess<List<SessionMemberDocument>>(
+          return TypedQuerySuccess<List<ListForSessionResultItem>>(
             expectList(
               value,
               label: 'ListForSessionResult',
-            ).map((item) => _decodeSessionMemberDocument(item)).toList(),
+            ).map((item) => _decodeListForSessionResultItem(item)).toList(),
           );
         case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<List<SessionMemberDocument>>(
+          return TypedQueryLoading<List<ListForSessionResultItem>>(
             hasPendingWrites: hasPendingWrites,
           );
         case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<List<SessionMemberDocument>>(
+          return TypedQueryError<List<ListForSessionResultItem>>(
             message,
             data: data,
             logLines: logLines,
           );
       }
     });
-    return TypedConvexSubscription<List<SessionMemberDocument>>(
+    return TypedConvexSubscription<List<ListForSessionResultItem>>(
       subscription$,
       typedStream$,
     );
   }
 
-  ConvexQueryReference<ListForSessionArgs, List<SessionMemberDocument>>
+  ConvexQueryReference<ListForSessionArgs, List<ListForSessionResultItem>>
   get listForSessionQuery => listForSessionQueryReference;
 
   Future<List<ListInvitationsResultItem>> listInvitations() async {
@@ -278,6 +329,63 @@ DeclineArgs _decodeDeclineArgs(dynamic raw) {
   );
 }
 
+typedef FindInviteeResultItem = ({UserId id, String username});
+
+Map<String, dynamic> _encodeFindInviteeResultItem(
+  FindInviteeResultItem value$,
+) {
+  final (id: id, username: username) = value$;
+  return <String, dynamic>{'_id': id.value, 'username': username};
+}
+
+FindInviteeResultItem _decodeFindInviteeResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'FindInviteeResultItem');
+  if (!map.containsKey('_id')) {
+    throw FormatException(
+      'Missing required field "_id" for FindInviteeResultItem',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for FindInviteeResultItem',
+    );
+  }
+  return (
+    id: UserId(expectString(map['_id'], label: 'FindInviteeResultItemId')),
+    username: expectString(
+      map['username'],
+      label: 'FindInviteeResultItemUsername',
+    ),
+  );
+}
+
+typedef FindInviteeArgs = ({SessionId sessionId, String username});
+
+Map<String, dynamic> _encodeFindInviteeArgs(FindInviteeArgs value$) {
+  final (sessionId: sessionId, username: username) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value, 'username': username};
+}
+
+FindInviteeArgs _decodeFindInviteeArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'FindInviteeArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for FindInviteeArgs',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for FindInviteeArgs',
+    );
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'FindInviteeArgsSessionId'),
+    ),
+    username: expectString(map['username'], label: 'FindInviteeArgsUsername'),
+  );
+}
+
 typedef InviteArgs = ({SessionId sessionId, UserId userId});
 
 Map<String, dynamic> _encodeInviteArgs(InviteArgs value$) {
@@ -321,6 +429,36 @@ LeaveArgs _decodeLeaveArgs(dynamic raw) {
       expectString(map['sessionId'], label: 'LeaveArgsSessionId'),
     ),
   );
+}
+
+Map<String, dynamic> _encodeSessionMemberRole(SessionMemberRole value) {
+  switch (value) {
+    case Member():
+      return <String, dynamic>{'kind': 'member'};
+    case Admin():
+      return <String, dynamic>{'kind': 'admin'};
+  }
+}
+
+SessionMemberRole _decodeSessionMemberRole(dynamic raw) {
+  final map = expectMap(raw, label: 'SessionMemberRole');
+  if (!map.containsKey('kind')) {
+    throw FormatException('Missing discriminator "kind" for SessionMemberRole');
+  }
+  final discriminator = expectString(
+    map['kind'],
+    label: 'SessionMemberRoleKind',
+  );
+  switch (discriminator) {
+    case 'member':
+      return const Member();
+    case 'admin':
+      return const Admin();
+    default:
+      throw FormatException(
+        'Unknown SessionMemberRole discriminator: $discriminator',
+      );
+  }
 }
 
 Map<String, dynamic> _encodeSessionMemberStatus(SessionMemberStatus value) {
@@ -367,34 +505,133 @@ SessionMemberStatus _decodeSessionMemberStatus(dynamic raw) {
   }
 }
 
-Map<String, dynamic> _encodeSessionMemberRole(SessionMemberRole value) {
-  switch (value) {
-    case Member():
-      return <String, dynamic>{'kind': 'member'};
-    case Admin():
-      return <String, dynamic>{'kind': 'admin'};
-  }
+typedef ListForSessionResultItem = ({
+  double creationTime,
+  SessionMemberId id,
+  SessionId sessionId,
+  SessionMemberRole sessionMemberRole,
+  SessionMemberStatus sessionMemberStatus,
+  double updatedAt,
+  UserId userId,
+  String username,
+});
+
+Map<String, dynamic> _encodeListForSessionResultItem(
+  ListForSessionResultItem value$,
+) {
+  final (
+    creationTime: creationTime,
+    id: id,
+    sessionId: sessionId,
+    sessionMemberRole: sessionMemberRole,
+    sessionMemberStatus: sessionMemberStatus,
+    updatedAt: updatedAt,
+    userId: userId,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_creationTime': creationTime,
+    '_id': id.value,
+    'sessionId': sessionId.value,
+    'sessionMemberRole': _encodeSessionMemberRole(sessionMemberRole),
+    'sessionMemberStatus': _encodeSessionMemberStatus(sessionMemberStatus),
+    'updatedAt': updatedAt,
+    'userId': userId.value,
+    'username': username,
+  };
 }
 
-SessionMemberRole _decodeSessionMemberRole(dynamic raw) {
-  final map = expectMap(raw, label: 'SessionMemberRole');
-  if (!map.containsKey('kind')) {
-    throw FormatException('Missing discriminator "kind" for SessionMemberRole');
+ListForSessionResultItem _decodeListForSessionResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ListForSessionResultItem');
+  if (!map.containsKey('_creationTime')) {
+    throw FormatException(
+      'Missing required field "_creationTime" for ListForSessionResultItem',
+    );
   }
-  final discriminator = expectString(
-    map['kind'],
-    label: 'SessionMemberRoleKind',
+  if (!map.containsKey('_id')) {
+    throw FormatException(
+      'Missing required field "_id" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('sessionMemberRole')) {
+    throw FormatException(
+      'Missing required field "sessionMemberRole" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('sessionMemberStatus')) {
+    throw FormatException(
+      'Missing required field "sessionMemberStatus" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('updatedAt')) {
+    throw FormatException(
+      'Missing required field "updatedAt" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('userId')) {
+    throw FormatException(
+      'Missing required field "userId" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for ListForSessionResultItem',
+    );
+  }
+  return (
+    creationTime: expectDouble(
+      map['_creationTime'],
+      label: 'ListForSessionResultItemCreationTime',
+    ),
+    id: SessionMemberId(
+      expectString(map['_id'], label: 'ListForSessionResultItemId'),
+    ),
+    sessionId: SessionId(
+      expectString(
+        map['sessionId'],
+        label: 'ListForSessionResultItemSessionId',
+      ),
+    ),
+    sessionMemberRole: _decodeSessionMemberRole(map['sessionMemberRole']),
+    sessionMemberStatus: _decodeSessionMemberStatus(map['sessionMemberStatus']),
+    updatedAt: expectDouble(
+      map['updatedAt'],
+      label: 'ListForSessionResultItemUpdatedAt',
+    ),
+    userId: UserId(
+      expectString(map['userId'], label: 'ListForSessionResultItemUserId'),
+    ),
+    username: expectString(
+      map['username'],
+      label: 'ListForSessionResultItemUsername',
+    ),
   );
-  switch (discriminator) {
-    case 'member':
-      return const Member();
-    case 'admin':
-      return const Admin();
-    default:
-      throw FormatException(
-        'Unknown SessionMemberRole discriminator: $discriminator',
-      );
+}
+
+typedef ListForSessionArgs = ({SessionId sessionId});
+
+Map<String, dynamic> _encodeListForSessionArgs(ListForSessionArgs value$) {
+  final (sessionId: sessionId) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value};
+}
+
+ListForSessionArgs _decodeListForSessionArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'ListForSessionArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for ListForSessionArgs',
+    );
   }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'ListForSessionArgsSessionId'),
+    ),
+  );
 }
 
 Map<String, dynamic> _encodeSessionMemberDocument(
@@ -476,27 +713,6 @@ SessionMemberDocument _decodeSessionMemberDocument(dynamic raw) {
     creationTime: expectDouble(
       map['_creationTime'],
       label: 'SessionMemberDocumentCreationTime',
-    ),
-  );
-}
-
-typedef ListForSessionArgs = ({SessionId sessionId});
-
-Map<String, dynamic> _encodeListForSessionArgs(ListForSessionArgs value$) {
-  final (sessionId: sessionId) = value$;
-  return <String, dynamic>{'sessionId': sessionId.value};
-}
-
-ListForSessionArgs _decodeListForSessionArgs(dynamic raw) {
-  final map = expectMap(raw, label: 'ListForSessionArgs');
-  if (!map.containsKey('sessionId')) {
-    throw FormatException(
-      'Missing required field "sessionId" for ListForSessionArgs',
-    );
-  }
-  return (
-    sessionId: SessionId(
-      expectString(map['sessionId'], label: 'ListForSessionArgsSessionId'),
     ),
   );
 }
@@ -592,24 +808,32 @@ SessionDocument _decodeSessionDocument(dynamic raw) {
         );
       }
       return Session(
-        ownerId: UserId(expectString(map['ownerId'], label: 'SessionOwnerId')),
-        name: expectString(map['name'], label: 'SessionName'),
+        ownerId: UserId(
+          expectString(map['ownerId'], label: 'SessionDocumentOwnerId'),
+        ),
+        name: expectString(map['name'], label: 'SessionDocumentName'),
         description: expectString(
           map['description'],
-          label: 'SessionDescription',
+          label: 'SessionDocumentDescription',
         ),
-        startedAt: expectDouble(map['startedAt'], label: 'SessionStartedAt'),
+        startedAt: expectDouble(
+          map['startedAt'],
+          label: 'SessionDocumentStartedAt',
+        ),
         endedAt: map['endedAt'] == null
             ? null
-            : expectDouble(map['endedAt'], label: 'SessionEndedAt'),
-        updatedAt: expectDouble(map['updatedAt'], label: 'SessionUpdatedAt'),
+            : expectDouble(map['endedAt'], label: 'SessionDocumentEndedAt'),
+        updatedAt: expectDouble(
+          map['updatedAt'],
+          label: 'SessionDocumentUpdatedAt',
+        ),
         deletedAt: map['deletedAt'] == null
             ? null
-            : expectDouble(map['deletedAt'], label: 'SessionDeletedAt'),
-        id: SessionId(expectString(map['_id'], label: 'SessionId')),
+            : expectDouble(map['deletedAt'], label: 'SessionDocumentDeletedAt'),
+        id: SessionId(expectString(map['_id'], label: 'SessionDocumentId')),
         creationTime: expectDouble(
           map['_creationTime'],
-          label: 'SessionCreationTime',
+          label: 'SessionDocumentCreationTime',
         ),
       );
     case 'party':
@@ -643,24 +867,32 @@ SessionDocument _decodeSessionDocument(dynamic raw) {
         );
       }
       return Party(
-        ownerId: UserId(expectString(map['ownerId'], label: 'PartyOwnerId')),
-        name: expectString(map['name'], label: 'PartyName'),
+        ownerId: UserId(
+          expectString(map['ownerId'], label: 'SessionDocumentOwnerId'),
+        ),
+        name: expectString(map['name'], label: 'SessionDocumentName'),
         description: expectString(
           map['description'],
-          label: 'PartyDescription',
+          label: 'SessionDocumentDescription',
         ),
-        startedAt: expectDouble(map['startedAt'], label: 'PartyStartedAt'),
+        startedAt: expectDouble(
+          map['startedAt'],
+          label: 'SessionDocumentStartedAt',
+        ),
         endedAt: map['endedAt'] == null
             ? null
-            : expectDouble(map['endedAt'], label: 'PartyEndedAt'),
-        updatedAt: expectDouble(map['updatedAt'], label: 'PartyUpdatedAt'),
+            : expectDouble(map['endedAt'], label: 'SessionDocumentEndedAt'),
+        updatedAt: expectDouble(
+          map['updatedAt'],
+          label: 'SessionDocumentUpdatedAt',
+        ),
         deletedAt: map['deletedAt'] == null
             ? null
-            : expectDouble(map['deletedAt'], label: 'PartyDeletedAt'),
-        id: SessionId(expectString(map['_id'], label: 'PartyId')),
+            : expectDouble(map['deletedAt'], label: 'SessionDocumentDeletedAt'),
+        id: SessionId(expectString(map['_id'], label: 'SessionDocumentId')),
         creationTime: expectDouble(
           map['_creationTime'],
-          label: 'PartyCreationTime',
+          label: 'SessionDocumentCreationTime',
         ),
       );
     default:
@@ -811,6 +1043,19 @@ final ConvexMutationReference<DeclineArgs, void> declineMutationReference =
       decode: (raw) => null,
     );
 
+final ConvexQueryReference<FindInviteeArgs, List<FindInviteeResultItem>>
+findInviteeQueryReference = ConvexQueryReference(
+  name: 'sessionMember:findInvitee',
+  encode: (args) => _encodeFindInviteeArgs(args),
+  decodeArgs: (raw) => _decodeFindInviteeArgs(raw),
+  decode: (raw) => expectList(
+    raw,
+    label: 'FindInviteeResult',
+  ).map((item) => _decodeFindInviteeResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodeFindInviteeResultItem(item)).toList(),
+);
+
 final ConvexMutationReference<InviteArgs, void> inviteMutationReference =
     ConvexMutationReference(
       name: 'sessionMember:invite',
@@ -825,7 +1070,7 @@ final ConvexMutationReference<LeaveArgs, void> leaveMutationReference =
       decode: (raw) => null,
     );
 
-final ConvexQueryReference<ListForSessionArgs, List<SessionMemberDocument>>
+final ConvexQueryReference<ListForSessionArgs, List<ListForSessionResultItem>>
 listForSessionQueryReference = ConvexQueryReference(
   name: 'sessionMember:listForSession',
   encode: (args) => _encodeListForSessionArgs(args),
@@ -833,9 +1078,9 @@ listForSessionQueryReference = ConvexQueryReference(
   decode: (raw) => expectList(
     raw,
     label: 'ListForSessionResult',
-  ).map((item) => _decodeSessionMemberDocument(item)).toList(),
+  ).map((item) => _decodeListForSessionResultItem(item)).toList(),
   encodeResult: (value) =>
-      value.map((item) => _encodeSessionMemberDocument(item)).toList(),
+      value.map((item) => _encodeListForSessionResultItem(item)).toList(),
 );
 
 final ConvexQueryReference<NoArgs, List<ListInvitationsResultItem>>

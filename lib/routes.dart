@@ -533,7 +533,7 @@ class CreateSessionRoute extends GoRouteData with $CreateSessionRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return CreateSessionPage();
+    return const CreateSessionPage();
   }
 }
 
@@ -551,7 +551,7 @@ class SessionManagementRoute extends GoRouteData with $SessionManagementRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return SessionManagementPage();
+    return const SessionManagementPage();
   }
 }
 

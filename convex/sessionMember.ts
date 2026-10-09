@@ -11,3 +11,5 @@ export const remove = mutation.remove.public();
 export const ban = mutation.ban.public();
 export const unban = mutation.unban.public();
 export const setRole = mutation.setRole.public();
+
+export const findInvitee = query.findInvitee.public();

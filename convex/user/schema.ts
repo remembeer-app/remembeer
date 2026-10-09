@@ -25,6 +25,7 @@ export const userTable = defineTable({
   drinkLogSortOrder: v.union(v.literal("asc"), v.literal("desc")),
 })
   .index("by_authUserId", ["authUserId"])
+  .index("by_normalizedUsername", ["normalizedUsername"])
   .index("by_avatarStorageId", ["avatarStorageId"]);
 
 export function normalizeUsername(username: string) {

@@ -5,14 +5,13 @@ import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/drinkLog.dart';
 import 'package:remembeer/convex_api/widgets/drink.dart';
+import 'package:remembeer/convex_api/widgets/drinkLog.dart';
 import 'package:remembeer/drink_log/widget/drink_log_form.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 
 class UpdateDrinkLogPage extends StatelessWidget {
-  UpdateDrinkLogPage({super.key, required this.log});
+  const UpdateDrinkLogPage({super.key, required this.log});
 
   final ListForDayResultLogsItem? log;
-  final _api = get<ConvexApi>();
 
   @override
   Widget build(BuildContext context) {
@@ -29,37 +28,43 @@ class UpdateDrinkLogPage extends StatelessWidget {
     return PageTemplate(
       title: const Text('Update drink'),
       child: DrinkListAvailableQuery(
-        builder: (context, drinks) => DrinkLogForm(
-          initialDrink:
-              drinks.where((drink) => drink.id == log.drinkId).firstOrNull ??
-              log.drink,
-          initialConsumedAt: DateTime.fromMillisecondsSinceEpoch(
-            log.consumedAt.toInt(),
+        builder: (context, drinks) => DrinkLogUpdateMutation(
+          builder: (context, update, snapshot) => DrinkLogForm(
+            initialSessionId: log.sessionId,
+            initialDrink:
+                drinks.where((drink) => drink.id == log.drinkId).firstOrNull ??
+                log.drink,
+            initialConsumedAt: DateTime.fromMillisecondsSinceEpoch(
+              log.consumedAt.toInt(),
+            ),
+            initialVolume: log.volumeMl.toInt(),
+            initialLocation: location == null
+                ? null
+                : GeoPoint(location.latitude, location.longitude),
+            onSubmit: (drink, consumedAt, volume, location, sessionId) async {
+              await update(
+                id: log.id,
+                sessionId: sessionId == log.sessionId
+                    ? const Optional.absent()
+                    : Optional.of(sessionId),
+                drinkId: Optional.of(drink.id),
+                consumedAt: Optional.of(
+                  consumedAt.millisecondsSinceEpoch.toDouble(),
+                ),
+                volumeMl: Optional.of(volume.toDouble()),
+                location: Optional.of(
+                  location == null
+                      ? null
+                      : (
+                          latitude: location.latitude,
+                          longitude: location.longitude,
+                          accuracy: null,
+                        ),
+                ),
+              );
+              if (context.mounted) context.pop();
+            },
           ),
-          initialVolume: log.volumeMl.toInt(),
-          initialLocation: location == null
-              ? null
-              : GeoPoint(location.latitude, location.longitude),
-          onSubmit: (drink, consumedAt, volume, location) async {
-            await _api.drinkLog.update(
-              id: log.id,
-              drinkId: Optional.of(drink.id),
-              consumedAt: Optional.of(
-                consumedAt.millisecondsSinceEpoch.toDouble(),
-              ),
-              volumeMl: Optional.of(volume.toDouble()),
-              location: Optional.of(
-                location == null
-                    ? null
-                    : (
-                        latitude: location.latitude,
-                        longitude: location.longitude,
-                        accuracy: null,
-                      ),
-              ),
-            );
-            if (context.mounted) context.pop();
-          },
         ),
       ),
     );

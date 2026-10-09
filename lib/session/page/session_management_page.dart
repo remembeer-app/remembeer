@@ -1,177 +1,95 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:intl/intl.dart';
-import 'package:remembeer/common/action/confirmation_dialog.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/convex_api/widgets/session.dart';
+import 'package:remembeer/convex_api/widgets/sessionMember.dart';
 import 'package:remembeer/routes.dart';
-import 'package:remembeer/session/model/session.dart';
-import 'package:remembeer/session/service/session_service.dart';
+import 'package:remembeer/session/widget/section_header.dart';
 
 class SessionManagementPage extends StatelessWidget {
-  SessionManagementPage({super.key});
-
-  final _sessionService = get<SessionService>();
+  const SessionManagementPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return PageTemplate(
-      title: const Text('Session Management'),
-      child: AsyncBuilder<List<Session>>(
-        stream: _sessionService.sharedSessionsWhereCurrentUserIsMemberStream,
-        builder: (context, sessions) {
-          if (sessions.isEmpty) {
-            return _buildEmptyState(context);
-          }
-
-          final now = DateTime.now();
-          final sevenDaysAgo = now.subtract(const Duration(days: 7));
-          final thirtyDaysAgo = now.subtract(const Duration(days: 30));
-
-          final thisWeek = sessions
-              .where((s) => s.startedAt.isAfter(sevenDaysAgo))
-              .toList();
-          final last30Days = sessions
-              .where(
-                (s) =>
-                    s.startedAt.isAfter(thirtyDaysAgo) &&
-                    !s.startedAt.isAfter(sevenDaysAgo),
-              )
-              .toList();
-          final older = sessions
-              .where((s) => !s.startedAt.isAfter(thirtyDaysAgo))
-              .toList();
-
-          return ListView(
-            children: [
-              if (thisWeek.isNotEmpty) ...[
-                _buildSectionHeader(context, 'This Week'),
-                ...thisWeek.map((s) => _buildSessionCard(context, s)),
-              ],
-              if (last30Days.isNotEmpty) ...[
-                _buildSectionHeader(context, 'Last 30 Days'),
-                ...last30Days.map((s) => _buildSessionCard(context, s)),
-              ],
-              if (older.isNotEmpty) ...[
-                _buildSectionHeader(context, 'Older'),
-                ...older.map((s) => _buildSessionCard(context, s)),
-              ],
-            ],
-          );
-        },
+  Widget build(BuildContext context) => PageTemplate(
+    title: const Text('Sessions'),
+    actions: [
+      IconButton(
+        tooltip: 'Create session',
+        icon: const Icon(Icons.add),
+        onPressed: () => const CreateSessionRoute().push<void>(context),
       ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.event_busy, size: 64, color: theme.colorScheme.outline),
-          const Gap(16),
-          Text(
-            "You're not part of any sessions yet",
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.outline,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(BuildContext context, String title) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 16, 4, 8),
-      child: Text(
-        title.toUpperCase(),
-        style: theme.textTheme.labelMedium?.copyWith(
-          color: theme.colorScheme.onSurfaceVariant,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSessionCard(BuildContext context, Session session) {
-    final theme = Theme.of(context);
-    final memberCount = session.memberIds.length;
-    final isOngoing = session.endedAt == null;
-    final isOwner = _sessionService.isSessionOwner(session);
-    final dateFormat = DateFormat.yMMMd();
-
-    // TODO(ohtenkay): somehow display the session color once custom colors are implemented
-    return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primaryContainer,
-          child: Icon(
-            session.isParty ? Icons.celebration : Icons.sports_bar,
-            color: theme.colorScheme.onPrimaryContainer,
-          ),
-        ),
-        title: Text(session.name, style: theme.textTheme.titleMedium),
-        subtitle: Text(
-          '${dateFormat.format(session.startedAt)} · $memberCount ${memberCount == 1 ? 'member' : 'members'}${session.isParty ? ' · Party' : ''}',
-          style: theme.textTheme.bodySmall,
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
+    ],
+    child: SessionMemberListInvitationsQuery(
+      builder: (context, invitations) => SessionListCurrentQuery(
+        builder: (context, sessions) => ListView(
           children: [
-            if (isOngoing)
-              Chip(
-                label: Text(
-                  'Ongoing',
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: theme.colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                backgroundColor: theme.colorScheme.primaryContainer,
-                side: BorderSide.none,
-                padding: EdgeInsets.zero,
-                visualDensity: VisualDensity.compact,
+            if (invitations.isNotEmpty)
+              const SectionHeader(title: 'Invitations'),
+            for (final invitation in invitations)
+              SessionMemberAcceptMutation(
+                builder: (context, accept, acceptState) =>
+                    SessionMemberDeclineMutation(
+                      builder: (context, decline, declineState) => Card(
+                        child: Column(
+                          children: [
+                            ListTile(
+                              title: Text(invitation.session.name),
+                              trailing: Wrap(
+                                children: [
+                                  TextButton(
+                                    onPressed:
+                                        acceptState.isLoading ||
+                                            declineState.isLoading
+                                        ? null
+                                        : () => accept.run(
+                                            sessionId: invitation.session.id,
+                                          ),
+                                    child: const Text('Accept'),
+                                  ),
+                                  TextButton(
+                                    onPressed:
+                                        acceptState.isLoading ||
+                                            declineState.isLoading
+                                        ? null
+                                        : () => decline.run(
+                                            sessionId: invitation.session.id,
+                                          ),
+                                    child: const Text('Decline'),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (acceptState.error ?? declineState.error
+                                case final error?)
+                              ErrorMessageBox(message: error.toString()),
+                          ],
+                        ),
+                      ),
+                    ),
               ),
-            if (isOwner)
-              IconButton(
-                icon: Icon(
-                  Icons.edit_outlined,
-                  color: theme.colorScheme.onSurfaceVariant,
+            const SectionHeader(title: 'Your sessions'),
+            if (sessions.isEmpty)
+              const ListTile(
+                title: Text(
+                  'No sessions yet. Create one or accept an invitation.',
                 ),
-                tooltip: 'Edit session',
-                onPressed: () =>
-                    EditSessionRoute(sessionId: session.id).push<void>(context),
-              )
-            else
-              IconButton(
-                icon: Icon(
-                  Icons.logout,
-                  color: theme.colorScheme.onSurfaceVariant,
+              ),
+            for (final session in sessions)
+              Card(
+                child: ListTile(
+                  leading: Icon(
+                    session.isParty ? Icons.celebration : Icons.table_bar,
+                  ),
+                  title: Text(session.name),
+                  subtitle: Text(session.endedAt == null ? 'Ongoing' : 'Ended'),
+                  onTap: () => ActivitySessionRoute(
+                    sessionId: session.id.value,
+                  ).push<void>(context),
                 ),
-                tooltip: 'Leave session',
-                onPressed: () => _confirmLeaveSession(context, session),
               ),
           ],
         ),
       ),
-    );
-  }
-
-  void _confirmLeaveSession(BuildContext context, Session session) {
-    showConfirmationDialog(
-      context: context,
-      title: 'Leave Session',
-      text: 'Are you sure you want to leave "${session.name}"?',
-      submitButtonText: 'Leave',
-      isDestructive: true,
-      onPressed: () => _sessionService.leaveSession(session),
-    );
-  }
+    ),
+  );
 }

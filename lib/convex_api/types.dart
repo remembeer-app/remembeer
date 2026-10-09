@@ -15,6 +15,11 @@ typedef BadgeDocument = ({
 
 sealed class DrinkCategory {
   const DrinkCategory();
+  bool get isBeer => this is Beer;
+  bool get isCider => this is Cider;
+  bool get isCocktail => this is Cocktail;
+  bool get isSpirit => this is Spirit;
+  bool get isWine => this is Wine;
 }
 
 final class Beer extends DrinkCategory {
@@ -70,6 +75,17 @@ typedef DrinkLogDocument = ({
 
 sealed class SessionDocument {
   const SessionDocument();
+  UserId get ownerId;
+  String get name;
+  String get description;
+  double get startedAt;
+  double? get endedAt;
+  double get updatedAt;
+  double? get deletedAt;
+  SessionId get id;
+  double get creationTime;
+  bool get isSession => this is Session;
+  bool get isParty => this is Party;
 }
 
 final class Session extends SessionDocument {
@@ -138,6 +154,11 @@ final class Party extends SessionDocument {
 
 sealed class SessionMemberStatus {
   const SessionMemberStatus();
+  bool get isInvited => this is Invited;
+  bool get isJoined => this is Joined;
+  bool get isLeft => this is Left;
+  bool get isBanned => this is Banned;
+  bool get isDeclined => this is Declined;
 }
 
 final class Invited extends SessionMemberStatus {
@@ -162,6 +183,8 @@ final class Declined extends SessionMemberStatus {
 
 sealed class SessionMemberRole {
   const SessionMemberRole();
+  bool get isMember => this is Member;
+  bool get isAdmin => this is Admin;
 }
 
 final class Member extends SessionMemberRole {

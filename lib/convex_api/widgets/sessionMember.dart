@@ -555,6 +555,77 @@ class SessionMemberUnbanMutation extends StatelessWidget {
   );
 }
 
+/// Flutter widget for sessionMember:findInvitee.
+class SessionMemberFindInviteeQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const SessionMemberFindInviteeQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+    required this.sessionId,
+    required this.username,
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const SessionMemberFindInviteeQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    required this.sessionId,
+    required this.username,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, List<FindInviteeResultItem>)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(
+    BuildContext,
+    ConvexQuerySnapshot<List<FindInviteeResultItem>>,
+  )?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final SessionId sessionId;
+  final String username;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<
+        FindInviteeArgs,
+        List<FindInviteeResultItem>
+      >.snapshot(
+        query: findInviteeQueryReference,
+        args: (sessionId: sessionId, username: username),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<FindInviteeArgs, List<FindInviteeResultItem>>(
+      query: findInviteeQueryReference,
+      args: (sessionId: sessionId, username: username),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}
+
 /// Flutter widget for sessionMember:listForSession.
 class SessionMemberListForSessionQuery extends StatelessWidget {
   /// Creates a typed query widget with default loading and error UI.
@@ -578,12 +649,12 @@ class SessionMemberListForSessionQuery extends StatelessWidget {
        errorBuilder = null;
 
   /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, List<SessionMemberDocument>)? builder;
+  final Widget Function(BuildContext, List<ListForSessionResultItem>)? builder;
 
   /// Builds the UI from every query snapshot in snapshot mode.
   final Widget Function(
     BuildContext,
-    ConvexQuerySnapshot<List<SessionMemberDocument>>,
+    ConvexQuerySnapshot<List<ListForSessionResultItem>>,
   )?
   snapshotBuilder;
 
@@ -604,7 +675,7 @@ class SessionMemberListForSessionQuery extends StatelessWidget {
     if (buildSnapshot != null) {
       return ConvexTypedQuery<
         ListForSessionArgs,
-        List<SessionMemberDocument>
+        List<ListForSessionResultItem>
       >.snapshot(
         query: listForSessionQueryReference,
         args: (sessionId: sessionId),
@@ -612,7 +683,7 @@ class SessionMemberListForSessionQuery extends StatelessWidget {
         snapshotBuilder: buildSnapshot,
       );
     }
-    return ConvexTypedQuery<ListForSessionArgs, List<SessionMemberDocument>>(
+    return ConvexTypedQuery<ListForSessionArgs, List<ListForSessionResultItem>>(
       query: listForSessionQueryReference,
       args: (sessionId: sessionId),
       client: client,

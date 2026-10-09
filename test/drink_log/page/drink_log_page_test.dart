@@ -80,8 +80,24 @@ void main() {
   testWidgets('daily list, add, edit and delete use the generated Convex API', (
     tester,
   ) async {
-    final client = _Runtime();
     final mutations = _Mutations();
+    final client = _Runtime()
+      ..mutations = mutations
+      ..sessionId = 'unavailable-session'
+      ..availableSessions = [
+        {
+          '_id': 'session',
+          '_creationTime': 1,
+          'ownerId': 'user',
+          'kind': 'session',
+          'name': 'Evening session',
+          'description': '',
+          'startedAt': 1,
+          'endedAt': null,
+          'updatedAt': 1,
+          'deletedAt': null,
+        },
+      ];
     final quickAdds = _Logs();
     get
       ..registerSingleton<DrinkLogService>(quickAdds)
@@ -97,7 +113,7 @@ void main() {
           routes: [
             GoRoute(
               path: 'new',
-              builder: (context, state) => AddDrinkLogPage(),
+              builder: (context, state) => const AddDrinkLogPage(),
             ),
             GoRoute(
               path: ':drinkLogId/edit',
@@ -140,6 +156,7 @@ void main() {
     await tester.tap(find.text('Edited beer'));
     await tester.pumpAndSettle();
     expect(find.text('Catalogue beer'), findsOneWidget);
+    expect(find.text('Previous session (unavailable)'), findsOneWidget);
     await tester.tap(find.widgetWithText(TextFormField, 'Volume (ml)'));
     await tester.pumpAndSettle();
     await tester.enterText(
@@ -147,10 +164,10 @@ void main() {
       '330',
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Next field'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Next field'));
-    await tester.pumpAndSettle();
+    while (find.byTooltip('Next field').evaluate().isNotEmpty) {
+      await tester.tap(find.byTooltip('Next field'));
+      await tester.pumpAndSettle();
+    }
     await tester.tap(find.byTooltip('Submit'));
     await tester.pumpAndSettle();
     expect(mutations.name, 'drinkLog:update');
@@ -177,17 +194,21 @@ void main() {
       find.widgetWithText(TextFormField, 'Volume (ml)'),
       '250',
     );
+    await tester.tap(find.byType(DropdownButtonFormField<SessionId>));
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Next field'));
+    await tester.tap(find.text('Evening session').last);
     await tester.pumpAndSettle();
-    await tester.tap(find.byTooltip('Next field'));
     await tester.pumpAndSettle();
+    while (find.byTooltip('Next field').evaluate().isNotEmpty) {
+      await tester.tap(find.byTooltip('Next field'));
+      await tester.pumpAndSettle();
+    }
     await tester.tap(find.byTooltip('Submit'));
     await tester.pumpAndSettle();
     expect(mutations.name, 'drinkLog:create');
     expect(mutations.args['drinkId'], 'drink');
     expect(mutations.args['volumeMl'], 250);
-    expect(mutations.args['sessionId'], isNull);
+    expect(mutations.args['sessionId'], 'session');
     expect(mutations.args['location'], isNull);
     expect(mutations.args['consumedAt'], isA<double>());
     expect(find.text('Drinks'), findsOneWidget);
@@ -294,7 +315,9 @@ Map<String, dynamic> _drink(String name) => {
 
 class _Runtime implements ConvexRuntimeClient {
   var emptyLogs = false;
+  _Mutations? mutations;
   List<Map<String, dynamic>> sessions = [];
+  List<Map<String, dynamic>> availableSessions = [];
   String? sessionId;
   var today = '2026-01-01';
 
@@ -380,6 +403,11 @@ class _Runtime implements ConvexRuntimeClient {
         ),
       );
     }
+    if (name == 'session:listCurrent') {
+      return _Subscription(
+        Stream.value(ConvexRuntimeQuerySuccess(availableSessions)),
+      );
+    }
     if (name == 'drink:listAvailable') {
       return _Subscription(
         Stream.value(ConvexRuntimeQuerySuccess([_drink('Catalogue beer')])),
@@ -387,6 +415,13 @@ class _Runtime implements ConvexRuntimeClient {
     }
     throw StateError('Unexpected query: $name');
   }
+
+  @override
+  Future<dynamic> mutate(
+    String name, [
+    Map<String, dynamic> args = const {},
+    OptimisticUpdate? optimisticUpdate,
+  ]) async => mutations!.mutate(name, args);
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

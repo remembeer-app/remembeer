@@ -12,7 +12,9 @@ void main() {
   ) async {
     get.registerSingleton(ConvexApi(_Caller()));
     addTearDown(get.reset);
-    await tester.pumpWidget(MaterialApp(home: UpdateDrinkLogPage(log: null)));
+    await tester.pumpWidget(
+      const MaterialApp(home: UpdateDrinkLogPage(log: null)),
+    );
     expect(
       find.text('Open a drink from the daily list to edit it.'),
       findsOneWidget,

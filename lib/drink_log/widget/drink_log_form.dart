@@ -1,11 +1,12 @@
 import 'dart:async';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/app_form.dart';
+import 'package:remembeer/convex_api/schema.dart';
 import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/convex_api/widgets/session.dart';
 import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/drink/widget/drink_picker.dart';
 import 'package:remembeer/drink_log/widget/drink_log_consumed_at_field.dart';
@@ -17,11 +18,13 @@ class DrinkLogForm extends StatefulWidget {
   final DateTime initialConsumedAt;
   final int initialVolume;
   final GeoPoint? initialLocation;
+  final SessionId? initialSessionId;
   final Future<void> Function(
     DrinkDocument drink,
     DateTime consumedAt,
     int volumeInMilliliters,
     GeoPoint? location,
+    SessionId? sessionId,
   )
   onSubmit;
 
@@ -31,6 +34,7 @@ class DrinkLogForm extends StatefulWidget {
     required this.initialConsumedAt,
     required this.initialVolume,
     this.initialLocation,
+    this.initialSessionId,
     required this.onSubmit,
   });
 
@@ -41,6 +45,7 @@ class DrinkLogForm extends StatefulWidget {
 class _DrinkLogFormState extends State<DrinkLogForm> {
   late DrinkDocument? _selectedDrink = widget.initialDrink;
   late DateTime _selectedConsumedAt = widget.initialConsumedAt;
+  late SessionId? _sessionId = widget.initialSessionId;
   late GeoPoint? _location = widget.initialLocation;
   late final _volumeController = TextEditingController(
     text: widget.initialVolume.toString(),
@@ -91,6 +96,31 @@ class _DrinkLogFormState extends State<DrinkLogForm> {
           onChanged: (value) => _selectedConsumedAt = value,
         ),
         const Gap(16),
+        SessionListCurrentQuery(
+          builder: (context, sessions) => DropdownButtonFormField<SessionId>(
+            initialValue: _sessionId,
+            decoration: const InputDecoration(
+              labelText: 'Session',
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              const DropdownMenuItem(child: Text('No session')),
+              if (_sessionId != null &&
+                  !sessions.any((session) => session.id == _sessionId))
+                DropdownMenuItem(
+                  value: _sessionId,
+                  enabled: false,
+                  child: const Text('Previous session (unavailable)'),
+                ),
+              for (final session in sessions)
+                DropdownMenuItem(value: session.id, child: Text(session.name)),
+            ],
+            onChanged: _isSubmitting
+                ? null
+                : (value) => setState(() => _sessionId = value),
+          ),
+        ),
+        const Gap(16),
         DrinkLogLocationField(
           initialLocation: _location,
           enabled: !_isSubmitting,
@@ -112,6 +142,7 @@ class _DrinkLogFormState extends State<DrinkLogForm> {
         _selectedConsumedAt,
         int.parse(_volumeController.text),
         _location,
+        _sessionId,
       );
     } on Exception catch (error) {
       if (mounted) setState(() => _error = error);

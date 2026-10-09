@@ -1,77 +1,117 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/activity/model/session_with_members.dart';
-import 'package:remembeer/activity/service/activity_service.dart';
-import 'package:remembeer/activity/widget/session_drink_logs_section.dart';
-import 'package:remembeer/activity/widget/session_header_card.dart';
-import 'package:remembeer/activity/widget/session_participants_section.dart';
-import 'package:remembeer/activity/widget/session_party_section.dart';
-import 'package:remembeer/activity/widget/session_photos_section.dart';
-import 'package:remembeer/activity/widget/session_statistics_card.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
+import 'package:intl/intl.dart';
+import 'package:remembeer/common/action/confirmation_dialog.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/widgets/session.dart';
+import 'package:remembeer/convex_api/widgets/sessionMember.dart';
+import 'package:remembeer/convex_api/widgets/user.dart';
+import 'package:remembeer/routes.dart';
 
 class SessionDetailPage extends StatelessWidget {
+  const SessionDetailPage({super.key, required this.sessionId});
   final String sessionId;
 
-  SessionDetailPage({super.key, required this.sessionId});
-
-  final _activityService = get<ActivityService>();
-
   @override
-  Widget build(BuildContext context) {
-    return AsyncBuilder<SessionWithMembers>(
-      stream: _activityService.sessionWithMembersStream(sessionId),
-      builder: _buildPage,
-    );
-  }
-
-  Widget _buildPage(
-    BuildContext context,
-    SessionWithMembers sessionWithMembers,
-  ) {
-    final session = sessionWithMembers.session;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return PageTemplate(
-      appBarBackgroundColor: session.isParty
-          ? colorScheme.errorContainer
-          : null,
-      appBarForegroundColor: session.isParty
-          ? colorScheme.onErrorContainer
-          : null,
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(session.isParty ? Icons.celebration : Icons.table_bar, size: 24),
-          const Gap(8),
-          Flexible(
-            child: Text(
-              session.isParty ? 'Party · ${session.name}' : session.name,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SessionHeaderCard(session: session),
-            const Gap(16),
-            SessionPhotosSection(sessionId: session.id),
-            SessionParticipantsSection(members: sessionWithMembers.membersList),
-            const Gap(16),
-            if (session.isParty)
-              SessionPartySection(sessionWithMembers: sessionWithMembers),
-            SessionDrinkLogsSection(sessionWithMembers: sessionWithMembers),
-            const Gap(16),
-            SessionStatisticsCard(sessionWithMembers: sessionWithMembers),
-          ],
+  Widget build(BuildContext context) => PageTemplate(
+    title: const Text('Session'),
+    child: SessionGetTypeQuery(
+      id: SessionId(sessionId),
+      builder: (context, session) => UserCurrentQuery(
+        builder: (context, user) => SessionMemberListForSessionQuery(
+          sessionId: session.id,
+          builder: (context, members) {
+            final owner = user.id == session.ownerId;
+            final admin =
+                owner ||
+                members.any(
+                  (member) =>
+                      member.userId == user.id &&
+                      member.sessionMemberStatus.isJoined &&
+                      member.sessionMemberRole.isAdmin,
+                );
+            return SessionMemberLeaveMutation(
+              builder: (context, leave, snapshot) => ListView(
+                children: [
+                  Text(
+                    session.isParty ? 'Party · ${session.name}' : session.name,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  if (session.description.isNotEmpty) ...[
+                    const Gap(12),
+                    Text(session.description),
+                  ],
+                  const Gap(12),
+                  Text('Started ${_time(session.startedAt)}'),
+                  Text(
+                    session.endedAt == null
+                        ? 'Still going'
+                        : 'Ended ${_time(session.endedAt!)}',
+                  ),
+                  const Gap(16),
+                  FilledButton.icon(
+                    icon: const Icon(Icons.add),
+                    label: const Text('Add drink'),
+                    onPressed: () => AddDrinkLogRoute(
+                      targetSessionId: sessionId,
+                    ).push<void>(context),
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.group),
+                    label: const Text('Members'),
+                    onPressed: () => AddSessionFriendsRoute(
+                      sessionId: sessionId,
+                    ).push<void>(context),
+                  ),
+                  if (admin)
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.edit),
+                      label: const Text('Edit session'),
+                      onPressed: () => EditSessionRoute(
+                        sessionId: sessionId,
+                      ).push<void>(context),
+                    ),
+                  if (!owner)
+                    OutlinedButton.icon(
+                      icon: const Icon(Icons.logout),
+                      label: const Text('Leave session'),
+                      onPressed: snapshot.isLoading
+                          ? null
+                          : () => showConfirmationDialog(
+                              context: context,
+                              title: 'Leave session',
+                              text:
+                                  'Leave this session? Your recorded drinks will be kept.',
+                              submitButtonText: 'Leave',
+                              isDestructive: true,
+                              onPressed: () async {
+                                leave.run(
+                                  sessionId: session.id,
+                                  onSuccess: (_) {
+                                    if (context.mounted) {
+                                      const SessionManagementRoute().go(
+                                        context,
+                                      );
+                                    }
+                                  },
+                                );
+                              },
+                            ),
+                    ),
+                  if (snapshot.error case final error?)
+                    ErrorMessageBox(message: error.toString()),
+                ],
+              ),
+            );
+          },
         ),
       ),
-    );
-  }
+    ),
+  );
+
+  String _time(double at) => DateFormat.yMMMd().add_Hm().format(
+    DateTime.fromMillisecondsSinceEpoch(at.toInt()),
+  );
 }

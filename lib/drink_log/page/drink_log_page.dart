@@ -9,6 +9,7 @@ import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/drink_log/widget/drink_log_group_list.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/routes.dart';
+import 'package:remembeer/session/widget/session_menu_button.dart';
 
 class DrinkLogPage extends StatefulWidget {
   const DrinkLogPage({super.key});
@@ -60,6 +61,7 @@ class _DrinkLogPageState extends State<DrinkLogPage> {
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Drinks'),
+      actions: const [SessionMenuButton()],
       padding: EdgeInsets.zero,
       floatingActionButton: GestureDetector(
         onLongPress: _quickAdd,

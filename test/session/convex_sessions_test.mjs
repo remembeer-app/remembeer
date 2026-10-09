@@ -20,7 +20,7 @@ const { sessions, sessionQueries, members, memberQueries, logs, deleteUserData }
   await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
 
 function fixture() {
-  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], drinkLog: [], drink: [], badge: [] };
+  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], drinkLog: [], drink: [], badge: [] };
   let sequence = 0;
   const db = {
     async get(table, id) { return tables[table].find((row) => row._id === id) ?? null; },
@@ -36,6 +36,7 @@ function fixture() {
         },
         async unique() { assert.ok(rows.length <= 1); return rows[0] ?? null; },
         async collect() { return rows; },
+        async take(count) { return rows.slice(0, count); },
       };
     },
   };
@@ -229,4 +230,17 @@ test("account deletion soft-deletes owned sessions and removes all of the user's
   assert.ok(f.member(ownedId, "member"));
   assert.equal(await f.db.get("user", "owner"), null);
   await assert.rejects(sessionQueries.get(f.ctx("member"), { id: ownedId }));
+});
+
+
+test("invitation lookup requires admin access and only returns public identifiers and names", async () => {
+  const f = fixture(); const id = await f.create();
+  await f.join(id, "member");
+  await assert.rejects(memberQueries.findInvitee(f.ctx("member"), { sessionId: id, username: "other" }));
+  await assert.rejects(memberQueries.findInvitee(f.ctx("other"), { sessionId: id, username: "owner" }));
+  assert.deepEqual(await memberQueries.findInvitee(f.owner, { sessionId: id, username: "OTHER" }), [{ _id: "other", username: "other" }]);
+  assert.deepEqual(await memberQueries.findInvitee(f.owner, { sessionId: id, username: "missing" }), []);
+  const roster = await memberQueries.listForSession(f.owner, { sessionId: id });
+  assert.equal(roster[0].username, "owner");
+  assert.equal(roster.some((row) => "authUserId" in row), false);
 });

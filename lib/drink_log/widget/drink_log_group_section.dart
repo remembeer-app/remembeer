@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/convex_api/modules/drinkLog.dart';
 import 'package:remembeer/drink_log/widget/drink_log_card.dart';
+import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/widget/section_header.dart';
 
 class DrinkLogGroupSection extends StatelessWidget {
@@ -36,6 +37,20 @@ class DrinkLogGroupSection extends StatelessWidget {
                 '${logs.length} ${logs.length == 1 ? 'drink' : 'drinks'} this day',
               ),
               children: [
+                ListTile(
+                  leading: const Icon(Icons.open_in_new),
+                  title: const Text('Open session'),
+                  onTap: () => ActivitySessionRoute(
+                    sessionId: session.id.value,
+                  ).push<void>(context),
+                ),
+                ListTile(
+                  leading: const Icon(Icons.add),
+                  title: const Text('Add drink'),
+                  onTap: () => AddDrinkLogRoute(
+                    targetSessionId: session.id.value,
+                  ).push<void>(context),
+                ),
                 if (session.description.trim().isNotEmpty)
                   ListTile(title: Text(session.description)),
                 ListTile(
