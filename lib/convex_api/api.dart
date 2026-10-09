@@ -5,6 +5,8 @@ import './modules/badge.dart';
 import './modules/drink.dart';
 import './modules/drinkLog.dart';
 import './modules/lib.dart';
+import './modules/session.dart';
+import './modules/sessionMember.dart';
 import './modules/user.dart';
 import './runtime.dart';
 import './schema.dart';
@@ -24,5 +26,7 @@ class ConvexApi {
   DrinkApi get drink => DrinkApi(_client);
   DrinkLogApi get drinkLog => DrinkLogApi(_client);
   LibApi get lib => LibApi(_client);
+  SessionApi get session => SessionApi(_client);
+  SessionMemberApi get sessionMember => SessionMemberApi(_client);
   UserApi get user => UserApi(_client);
 }

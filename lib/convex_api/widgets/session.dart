@@ -3,46 +3,42 @@
 // ignore_for_file: unnecessary_import
 
 import '../api.dart';
-import '../modules/drink.dart';
+import '../modules/session.dart';
 
 import 'dart:async';
 
 import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/widgets.dart';
 
-/// Callable typed mutation for drink:create.
-class DrinkCreateMutationExecutor {
+/// Callable typed mutation for session:create.
+class SessionCreateMutationExecutor {
   /// Creates an executor backed by the mutation widget.
-  const DrinkCreateMutationExecutor(this._mutate);
+  const SessionCreateMutationExecutor(this._mutate);
 
-  final Future<DrinkId> Function(CreateArgs) _mutate;
+  final Future<SessionId> Function(CreateArgs) _mutate;
 
   /// Runs the mutation.
-  Future<DrinkId> call({
-    required double alcoholPercentage,
-    required DrinkCategory drinkCategory,
+  Future<SessionId> call({
+    required String description,
     required String name,
-  }) => _mutate((
-    alcoholPercentage: alcoholPercentage,
-    drinkCategory: drinkCategory,
-    name: name,
-  ));
+    required double startedAt,
+  }) => _mutate((description: description, name: name, startedAt: startedAt));
 
   /// Starts the mutation, observing failures through the widget snapshot.
   ///
   /// [onSuccess] runs only on success. Errors from that callback are not
   /// suppressed. Use [call] when you need to await the result or handle errors.
   void run({
-    required double alcoholPercentage,
-    required DrinkCategory drinkCategory,
+    required String description,
     required String name,
-    void Function(DrinkId result)? onSuccess,
+    required double startedAt,
+    void Function(SessionId result)? onSuccess,
   }) {
     unawaited(
       _mutate((
-        alcoholPercentage: alcoholPercentage,
-        drinkCategory: drinkCategory,
+        description: description,
         name: name,
+        startedAt: startedAt,
       )).then<void>((result) {
         onSuccess?.call(result);
       }, onError: (Object error, StackTrace stackTrace) {}),
@@ -50,10 +46,10 @@ class DrinkCreateMutationExecutor {
   }
 }
 
-/// Flutter widget for drink:create.
-class DrinkCreateMutation extends StatelessWidget {
+/// Flutter widget for session:create.
+class SessionCreateMutation extends StatelessWidget {
   /// Creates a typed mutation widget.
-  const DrinkCreateMutation({
+  const SessionCreateMutation({
     super.key,
     required this.builder,
     this.client,
@@ -64,8 +60,8 @@ class DrinkCreateMutation extends StatelessWidget {
   /// Builds the UI with the callable mutation and current request state.
   final Widget Function(
     BuildContext,
-    DrinkCreateMutationExecutor,
-    ConvexRequestSnapshot<DrinkId>,
+    SessionCreateMutationExecutor,
+    ConvexRequestSnapshot<SessionId>,
   )
   builder;
 
@@ -79,31 +75,31 @@ class DrinkCreateMutation extends StatelessWidget {
   final MutationMode mode;
 
   @override
-  Widget build(BuildContext context) => ConvexMutation<CreateArgs, DrinkId>(
+  Widget build(BuildContext context) => ConvexMutation<CreateArgs, SessionId>(
     mutation: createMutationReference,
     client: client,
     typedOptimisticUpdate: optimisticUpdate,
     mode: mode,
     builder: (context, mutate, snapshot) =>
-        builder(context, DrinkCreateMutationExecutor(mutate), snapshot),
+        builder(context, SessionCreateMutationExecutor(mutate), snapshot),
   );
 }
 
-/// Callable typed mutation for drink:softDelete.
-class DrinkSoftDeleteMutationExecutor {
+/// Callable typed mutation for session:promoteToParty.
+class SessionPromoteToPartyMutationExecutor {
   /// Creates an executor backed by the mutation widget.
-  const DrinkSoftDeleteMutationExecutor(this._mutate);
+  const SessionPromoteToPartyMutationExecutor(this._mutate);
 
-  final Future<void> Function(SoftDeleteArgs) _mutate;
+  final Future<void> Function(PromoteToPartyArgs) _mutate;
 
   /// Runs the mutation.
-  Future<void> call({required DrinkId id}) => _mutate((id: id));
+  Future<void> call({required SessionId id}) => _mutate((id: id));
 
   /// Starts the mutation, observing failures through the widget snapshot.
   ///
   /// [onSuccess] runs only on success. Errors from that callback are not
   /// suppressed. Use [call] when you need to await the result or handle errors.
-  void run({required DrinkId id, void Function(void result)? onSuccess}) {
+  void run({required SessionId id, void Function(void result)? onSuccess}) {
     unawaited(
       _mutate((id: id)).then<void>((result) {
         onSuccess?.call(result);
@@ -112,10 +108,10 @@ class DrinkSoftDeleteMutationExecutor {
   }
 }
 
-/// Flutter widget for drink:softDelete.
-class DrinkSoftDeleteMutation extends StatelessWidget {
+/// Flutter widget for session:promoteToParty.
+class SessionPromoteToPartyMutation extends StatelessWidget {
   /// Creates a typed mutation widget.
-  const DrinkSoftDeleteMutation({
+  const SessionPromoteToPartyMutation({
     super.key,
     required this.builder,
     this.client,
@@ -126,7 +122,73 @@ class DrinkSoftDeleteMutation extends StatelessWidget {
   /// Builds the UI with the callable mutation and current request state.
   final Widget Function(
     BuildContext,
-    DrinkSoftDeleteMutationExecutor,
+    SessionPromoteToPartyMutationExecutor,
+    ConvexRequestSnapshot<void>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  /// Optional optimistic update for the mutation.
+  final TypedOptimisticUpdate<PromoteToPartyArgs>? optimisticUpdate;
+
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
+  @override
+  Widget build(BuildContext context) =>
+      ConvexMutation<PromoteToPartyArgs, void>(
+        mutation: promoteToPartyMutationReference,
+        client: client,
+        typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
+        builder: (context, mutate, snapshot) => builder(
+          context,
+          SessionPromoteToPartyMutationExecutor(mutate),
+          snapshot,
+        ),
+      );
+}
+
+/// Callable typed mutation for session:softDelete.
+class SessionSoftDeleteMutationExecutor {
+  /// Creates an executor backed by the mutation widget.
+  const SessionSoftDeleteMutationExecutor(this._mutate);
+
+  final Future<void> Function(SoftDeleteArgs) _mutate;
+
+  /// Runs the mutation.
+  Future<void> call({required SessionId id}) => _mutate((id: id));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({required SessionId id, void Function(void result)? onSuccess}) {
+    unawaited(
+      _mutate((id: id)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
+}
+
+/// Flutter widget for session:softDelete.
+class SessionSoftDeleteMutation extends StatelessWidget {
+  /// Creates a typed mutation widget.
+  const SessionSoftDeleteMutation({
+    super.key,
+    required this.builder,
+    this.client,
+    this.optimisticUpdate,
+    this.mode = MutationMode.single,
+  });
+
+  /// Builds the UI with the callable mutation and current request state.
+  final Widget Function(
+    BuildContext,
+    SessionSoftDeleteMutationExecutor,
     ConvexRequestSnapshot<void>,
   )
   builder;
@@ -147,28 +209,30 @@ class DrinkSoftDeleteMutation extends StatelessWidget {
     typedOptimisticUpdate: optimisticUpdate,
     mode: mode,
     builder: (context, mutate, snapshot) =>
-        builder(context, DrinkSoftDeleteMutationExecutor(mutate), snapshot),
+        builder(context, SessionSoftDeleteMutationExecutor(mutate), snapshot),
   );
 }
 
-/// Callable typed mutation for drink:update.
-class DrinkUpdateMutationExecutor {
+/// Callable typed mutation for session:update.
+class SessionUpdateMutationExecutor {
   /// Creates an executor backed by the mutation widget.
-  const DrinkUpdateMutationExecutor(this._mutate);
+  const SessionUpdateMutationExecutor(this._mutate);
 
   final Future<void> Function(UpdateArgs) _mutate;
 
   /// Runs the mutation.
   Future<void> call({
-    Optional<double> alcoholPercentage = const Optional.absent(),
-    Optional<DrinkCategory> drinkCategory = const Optional.absent(),
-    required DrinkId id,
+    Optional<String> description = const Optional.absent(),
+    Optional<double?> endedAt = const Optional.absent(),
+    required SessionId id,
     Optional<String> name = const Optional.absent(),
+    Optional<double> startedAt = const Optional.absent(),
   }) => _mutate((
-    alcoholPercentage: alcoholPercentage,
-    drinkCategory: drinkCategory,
+    description: description,
+    endedAt: endedAt,
     id: id,
     name: name,
+    startedAt: startedAt,
   ));
 
   /// Starts the mutation, observing failures through the widget snapshot.
@@ -176,18 +240,20 @@ class DrinkUpdateMutationExecutor {
   /// [onSuccess] runs only on success. Errors from that callback are not
   /// suppressed. Use [call] when you need to await the result or handle errors.
   void run({
-    Optional<double> alcoholPercentage = const Optional.absent(),
-    Optional<DrinkCategory> drinkCategory = const Optional.absent(),
-    required DrinkId id,
+    Optional<String> description = const Optional.absent(),
+    Optional<double?> endedAt = const Optional.absent(),
+    required SessionId id,
     Optional<String> name = const Optional.absent(),
+    Optional<double> startedAt = const Optional.absent(),
     void Function(void result)? onSuccess,
   }) {
     unawaited(
       _mutate((
-        alcoholPercentage: alcoholPercentage,
-        drinkCategory: drinkCategory,
+        description: description,
+        endedAt: endedAt,
         id: id,
         name: name,
+        startedAt: startedAt,
       )).then<void>((result) {
         onSuccess?.call(result);
       }, onError: (Object error, StackTrace stackTrace) {}),
@@ -195,10 +261,10 @@ class DrinkUpdateMutationExecutor {
   }
 }
 
-/// Flutter widget for drink:update.
-class DrinkUpdateMutation extends StatelessWidget {
+/// Flutter widget for session:update.
+class SessionUpdateMutation extends StatelessWidget {
   /// Creates a typed mutation widget.
-  const DrinkUpdateMutation({
+  const SessionUpdateMutation({
     super.key,
     required this.builder,
     this.client,
@@ -209,7 +275,7 @@ class DrinkUpdateMutation extends StatelessWidget {
   /// Builds the UI with the callable mutation and current request state.
   final Widget Function(
     BuildContext,
-    DrinkUpdateMutationExecutor,
+    SessionUpdateMutationExecutor,
     ConvexRequestSnapshot<void>,
   )
   builder;
@@ -230,14 +296,14 @@ class DrinkUpdateMutation extends StatelessWidget {
     typedOptimisticUpdate: optimisticUpdate,
     mode: mode,
     builder: (context, mutate, snapshot) =>
-        builder(context, DrinkUpdateMutationExecutor(mutate), snapshot),
+        builder(context, SessionUpdateMutationExecutor(mutate), snapshot),
   );
 }
 
-/// Flutter widget for drink:get.
-class DrinkGetTypeQuery extends StatelessWidget {
+/// Flutter widget for session:get.
+class SessionGetTypeQuery extends StatelessWidget {
   /// Creates a typed query widget with default loading and error UI.
-  const DrinkGetTypeQuery({
+  const SessionGetTypeQuery({
     super.key,
     required this.builder,
     this.client,
@@ -247,7 +313,7 @@ class DrinkGetTypeQuery extends StatelessWidget {
   }) : snapshotBuilder = null;
 
   /// Creates a query widget whose builder handles every snapshot state.
-  const DrinkGetTypeQuery.snapshot({
+  const SessionGetTypeQuery.snapshot({
     super.key,
     required this.snapshotBuilder,
     this.client,
@@ -257,10 +323,10 @@ class DrinkGetTypeQuery extends StatelessWidget {
        errorBuilder = null;
 
   /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, DrinkDocument)? builder;
+  final Widget Function(BuildContext, SessionDocument)? builder;
 
   /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(BuildContext, ConvexQuerySnapshot<DrinkDocument>)?
+  final Widget Function(BuildContext, ConvexQuerySnapshot<SessionDocument>)?
   snapshotBuilder;
 
   /// Overrides the initial loading UI.
@@ -272,20 +338,20 @@ class DrinkGetTypeQuery extends StatelessWidget {
   /// Optional runtime client override.
   final ConvexRuntimeClient? client;
 
-  final DrinkId id;
+  final SessionId id;
 
   @override
   Widget build(BuildContext context) {
     final buildSnapshot = snapshotBuilder;
     if (buildSnapshot != null) {
-      return ConvexTypedQuery<GetTypeArgs, DrinkDocument>.snapshot(
+      return ConvexTypedQuery<GetTypeArgs, SessionDocument>.snapshot(
         query: getValueQueryReference,
         args: (id: id),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
-    return ConvexTypedQuery<GetTypeArgs, DrinkDocument>(
+    return ConvexTypedQuery<GetTypeArgs, SessionDocument>(
       query: getValueQueryReference,
       args: (id: id),
       client: client,
@@ -296,10 +362,10 @@ class DrinkGetTypeQuery extends StatelessWidget {
   }
 }
 
-/// Flutter widget for drink:listAvailable.
-class DrinkListAvailableQuery extends StatelessWidget {
+/// Flutter widget for session:listCurrent.
+class SessionListCurrentQuery extends StatelessWidget {
   /// Creates a typed query widget with default loading and error UI.
-  const DrinkListAvailableQuery({
+  const SessionListCurrentQuery({
     super.key,
     required this.builder,
     this.client,
@@ -308,7 +374,7 @@ class DrinkListAvailableQuery extends StatelessWidget {
   }) : snapshotBuilder = null;
 
   /// Creates a query widget whose builder handles every snapshot state.
-  const DrinkListAvailableQuery.snapshot({
+  const SessionListCurrentQuery.snapshot({
     super.key,
     required this.snapshotBuilder,
     this.client,
@@ -317,10 +383,13 @@ class DrinkListAvailableQuery extends StatelessWidget {
        errorBuilder = null;
 
   /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, List<DrinkDocument>)? builder;
+  final Widget Function(BuildContext, List<SessionDocument>)? builder;
 
   /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(BuildContext, ConvexQuerySnapshot<List<DrinkDocument>>)?
+  final Widget Function(
+    BuildContext,
+    ConvexQuerySnapshot<List<SessionDocument>>,
+  )?
   snapshotBuilder;
 
   /// Overrides the initial loading UI.
@@ -336,73 +405,15 @@ class DrinkListAvailableQuery extends StatelessWidget {
   Widget build(BuildContext context) {
     final buildSnapshot = snapshotBuilder;
     if (buildSnapshot != null) {
-      return ConvexTypedQuery<NoArgs, List<DrinkDocument>>.snapshot(
-        query: listAvailableQueryReference,
+      return ConvexTypedQuery<NoArgs, List<SessionDocument>>.snapshot(
+        query: listCurrentQueryReference,
         args: const NoArgs(),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
-    return ConvexTypedQuery<NoArgs, List<DrinkDocument>>(
-      query: listAvailableQueryReference,
-      args: const NoArgs(),
-      client: client,
-      builder: builder!,
-      waitingBuilder: waitingBuilder,
-      errorBuilder: errorBuilder,
-    );
-  }
-}
-
-/// Flutter widget for drink:listCustom.
-class DrinkListCustomQuery extends StatelessWidget {
-  /// Creates a typed query widget with default loading and error UI.
-  const DrinkListCustomQuery({
-    super.key,
-    required this.builder,
-    this.client,
-    this.waitingBuilder,
-    this.errorBuilder,
-  }) : snapshotBuilder = null;
-
-  /// Creates a query widget whose builder handles every snapshot state.
-  const DrinkListCustomQuery.snapshot({
-    super.key,
-    required this.snapshotBuilder,
-    this.client,
-  }) : builder = null,
-       waitingBuilder = null,
-       errorBuilder = null;
-
-  /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, List<DrinkDocument>)? builder;
-
-  /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(BuildContext, ConvexQuerySnapshot<List<DrinkDocument>>)?
-  snapshotBuilder;
-
-  /// Overrides the initial loading UI.
-  final WidgetBuilder? waitingBuilder;
-
-  /// Overrides the error UI.
-  final Widget Function(BuildContext, Object)? errorBuilder;
-
-  /// Optional runtime client override.
-  final ConvexRuntimeClient? client;
-
-  @override
-  Widget build(BuildContext context) {
-    final buildSnapshot = snapshotBuilder;
-    if (buildSnapshot != null) {
-      return ConvexTypedQuery<NoArgs, List<DrinkDocument>>.snapshot(
-        query: listCustomQueryReference,
-        args: const NoArgs(),
-        client: client,
-        snapshotBuilder: buildSnapshot,
-      );
-    }
-    return ConvexTypedQuery<NoArgs, List<DrinkDocument>>(
-      query: listCustomQueryReference,
+    return ConvexTypedQuery<NoArgs, List<SessionDocument>>(
+      query: listCurrentQueryReference,
       args: const NoArgs(),
       client: client,
       builder: builder!,

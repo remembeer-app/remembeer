@@ -4,4 +4,6 @@ export 'widgets/badge.dart';
 export 'widgets/drink.dart';
 export 'widgets/drinkLog.dart';
 export 'widgets/lib/timeZone.dart';
+export 'widgets/session.dart';
+export 'widgets/sessionMember.dart';
 export 'widgets/user.dart';

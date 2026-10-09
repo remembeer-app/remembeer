@@ -4,6 +4,7 @@ import { z } from "zod";
 import { authQuery } from "../lib/authenticated";
 import { logicalDayBoundaries, logicalDayAt } from "../lib/logicalDay";
 import { schema } from "../schema";
+import { listCurrentHandler } from "../session/query";
 
 export const listForDay = authQuery
   .extend(WithZod)
@@ -48,31 +49,10 @@ export const listForDay = authQuery
       )
       .order(ctx.user.drinkLogSortOrder)
       .collect();
-    // shortcut: reads all accessible session history; add day-filtered indexes when history approaches Convex read limits.
-    const [ownedSessions, memberships] = await Promise.all([
-      ctx.db.query("session")
-        .withIndex("by_ownerId_and_kind", (q) => q.eq("ownerId", ctx.user._id))
-        .collect(),
-      ctx.db.query("sessionMember")
-        .withIndex("by_userId_and_sessionMemberStatus_kind", (q) =>
-          q.eq("userId", ctx.user._id).eq("sessionMemberStatus.kind", "joined"))
-        .collect(),
-    ]);
-    const joinedSessions = await Promise.all(
-      memberships.map((member) => ctx.db.get("session", member.sessionId)),
-    );
     const referencedIds = new Set(logs.map((log) => log.sessionId));
-    const sessions = [...new Map(
-      [...ownedSessions, ...joinedSessions]
-        .filter((session) => session !== null)
-        .map((session) => [session._id, session] as const),
-    ).values()]
-      .filter((session) => session.deletedAt === null && (
-        referencedIds.has(session._id) ||
-        (session.startedAt < end && (session.endedAt === null || session.endedAt > start))
-      ))
-      .sort((a, b) => (a.startedAt - b.startedAt || a._id.localeCompare(b._id)) *
-        (ctx.user.drinkLogSortOrder === "asc" ? 1 : -1));
+    const sessions = (await listCurrentHandler(ctx)).filter((session) =>
+      referencedIds.has(session._id) ||
+      (session.startedAt < end && (session.endedAt === null || session.endedAt > start)));
     const localTime = (at: number) => Temporal.Instant.fromEpochMilliseconds(at)
       .toZonedDateTimeISO(ctx.user.timeZone).toPlainDateTime().toString();
     return {

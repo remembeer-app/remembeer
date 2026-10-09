@@ -2,6 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
 import { schema } from "../schema";
+import { requireSessionAccess } from "../session/access";
 import type { Id } from "../_generated/dataModel";
 import {
   createDrinkLogInputValidator,
@@ -97,20 +98,6 @@ async function checkReferences(
     }
   }
   if (sessionId !== undefined && sessionId !== null) {
-    const session = await ctx.db.get("session", sessionId);
-    if (!session || session.deletedAt !== null) {
-      throw new ConvexError("Session not found");
-    }
-    if (session.ownerId !== ctx.user._id) {
-      const member = await ctx.db
-        .query("sessionMember")
-        .withIndex("by_sessionId_and_userId", (q) =>
-          q.eq("sessionId", sessionId).eq("userId", ctx.user._id),
-        )
-        .unique();
-      if (member?.sessionMemberStatus.kind !== "joined") {
-        throw new ConvexError("You must be a session member to log a drink");
-      }
-    }
+    await requireSessionAccess(ctx, sessionId, "joined");
   }
 }

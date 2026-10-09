@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
 import 'package:remembeer/common/util/invariant.dart';
-import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/convex_api/types.dart' hide Party, Session;
 import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/drink_log/model/drink_log.dart';
 import 'package:remembeer/party/constants.dart';

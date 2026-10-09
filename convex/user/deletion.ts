@@ -31,6 +31,20 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     await ctx.db.delete("badge", badge._id);
   }
 
+  const sessions = await ctx.db.query("session")
+    .withIndex("by_ownerId_and_kind", (q) => q.eq("ownerId", user._id)).collect();
+  const now = Date.now();
+  for (const session of sessions) {
+    if (session.deletedAt === null) {
+      await ctx.db.patch("session", session._id, { deletedAt: now, updatedAt: now });
+    }
+  }
+  const memberships = await ctx.db.query("sessionMember")
+    .withIndex("by_userId_and_sessionMemberStatus_kind", (q) => q.eq("userId", user._id)).collect();
+  for (const member of memberships) {
+    await ctx.db.delete("sessionMember", member._id);
+  }
+
   if (user.avatarStorageId) {
     await ctx.storage.delete(user.avatarStorageId);
   }

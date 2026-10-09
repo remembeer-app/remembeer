@@ -267,131 +267,93 @@ DrinkCategory _decodeDrinkCategory(dynamic raw) {
   }
 }
 
-typedef ListForDayResultLogsItemDrink = ({
-  double creationTime,
-  DrinkId id,
-  double alcoholPercentage,
-  double? deletedAt,
-  DrinkCategory drinkCategory,
-  String name,
-  UserId? ownerId,
-  Optional<String> seedKey,
-  double updatedAt,
-});
-
-Map<String, dynamic> _encodeListForDayResultLogsItemDrink(
-  ListForDayResultLogsItemDrink value$,
-) {
+Map<String, dynamic> _encodeDrinkDocument(DrinkDocument value$) {
   final (
-    creationTime: creationTime,
-    id: id,
-    alcoholPercentage: alcoholPercentage,
-    deletedAt: deletedAt,
-    drinkCategory: drinkCategory,
-    name: name,
     ownerId: ownerId,
     seedKey: seedKey,
+    name: name,
+    drinkCategory: drinkCategory,
+    alcoholPercentage: alcoholPercentage,
     updatedAt: updatedAt,
+    deletedAt: deletedAt,
+    id: id,
+    creationTime: creationTime,
   ) = value$;
   return <String, dynamic>{
-    '_creationTime': creationTime,
-    '_id': id.value,
-    'alcoholPercentage': alcoholPercentage,
-    'deletedAt': deletedAt,
-    'drinkCategory': _encodeDrinkCategory(drinkCategory),
-    'name': name,
     'ownerId': switch (ownerId) {
       null => null,
       final v$ => v$.value,
     },
     if (seedKey.isDefined) 'seedKey': seedKey.value,
+    'name': name,
+    'drinkCategory': _encodeDrinkCategory(drinkCategory),
+    'alcoholPercentage': alcoholPercentage,
     'updatedAt': updatedAt,
+    'deletedAt': deletedAt,
+    '_id': id.value,
+    '_creationTime': creationTime,
   };
 }
 
-ListForDayResultLogsItemDrink _decodeListForDayResultLogsItemDrink(
-  dynamic raw,
-) {
-  final map = expectMap(raw, label: 'ListForDayResultLogsItemDrink');
-  if (!map.containsKey('_creationTime')) {
-    throw FormatException(
-      'Missing required field "_creationTime" for ListForDayResultLogsItemDrink',
-    );
+DrinkDocument _decodeDrinkDocument(dynamic raw) {
+  final map = expectMap(raw, label: 'DrinkDocument');
+  if (!map.containsKey('ownerId')) {
+    throw FormatException('Missing required field "ownerId" for DrinkDocument');
   }
-  if (!map.containsKey('_id')) {
+  if (!map.containsKey('name')) {
+    throw FormatException('Missing required field "name" for DrinkDocument');
+  }
+  if (!map.containsKey('drinkCategory')) {
     throw FormatException(
-      'Missing required field "_id" for ListForDayResultLogsItemDrink',
+      'Missing required field "drinkCategory" for DrinkDocument',
     );
   }
   if (!map.containsKey('alcoholPercentage')) {
     throw FormatException(
-      'Missing required field "alcoholPercentage" for ListForDayResultLogsItemDrink',
-    );
-  }
-  if (!map.containsKey('deletedAt')) {
-    throw FormatException(
-      'Missing required field "deletedAt" for ListForDayResultLogsItemDrink',
-    );
-  }
-  if (!map.containsKey('drinkCategory')) {
-    throw FormatException(
-      'Missing required field "drinkCategory" for ListForDayResultLogsItemDrink',
-    );
-  }
-  if (!map.containsKey('name')) {
-    throw FormatException(
-      'Missing required field "name" for ListForDayResultLogsItemDrink',
-    );
-  }
-  if (!map.containsKey('ownerId')) {
-    throw FormatException(
-      'Missing required field "ownerId" for ListForDayResultLogsItemDrink',
+      'Missing required field "alcoholPercentage" for DrinkDocument',
     );
   }
   if (!map.containsKey('updatedAt')) {
     throw FormatException(
-      'Missing required field "updatedAt" for ListForDayResultLogsItemDrink',
+      'Missing required field "updatedAt" for DrinkDocument',
+    );
+  }
+  if (!map.containsKey('deletedAt')) {
+    throw FormatException(
+      'Missing required field "deletedAt" for DrinkDocument',
+    );
+  }
+  if (!map.containsKey('_id')) {
+    throw FormatException('Missing required field "_id" for DrinkDocument');
+  }
+  if (!map.containsKey('_creationTime')) {
+    throw FormatException(
+      'Missing required field "_creationTime" for DrinkDocument',
     );
   }
   return (
-    creationTime: expectDouble(
-      map['_creationTime'],
-      label: 'ListForDayResultLogsItemDrinkCreationTime',
-    ),
-    id: DrinkId(
-      expectString(map['_id'], label: 'ListForDayResultLogsItemDrinkId'),
-    ),
-    alcoholPercentage: expectDouble(
-      map['alcoholPercentage'],
-      label: 'ListForDayResultLogsItemDrinkAlcoholPercentage',
-    ),
-    deletedAt: map['deletedAt'] == null
-        ? null
-        : expectDouble(
-            map['deletedAt'],
-            label: 'ListForDayResultLogsItemDrinkDeletedAt',
-          ),
-    drinkCategory: _decodeDrinkCategory(map['drinkCategory']),
-    name: expectString(map['name'], label: 'ListForDayResultLogsItemDrinkName'),
     ownerId: map['ownerId'] == null
         ? null
-        : UserId(
-            expectString(
-              map['ownerId'],
-              label: 'ListForDayResultLogsItemDrinkOwnerId',
-            ),
-          ),
+        : UserId(expectString(map['ownerId'], label: 'DrinkDocumentOwnerId')),
     seedKey: map.containsKey('seedKey')
         ? Optional.of(
-            expectString(
-              map['seedKey'],
-              label: 'ListForDayResultLogsItemDrinkSeedKey',
-            ),
+            expectString(map['seedKey'], label: 'DrinkDocumentSeedKey'),
           )
         : const Optional.absent(),
-    updatedAt: expectDouble(
-      map['updatedAt'],
-      label: 'ListForDayResultLogsItemDrinkUpdatedAt',
+    name: expectString(map['name'], label: 'DrinkDocumentName'),
+    drinkCategory: _decodeDrinkCategory(map['drinkCategory']),
+    alcoholPercentage: expectDouble(
+      map['alcoholPercentage'],
+      label: 'DrinkDocumentAlcoholPercentage',
+    ),
+    updatedAt: expectDouble(map['updatedAt'], label: 'DrinkDocumentUpdatedAt'),
+    deletedAt: map['deletedAt'] == null
+        ? null
+        : expectDouble(map['deletedAt'], label: 'DrinkDocumentDeletedAt'),
+    id: DrinkId(expectString(map['_id'], label: 'DrinkDocumentId')),
+    creationTime: expectDouble(
+      map['_creationTime'],
+      label: 'DrinkDocumentCreationTime',
     ),
   );
 }
@@ -456,7 +418,7 @@ typedef ListForDayResultLogsItem = ({
   double consumedAt,
   String consumedAtLocal,
   double? deletedAt,
-  ListForDayResultLogsItemDrink? drink,
+  DrinkDocument? drink,
   DrinkId drinkId,
   ListForDayResultLogsItemLocation? location,
   SessionId? sessionId,
@@ -490,7 +452,7 @@ Map<String, dynamic> _encodeListForDayResultLogsItem(
     'deletedAt': deletedAt,
     'drink': switch (drink) {
       null => null,
-      final v$ => _encodeListForDayResultLogsItemDrink(v$),
+      final v$ => _encodeDrinkDocument(v$),
     },
     'drinkId': drinkId.value,
     'location': switch (location) {
@@ -591,9 +553,7 @@ ListForDayResultLogsItem _decodeListForDayResultLogsItem(dynamic raw) {
             map['deletedAt'],
             label: 'ListForDayResultLogsItemDeletedAt',
           ),
-    drink: map['drink'] == null
-        ? null
-        : _decodeListForDayResultLogsItemDrink(map['drink']),
+    drink: map['drink'] == null ? null : _decodeDrinkDocument(map['drink']),
     drinkId: DrinkId(
       expectString(map['drinkId'], label: 'ListForDayResultLogsItemDrinkId'),
     ),

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/convex_api/modules/drink.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/widget/drink_picker_sheet.dart';
 import 'package:remembeer/drink/widget/selected_drink_display.dart';
 
-class DrinkPicker extends FormField<ListAvailableResultItem> {
-  final ListAvailableResultItem? selectedDrink;
-  final ValueChanged<ListAvailableResultItem> onChanged;
+class DrinkPicker extends FormField<DrinkDocument> {
+  final DrinkDocument? selectedDrink;
+  final ValueChanged<DrinkDocument> onChanged;
 
   DrinkPicker({
     super.key,
@@ -19,10 +19,10 @@ class DrinkPicker extends FormField<ListAvailableResultItem> {
        );
 
   @override
-  FormFieldState<ListAvailableResultItem> createState() => _DrinkPickerState();
+  FormFieldState<DrinkDocument> createState() => _DrinkPickerState();
 }
 
-class _DrinkPickerState extends FormFieldState<ListAvailableResultItem> {
+class _DrinkPickerState extends FormFieldState<DrinkDocument> {
   final _focusNode = FocusNode();
 
   @override
@@ -43,7 +43,7 @@ class _DrinkPickerState extends FormFieldState<ListAvailableResultItem> {
   }
 
   void _openPicker(BuildContext context) {
-    showModalBottomSheet<ListAvailableResultItem>(
+    showModalBottomSheet<DrinkDocument>(
       context: context,
       isScrollControlled: true,
       useSafeArea: true,

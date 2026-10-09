@@ -9,7 +9,7 @@ const sessionMemberStatusValidator = v.union(
   v.object({ kind: v.literal("declined") }),
 );
 
-const sessionMemberRoleValidator = v.union(
+export const sessionMemberRoleValidator = v.union(
   v.object({ kind: v.literal("member") }),
   v.object({ kind: v.literal("admin") }),
 );

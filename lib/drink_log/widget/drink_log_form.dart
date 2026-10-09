@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/app_form.dart';
-import 'package:remembeer/convex_api/modules/drink.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/drink/widget/drink_picker.dart';
 import 'package:remembeer/drink_log/widget/drink_log_consumed_at_field.dart';
@@ -13,12 +13,12 @@ import 'package:remembeer/drink_log/widget/drink_log_location_field.dart';
 import 'package:remembeer/drink_log/widget/drink_log_volume_field.dart';
 
 class DrinkLogForm extends StatefulWidget {
-  final ListAvailableResultItem? initialDrink;
+  final DrinkDocument? initialDrink;
   final DateTime initialConsumedAt;
   final int initialVolume;
   final GeoPoint? initialLocation;
   final Future<void> Function(
-    ListAvailableResultItem drink,
+    DrinkDocument drink,
     DateTime consumedAt,
     int volumeInMilliliters,
     GeoPoint? location,
@@ -39,7 +39,7 @@ class DrinkLogForm extends StatefulWidget {
 }
 
 class _DrinkLogFormState extends State<DrinkLogForm> {
-  late ListAvailableResultItem? _selectedDrink = widget.initialDrink;
+  late DrinkDocument? _selectedDrink = widget.initialDrink;
   late DateTime _selectedConsumedAt = widget.initialConsumedAt;
   late GeoPoint? _location = widget.initialLocation;
   late final _volumeController = TextEditingController(

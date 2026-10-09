@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/convex_api/modules/drink.dart';
+import 'package:remembeer/convex_api/types.dart';
 
 class SelectedDrinkDisplay extends StatelessWidget {
-  final ListAvailableResultItem drink;
+  final DrinkDocument drink;
 
   const SelectedDrinkDisplay({super.key, required this.drink});
 
