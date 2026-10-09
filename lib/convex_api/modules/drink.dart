@@ -31,12 +31,12 @@ class DrinkApi {
   ConvexMutationReference<CreateArgs, DrinkId> get createMutation =>
       createMutationReference;
 
-  Future<GetTypeResult> getValue({required DrinkId id}) async {
+  Future<DrinkDocument> getValue({required DrinkId id}) async {
     final raw$ = await _client.query('drink:get', _encodeGetTypeArgs((id: id)));
-    return _decodeGetTypeResult(raw$);
+    return _decodeDrinkDocument(raw$);
   }
 
-  TypedConvexSubscription<GetTypeResult> getValueSubscribe({
+  TypedConvexSubscription<DrinkDocument> getValueSubscribe({
     required DrinkId id,
   }) {
     final subscription$ = _client.subscribe(
@@ -46,26 +46,26 @@ class DrinkApi {
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
         case QuerySuccess(:final value):
-          return TypedQuerySuccess<GetTypeResult>(_decodeGetTypeResult(value));
+          return TypedQuerySuccess<DrinkDocument>(_decodeDrinkDocument(value));
         case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<GetTypeResult>(
+          return TypedQueryLoading<DrinkDocument>(
             hasPendingWrites: hasPendingWrites,
           );
         case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<GetTypeResult>(
+          return TypedQueryError<DrinkDocument>(
             message,
             data: data,
             logLines: logLines,
           );
       }
     });
-    return TypedConvexSubscription<GetTypeResult>(subscription$, typedStream$);
+    return TypedConvexSubscription<DrinkDocument>(subscription$, typedStream$);
   }
 
-  ConvexQueryReference<GetTypeArgs, GetTypeResult> get getValueQuery =>
+  ConvexQueryReference<GetTypeArgs, DrinkDocument> get getValueQuery =>
       getValueQueryReference;
 
-  Future<List<ListAvailableResultItem>> listAvailable() async {
+  Future<List<DrinkDocument>> listAvailable() async {
     final raw$ = await _client.query(
       'drink:listAvailable',
       const <String, dynamic>{},
@@ -73,11 +73,10 @@ class DrinkApi {
     return expectList(
       raw$,
       label: 'ListAvailableResult',
-    ).map((item) => _decodeListAvailableResultItem(item)).toList();
+    ).map((item) => _decodeDrinkDocument(item)).toList();
   }
 
-  TypedConvexSubscription<List<ListAvailableResultItem>>
-  listAvailableSubscribe() {
+  TypedConvexSubscription<List<DrinkDocument>> listAvailableSubscribe() {
     final subscription$ = _client.subscribe(
       'drink:listAvailable',
       const <String, dynamic>{},
@@ -85,34 +84,34 @@ class DrinkApi {
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
         case QuerySuccess(:final value):
-          return TypedQuerySuccess<List<ListAvailableResultItem>>(
+          return TypedQuerySuccess<List<DrinkDocument>>(
             expectList(
               value,
               label: 'ListAvailableResult',
-            ).map((item) => _decodeListAvailableResultItem(item)).toList(),
+            ).map((item) => _decodeDrinkDocument(item)).toList(),
           );
         case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<List<ListAvailableResultItem>>(
+          return TypedQueryLoading<List<DrinkDocument>>(
             hasPendingWrites: hasPendingWrites,
           );
         case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<List<ListAvailableResultItem>>(
+          return TypedQueryError<List<DrinkDocument>>(
             message,
             data: data,
             logLines: logLines,
           );
       }
     });
-    return TypedConvexSubscription<List<ListAvailableResultItem>>(
+    return TypedConvexSubscription<List<DrinkDocument>>(
       subscription$,
       typedStream$,
     );
   }
 
-  ConvexQueryReference<NoArgs, List<ListAvailableResultItem>>
-  get listAvailableQuery => listAvailableQueryReference;
+  ConvexQueryReference<NoArgs, List<DrinkDocument>> get listAvailableQuery =>
+      listAvailableQueryReference;
 
-  Future<List<ListCustomResultItem>> listCustom() async {
+  Future<List<DrinkDocument>> listCustom() async {
     final raw$ = await _client.query(
       'drink:listCustom',
       const <String, dynamic>{},
@@ -120,10 +119,10 @@ class DrinkApi {
     return expectList(
       raw$,
       label: 'ListCustomResult',
-    ).map((item) => _decodeListCustomResultItem(item)).toList();
+    ).map((item) => _decodeDrinkDocument(item)).toList();
   }
 
-  TypedConvexSubscription<List<ListCustomResultItem>> listCustomSubscribe() {
+  TypedConvexSubscription<List<DrinkDocument>> listCustomSubscribe() {
     final subscription$ = _client.subscribe(
       'drink:listCustom',
       const <String, dynamic>{},
@@ -131,32 +130,32 @@ class DrinkApi {
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
         case QuerySuccess(:final value):
-          return TypedQuerySuccess<List<ListCustomResultItem>>(
+          return TypedQuerySuccess<List<DrinkDocument>>(
             expectList(
               value,
               label: 'ListCustomResult',
-            ).map((item) => _decodeListCustomResultItem(item)).toList(),
+            ).map((item) => _decodeDrinkDocument(item)).toList(),
           );
         case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<List<ListCustomResultItem>>(
+          return TypedQueryLoading<List<DrinkDocument>>(
             hasPendingWrites: hasPendingWrites,
           );
         case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<List<ListCustomResultItem>>(
+          return TypedQueryError<List<DrinkDocument>>(
             message,
             data: data,
             logLines: logLines,
           );
       }
     });
-    return TypedConvexSubscription<List<ListCustomResultItem>>(
+    return TypedConvexSubscription<List<DrinkDocument>>(
       subscription$,
       typedStream$,
     );
   }
 
-  ConvexQueryReference<NoArgs, List<ListCustomResultItem>>
-  get listCustomQuery => listCustomQueryReference;
+  ConvexQueryReference<NoArgs, List<DrinkDocument>> get listCustomQuery =>
+      listCustomQueryReference;
 
   Future<Null> softDelete({required DrinkId id}) async {
     await _client.mutate('drink:softDelete', _encodeSoftDeleteArgs((id: id)));
@@ -271,106 +270,94 @@ CreateArgs _decodeCreateArgs(dynamic raw) {
   );
 }
 
-typedef GetTypeResult = ({
-  double creationTime,
-  DrinkId id,
-  double alcoholPercentage,
-  double? deletedAt,
-  DrinkCategory drinkCategory,
-  String name,
-  UserId? ownerId,
-  Optional<String> seedKey,
-  double updatedAt,
-});
-
-Map<String, dynamic> _encodeGetTypeResult(GetTypeResult value$) {
+Map<String, dynamic> _encodeDrinkDocument(DrinkDocument value$) {
   final (
-    creationTime: creationTime,
-    id: id,
-    alcoholPercentage: alcoholPercentage,
-    deletedAt: deletedAt,
-    drinkCategory: drinkCategory,
-    name: name,
     ownerId: ownerId,
     seedKey: seedKey,
+    name: name,
+    drinkCategory: drinkCategory,
+    alcoholPercentage: alcoholPercentage,
     updatedAt: updatedAt,
+    deletedAt: deletedAt,
+    id: id,
+    creationTime: creationTime,
   ) = value$;
   return <String, dynamic>{
-    '_creationTime': creationTime,
-    '_id': id.value,
-    'alcoholPercentage': alcoholPercentage,
-    'deletedAt': deletedAt,
-    'drinkCategory': _encodeDrinkCategory(drinkCategory),
-    'name': name,
     'ownerId': switch (ownerId) {
       null => null,
       final v$ => v$.value,
     },
     if (seedKey.isDefined) 'seedKey': seedKey.value,
+    'name': name,
+    'drinkCategory': _encodeDrinkCategory(drinkCategory),
+    'alcoholPercentage': alcoholPercentage,
     'updatedAt': updatedAt,
+    'deletedAt': deletedAt,
+    '_id': id.value,
+    '_creationTime': creationTime,
   };
 }
 
-GetTypeResult _decodeGetTypeResult(dynamic raw) {
-  final map = expectMap(raw, label: 'GetTypeResult');
-  if (!map.containsKey('_creationTime')) {
-    throw FormatException(
-      'Missing required field "_creationTime" for GetTypeResult',
-    );
+DrinkDocument _decodeDrinkDocument(dynamic raw) {
+  final map = expectMap(raw, label: 'DrinkDocument');
+  if (!map.containsKey('ownerId')) {
+    throw FormatException('Missing required field "ownerId" for DrinkDocument');
   }
-  if (!map.containsKey('_id')) {
-    throw FormatException('Missing required field "_id" for GetTypeResult');
+  if (!map.containsKey('name')) {
+    throw FormatException('Missing required field "name" for DrinkDocument');
+  }
+  if (!map.containsKey('drinkCategory')) {
+    throw FormatException(
+      'Missing required field "drinkCategory" for DrinkDocument',
+    );
   }
   if (!map.containsKey('alcoholPercentage')) {
     throw FormatException(
-      'Missing required field "alcoholPercentage" for GetTypeResult',
+      'Missing required field "alcoholPercentage" for DrinkDocument',
+    );
+  }
+  if (!map.containsKey('updatedAt')) {
+    throw FormatException(
+      'Missing required field "updatedAt" for DrinkDocument',
     );
   }
   if (!map.containsKey('deletedAt')) {
     throw FormatException(
-      'Missing required field "deletedAt" for GetTypeResult',
+      'Missing required field "deletedAt" for DrinkDocument',
     );
   }
-  if (!map.containsKey('drinkCategory')) {
+  if (!map.containsKey('_id')) {
+    throw FormatException('Missing required field "_id" for DrinkDocument');
+  }
+  if (!map.containsKey('_creationTime')) {
     throw FormatException(
-      'Missing required field "drinkCategory" for GetTypeResult',
-    );
-  }
-  if (!map.containsKey('name')) {
-    throw FormatException('Missing required field "name" for GetTypeResult');
-  }
-  if (!map.containsKey('ownerId')) {
-    throw FormatException('Missing required field "ownerId" for GetTypeResult');
-  }
-  if (!map.containsKey('updatedAt')) {
-    throw FormatException(
-      'Missing required field "updatedAt" for GetTypeResult',
+      'Missing required field "_creationTime" for DrinkDocument',
     );
   }
   return (
-    creationTime: expectDouble(
-      map['_creationTime'],
-      label: 'GetTypeResultCreationTime',
-    ),
-    id: DrinkId(expectString(map['_id'], label: 'GetTypeResultId')),
-    alcoholPercentage: expectDouble(
-      map['alcoholPercentage'],
-      label: 'GetTypeResultAlcoholPercentage',
-    ),
-    deletedAt: map['deletedAt'] == null
-        ? null
-        : expectDouble(map['deletedAt'], label: 'GetTypeResultDeletedAt'),
-    drinkCategory: _decodeDrinkCategory(map['drinkCategory']),
-    name: expectString(map['name'], label: 'GetTypeResultName'),
     ownerId: map['ownerId'] == null
         ? null
-        : UserId(expectString(map['ownerId'], label: 'GetTypeResultOwnerId')),
+        : UserId(expectString(map['ownerId'], label: 'DrinkDocumentOwnerId')),
     seedKey: map.containsKey('seedKey')
         ? Optional.of(
-            expectString(map['seedKey'], label: 'GetTypeResultSeedKey'),
+            expectString(map['seedKey'], label: 'DrinkDocumentSeedKey'),
           )
         : const Optional.absent(),
-    updatedAt: expectDouble(map['updatedAt'], label: 'GetTypeResultUpdatedAt'),
+    name: expectString(map['name'], label: 'DrinkDocumentName'),
+    drinkCategory: _decodeDrinkCategory(map['drinkCategory']),
+    alcoholPercentage: expectDouble(
+      map['alcoholPercentage'],
+      label: 'DrinkDocumentAlcoholPercentage',
+    ),
+    updatedAt: expectDouble(map['updatedAt'], label: 'DrinkDocumentUpdatedAt'),
+    deletedAt: map['deletedAt'] == null
+        ? null
+        : expectDouble(map['deletedAt'], label: 'DrinkDocumentDeletedAt'),
+    id: DrinkId(expectString(map['_id'], label: 'DrinkDocumentId')),
+    creationTime: expectDouble(
+      map['_creationTime'],
+      label: 'DrinkDocumentCreationTime',
+    ),
   );
 }
 
@@ -387,248 +374,6 @@ GetTypeArgs _decodeGetTypeArgs(dynamic raw) {
     throw FormatException('Missing required field "id" for GetTypeArgs');
   }
   return (id: DrinkId(expectString(map['id'], label: 'GetTypeArgsId')));
-}
-
-typedef ListAvailableResultItem = ({
-  double creationTime,
-  DrinkId id,
-  double alcoholPercentage,
-  double? deletedAt,
-  DrinkCategory drinkCategory,
-  String name,
-  UserId? ownerId,
-  Optional<String> seedKey,
-  double updatedAt,
-});
-
-Map<String, dynamic> _encodeListAvailableResultItem(
-  ListAvailableResultItem value$,
-) {
-  final (
-    creationTime: creationTime,
-    id: id,
-    alcoholPercentage: alcoholPercentage,
-    deletedAt: deletedAt,
-    drinkCategory: drinkCategory,
-    name: name,
-    ownerId: ownerId,
-    seedKey: seedKey,
-    updatedAt: updatedAt,
-  ) = value$;
-  return <String, dynamic>{
-    '_creationTime': creationTime,
-    '_id': id.value,
-    'alcoholPercentage': alcoholPercentage,
-    'deletedAt': deletedAt,
-    'drinkCategory': _encodeDrinkCategory(drinkCategory),
-    'name': name,
-    'ownerId': switch (ownerId) {
-      null => null,
-      final v$ => v$.value,
-    },
-    if (seedKey.isDefined) 'seedKey': seedKey.value,
-    'updatedAt': updatedAt,
-  };
-}
-
-ListAvailableResultItem _decodeListAvailableResultItem(dynamic raw) {
-  final map = expectMap(raw, label: 'ListAvailableResultItem');
-  if (!map.containsKey('_creationTime')) {
-    throw FormatException(
-      'Missing required field "_creationTime" for ListAvailableResultItem',
-    );
-  }
-  if (!map.containsKey('_id')) {
-    throw FormatException(
-      'Missing required field "_id" for ListAvailableResultItem',
-    );
-  }
-  if (!map.containsKey('alcoholPercentage')) {
-    throw FormatException(
-      'Missing required field "alcoholPercentage" for ListAvailableResultItem',
-    );
-  }
-  if (!map.containsKey('deletedAt')) {
-    throw FormatException(
-      'Missing required field "deletedAt" for ListAvailableResultItem',
-    );
-  }
-  if (!map.containsKey('drinkCategory')) {
-    throw FormatException(
-      'Missing required field "drinkCategory" for ListAvailableResultItem',
-    );
-  }
-  if (!map.containsKey('name')) {
-    throw FormatException(
-      'Missing required field "name" for ListAvailableResultItem',
-    );
-  }
-  if (!map.containsKey('ownerId')) {
-    throw FormatException(
-      'Missing required field "ownerId" for ListAvailableResultItem',
-    );
-  }
-  if (!map.containsKey('updatedAt')) {
-    throw FormatException(
-      'Missing required field "updatedAt" for ListAvailableResultItem',
-    );
-  }
-  return (
-    creationTime: expectDouble(
-      map['_creationTime'],
-      label: 'ListAvailableResultItemCreationTime',
-    ),
-    id: DrinkId(expectString(map['_id'], label: 'ListAvailableResultItemId')),
-    alcoholPercentage: expectDouble(
-      map['alcoholPercentage'],
-      label: 'ListAvailableResultItemAlcoholPercentage',
-    ),
-    deletedAt: map['deletedAt'] == null
-        ? null
-        : expectDouble(
-            map['deletedAt'],
-            label: 'ListAvailableResultItemDeletedAt',
-          ),
-    drinkCategory: _decodeDrinkCategory(map['drinkCategory']),
-    name: expectString(map['name'], label: 'ListAvailableResultItemName'),
-    ownerId: map['ownerId'] == null
-        ? null
-        : UserId(
-            expectString(
-              map['ownerId'],
-              label: 'ListAvailableResultItemOwnerId',
-            ),
-          ),
-    seedKey: map.containsKey('seedKey')
-        ? Optional.of(
-            expectString(
-              map['seedKey'],
-              label: 'ListAvailableResultItemSeedKey',
-            ),
-          )
-        : const Optional.absent(),
-    updatedAt: expectDouble(
-      map['updatedAt'],
-      label: 'ListAvailableResultItemUpdatedAt',
-    ),
-  );
-}
-
-typedef ListCustomResultItem = ({
-  double creationTime,
-  DrinkId id,
-  double alcoholPercentage,
-  double? deletedAt,
-  DrinkCategory drinkCategory,
-  String name,
-  UserId? ownerId,
-  Optional<String> seedKey,
-  double updatedAt,
-});
-
-Map<String, dynamic> _encodeListCustomResultItem(ListCustomResultItem value$) {
-  final (
-    creationTime: creationTime,
-    id: id,
-    alcoholPercentage: alcoholPercentage,
-    deletedAt: deletedAt,
-    drinkCategory: drinkCategory,
-    name: name,
-    ownerId: ownerId,
-    seedKey: seedKey,
-    updatedAt: updatedAt,
-  ) = value$;
-  return <String, dynamic>{
-    '_creationTime': creationTime,
-    '_id': id.value,
-    'alcoholPercentage': alcoholPercentage,
-    'deletedAt': deletedAt,
-    'drinkCategory': _encodeDrinkCategory(drinkCategory),
-    'name': name,
-    'ownerId': switch (ownerId) {
-      null => null,
-      final v$ => v$.value,
-    },
-    if (seedKey.isDefined) 'seedKey': seedKey.value,
-    'updatedAt': updatedAt,
-  };
-}
-
-ListCustomResultItem _decodeListCustomResultItem(dynamic raw) {
-  final map = expectMap(raw, label: 'ListCustomResultItem');
-  if (!map.containsKey('_creationTime')) {
-    throw FormatException(
-      'Missing required field "_creationTime" for ListCustomResultItem',
-    );
-  }
-  if (!map.containsKey('_id')) {
-    throw FormatException(
-      'Missing required field "_id" for ListCustomResultItem',
-    );
-  }
-  if (!map.containsKey('alcoholPercentage')) {
-    throw FormatException(
-      'Missing required field "alcoholPercentage" for ListCustomResultItem',
-    );
-  }
-  if (!map.containsKey('deletedAt')) {
-    throw FormatException(
-      'Missing required field "deletedAt" for ListCustomResultItem',
-    );
-  }
-  if (!map.containsKey('drinkCategory')) {
-    throw FormatException(
-      'Missing required field "drinkCategory" for ListCustomResultItem',
-    );
-  }
-  if (!map.containsKey('name')) {
-    throw FormatException(
-      'Missing required field "name" for ListCustomResultItem',
-    );
-  }
-  if (!map.containsKey('ownerId')) {
-    throw FormatException(
-      'Missing required field "ownerId" for ListCustomResultItem',
-    );
-  }
-  if (!map.containsKey('updatedAt')) {
-    throw FormatException(
-      'Missing required field "updatedAt" for ListCustomResultItem',
-    );
-  }
-  return (
-    creationTime: expectDouble(
-      map['_creationTime'],
-      label: 'ListCustomResultItemCreationTime',
-    ),
-    id: DrinkId(expectString(map['_id'], label: 'ListCustomResultItemId')),
-    alcoholPercentage: expectDouble(
-      map['alcoholPercentage'],
-      label: 'ListCustomResultItemAlcoholPercentage',
-    ),
-    deletedAt: map['deletedAt'] == null
-        ? null
-        : expectDouble(
-            map['deletedAt'],
-            label: 'ListCustomResultItemDeletedAt',
-          ),
-    drinkCategory: _decodeDrinkCategory(map['drinkCategory']),
-    name: expectString(map['name'], label: 'ListCustomResultItemName'),
-    ownerId: map['ownerId'] == null
-        ? null
-        : UserId(
-            expectString(map['ownerId'], label: 'ListCustomResultItemOwnerId'),
-          ),
-    seedKey: map.containsKey('seedKey')
-        ? Optional.of(
-            expectString(map['seedKey'], label: 'ListCustomResultItemSeedKey'),
-          )
-        : const Optional.absent(),
-    updatedAt: expectDouble(
-      map['updatedAt'],
-      label: 'ListCustomResultItemUpdatedAt',
-    ),
-  );
 }
 
 typedef SoftDeleteArgs = ({DrinkId id});
@@ -701,16 +446,16 @@ final ConvexMutationReference<CreateArgs, DrinkId> createMutationReference =
       decode: (raw) => DrinkId(expectString(raw, label: 'CreateResult')),
     );
 
-final ConvexQueryReference<GetTypeArgs, GetTypeResult> getValueQueryReference =
+final ConvexQueryReference<GetTypeArgs, DrinkDocument> getValueQueryReference =
     ConvexQueryReference(
       name: 'drink:get',
       encode: (args) => _encodeGetTypeArgs(args),
       decodeArgs: (raw) => _decodeGetTypeArgs(raw),
-      decode: (raw) => _decodeGetTypeResult(raw),
-      encodeResult: (value) => _encodeGetTypeResult(value),
+      decode: (raw) => _decodeDrinkDocument(raw),
+      encodeResult: (value) => _encodeDrinkDocument(value),
     );
 
-final ConvexQueryReference<NoArgs, List<ListAvailableResultItem>>
+final ConvexQueryReference<NoArgs, List<DrinkDocument>>
 listAvailableQueryReference = ConvexQueryReference(
   name: 'drink:listAvailable',
   encode: (args) => const <String, dynamic>{},
@@ -718,12 +463,12 @@ listAvailableQueryReference = ConvexQueryReference(
   decode: (raw) => expectList(
     raw,
     label: 'ListAvailableResult',
-  ).map((item) => _decodeListAvailableResultItem(item)).toList(),
+  ).map((item) => _decodeDrinkDocument(item)).toList(),
   encodeResult: (value) =>
-      value.map((item) => _encodeListAvailableResultItem(item)).toList(),
+      value.map((item) => _encodeDrinkDocument(item)).toList(),
 );
 
-final ConvexQueryReference<NoArgs, List<ListCustomResultItem>>
+final ConvexQueryReference<NoArgs, List<DrinkDocument>>
 listCustomQueryReference = ConvexQueryReference(
   name: 'drink:listCustom',
   encode: (args) => const <String, dynamic>{},
@@ -731,9 +476,9 @@ listCustomQueryReference = ConvexQueryReference(
   decode: (raw) => expectList(
     raw,
     label: 'ListCustomResult',
-  ).map((item) => _decodeListCustomResultItem(item)).toList(),
+  ).map((item) => _decodeDrinkDocument(item)).toList(),
   encodeResult: (value) =>
-      value.map((item) => _encodeListCustomResultItem(item)).toList(),
+      value.map((item) => _encodeDrinkDocument(item)).toList(),
 );
 
 final ConvexMutationReference<SoftDeleteArgs, void>

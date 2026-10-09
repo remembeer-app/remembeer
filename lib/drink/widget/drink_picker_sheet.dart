@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/convex_api/modules/drink.dart';
 import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/convex_api/widgets/drink.dart';
 import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 
 class DrinkPickerSheet extends StatefulWidget {
-  final ListAvailableResultItem? selectedDrink;
+  final DrinkDocument? selectedDrink;
 
   const DrinkPickerSheet({super.key, required this.selectedDrink});
 
@@ -26,9 +25,7 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
     super.dispose();
   }
 
-  Iterable<ListAvailableResultItem> _filterDrinks(
-    List<ListAvailableResultItem> drinks,
-  ) {
+  Iterable<DrinkDocument> _filterDrinks(List<DrinkDocument> drinks) {
     return drinks.where((drink) {
       if (_searchQuery.isNotEmpty) {
         final matchesSearch = drink.name.toLowerCase().contains(
@@ -242,7 +239,7 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
           return _buildEmptyState();
         }
 
-        final groupedDrinks = <String, List<ListAvailableResultItem>>{};
+        final groupedDrinks = <String, List<DrinkDocument>>{};
         for (final drink in filteredDrinks) {
           groupedDrinks
               .putIfAbsent(drink.drinkCategory.kind, () => [])
@@ -270,7 +267,7 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
 
   Widget _buildCategorySection(
     DrinkCategory category,
-    List<ListAvailableResultItem> drinks,
+    List<DrinkDocument> drinks,
   ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,7 +302,7 @@ class _DrinkPickerSheetState extends State<DrinkPickerSheet> {
     );
   }
 
-  Widget _buildDrinkTile(ListAvailableResultItem drink) {
+  Widget _buildDrinkTile(DrinkDocument drink) {
     final isSelected = widget.selectedDrink?.id == drink.id;
     final category = drink.drinkCategory;
     final theme = Theme.of(context);

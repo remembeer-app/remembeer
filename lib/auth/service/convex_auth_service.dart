@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:dartvex/dartvex.dart';
 import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/user/constants.dart';
 
 class ConvexAuthService extends ChangeNotifier {
   final ConvexBetterAuthProvider _authProvider;
@@ -38,13 +40,14 @@ class ConvexAuthService extends ChangeNotifier {
     required String email,
     required String password,
   }) async {
+    final timeZone = await _initialTimeZone();
     await _authProvider.signUp(
       name: name,
       email: email,
       password: password,
       onIdToken: (_) {},
     );
-    await _completeAuthentication(_client.login);
+    await _completeAuthentication(_client.login, timeZone: timeZone);
   }
 
   Future<void> signOut() => _client.logout();
@@ -79,16 +82,30 @@ class ConvexAuthService extends ChangeNotifier {
   }
 
   Future<void> _completeAuthentication(
-    Future<BetterAuthSession> Function() authenticate,
-  ) async {
+    Future<BetterAuthSession> Function() authenticate, {
+    String? timeZone,
+  }) async {
     await authenticate();
     try {
-      await _api.user.ensureCurrent();
+      await _api.user.ensureCurrent(
+        timeZone: timeZone == null
+            ? const Optional.absent()
+            : Optional.of(timeZone),
+      );
     } on Object {
       await _client.logout();
       rethrow;
     }
     notifyListeners();
+  }
+
+  Future<String> _initialTimeZone() async {
+    try {
+      return (await FlutterTimezone.getLocalTimezone()).identifier;
+    } on Object catch (error) {
+      debugPrint('Could not detect the account timezone: $error');
+      return defaultTimeZone;
+    }
   }
 
   void _handleAuthState(AuthState<BetterAuthSession> state) {

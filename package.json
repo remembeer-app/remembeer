@@ -11,6 +11,7 @@
     "convex:typecheck": "tsc -p convex/tsconfig.json",
     "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api --flutter-widgets",
     "test": "node --test test/firestore-rules.test.js",
+    "test:convex:sessions": "node --harmony-temporal --test test/session/convex_sessions_test.mjs test/drink_log/convex_day_query_test.mjs",
     "test:seed:drinks": "node --test test/drink/seed_data/convex_seed_test.mjs",
     "seed": "node scripts/seed_drinks.mjs",
     "seed:drinks": "convex run drink:seedGlobal"
@@ -28,6 +29,6 @@
     "@types/node": "^24",
     "firebase": "^12.2.1",
     "firebase-admin": "^14.5.0",
-    "typescript": "5.9.2"
+    "typescript": "7.0.2"
   }
 }

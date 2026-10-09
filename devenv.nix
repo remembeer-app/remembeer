@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, config, ... }:
 
 {
   dotenv.disableHint = true;
@@ -30,6 +30,11 @@
     curl
     jq
   ];
+
+  # Use the project's TypeScript 7 LSP so editor types match tsc (including Temporal).
+  scripts.typescript-language-server.exec = ''
+    exec "${config.devenv.root}/node_modules/.bin/tsc" --lsp "$@"
+  '';
 
   scripts.createm.exec = ''
     set -euo pipefail

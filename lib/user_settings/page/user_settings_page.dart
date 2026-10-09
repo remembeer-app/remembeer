@@ -169,6 +169,11 @@ class UserSettingsPage extends StatelessWidget {
         ),
         _divider,
         _buildSettingsCard(
+          title: 'Account timezone',
+          onTap: () => const TimeZoneSettingsRoute().push<void>(context),
+        ),
+        _divider,
+        _buildSettingsCard(
           title: 'Drink log order',
           onTap: () => const DrinkLogSortSettingsRoute().push<void>(context),
         ),

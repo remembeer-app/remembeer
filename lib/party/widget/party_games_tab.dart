@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
-import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/convex_api/types.dart' hide Party, Session;
 import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/party/constants.dart';

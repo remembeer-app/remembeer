@@ -11,7 +11,6 @@ import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
 import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/convex_api/api.dart';
-import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
@@ -110,25 +109,16 @@ class IoCContainer {
 
   static void _registerServices() {
     get
-      ..registerSingleton(DateService(userController: get<UserController>()))
+      ..registerSingleton(
+        DrinkLogService(
+          api: get<ConvexApi>(),
+          locationService: get<LocationService>(),
+        ),
+      )
       ..registerSingleton(
         AppIconService(
           authService: get<AuthService>(),
           userController: get<UserController>(),
-        ),
-      )
-      ..registerSingleton(
-        DrinkLogService(
-          authService: get<AuthService>(),
-          userController: get<UserController>(),
-          userSettingsController: get<UserSettingsController>(),
-          sessionController: get<SessionController>(),
-          dateService: get<DateService>(),
-          locationService: get<LocationService>(),
-          userStatsService: get<UserStatsService>(),
-          badgeService: get<BadgeService>(),
-          drinkController: get<DrinkController>(),
-          partyController: get<PartyController>(),
         ),
       )
       ..registerSingleton(
@@ -159,7 +149,6 @@ class IoCContainer {
           authService: get<AuthService>(),
           sessionController: get<SessionController>(),
           userSettingsController: get<UserSettingsController>(),
-          dateService: get<DateService>(),
           userService: get<UserService>(),
           notificationService: get<NotificationService>(),
           partyController: get<PartyController>(),

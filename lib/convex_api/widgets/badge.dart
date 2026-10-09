@@ -98,13 +98,10 @@ class BadgeListCurrentQuery extends StatelessWidget {
        errorBuilder = null;
 
   /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, List<ListCurrentResultItem>)? builder;
+  final Widget Function(BuildContext, List<BadgeDocument>)? builder;
 
   /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(
-    BuildContext,
-    ConvexQuerySnapshot<List<ListCurrentResultItem>>,
-  )?
+  final Widget Function(BuildContext, ConvexQuerySnapshot<List<BadgeDocument>>)?
   snapshotBuilder;
 
   /// Overrides the initial loading UI.
@@ -120,14 +117,14 @@ class BadgeListCurrentQuery extends StatelessWidget {
   Widget build(BuildContext context) {
     final buildSnapshot = snapshotBuilder;
     if (buildSnapshot != null) {
-      return ConvexTypedQuery<NoArgs, List<ListCurrentResultItem>>.snapshot(
+      return ConvexTypedQuery<NoArgs, List<BadgeDocument>>.snapshot(
         query: listCurrentQueryReference,
         args: const NoArgs(),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
-    return ConvexTypedQuery<NoArgs, List<ListCurrentResultItem>>(
+    return ConvexTypedQuery<NoArgs, List<BadgeDocument>>(
       query: listCurrentQueryReference,
       args: const NoArgs(),
       client: client,

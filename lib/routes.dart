@@ -14,6 +14,8 @@ import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/common/widget/nav_bar.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/modules/drinkLog.dart' as convex_log;
 import 'package:remembeer/drink/page/add_drink_page.dart';
 import 'package:remembeer/drink/page/custom_drinks_page.dart';
 import 'package:remembeer/drink/page/update_drink_page.dart';
@@ -50,6 +52,7 @@ import 'package:remembeer/user_settings/page/badge_visibility_page.dart';
 import 'package:remembeer/user_settings/page/default_drink_page.dart';
 import 'package:remembeer/user_settings/page/drink_log_list_sort_page.dart';
 import 'package:remembeer/user_settings/page/end_of_day_page.dart';
+import 'package:remembeer/user_settings/page/time_zone_page.dart';
 import 'package:remembeer/user_settings/page/user_settings_page.dart';
 import 'package:remembeer/user_settings/page/username_page.dart';
 
@@ -70,7 +73,7 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   @override
   String? redirect(BuildContext context, GoRouterState state) {
     return _convexAuthService.isAuthenticated
-        ? const SettingsRoute().location
+        ? const DrinkLogRoute().location
         : null;
   }
 
@@ -87,7 +90,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
   @override
   String? redirect(BuildContext context, GoRouterState state) {
     return _convexAuthService.isAuthenticated
-        ? const SettingsRoute().location
+        ? const DrinkLogRoute().location
         : null;
   }
 
@@ -140,6 +143,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
           path: '/drink-logs',
           routes: [
             TypedGoRoute<AddDrinkLogRoute>(path: 'new'),
+            TypedGoRoute<UpdateDrinkLogRoute>(path: ':drinkLogId/edit'),
             TypedGoRoute<PartyRoute>(
               path: 'parties/:sessionId',
               routes: [
@@ -168,9 +172,6 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             ),
             TypedGoRoute<AddSessionFriendsRoute>(
               path: 'sessions/:sessionId/friends/add',
-            ),
-            TypedGoRoute<UpdateDrinkLogRoute>(
-              path: 'sessions/:sessionId/drink-logs/:drinkLogId/edit',
             ),
           ],
         ),
@@ -213,6 +214,7 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             TypedGoRoute<BadgeVisibilityRoute>(path: 'badge-visibility'),
             TypedGoRoute<ChangePasswordRoute>(path: 'password'),
             TypedGoRoute<EndOfDaySettingsRoute>(path: 'end-of-day'),
+            TypedGoRoute<TimeZoneSettingsRoute>(path: 'time-zone'),
             TypedGoRoute<DeleteAccountRoute>(path: 'delete-account'),
           ],
         ),
@@ -286,7 +288,7 @@ class DrinkLogRoute extends GoRouteData with $DrinkLogRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return DrinkLogPage();
+    return const DrinkLogPage();
   }
 }
 
@@ -408,6 +410,18 @@ class AddDrinkLogRoute extends GoRouteData with $AddDrinkLogRoute {
   }
 }
 
+class UpdateDrinkLogRoute extends GoRouteData with $UpdateDrinkLogRoute {
+  const UpdateDrinkLogRoute({required this.drinkLogId, this.$extra});
+
+  final String drinkLogId;
+  final convex_log.ListForDayResultLogsItem? $extra;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return UpdateDrinkLogPage(log: $extra);
+  }
+}
+
 class PartyRoute extends GoRouteData with $PartyRoute {
   final String sessionId;
   final PartyTab tab;
@@ -519,7 +533,7 @@ class CreateSessionRoute extends GoRouteData with $CreateSessionRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return CreateSessionPage();
+    return const CreateSessionPage();
   }
 }
 
@@ -528,7 +542,7 @@ class SessionSummaryRoute extends GoRouteData with $SessionSummaryRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return SummaryPage();
+    return const SummaryPage();
   }
 }
 
@@ -537,7 +551,7 @@ class SessionManagementRoute extends GoRouteData with $SessionManagementRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return SessionManagementPage();
+    return const SessionManagementPage();
   }
 }
 
@@ -572,21 +586,6 @@ class AddSessionFriendsRoute extends GoRouteData with $AddSessionFriendsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return AddFriendsToSessionPage(sessionId: sessionId);
-  }
-}
-
-class UpdateDrinkLogRoute extends GoRouteData with $UpdateDrinkLogRoute {
-  final String sessionId;
-  final String drinkLogId;
-
-  const UpdateDrinkLogRoute({
-    required this.sessionId,
-    required this.drinkLogId,
-  });
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return UpdateDrinkLogPage(sessionId: sessionId, drinkLogId: drinkLogId);
   }
 }
 
@@ -751,6 +750,15 @@ class EndOfDaySettingsRoute extends GoRouteData with $EndOfDaySettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return const EndOfDayPage();
+  }
+}
+
+class TimeZoneSettingsRoute extends GoRouteData with $TimeZoneSettingsRoute {
+  const TimeZoneSettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return TimeZonePage();
   }
 }
 

@@ -4,11 +4,12 @@ import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
 import 'package:remembeer/convex_api/modules/drink.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/convex_api/widgets.dart';
 import 'package:remembeer/routes.dart';
 
 class DrinkTile extends StatelessWidget {
-  final ListCustomResultItem drink;
+  final DrinkDocument drink;
 
   const DrinkTile({super.key, required this.drink});
 

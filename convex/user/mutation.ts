@@ -8,6 +8,7 @@ import { getCurrentUserSafe } from "./currentUser";
 import {
   normalizeUsername,
   updateEndOfDayBoundaryInputValidator,
+  updateTimeZoneInputValidator,
   updateUsernameInputValidator,
   userTable,
 } from "./schema";
@@ -19,8 +20,10 @@ const accentColors = userTable.validator.fields.accentColor.members.map(
 
 export const ensureCurrent = convex
   .mutation()
+  .extend(WithZod)
+  .input(updateTimeZoneInputValidator.partial())
   .returns(v.id("user"))
-  .handler(async (ctx) => {
+  .handler(async (ctx, { timeZone }) => {
     const { user, authUser } = await getCurrentUserSafe(ctx);
     if (user) {
       return user._id;
@@ -32,9 +35,11 @@ export const ensureCurrent = convex
       authUserId: authUser._id,
       username,
       normalizedUsername: normalizeUsername(username),
-      accentColor: accentColors[Math.floor(Math.random() * accentColors.length)]!,
+      accentColor:
+        accentColors[Math.floor(Math.random() * accentColors.length)]!,
       avatarStorageId: null,
       endOfDayBoundary: defaultEndOfDayBoundary,
+      timeZone: timeZone ?? "UTC",
       defaultDrink: null,
       drinkLogSortOrder: "desc",
     });
@@ -49,6 +54,7 @@ export const updateUsername = authMutation
       username,
       normalizedUsername: normalizeUsername(username),
     });
+
     return null;
   });
 
@@ -57,6 +63,7 @@ export const updateAccentColor = authMutation
   .returns(v.null())
   .handler(async (ctx, { accentColor }) => {
     await ctx.db.patch("user", ctx.user._id, { accentColor });
+
     return null;
   });
 
@@ -70,18 +77,24 @@ export const updateAvatar = authMutation
   .returns(v.nullable(v.string()))
   .handler(async (ctx, { storageId }) => {
     let avatarUrl: string | null = null;
+
     if (storageId !== null) {
       const owner = await ctx.db
         .query("user")
-        .withIndex("by_avatarStorageId", (q) => q.eq("avatarStorageId", storageId))
+        .withIndex("by_avatarStorageId", (q) =>
+          q.eq("avatarStorageId", storageId),
+        )
         .first();
+
       if (owner && owner._id !== ctx.user._id) {
         throw new ConvexError("Avatar belongs to another user");
       }
+
       const metadata = await ctx.db.system.get(storageId);
       if (!metadata || metadata.contentType !== "image/jpeg") {
         throw new ConvexError("Avatar must be an uploaded JPEG image");
       }
+
       avatarUrl = await ctx.storage.getUrl(storageId);
       if (avatarUrl === null) {
         throw new ConvexError("Avatar file is not available");
@@ -91,9 +104,11 @@ export const updateAvatar = authMutation
     await ctx.db.patch("user", ctx.user._id, {
       avatarStorageId: storageId,
     });
+
     if (ctx.user.avatarStorageId && ctx.user.avatarStorageId !== storageId) {
       await ctx.storage.delete(ctx.user.avatarStorageId);
     }
+
     return avatarUrl;
   });
 
@@ -103,6 +118,17 @@ export const updateEndOfDayBoundary = authMutation
   .returns(v.null())
   .handler(async (ctx, { endOfDayBoundary }) => {
     await ctx.db.patch("user", ctx.user._id, { endOfDayBoundary });
+
+    return null;
+  });
+
+export const updateTimeZone = authMutation
+  .extend(WithZod)
+  .input(updateTimeZoneInputValidator)
+  .returns(v.null())
+  .handler(async (ctx, { timeZone }) => {
+    await ctx.db.patch("user", ctx.user._id, { timeZone });
+
     return null;
   });
 
@@ -124,6 +150,7 @@ export const updateDefaultDrink = authMutation
     await ctx.db.patch("user", ctx.user._id, {
       defaultDrink,
     });
+
     return null;
   });
 
@@ -132,6 +159,7 @@ export const updateDrinkLogSortOrder = authMutation
   .returns(v.null())
   .handler(async (ctx, { drinkLogSortOrder }) => {
     await ctx.db.patch("user", ctx.user._id, { drinkLogSortOrder });
+
     return null;
   });
 
@@ -140,6 +168,7 @@ export const deleteCurrent = authMutation
   .returns(v.null())
   .handler(async (ctx, { password }) => {
     if (!password) throw new ConvexError("Please enter your password.");
+
     const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
     try {
       await auth.api.deleteUser({ body: { password }, headers });
@@ -151,5 +180,6 @@ export const deleteCurrent = authMutation
       }
       throw error;
     }
+
     return null;
   });

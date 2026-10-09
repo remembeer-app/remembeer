@@ -78,18 +78,22 @@ class UserEnsureCurrentMutationExecutor {
   /// Creates an executor backed by the mutation widget.
   const UserEnsureCurrentMutationExecutor(this._mutate);
 
-  final Future<UserId> Function(NoArgs) _mutate;
+  final Future<UserId> Function(EnsureCurrentArgs) _mutate;
 
   /// Runs the mutation.
-  Future<UserId> call() => _mutate(const NoArgs());
+  Future<UserId> call({Optional<String> timeZone = const Optional.absent()}) =>
+      _mutate((timeZone: timeZone));
 
   /// Starts the mutation, observing failures through the widget snapshot.
   ///
   /// [onSuccess] runs only on success. Errors from that callback are not
   /// suppressed. Use [call] when you need to await the result or handle errors.
-  void run({void Function(UserId result)? onSuccess}) {
+  void run({
+    Optional<String> timeZone = const Optional.absent(),
+    void Function(UserId result)? onSuccess,
+  }) {
     unawaited(
-      _mutate(const NoArgs()).then<void>((result) {
+      _mutate((timeZone: timeZone)).then<void>((result) {
         onSuccess?.call(result);
       }, onError: (Object error, StackTrace stackTrace) {}),
     );
@@ -119,20 +123,24 @@ class UserEnsureCurrentMutation extends StatelessWidget {
   final ConvexRuntimeClient? client;
 
   /// Optional optimistic update for the mutation.
-  final TypedOptimisticUpdate<NoArgs>? optimisticUpdate;
+  final TypedOptimisticUpdate<EnsureCurrentArgs>? optimisticUpdate;
 
   /// Whether overlapping calls are rejected or coalesced to the latest value.
   final MutationMode mode;
 
   @override
-  Widget build(BuildContext context) => ConvexMutation<NoArgs, UserId>(
-    mutation: ensureCurrentMutationReference,
-    client: client,
-    typedOptimisticUpdate: optimisticUpdate,
-    mode: mode,
-    builder: (context, mutate, snapshot) =>
-        builder(context, UserEnsureCurrentMutationExecutor(mutate), snapshot),
-  );
+  Widget build(BuildContext context) =>
+      ConvexMutation<EnsureCurrentArgs, UserId>(
+        mutation: ensureCurrentMutationReference,
+        client: client,
+        typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
+        builder: (context, mutate, snapshot) => builder(
+          context,
+          UserEnsureCurrentMutationExecutor(mutate),
+          snapshot,
+        ),
+      );
 }
 
 /// Callable typed mutation for user:generateAvatarUploadUrl.
@@ -546,6 +554,73 @@ class UserUpdateEndOfDayBoundaryMutation extends StatelessWidget {
         builder: (context, mutate, snapshot) => builder(
           context,
           UserUpdateEndOfDayBoundaryMutationExecutor(mutate),
+          snapshot,
+        ),
+      );
+}
+
+/// Callable typed mutation for user:updateTimeZone.
+class UserUpdateTimeZoneMutationExecutor {
+  /// Creates an executor backed by the mutation widget.
+  const UserUpdateTimeZoneMutationExecutor(this._mutate);
+
+  final Future<void> Function(UpdateTimeZoneArgs) _mutate;
+
+  /// Runs the mutation.
+  Future<void> call({required String timeZone}) =>
+      _mutate((timeZone: timeZone));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({required String timeZone, void Function(void result)? onSuccess}) {
+    unawaited(
+      _mutate((timeZone: timeZone)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
+}
+
+/// Flutter widget for user:updateTimeZone.
+class UserUpdateTimeZoneMutation extends StatelessWidget {
+  /// Creates a typed mutation widget.
+  const UserUpdateTimeZoneMutation({
+    super.key,
+    required this.builder,
+    this.client,
+    this.optimisticUpdate,
+    this.mode = MutationMode.single,
+  });
+
+  /// Builds the UI with the callable mutation and current request state.
+  final Widget Function(
+    BuildContext,
+    UserUpdateTimeZoneMutationExecutor,
+    ConvexRequestSnapshot<void>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  /// Optional optimistic update for the mutation.
+  final TypedOptimisticUpdate<UpdateTimeZoneArgs>? optimisticUpdate;
+
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
+  @override
+  Widget build(BuildContext context) =>
+      ConvexMutation<UpdateTimeZoneArgs, void>(
+        mutation: updateTimeZoneMutationReference,
+        client: client,
+        typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
+        builder: (context, mutate, snapshot) => builder(
+          context,
+          UserUpdateTimeZoneMutationExecutor(mutate),
           snapshot,
         ),
       );

@@ -3,6 +3,11 @@
     "api.dart",
     "modules/badge.dart",
     "modules/drink.dart",
+    "modules/drinkLog.dart",
+    "modules/lib.dart",
+    "modules/lib/timeZone.dart",
+    "modules/session.dart",
+    "modules/sessionMember.dart",
     "modules/user.dart",
     "runtime.dart",
     "schema.dart",
@@ -10,6 +15,10 @@
     "widgets.dart",
     "widgets/badge.dart",
     "widgets/drink.dart",
+    "widgets/drinkLog.dart",
+    "widgets/lib/timeZone.dart",
+    "widgets/session.dart",
+    "widgets/sessionMember.dart",
     "widgets/user.dart"
   ]
 }

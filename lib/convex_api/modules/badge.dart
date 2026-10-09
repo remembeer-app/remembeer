@@ -3,6 +3,7 @@
 
 import '../runtime.dart';
 import '../schema.dart';
+import '../types.dart';
 
 import 'package:dartvex/dartvex.dart';
 
@@ -11,7 +12,7 @@ class BadgeApi {
 
   final ConvexFunctionCaller _client;
 
-  Future<List<ListCurrentResultItem>> listCurrent() async {
+  Future<List<BadgeDocument>> listCurrent() async {
     final raw$ = await _client.query(
       'badge:listCurrent',
       const <String, dynamic>{},
@@ -19,10 +20,10 @@ class BadgeApi {
     return expectList(
       raw$,
       label: 'ListCurrentResult',
-    ).map((item) => _decodeListCurrentResultItem(item)).toList();
+    ).map((item) => _decodeBadgeDocument(item)).toList();
   }
 
-  TypedConvexSubscription<List<ListCurrentResultItem>> listCurrentSubscribe() {
+  TypedConvexSubscription<List<BadgeDocument>> listCurrentSubscribe() {
     final subscription$ = _client.subscribe(
       'badge:listCurrent',
       const <String, dynamic>{},
@@ -30,32 +31,32 @@ class BadgeApi {
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
         case QuerySuccess(:final value):
-          return TypedQuerySuccess<List<ListCurrentResultItem>>(
+          return TypedQuerySuccess<List<BadgeDocument>>(
             expectList(
               value,
               label: 'ListCurrentResult',
-            ).map((item) => _decodeListCurrentResultItem(item)).toList(),
+            ).map((item) => _decodeBadgeDocument(item)).toList(),
           );
         case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<List<ListCurrentResultItem>>(
+          return TypedQueryLoading<List<BadgeDocument>>(
             hasPendingWrites: hasPendingWrites,
           );
         case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<List<ListCurrentResultItem>>(
+          return TypedQueryError<List<BadgeDocument>>(
             message,
             data: data,
             logLines: logLines,
           );
       }
     });
-    return TypedConvexSubscription<List<ListCurrentResultItem>>(
+    return TypedConvexSubscription<List<BadgeDocument>>(
       subscription$,
       typedStream$,
     );
   }
 
-  ConvexQueryReference<NoArgs, List<ListCurrentResultItem>>
-  get listCurrentQuery => listCurrentQueryReference;
+  ConvexQueryReference<NoArgs, List<BadgeDocument>> get listCurrentQuery =>
+      listCurrentQueryReference;
 
   Future<Null> setVisibility({
     required String badgeKey,
@@ -72,85 +73,63 @@ class BadgeApi {
       setVisibilityMutationReference;
 }
 
-typedef ListCurrentResultItem = ({
-  double creationTime,
-  BadgeId id,
-  String badgeKey,
-  bool isShown,
-  double unlockedAt,
-  UserId userId,
-});
-
-Map<String, dynamic> _encodeListCurrentResultItem(
-  ListCurrentResultItem value$,
-) {
+Map<String, dynamic> _encodeBadgeDocument(BadgeDocument value$) {
   final (
-    creationTime: creationTime,
-    id: id,
-    badgeKey: badgeKey,
-    isShown: isShown,
-    unlockedAt: unlockedAt,
     userId: userId,
+    badgeKey: badgeKey,
+    unlockedAt: unlockedAt,
+    isShown: isShown,
+    id: id,
+    creationTime: creationTime,
   ) = value$;
   return <String, dynamic>{
-    '_creationTime': creationTime,
-    '_id': id.value,
-    'badgeKey': badgeKey,
-    'isShown': isShown,
-    'unlockedAt': unlockedAt,
     'userId': userId.value,
+    'badgeKey': badgeKey,
+    'unlockedAt': unlockedAt,
+    'isShown': isShown,
+    '_id': id.value,
+    '_creationTime': creationTime,
   };
 }
 
-ListCurrentResultItem _decodeListCurrentResultItem(dynamic raw) {
-  final map = expectMap(raw, label: 'ListCurrentResultItem');
-  if (!map.containsKey('_creationTime')) {
-    throw FormatException(
-      'Missing required field "_creationTime" for ListCurrentResultItem',
-    );
-  }
-  if (!map.containsKey('_id')) {
-    throw FormatException(
-      'Missing required field "_id" for ListCurrentResultItem',
-    );
+BadgeDocument _decodeBadgeDocument(dynamic raw) {
+  final map = expectMap(raw, label: 'BadgeDocument');
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for BadgeDocument');
   }
   if (!map.containsKey('badgeKey')) {
     throw FormatException(
-      'Missing required field "badgeKey" for ListCurrentResultItem',
-    );
-  }
-  if (!map.containsKey('isShown')) {
-    throw FormatException(
-      'Missing required field "isShown" for ListCurrentResultItem',
+      'Missing required field "badgeKey" for BadgeDocument',
     );
   }
   if (!map.containsKey('unlockedAt')) {
     throw FormatException(
-      'Missing required field "unlockedAt" for ListCurrentResultItem',
+      'Missing required field "unlockedAt" for BadgeDocument',
     );
   }
-  if (!map.containsKey('userId')) {
+  if (!map.containsKey('isShown')) {
+    throw FormatException('Missing required field "isShown" for BadgeDocument');
+  }
+  if (!map.containsKey('_id')) {
+    throw FormatException('Missing required field "_id" for BadgeDocument');
+  }
+  if (!map.containsKey('_creationTime')) {
     throw FormatException(
-      'Missing required field "userId" for ListCurrentResultItem',
+      'Missing required field "_creationTime" for BadgeDocument',
     );
   }
   return (
-    creationTime: expectDouble(
-      map['_creationTime'],
-      label: 'ListCurrentResultItemCreationTime',
-    ),
-    id: BadgeId(expectString(map['_id'], label: 'ListCurrentResultItemId')),
-    badgeKey: expectString(
-      map['badgeKey'],
-      label: 'ListCurrentResultItemBadgeKey',
-    ),
-    isShown: expectBool(map['isShown'], label: 'ListCurrentResultItemIsShown'),
+    userId: UserId(expectString(map['userId'], label: 'BadgeDocumentUserId')),
+    badgeKey: expectString(map['badgeKey'], label: 'BadgeDocumentBadgeKey'),
     unlockedAt: expectDouble(
       map['unlockedAt'],
-      label: 'ListCurrentResultItemUnlockedAt',
+      label: 'BadgeDocumentUnlockedAt',
     ),
-    userId: UserId(
-      expectString(map['userId'], label: 'ListCurrentResultItemUserId'),
+    isShown: expectBool(map['isShown'], label: 'BadgeDocumentIsShown'),
+    id: BadgeId(expectString(map['_id'], label: 'BadgeDocumentId')),
+    creationTime: expectDouble(
+      map['_creationTime'],
+      label: 'BadgeDocumentCreationTime',
     ),
   );
 }
@@ -180,7 +159,7 @@ SetVisibilityArgs _decodeSetVisibilityArgs(dynamic raw) {
   );
 }
 
-final ConvexQueryReference<NoArgs, List<ListCurrentResultItem>>
+final ConvexQueryReference<NoArgs, List<BadgeDocument>>
 listCurrentQueryReference = ConvexQueryReference(
   name: 'badge:listCurrent',
   encode: (args) => const <String, dynamic>{},
@@ -188,9 +167,9 @@ listCurrentQueryReference = ConvexQueryReference(
   decode: (raw) => expectList(
     raw,
     label: 'ListCurrentResult',
-  ).map((item) => _decodeListCurrentResultItem(item)).toList(),
+  ).map((item) => _decodeBadgeDocument(item)).toList(),
   encodeResult: (value) =>
-      value.map((item) => _encodeListCurrentResultItem(item)).toList(),
+      value.map((item) => _encodeBadgeDocument(item)).toList(),
 );
 
 final ConvexMutationReference<SetVisibilityArgs, void>

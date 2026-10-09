@@ -1,237 +1,161 @@
 import 'package:flutter/material.dart';
-import 'package:gap/gap.dart';
-import 'package:remembeer/common/util/invariant.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
+import 'package:intl/intl.dart';
+import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/drag_state_provider.dart';
-import 'package:remembeer/drink_log/service/drink_log_service.dart';
-import 'package:remembeer/drink_log/type/drink_log_with_session_id.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/modules/drinkLog.dart';
+import 'package:remembeer/drink_log/constants.dart';
 import 'package:remembeer/drink_log/widget/drink_log_card.dart';
 import 'package:remembeer/drink_log/widget/midnight_divider.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/session/model/session.dart';
-import 'package:remembeer/session/widget/session_divider.dart';
+import 'package:remembeer/routes.dart';
+import 'package:remembeer/session/widget/section_header.dart';
 
-const _sessionBackgroundColor = Color(0x1A4CAF50);
-const _sessionDragOverColor = Color(0x334CAF50);
-const _sessionBorderColor = Color(0x404CAF50);
-const _noSessionMinHeight = 100.0;
-const _borderRadius = 12.0;
+class DrinkLogGroupSection extends StatelessWidget {
+  const DrinkLogGroupSection({super.key, this.session, required this.logs});
 
-/// A unified widget that displays a group of drinks.
-///
-/// When [isSharedSession] is true, displays drinks within a single shared
-/// session with a background and a [SessionDivider] at the top. The
-/// [sessions] list must contain exactly one session.
-///
-/// When [isSharedSession] is false, displays solo drinks (each in its own
-/// session container) with a transparent background and a minimum height
-/// for easy drag-and-drop.
-class DrinkLogGroupSection extends StatefulWidget {
-  final bool isSharedSession;
-  final List<Session> sessions;
-  final double? minHeight;
-
-  DrinkLogGroupSection({
-    super.key,
-    required this.isSharedSession,
-    required this.sessions,
-    this.minHeight,
-  }) {
-    invariant(
-      !isSharedSession || sessions.length == 1,
-      'Shared session mode requires exactly one session',
-    );
-  }
-
-  @override
-  State<DrinkLogGroupSection> createState() => _DrinkLogGroupSectionState();
-}
-
-class _DrinkLogGroupSectionState extends State<DrinkLogGroupSection> {
-  final _drinkLogService = get<DrinkLogService>();
-  var _isDragOver = false;
+  final ListForDayResultSessionsItem? session;
+  final List<ListForDayResultLogsItem> logs;
 
   @override
   Widget build(BuildContext context) {
-    final isDragging = DragStateProvider.maybeOf(context)?.isDragging ?? false;
-
+    final session = this.session;
+    final colors = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
-      child: DragTarget<DrinkLogWithSessionId>(
-        onWillAcceptWithDetails: (details) {
-          final willAccept = _shouldAcceptDrinkLog(details.data);
-          if (willAccept && !_isDragOver) {
-            setState(() => _isDragOver = true);
-          }
-          return willAccept;
-        },
-        onLeave: (_) => setState(() => _isDragOver = false),
+      child: DragTarget<ListForDayResultLogsItem>(
+        onWillAcceptWithDetails: (details) =>
+            details.data.sessionId != session?.id,
         onAcceptWithDetails: (details) async {
-          setState(() => _isDragOver = false);
-
-          await _drinkLogService.moveDrinkLogBetweenSessions(
-            drinkLog: details.data.drinkLog,
-            fromSessionId: details.data.originalSessionId,
-            toSessionId: widget.isSharedSession
-                ? widget.sessions.first.id
-                : null,
-          );
-        },
-        builder: (context, candidateData, rejectedData) {
-          final content = widget.isSharedSession
-              ? _buildSharedSessionContent()
-              : _buildSoloSessionsContent();
-
-          final decoration = widget.isSharedSession
-              ? BoxDecoration(
-                  color: _backgroundColor,
-                  borderRadius: BorderRadius.circular(_borderRadius),
-                  border: Border.all(color: _sessionBorderColor),
-                )
-              : BoxDecoration(
-                  color: _backgroundColor,
-                  borderRadius: BorderRadius.circular(_borderRadius),
-                );
-
-          if (widget.isSharedSession) {
-            return Container(
-              width: double.infinity,
-              decoration: decoration,
-              child: content,
+          try {
+            await get<ConvexApi>().drinkLog.update(
+              id: details.data.id,
+              sessionId: Optional.of(session?.id),
             );
-          } else {
-            final effectiveMinHeight = (isDragging && widget.minHeight != null)
-                ? widget.minHeight!
-                : _noSessionMinHeight;
-
-            return ConstrainedBox(
-              constraints: BoxConstraints(minHeight: effectiveMinHeight),
-              child: DecoratedBox(
-                decoration: decoration,
-                child: SizedBox(width: double.infinity, child: content),
-              ),
-            );
+          } on Object catch (error) {
+            showNotification(error.toString());
           }
         },
-      ),
-    );
-  }
-
-  bool _shouldAcceptDrinkLog(DrinkLogWithSessionId dragData) {
-    if (dragData.isParty ||
-        (widget.isSharedSession && widget.sessions.first.isParty)) {
-      return false;
-    }
-
-    // Don't accept if the drink is already in one of our sessions
-    for (final session in widget.sessions) {
-      if (dragData.originalSessionId == session.id) {
-        return false;
-      }
-    }
-
-    // For solo sessions area, accept any drink not already here
-    if (!widget.isSharedSession) {
-      return true;
-    }
-
-    // For shared session, check if drink time fits within session bounds
-    // and that the session is not full
-    final session = widget.sessions.first;
-
-    if (!session.hasFreeSpace) {
-      return false;
-    }
-
-    final drinkLog = dragData.drinkLog;
-
-    final isAfterStart = drinkLog.consumedAt.isAfter(session.startedAt);
-    final sessionEnd = session.endedAt;
-    final isBeforeEnd =
-        sessionEnd == null || drinkLog.consumedAt.isBefore(sessionEnd);
-
-    return isAfterStart && isBeforeEnd;
-  }
-
-  Color get _backgroundColor {
-    if (widget.isSharedSession) {
-      return _isDragOver ? _sessionDragOverColor : _sessionBackgroundColor;
-    } else {
-      return _isDragOver
-          ? Theme.of(context).colorScheme.surfaceContainerHighest
-          : Colors.transparent;
-    }
-  }
-
-  Widget _buildSharedSessionContent() {
-    return AsyncBuilder(
-      stream: _drinkLogService.drinkLogsWithSessionIdToShowFromSessions(
-        widget.sessions,
-      ),
-      builder: (context, drinkLogs) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SessionDivider(session: widget.sessions.first),
-            if (drinkLogs.isEmpty)
-              const Gap(32)
-            else
-              ..._buildDrinkLogItems(drinkLogs),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildSoloSessionsContent() {
-    return AsyncBuilder(
-      stream: _drinkLogService.drinkLogsWithSessionIdToShowFromSessions(
-        widget.sessions,
-      ),
-      builder: (context, drinkLogs) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ..._buildDrinkLogItems(drinkLogs),
-            // The floating add drink button overlaps last drink without this space.
-            const Gap(_noSessionMinHeight),
-          ],
-        );
-      },
-    );
-  }
-
-  List<Widget> _buildDrinkLogItems(List<DrinkLogWithSessionId> drinkLogs) {
-    if (drinkLogs.isEmpty) {
-      return const [];
-    }
-
-    final items = <Widget>[];
-
-    for (var i = 0; i < drinkLogs.length; i++) {
-      final dragData = drinkLogs[i];
-      items.add(DrinkLogCard(drinkLogWithSessionId: dragData));
-
-      if (i < drinkLogs.length - 1) {
-        final nextDrinkLog = drinkLogs[i + 1].drinkLog;
-        if (_crossesMidnight(
-          dragData.drinkLog.consumedAt,
-          nextDrinkLog.consumedAt,
-        )) {
-          items.add(
-            MidnightDivider(
-              fromDate: nextDrinkLog.consumedAt,
-              toDate: dragData.drinkLog.consumedAt,
+        builder: (context, candidates, rejected) => Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(
+            minHeight: drinkLogDropAreaMinHeight,
+          ),
+          child: Material(
+            color: candidates.isNotEmpty
+                ? colors.primaryContainer
+                : session == null
+                ? Colors.transparent
+                : colors.primary.withValues(alpha: 0.1),
+            clipBehavior: Clip.antiAlias,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+              side: session == null
+                  ? BorderSide.none
+                  : BorderSide(color: colors.primary.withValues(alpha: 0.25)),
             ),
-          );
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (session == null)
+                  const SectionHeader(title: 'Other drinks')
+                else
+                  ExpansionTile(
+                    leading: Icon(
+                      session.kind ==
+                              ListForDayResultSessionsItemKind.partyValue
+                          ? Icons.celebration
+                          : Icons.table_bar,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                    title: Text(
+                      session.kind ==
+                              ListForDayResultSessionsItemKind.partyValue
+                          ? 'Party · ${session.name}'
+                          : session.name,
+                    ),
+                    subtitle: Text(
+                      '${logs.length} ${logs.length == 1 ? 'drink' : 'drinks'} this day',
+                    ),
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.open_in_new),
+                        title: const Text('Open session'),
+                        onTap: () => ActivitySessionRoute(
+                          sessionId: session.id.value,
+                        ).push<void>(context),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.add),
+                        title: const Text('Add drink'),
+                        onTap: () => AddDrinkLogRoute(
+                          targetSessionId: session.id.value,
+                        ).push<void>(context),
+                      ),
+                      if (session.description.trim().isNotEmpty)
+                        ListTile(title: Text(session.description)),
+                      ListTile(
+                        leading: const Icon(Icons.play_circle_outline),
+                        title: Text(
+                          'Started ${_formatTime(session.startedAtLocal)}',
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.stop_circle_outlined),
+                        title: Text(
+                          session.endedAtLocal == null
+                              ? 'Still going'
+                              : 'Ended ${_formatTime(session.endedAtLocal!)}',
+                        ),
+                      ),
+                    ],
+                  ),
+                ..._buildDrinkLogs(context),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _buildDrinkLogs(BuildContext context) {
+    final items = <Widget>[];
+    for (var i = 0; i < logs.length; i++) {
+      final log = logs[i];
+      final card = DrinkLogCard(log: log);
+      items.add(
+        LongPressDraggable<ListForDayResultLogsItem>(
+          key: ValueKey(log.id),
+          data: log,
+          maxSimultaneousDrags: 1,
+          onDragStarted: () =>
+              DragStateProvider.maybeOf(context)?.setDragging(true),
+          onDragEnd: (_) =>
+              DragStateProvider.maybeOf(context)?.setDragging(false),
+          feedback: Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(12),
+            child: SizedBox(
+              width: MediaQuery.sizeOf(context).width - 32,
+              child: card,
+            ),
+          ),
+          childWhenDragging: Opacity(opacity: 0.3, child: card),
+          child: card,
+        ),
+      );
+      if (i < logs.length - 1) {
+        final date = DateTime.parse('${log.consumedAtLocal}Z');
+        final nextDate = DateTime.parse('${logs[i + 1].consumedAtLocal}Z');
+        if (!DateUtils.isSameDay(date, nextDate)) {
+          items.add(MidnightDivider(fromDate: date, toDate: nextDate));
         }
       }
     }
-
     return items;
   }
 
-  bool _crossesMidnight(DateTime later, DateTime earlier) {
-    return !DateUtils.isSameDay(later, earlier);
-  }
+  String _formatTime(String localTime) =>
+      DateFormat.yMMMd().add_Hm().format(DateTime.parse('${localTime}Z'));
 }

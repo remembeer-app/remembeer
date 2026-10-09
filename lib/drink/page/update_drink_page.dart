@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
-import 'package:remembeer/convex_api/modules/drink.dart';
 import 'package:remembeer/convex_api/widgets.dart';
 import 'package:remembeer/drink/widget/drink_form.dart';
 
@@ -16,7 +15,7 @@ class UpdateDrinkPage extends StatelessWidget {
     return DrinkGetTypeQuery(id: DrinkId(drinkId), builder: _buildPage);
   }
 
-  Widget _buildPage(BuildContext context, GetTypeResult drink) {
+  Widget _buildPage(BuildContext context, DrinkDocument drink) {
     return PageTemplate(
       title: const Text('Update Custom Drink'),
       child: DrinkUpdateMutation(

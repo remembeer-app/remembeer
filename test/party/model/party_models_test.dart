@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/convex_api/types.dart' hide Party, Session;
 import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
 import 'package:remembeer/party/constants.dart';
 import 'package:remembeer/party/model/beerpong_match.dart';

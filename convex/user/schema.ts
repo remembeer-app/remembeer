@@ -2,6 +2,7 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { convexToZod } from "convex-helpers/server/zod4";
 import { z } from "zod";
+import { isValidTimeZone } from "../lib/timeZone";
 
 export const userTable = defineTable({
   authUserId: v.string(),
@@ -19,10 +20,12 @@ export const userTable = defineTable({
   ),
   avatarStorageId: v.optional(v.nullable(v.id("_storage"))),
   endOfDayBoundary: v.number(),
+  timeZone: v.string(),
   defaultDrink: v.nullable(v.id("drink")),
   drinkLogSortOrder: v.union(v.literal("asc"), v.literal("desc")),
 })
   .index("by_authUserId", ["authUserId"])
+  .index("by_normalizedUsername", ["normalizedUsername"])
   .index("by_avatarStorageId", ["avatarStorageId"]);
 
 export function normalizeUsername(username: string) {
@@ -54,4 +57,10 @@ export const updateEndOfDayBoundaryInputValidator = convexToZod(
     .int()
     .min(0)
     .max(24 * 60 - 1),
+});
+
+export const updateTimeZoneInputValidator = convexToZod(
+  userTable.validator.pick("timeZone"),
+).extend({
+  timeZone: z.string().refine(isValidTimeZone, "Invalid IANA timezone"),
 });

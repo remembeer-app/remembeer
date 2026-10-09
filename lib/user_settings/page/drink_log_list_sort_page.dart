@@ -96,6 +96,7 @@ class DrinkLogListSortPage extends StatelessWidget {
         ),
         endOfDayBoundary: user.endOfDayBoundary,
         normalizedUsername: user.normalizedUsername,
+        timeZone: user.timeZone,
         username: user.username,
       ),
     );

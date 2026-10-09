@@ -257,10 +257,10 @@ class DrinkGetTypeQuery extends StatelessWidget {
        errorBuilder = null;
 
   /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, GetTypeResult)? builder;
+  final Widget Function(BuildContext, DrinkDocument)? builder;
 
   /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(BuildContext, ConvexQuerySnapshot<GetTypeResult>)?
+  final Widget Function(BuildContext, ConvexQuerySnapshot<DrinkDocument>)?
   snapshotBuilder;
 
   /// Overrides the initial loading UI.
@@ -278,14 +278,14 @@ class DrinkGetTypeQuery extends StatelessWidget {
   Widget build(BuildContext context) {
     final buildSnapshot = snapshotBuilder;
     if (buildSnapshot != null) {
-      return ConvexTypedQuery<GetTypeArgs, GetTypeResult>.snapshot(
+      return ConvexTypedQuery<GetTypeArgs, DrinkDocument>.snapshot(
         query: getValueQueryReference,
         args: (id: id),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
-    return ConvexTypedQuery<GetTypeArgs, GetTypeResult>(
+    return ConvexTypedQuery<GetTypeArgs, DrinkDocument>(
       query: getValueQueryReference,
       args: (id: id),
       client: client,
@@ -317,13 +317,10 @@ class DrinkListAvailableQuery extends StatelessWidget {
        errorBuilder = null;
 
   /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, List<ListAvailableResultItem>)? builder;
+  final Widget Function(BuildContext, List<DrinkDocument>)? builder;
 
   /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(
-    BuildContext,
-    ConvexQuerySnapshot<List<ListAvailableResultItem>>,
-  )?
+  final Widget Function(BuildContext, ConvexQuerySnapshot<List<DrinkDocument>>)?
   snapshotBuilder;
 
   /// Overrides the initial loading UI.
@@ -339,14 +336,14 @@ class DrinkListAvailableQuery extends StatelessWidget {
   Widget build(BuildContext context) {
     final buildSnapshot = snapshotBuilder;
     if (buildSnapshot != null) {
-      return ConvexTypedQuery<NoArgs, List<ListAvailableResultItem>>.snapshot(
+      return ConvexTypedQuery<NoArgs, List<DrinkDocument>>.snapshot(
         query: listAvailableQueryReference,
         args: const NoArgs(),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
-    return ConvexTypedQuery<NoArgs, List<ListAvailableResultItem>>(
+    return ConvexTypedQuery<NoArgs, List<DrinkDocument>>(
       query: listAvailableQueryReference,
       args: const NoArgs(),
       client: client,
@@ -378,13 +375,10 @@ class DrinkListCustomQuery extends StatelessWidget {
        errorBuilder = null;
 
   /// Builds the UI when query data is available.
-  final Widget Function(BuildContext, List<ListCustomResultItem>)? builder;
+  final Widget Function(BuildContext, List<DrinkDocument>)? builder;
 
   /// Builds the UI from every query snapshot in snapshot mode.
-  final Widget Function(
-    BuildContext,
-    ConvexQuerySnapshot<List<ListCustomResultItem>>,
-  )?
+  final Widget Function(BuildContext, ConvexQuerySnapshot<List<DrinkDocument>>)?
   snapshotBuilder;
 
   /// Overrides the initial loading UI.
@@ -400,14 +394,14 @@ class DrinkListCustomQuery extends StatelessWidget {
   Widget build(BuildContext context) {
     final buildSnapshot = snapshotBuilder;
     if (buildSnapshot != null) {
-      return ConvexTypedQuery<NoArgs, List<ListCustomResultItem>>.snapshot(
+      return ConvexTypedQuery<NoArgs, List<DrinkDocument>>.snapshot(
         query: listCustomQueryReference,
         args: const NoArgs(),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
-    return ConvexTypedQuery<NoArgs, List<ListCustomResultItem>>(
+    return ConvexTypedQuery<NoArgs, List<DrinkDocument>>(
       query: listCustomQueryReference,
       args: const NoArgs(),
       client: client,

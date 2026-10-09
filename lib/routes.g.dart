@@ -152,6 +152,11 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               factory: $AddDrinkLogRoute._fromState,
             ),
             GoRouteData.$route(
+              path: ':drinkLogId/edit',
+              hasOverriddenOnExit: false,
+              factory: $UpdateDrinkLogRoute._fromState,
+            ),
+            GoRouteData.$route(
               path: 'parties/:sessionId',
               hasOverriddenOnExit: false,
               factory: $PartyRoute._fromState,
@@ -219,11 +224,6 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               path: 'sessions/:sessionId/friends/add',
               hasOverriddenOnExit: false,
               factory: $AddSessionFriendsRoute._fromState,
-            ),
-            GoRouteData.$route(
-              path: 'sessions/:sessionId/drink-logs/:drinkLogId/edit',
-              hasOverriddenOnExit: false,
-              factory: $UpdateDrinkLogRoute._fromState,
             ),
           ],
         ),
@@ -325,6 +325,11 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               path: 'end-of-day',
               hasOverriddenOnExit: false,
               factory: $EndOfDaySettingsRoute._fromState,
+            ),
+            GoRouteData.$route(
+              path: 'time-zone',
+              hasOverriddenOnExit: false,
+              factory: $TimeZoneSettingsRoute._fromState,
             ),
             GoRouteData.$route(
               path: 'delete-account',
@@ -639,6 +644,63 @@ mixin $AddDrinkLogRoute on GoRouteData {
 
   @override
   void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $UpdateDrinkLogRoute on GoRouteData {
+  static UpdateDrinkLogRoute _fromState(
+    GoRouterState state,
+  ) => UpdateDrinkLogRoute(
+    drinkLogId: state.pathParameters['drinkLogId']!,
+    $extra:
+        state.extra
+            as ({
+              double consumedAt,
+              String consumedAtLocal,
+              double creationTime,
+              double? deletedAt,
+              ({
+                double alcoholPercentage,
+                double creationTime,
+                double? deletedAt,
+                DrinkCategory drinkCategory,
+                DrinkId id,
+                String name,
+                UserId? ownerId,
+                Optional<String> seedKey,
+                double updatedAt,
+              })?
+              drink,
+              DrinkId drinkId,
+              DrinkLogId id,
+              ({double? accuracy, double latitude, double longitude})? location,
+              SessionId? sessionId,
+              double updatedAt,
+              UserId userId,
+              double volumeMl,
+            })?,
+  );
+
+  UpdateDrinkLogRoute get _self => this as UpdateDrinkLogRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/drink-logs/${Uri.encodeComponent(_self.drinkLogId)}/edit',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location, extra: _self.$extra);
+
+  @override
+  Future<T?> push<T>(BuildContext context) =>
+      context.push<T>(location, extra: _self.$extra);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location, extra: _self.$extra);
+
+  @override
+  void replace(BuildContext context) =>
+      context.replace(location, extra: _self.$extra);
 }
 
 mixin $PartyRoute on GoRouteData {
@@ -1040,34 +1102,6 @@ mixin $AddSessionFriendsRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $UpdateDrinkLogRoute on GoRouteData {
-  static UpdateDrinkLogRoute _fromState(GoRouterState state) =>
-      UpdateDrinkLogRoute(
-        sessionId: state.pathParameters['sessionId']!,
-        drinkLogId: state.pathParameters['drinkLogId']!,
-      );
-
-  UpdateDrinkLogRoute get _self => this as UpdateDrinkLogRoute;
-
-  @override
-  String get location => GoRouteData.$location(
-    '/drink-logs/sessions/${Uri.encodeComponent(_self.sessionId)}/drink-logs/${Uri.encodeComponent(_self.drinkLogId)}/edit',
-  );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
 mixin $ActivityRoute on GoRouteData {
   static ActivityRoute _fromState(GoRouterState state) => const ActivityRoute();
 
@@ -1429,6 +1463,27 @@ mixin $EndOfDaySettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/end-of-day');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $TimeZoneSettingsRoute on GoRouteData {
+  static TimeZoneSettingsRoute _fromState(GoRouterState state) =>
+      const TimeZoneSettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/time-zone');
 
   @override
   void go(BuildContext context) => context.go(location);

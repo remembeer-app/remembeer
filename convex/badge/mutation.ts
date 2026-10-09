@@ -65,7 +65,9 @@ export const setVisibility = authMutation
           q.eq("userId", ctx.user._id),
         )
         .collect();
-      if (badges.filter((unlocked) => unlocked.isShown).length >= maxBadgesShown) {
+      if (
+        badges.filter((unlocked) => unlocked.isShown).length >= maxBadgesShown
+      ) {
         throw new ConvexError(`Only ${maxBadgesShown} badges can be shown`);
       }
     }

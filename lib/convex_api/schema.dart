@@ -21,6 +21,24 @@ class DrinkId extends ConvexTableId {
   static const String tableName = 'drink';
 }
 
+class DrinkLogId extends ConvexTableId {
+  const DrinkLogId(super.value);
+
+  static const String tableName = 'drinkLog';
+}
+
+class SessionId extends ConvexTableId {
+  const SessionId(super.value);
+
+  static const String tableName = 'session';
+}
+
+class SessionMemberId extends ConvexTableId {
+  const SessionMemberId(super.value);
+
+  static const String tableName = 'sessionMember';
+}
+
 class UserId extends ConvexTableId {
   const UserId(super.value);
 
