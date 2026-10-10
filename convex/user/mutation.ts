@@ -164,14 +164,24 @@ export const updateDrinkLogSortOrder = authMutation
   });
 
 export const deleteCurrent = authMutation
-  .input({ password: v.string() })
+  .input({ password: v.optional(v.string()) })
   .returns(v.null())
   .handler(async (ctx, { password }) => {
-    if (!password) throw new ConvexError("Please enter your password.");
-
     const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
     try {
-      await auth.api.deleteUser({ body: { password }, headers });
+      if (!password) {
+        const accounts = await auth.api.listUserAccounts({ headers });
+        if (accounts.some((account) => account.providerId === "credential")) {
+          throw new ConvexError("Please enter your password.");
+        }
+        if (!accounts.some((account) => account.providerId === "google")) {
+          throw new ConvexError("Please sign in with Google again.");
+        }
+      }
+      await auth.api.deleteUser({
+        body: password ? { password } : {},
+        headers,
+      });
     } catch (error) {
       if (error instanceof APIError) {
         throw new ConvexError(

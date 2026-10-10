@@ -28,5 +28,8 @@ void main() {
 
 class _FakeConvexAuthService implements ConvexAuthService {
   @override
+  bool get hasPasswordProvider => true;
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

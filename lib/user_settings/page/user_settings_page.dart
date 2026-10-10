@@ -150,11 +150,13 @@ class UserSettingsPage extends StatelessWidget {
           title: 'Badge visibility',
           onTap: () => const BadgeVisibilityRoute().push<void>(context),
         ),
-        _divider,
-        _buildSettingsCard(
-          title: 'Change password',
-          onTap: () => const ChangePasswordRoute().push<void>(context),
-        ),
+        if (_convexAuthService.hasPasswordProvider) ...[
+          _divider,
+          _buildSettingsCard(
+            title: 'Change password',
+            onTap: () => const ChangePasswordRoute().push<void>(context),
+          ),
+        ],
       ],
     );
   }

@@ -67,6 +67,14 @@ class _LoginPageState extends State<LoginPage> {
               onFieldSubmitted: (_) => submit(),
             ),
             const Gap(12),
+            OutlinedButton.icon(
+              onPressed: _isSubmitting
+                  ? null
+                  : () => unawaited(_login(google: true)),
+              icon: const Icon(Icons.account_circle_outlined),
+              label: const Text('Continue with Google'),
+            ),
+            const Gap(12),
             const PrivacyPolicyNotice(),
             const Gap(16),
             TextButton(
@@ -108,18 +116,22 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<void> _login() async {
+  Future<void> _login({bool google = false}) async {
     if (_isSubmitting) return;
     setState(() {
       _isSubmitting = true;
       _error = null;
     });
     try {
-      await _convexAuthService.signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      if (mounted) showSuccessNotification('Logged in with Better Auth.');
+      if (google) {
+        if (!await _convexAuthService.signInWithGoogle()) return;
+      } else {
+        await _convexAuthService.signIn(
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
+      if (mounted) showSuccessNotification('Logged in.');
     } on Exception catch (error) {
       if (!mounted) return;
       setState(() {

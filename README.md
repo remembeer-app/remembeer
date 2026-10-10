@@ -48,6 +48,26 @@ The Flutter client includes the complete Dartvex stack: the core client,
 Flutter widgets, Better Auth integration, generated API bindings, and optional
 SQLite-backed offline support through `dartvex_local`.
 
+### Google sign-in
+
+Google sign-in uses the native Google SDK and sends its ID token to Better
+Auth; Firebase Auth is not involved. Set `GOOGLE_AUTH_SERVER_CLIENT_ID` in
+`.env.client` to the Google OAuth web client ID. Configure that same ID and
+the web client secret on your Convex deployment:
+
+```bash
+npx convex env set GOOGLE_AUTH_SERVER_CLIENT_ID '<web-client-id>'
+npx convex env set GOOGLE_AUTH_CLIENT_SECRET '<web-client-secret>'
+```
+
+Keep the secret out of `.env.client`. The native Google project must also
+have the Android package/signing certificates and iOS client/URL scheme
+configured for this app. Google-only accounts confirm their Google identity
+again before deletion; accounts with a password confirm that password.
+
+Password-reset and verification emails are deferred until an email delivery
+provider is configured. Email verification is not required to sign in.
+
 ## Seed global drinks
 
 The internal `drink:seedGlobal` mutation reads the bundled

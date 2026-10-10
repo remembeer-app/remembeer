@@ -18,14 +18,17 @@ class UserDeleteCurrentMutationExecutor {
   final Future<void> Function(DeleteCurrentArgs) _mutate;
 
   /// Runs the mutation.
-  Future<void> call({required String password}) =>
+  Future<void> call({Optional<String> password = const Optional.absent()}) =>
       _mutate((password: password));
 
   /// Starts the mutation, observing failures through the widget snapshot.
   ///
   /// [onSuccess] runs only on success. Errors from that callback are not
   /// suppressed. Use [call] when you need to await the result or handle errors.
-  void run({required String password, void Function(void result)? onSuccess}) {
+  void run({
+    Optional<String> password = const Optional.absent(),
+    void Function(void result)? onSuccess,
+  }) {
     unawaited(
       _mutate((password: password)).then<void>((result) {
         onSuccess?.call(result);

@@ -92,6 +92,14 @@ class _RegisterPageState extends State<RegisterPage> {
               onFieldSubmitted: (_) => submit(),
             ),
             const Gap(16),
+            OutlinedButton.icon(
+              onPressed: _isSubmitting
+                  ? null
+                  : () => unawaited(_register(google: true)),
+              icon: const Icon(Icons.account_circle_outlined),
+              label: const Text('Continue with Google'),
+            ),
+            const Gap(8),
             TextButton(
               onPressed: _isSubmitting
                   ? null
@@ -110,19 +118,25 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => _obscurePassword = !_obscurePassword);
   }
 
-  Future<void> _register() async {
+  Future<void> _register({bool google = false}) async {
     if (_isSubmitting) return;
     setState(() {
       _isSubmitting = true;
       _error = null;
     });
     try {
-      await _convexAuthService.signUp(
-        name: _usernameController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-      );
-      if (mounted) showSuccessNotification('Account created with Better Auth.');
+      if (google) {
+        if (!await _convexAuthService.signInWithGoogle()) return;
+      } else {
+        await _convexAuthService.signUp(
+          name: _usernameController.text.trim(),
+          email: _emailController.text.trim(),
+          password: _passwordController.text,
+        );
+      }
+      if (mounted) {
+        showSuccessNotification(google ? 'Logged in.' : 'Account created.');
+      }
     } on Exception catch (error) {
       if (!mounted) return;
       setState(() {

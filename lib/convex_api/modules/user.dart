@@ -43,7 +43,9 @@ class UserApi {
   ConvexQueryReference<NoArgs, CurrentResult> get currentQuery =>
       currentQueryReference;
 
-  Future<Null> deleteCurrent({required String password}) async {
+  Future<Null> deleteCurrent({
+    Optional<String> password = const Optional.absent(),
+  }) async {
     await _client.mutate(
       'user:deleteCurrent',
       _encodeDeleteCurrentArgs((password: password)),
@@ -451,22 +453,21 @@ CurrentResult _decodeCurrentResult(dynamic raw) {
   );
 }
 
-typedef DeleteCurrentArgs = ({String password});
+typedef DeleteCurrentArgs = ({Optional<String> password});
 
 Map<String, dynamic> _encodeDeleteCurrentArgs(DeleteCurrentArgs value$) {
   final (password: password) = value$;
-  return <String, dynamic>{'password': password};
+  return <String, dynamic>{if (password.isDefined) 'password': password.value};
 }
 
 DeleteCurrentArgs _decodeDeleteCurrentArgs(dynamic raw) {
   final map = expectMap(raw, label: 'DeleteCurrentArgs');
-  if (!map.containsKey('password')) {
-    throw FormatException(
-      'Missing required field "password" for DeleteCurrentArgs',
-    );
-  }
   return (
-    password: expectString(map['password'], label: 'DeleteCurrentArgsPassword'),
+    password: map.containsKey('password')
+        ? Optional.of(
+            expectString(map['password'], label: 'DeleteCurrentArgsPassword'),
+          )
+        : const Optional.absent(),
   );
 }
 

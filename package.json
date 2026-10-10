@@ -14,6 +14,7 @@
     "test:convex:sessions": "node --harmony-temporal --test test/session/convex_sessions_test.mjs test/drink_log/convex_day_query_test.mjs",
     "test:convex:leaderboards": "node --harmony-temporal --test test/leaderboard/convex_leaderboard_test.mjs",
     "test:convex:friends": "node --test test/friendship/convex_friendship_test.mjs",
+    "test:convex:auth": "node --test test/auth/convex_auth_test.mjs",
     "test:seed:drinks": "node --test test/drink/seed_data/convex_seed_test.mjs",
     "seed": "node scripts/seed_drinks.mjs",
     "seed:drinks": "convex run drink:seedGlobal"

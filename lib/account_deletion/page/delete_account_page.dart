@@ -47,7 +47,10 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
               'Your badges and settings',
             ]),
             const Gap(24),
-            _buildPasswordField(form),
+            if (_authService.hasPasswordProvider)
+              _buildPasswordField(form)
+            else
+              const Text('Confirm your Google account to delete it.'),
             const Gap(8),
             form.buildErrorMessage(),
             const Gap(24),
@@ -140,7 +143,11 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   }
 
   Future<void> _deleteAccount() async {
-    await _authService.deleteAccount(password: _passwordController.text);
-    showSuccessNotification('Account deleted.');
+    final deleted = await _authService.deleteAccount(
+      password: _authService.hasPasswordProvider
+          ? _passwordController.text
+          : null,
+    );
+    if (deleted) showSuccessNotification('Account deleted.');
   }
 }
