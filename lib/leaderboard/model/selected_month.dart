@@ -1,15 +1,15 @@
 import 'package:remembeer/common/formatter/time_formatter.dart';
 
 class SelectedMonth {
+  const SelectedMonth({
+    required this.year,
+    required this.month,
+    required this.isCurrentMonth,
+  });
+
   final int year;
   final int month;
-
-  const SelectedMonth({required this.year, required this.month});
+  final bool isCurrentMonth;
 
   String get displayName => formatMonthYear(year, month);
-
-  bool get isCurrentMonth {
-    final now = DateTime.now();
-    return year == now.year && month == now.month;
-  }
 }

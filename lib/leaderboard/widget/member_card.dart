@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
-import 'package:remembeer/user/model/user_model.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart';
 
 class MemberCard extends StatelessWidget {
-  final UserModel user;
+  final GetTypeResultMembersItem user;
   final bool isOwner;
-  final VoidCallback onRemove;
-  final VoidCallback onBan;
+  final VoidCallback? onRemove;
+  final VoidCallback? onBan;
 
   const MemberCard({
     super.key,

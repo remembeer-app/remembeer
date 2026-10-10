@@ -4,11 +4,9 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/formatter/uppercase_formatter.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart';
+import 'package:remembeer/convex_api/widgets/leaderboard.dart';
 import 'package:remembeer/leaderboard/constants.dart';
-import 'package:remembeer/leaderboard/model/join_leaderboard_result.dart';
-import 'package:remembeer/leaderboard/model/leaderboard.dart';
-import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/widget/found_leaderboard_card.dart';
 
 class JoinLeaderboardPage extends StatefulWidget {
@@ -19,12 +17,11 @@ class JoinLeaderboardPage extends StatefulWidget {
 }
 
 class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
-  final _leaderboardService = get<LeaderboardService>();
-
   final _formKey = GlobalKey<FormState>();
   final _codeController = TextEditingController();
 
-  Leaderboard? _foundLeaderboard;
+  String? _searchedCode;
+  var _searchVersion = 0;
   String? _errorMessage;
 
   @override
@@ -74,9 +71,9 @@ class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
         return null;
       },
       onChanged: (_) {
-        if (_foundLeaderboard != null || _errorMessage != null) {
+        if (_searchedCode != null || _errorMessage != null) {
           setState(() {
-            _foundLeaderboard = null;
+            _searchedCode = null;
             _errorMessage = null;
           });
         }
@@ -97,20 +94,60 @@ class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
 
   Widget _buildResult() {
     if (_errorMessage != null) {
-      return _buildErrorState();
+      return _buildErrorState(_errorMessage!);
     }
 
-    if (_foundLeaderboard != null) {
-      return FoundLeaderboardCard(
-        leaderboard: _foundLeaderboard!,
-        onJoin: _joinLeaderboard,
+    if (_searchedCode case final code?) {
+      return LeaderboardFindByInviteCodeQuery(
+        key: ValueKey((code, _searchVersion)),
+        inviteCode: code,
+        errorBuilder: (context, error) => _buildErrorState(error.toString()),
+        builder: (_, leaderboard) {
+          if (leaderboard == null) {
+            return _buildErrorState('No leaderboard found with this code.');
+          }
+          return LeaderboardJoinMutation(
+            builder: (_, join, snapshot) {
+              if (snapshot.error case final error?) {
+                return _buildErrorState(error.toString());
+              }
+              return FoundLeaderboardCard(
+                leaderboard: leaderboard,
+                onJoin: snapshot.isLoading
+                    ? null
+                    : () => join.run(
+                        id: leaderboard.id,
+                        onSuccess: (result) {
+                          if (!mounted) return;
+                          switch (result) {
+                            case JoinResult.successValue:
+                            case JoinResult.alreadyMemberValue:
+                              context.pop();
+                            case JoinResult.fullValue:
+                              setState(() {
+                                _searchedCode = null;
+                                _errorMessage = 'Leaderboard is full.';
+                              });
+                            case JoinResult.bannedValue:
+                              setState(() {
+                                _searchedCode = null;
+                                _errorMessage =
+                                    'You are banned from this leaderboard.';
+                              });
+                          }
+                        },
+                      ),
+              );
+            },
+          );
+        },
       );
     }
 
     return const SizedBox.shrink();
   }
 
-  Widget _buildErrorState() {
+  Widget _buildErrorState(String message) {
     final theme = Theme.of(context);
 
     return Center(
@@ -124,7 +161,7 @@ class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
           ),
           const Gap(12),
           Text(
-            _errorMessage!,
+            message,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.error,
             ),
@@ -134,51 +171,12 @@ class _JoinLeaderboardPageState extends State<JoinLeaderboardPage> {
     );
   }
 
-  Future<void> _searchLeaderboard() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
+  void _searchLeaderboard() {
+    if (!_formKey.currentState!.validate()) return;
     setState(() {
-      _foundLeaderboard = null;
+      _searchedCode = _codeController.text.trim().toUpperCase();
+      _searchVersion++;
       _errorMessage = null;
     });
-
-    final code = _codeController.text.trim().toUpperCase();
-    final leaderboard = await _leaderboardService.findByInviteCode(code);
-
-    setState(() {
-      if (leaderboard == null) {
-        _errorMessage = 'No leaderboard found with this code.';
-      } else {
-        _foundLeaderboard = leaderboard;
-      }
-    });
-  }
-
-  Future<void> _joinLeaderboard() async {
-    if (_foundLeaderboard == null) return;
-
-    final result = await _leaderboardService.joinLeaderboard(
-      _foundLeaderboard!,
-    );
-
-    if (!mounted) return;
-
-    switch (result) {
-      case JoinLeaderboardResult.success:
-      case JoinLeaderboardResult.alreadyMember:
-        context.pop();
-      case JoinLeaderboardResult.full:
-        setState(() {
-          _foundLeaderboard = null;
-          _errorMessage = 'Leaderboard is full.';
-        });
-      case JoinLeaderboardResult.banned:
-        setState(() {
-          _foundLeaderboard = null;
-          _errorMessage = 'You are banned from this leaderboard.';
-        });
-    }
   }
 }

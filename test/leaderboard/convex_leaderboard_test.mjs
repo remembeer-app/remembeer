@@ -106,7 +106,10 @@ test("permissions, joining, bans, removal, leaving, and owner restrictions", asy
   assert.deepEqual(await q.listCurrent(f.ctx("b"), {}), []);
   assert.equal(await m.join(f.ctx("b"), { id }), "success");
   assert.equal(await m.join(f.ctx("b"), { id }), "alreadyMember");
-  assert.equal((await q.listCurrent(f.ctx("b"), {})).length, 1);
+  const joinedList = await q.listCurrent(f.ctx("b"), {});
+  assert.equal(joinedList.length, 1);
+  assert.equal(joinedList[0].leaderboard._id, id);
+  assert.equal(joinedList[0].memberCount, 2);
   await m.update(f.ctx("a"), { id, name: " Renamed ", iconName: "beer" });
   assert.equal((await q.get(f.ctx("b"), { id })).leaderboard.name, "Renamed");
   for (const operation of [m.remove, m.ban, m.unban]) {

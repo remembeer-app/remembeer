@@ -18,7 +18,14 @@ const idInput = { id: v.id("leaderboard") };
 
 export const listCurrent = authQuery
   .input({})
-  .returns(v.array(schema.doc("leaderboard")))
+  .returns(
+    v.array(
+      v.object({
+        leaderboard: schema.doc("leaderboard"),
+        memberCount: v.number(),
+      }),
+    ),
+  )
   .handler(async (ctx) => {
     const memberships = await ctx.db
       .query("leaderboardMember")
@@ -31,13 +38,21 @@ export const listCurrent = authQuery
         ctx.db.get("leaderboard", member.leaderboardId),
       ),
     );
-    return leaderboards
+    const active = leaderboards
       .filter((board) => board !== null)
       .filter((board) => board.deletedAt === null)
       .sort(
         (a, b) =>
           a._creationTime - b._creationTime || a._id.localeCompare(b._id),
       );
+    return await Promise.all(
+      active.map(async (leaderboard) => ({
+        leaderboard,
+        memberCount: (await listMemberships(ctx, leaderboard._id)).filter(
+          (member) => member.status === "joined",
+        ).length,
+      })),
+    );
   });
 
 export const get = authQuery
@@ -120,6 +135,8 @@ export const standings = authQuery
   .input(
     z.object({
       id: convexToZod(v.id("leaderboard")),
+      // A changed timestamp refreshes cached subscriptions at reporting-month rollover.
+      refreshAt: z.number().int().optional(),
       month: z
         .string()
         .regex(/^\d{4}-(0[1-9]|1[0-2])$/)
