@@ -78,6 +78,91 @@ class UserApi {
   ConvexMutationReference<NoArgs, String> get generateAvatarUploadUrlMutation =>
       generateAvatarUploadUrlMutationReference;
 
+  Future<GetTypeResult> getValue({required UserId userId}) async {
+    final raw$ = await _client.query(
+      'user:get',
+      _encodeGetTypeArgs((userId: userId)),
+    );
+    return _decodeGetTypeResult(raw$);
+  }
+
+  TypedConvexSubscription<GetTypeResult> getValueSubscribe({
+    required UserId userId,
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:get',
+      _encodeGetTypeArgs((userId: userId)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<GetTypeResult>(_decodeGetTypeResult(value));
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<GetTypeResult>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<GetTypeResult>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<GetTypeResult>(subscription$, typedStream$);
+  }
+
+  ConvexQueryReference<GetTypeArgs, GetTypeResult> get getValueQuery =>
+      getValueQueryReference;
+
+  Future<List<SearchResultItem>> search({required String username}) async {
+    final raw$ = await _client.query(
+      'user:search',
+      _encodeSearchArgs((username: username)),
+    );
+    return expectList(
+      raw$,
+      label: 'SearchResult',
+    ).map((item) => _decodeSearchResultItem(item)).toList();
+  }
+
+  TypedConvexSubscription<List<SearchResultItem>> searchSubscribe({
+    required String username,
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:search',
+      _encodeSearchArgs((username: username)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<List<SearchResultItem>>(
+            expectList(
+              value,
+              label: 'SearchResult',
+            ).map((item) => _decodeSearchResultItem(item)).toList(),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<List<SearchResultItem>>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<List<SearchResultItem>>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<List<SearchResultItem>>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<SearchArgs, List<SearchResultItem>> get searchQuery =>
+      searchQueryReference;
+
   Future<Null> updateAccentColor({
     required UpdateAccentColorArgsAccentColor accentColor,
   }) async {
@@ -403,6 +488,220 @@ EnsureCurrentArgs _decodeEnsureCurrentArgs(dynamic raw) {
   );
 }
 
+enum GetTypeResultAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const GetTypeResultAccentColor(this.value);
+  final Object? value;
+
+  static GetTypeResultAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return GetTypeResultAccentColor.amberValue;
+      case 'rose':
+        return GetTypeResultAccentColor.roseValue;
+      case 'violet':
+        return GetTypeResultAccentColor.violetValue;
+      case 'sky':
+        return GetTypeResultAccentColor.skyValue;
+      case 'emerald':
+        return GetTypeResultAccentColor.emeraldValue;
+      case 'lime':
+        return GetTypeResultAccentColor.limeValue;
+      case 'orange':
+        return GetTypeResultAccentColor.orangeValue;
+      case 'fuchsia':
+        return GetTypeResultAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for GetTypeResultAccentColor',
+        );
+    }
+  }
+}
+
+typedef GetTypeResult = ({
+  UserId id,
+  GetTypeResultAccentColor accentColor,
+  String? avatarUrl,
+  String username,
+});
+
+Map<String, dynamic> _encodeGetTypeResult(GetTypeResult value$) {
+  final (
+    id: id,
+    accentColor: accentColor,
+    avatarUrl: avatarUrl,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_id': id.value,
+    'accentColor': accentColor.value,
+    'avatarUrl': avatarUrl,
+    'username': username,
+  };
+}
+
+GetTypeResult _decodeGetTypeResult(dynamic raw) {
+  final map = expectMap(raw, label: 'GetTypeResult');
+  if (!map.containsKey('_id')) {
+    throw FormatException('Missing required field "_id" for GetTypeResult');
+  }
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for GetTypeResult',
+    );
+  }
+  if (!map.containsKey('avatarUrl')) {
+    throw FormatException(
+      'Missing required field "avatarUrl" for GetTypeResult',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for GetTypeResult',
+    );
+  }
+  return (
+    id: UserId(expectString(map['_id'], label: 'GetTypeResultId')),
+    accentColor: GetTypeResultAccentColor.fromJson(map['accentColor']),
+    avatarUrl: map['avatarUrl'] == null
+        ? null
+        : expectString(map['avatarUrl'], label: 'GetTypeResultAvatarUrl'),
+    username: expectString(map['username'], label: 'GetTypeResultUsername'),
+  );
+}
+
+typedef GetTypeArgs = ({UserId userId});
+
+Map<String, dynamic> _encodeGetTypeArgs(GetTypeArgs value$) {
+  final (userId: userId) = value$;
+  return <String, dynamic>{'userId': userId.value};
+}
+
+GetTypeArgs _decodeGetTypeArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'GetTypeArgs');
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for GetTypeArgs');
+  }
+  return (
+    userId: UserId(expectString(map['userId'], label: 'GetTypeArgsUserId')),
+  );
+}
+
+enum SearchResultItemAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const SearchResultItemAccentColor(this.value);
+  final Object? value;
+
+  static SearchResultItemAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return SearchResultItemAccentColor.amberValue;
+      case 'rose':
+        return SearchResultItemAccentColor.roseValue;
+      case 'violet':
+        return SearchResultItemAccentColor.violetValue;
+      case 'sky':
+        return SearchResultItemAccentColor.skyValue;
+      case 'emerald':
+        return SearchResultItemAccentColor.emeraldValue;
+      case 'lime':
+        return SearchResultItemAccentColor.limeValue;
+      case 'orange':
+        return SearchResultItemAccentColor.orangeValue;
+      case 'fuchsia':
+        return SearchResultItemAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for SearchResultItemAccentColor',
+        );
+    }
+  }
+}
+
+typedef SearchResultItem = ({
+  UserId id,
+  SearchResultItemAccentColor accentColor,
+  String? avatarUrl,
+  String username,
+});
+
+Map<String, dynamic> _encodeSearchResultItem(SearchResultItem value$) {
+  final (
+    id: id,
+    accentColor: accentColor,
+    avatarUrl: avatarUrl,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_id': id.value,
+    'accentColor': accentColor.value,
+    'avatarUrl': avatarUrl,
+    'username': username,
+  };
+}
+
+SearchResultItem _decodeSearchResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'SearchResultItem');
+  if (!map.containsKey('_id')) {
+    throw FormatException('Missing required field "_id" for SearchResultItem');
+  }
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for SearchResultItem',
+    );
+  }
+  if (!map.containsKey('avatarUrl')) {
+    throw FormatException(
+      'Missing required field "avatarUrl" for SearchResultItem',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for SearchResultItem',
+    );
+  }
+  return (
+    id: UserId(expectString(map['_id'], label: 'SearchResultItemId')),
+    accentColor: SearchResultItemAccentColor.fromJson(map['accentColor']),
+    avatarUrl: map['avatarUrl'] == null
+        ? null
+        : expectString(map['avatarUrl'], label: 'SearchResultItemAvatarUrl'),
+    username: expectString(map['username'], label: 'SearchResultItemUsername'),
+  );
+}
+
+typedef SearchArgs = ({String username});
+
+Map<String, dynamic> _encodeSearchArgs(SearchArgs value$) {
+  final (username: username) = value$;
+  return <String, dynamic>{'username': username};
+}
+
+SearchArgs _decodeSearchArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SearchArgs');
+  if (!map.containsKey('username')) {
+    throw FormatException('Missing required field "username" for SearchArgs');
+  }
+  return (username: expectString(map['username'], label: 'SearchArgsUsername'));
+}
+
 enum UpdateAccentColorArgsAccentColor {
   amberValue('amber'),
   roseValue('rose'),
@@ -668,6 +967,28 @@ generateAvatarUploadUrlMutationReference = ConvexMutationReference(
   name: 'user:generateAvatarUploadUrl',
   encode: (args) => const <String, dynamic>{},
   decode: (raw) => expectString(raw, label: 'GenerateAvatarUploadUrlResult'),
+);
+
+final ConvexQueryReference<GetTypeArgs, GetTypeResult> getValueQueryReference =
+    ConvexQueryReference(
+      name: 'user:get',
+      encode: (args) => _encodeGetTypeArgs(args),
+      decodeArgs: (raw) => _decodeGetTypeArgs(raw),
+      decode: (raw) => _decodeGetTypeResult(raw),
+      encodeResult: (value) => _encodeGetTypeResult(value),
+    );
+
+final ConvexQueryReference<SearchArgs, List<SearchResultItem>>
+searchQueryReference = ConvexQueryReference(
+  name: 'user:search',
+  encode: (args) => _encodeSearchArgs(args),
+  decodeArgs: (raw) => _decodeSearchArgs(raw),
+  decode: (raw) => expectList(
+    raw,
+    label: 'SearchResult',
+  ).map((item) => _decodeSearchResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodeSearchResultItem(item)).toList(),
 );
 
 final ConvexMutationReference<UpdateAccentColorArgs, void>

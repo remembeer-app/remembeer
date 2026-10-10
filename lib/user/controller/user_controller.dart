@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/controller/controller.dart';
 import 'package:remembeer/common/extension/json_firestore_helper.dart';
-import 'package:remembeer/common/extension/searchable.dart';
 import 'package:remembeer/common/util/invariant.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/model/accent_color.dart';
@@ -19,40 +18,6 @@ class UserController extends Controller<UserModel> {
 
   Stream<UserModel> get currentUserStream =>
       streamById(authService.authenticatedUser.uid);
-
-  Future<List<UserModel>> searchUsersByUsernameOrEmail(String query) async {
-    final searchableQuery = query.toSearchable();
-
-    final usernameQuery = readCollection
-        .where('searchableUsername', isGreaterThanOrEqualTo: searchableQuery)
-        .where(
-          'searchableUsername',
-          isLessThanOrEqualTo: '$searchableQuery\uf8ff',
-        )
-        .limit(10)
-        .get();
-
-    final emailQueryLower = query.toLowerCase();
-    final emailQuery = readCollection
-        .where('email', isGreaterThanOrEqualTo: emailQueryLower)
-        .where('email', isLessThanOrEqualTo: '$emailQueryLower\uf8ff')
-        .limit(10)
-        .get();
-
-    final results = await Future.wait([usernameQuery, emailQuery]);
-
-    final userMap = <String, UserModel>{};
-    for (final snapshot in results) {
-      for (final doc in snapshot.docs) {
-        final user = doc.data();
-        if (user.id != authService.authenticatedUser.uid) {
-          userMap[user.id] = user;
-        }
-      }
-    }
-
-    return userMap.values.toList();
-  }
 
   Future<void> createOrUpdateUser(UserModel user) {
     final userId = user.id;
@@ -78,42 +43,6 @@ class UserController extends Controller<UserModel> {
   }) {
     final docRef = writeCollection.doc(user.id);
     batch.set(docRef, user.toJson());
-  }
-
-  Future<List<UserModel>> usersWithFriend(String userId) async {
-    final snapshot = await readCollection
-        .where(friendsField, arrayContains: userId)
-        .get();
-    return snapshot.docs.map((doc) => doc.data()).toList();
-  }
-
-  Future<void> removeFriendFrom({
-    required String userId,
-    required String friendId,
-  }) {
-    return writeCollection.doc(userId).update({
-      friendsField: FieldValue.arrayRemove([friendId]),
-    });
-  }
-
-  void addFriendToInBatch({
-    required String userId,
-    required String friendId,
-    required WriteBatch batch,
-  }) {
-    batch.update(writeCollection.doc(userId), {
-      friendsField: FieldValue.arrayUnion([friendId]),
-    });
-  }
-
-  void removeFriendFromInBatch({
-    required String userId,
-    required String friendId,
-    required WriteBatch batch,
-  }) {
-    batch.update(writeCollection.doc(userId), {
-      friendsField: FieldValue.arrayRemove([friendId]),
-    });
   }
 
   Future<void> anonymizeCurrentUser() async {

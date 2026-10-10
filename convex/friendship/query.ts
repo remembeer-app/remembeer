@@ -1,26 +1,8 @@
 import { v } from "convex/values";
-import type { Id } from "../_generated/dataModel";
-import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
+import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
 import { getFriendship, listForUser } from "./relation";
-
-const publicUserValidator = schema
-  .doc("user")
-  .pick("_id", "username", "accentColor")
-  .extend({ avatarUrl: v.nullable(v.string()) });
-
-async function publicUser(ctx: AuthQueryCtx, userId: Id<"user">) {
-  const user = await ctx.db.get("user", userId);
-  if (!user) return null;
-  return {
-    _id: user._id,
-    username: user.username,
-    accentColor: user.accentColor,
-    avatarUrl: user.avatarStorageId
-      ? await ctx.storage.getUrl(user.avatarStorageId)
-      : null,
-  };
-}
+import { publicUser, publicUserValidator } from "../user/publicProfile";
 
 export const listCurrent = authQuery
   .input({})

@@ -159,18 +159,6 @@ class SessionService {
     });
   }
 
-  Stream<List<UserModel>> availableFriendsForSessionStream(String sessionId) {
-    return Rx.combineLatest2(
-      sessionController.streamById(sessionId),
-      userService.friendsFor(currentUserId),
-      (session, friends) {
-        return friends
-            .where((friend) => !session.memberIds.contains(friend.id))
-            .toList();
-      },
-    );
-  }
-
   Future<void> addMemberToSession({
     required String sessionId,
     required String memberId,

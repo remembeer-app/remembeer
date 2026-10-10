@@ -2,12 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/convex_api/widgets/user.dart';
 import 'package:remembeer/user/constants.dart';
-import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/service/user_service.dart';
 import 'package:remembeer/user/widget/user_card.dart';
 
 class SearchUserPage extends StatefulWidget {
@@ -18,11 +15,8 @@ class SearchUserPage extends StatefulWidget {
 }
 
 class _SearchUserPageState extends State<SearchUserPage> {
-  final _userService = get<UserService>();
   final _searchController = TextEditingController();
-
-  Future<List<UserModel>>? _searchResults;
-
+  String? _query;
   Timer? _debounce;
 
   @override
@@ -32,14 +26,9 @@ class _SearchUserPageState extends State<SearchUserPage> {
   }
 
   void _onSearchChanged() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-
+    _debounce?.cancel();
     _debounce = Timer(searchDebounceDuration, () {
-      final query = _searchController.text;
-
-      setState(() {
-        _searchResults = _userService.searchUsersByUsernameOrEmail(query);
-      });
+      setState(() => _query = _searchController.text.trim());
     });
   }
 
@@ -51,49 +40,53 @@ class _SearchUserPageState extends State<SearchUserPage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return PageTemplate(
-      title: const Text('Search Users'),
-      child: Column(
-        children: [
-          TextField(
-            controller: _searchController,
-            autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Search by username or email',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.search),
-            ),
+  Widget build(BuildContext context) => PageTemplate(
+    title: const Text('Search Users'),
+    child: Column(
+      children: [
+        TextField(
+          controller: _searchController,
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'Search by username or email',
+            border: OutlineInputBorder(),
+            prefixIcon: Icon(Icons.search),
           ),
-          const Gap(16),
-          Expanded(child: _buildSearchResults()),
-        ],
-      ),
-    );
-  }
+        ),
+        const Gap(16),
+        Expanded(child: _buildSearchResults()),
+      ],
+    ),
+  );
 
   Widget _buildSearchResults() {
-    if (_searchResults == null) {
+    final query = _query;
+    if (query == null || query.isEmpty) {
       return const Center(
         child: Text('Enter a username or email to start searching.'),
       );
     }
-
-    return AsyncBuilder(
-      future: _searchResults,
-      builder: (context, users) {
-        if (users.isEmpty) {
-          return const Center(child: Text('No users found.'));
-        }
-
-        return ListView.builder(
-          itemCount: users.length,
-          itemBuilder: (context, index) {
-            final user = users[index];
-            return UserCard(user: user);
-          },
-        );
-      },
+    // TODO(ohtenkay): Replace empty email/short-query results and full-username matching with Convex prefix/email search.
+    if (query.contains('@') ||
+        query.length < minUsernameLength ||
+        query.length > maxUsernameLength) {
+      return const Center(child: Text('No users found.'));
+    }
+    return UserSearchQuery(
+      username: query,
+      builder: (context, users) => users.isEmpty
+          ? const Center(child: Text('No users found.'))
+          : ListView.builder(
+              itemCount: users.length,
+              itemBuilder: (context, index) {
+                final user = users[index];
+                return UserCard(
+                  userId: user.id,
+                  username: user.username,
+                  avatarUrl: user.avatarUrl,
+                );
+              },
+            ),
     );
   }
 }

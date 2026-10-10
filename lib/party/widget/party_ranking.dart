@@ -75,7 +75,8 @@ class PartyStandingCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (standing.user case final user?) UserAvatar(user: user),
+                if (standing.user case final user?)
+                  UserAvatar(avatarUrl: user.avatarUrl),
                 if (standing.user == null)
                   const CircleAvatar(child: Icon(Icons.person_outline)),
                 const Gap(12),

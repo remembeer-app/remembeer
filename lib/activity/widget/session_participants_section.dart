@@ -55,7 +55,7 @@ class SessionParticipantsSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             children: [
-              UserAvatar(user: member, size: 16),
+              UserAvatar(avatarUrl: member.avatarUrl, size: 16),
               const Gap(8),
               Expanded(
                 child: Text(

@@ -6,6 +6,7 @@ const { outputFiles } = await build({
   stdin: {
     contents: `export * as mutations from "./convex/friendship/mutation";
       export * as queries from "./convex/friendship/query";
+      export * as userQueries from "./convex/user/query";
       export { deleteUserData } from "./convex/user/deletion";`,
     resolveDir: process.cwd(),
   },
@@ -16,14 +17,14 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { mutations, queries, deleteUserData } = await import(
+const { mutations, queries, userQueries, deleteUserData } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
 );
 
 function fixture() {
   const tables = {
     user: ["a", "b", "c", "d"].map((_id) => ({
-      _id, username: _id, accentColor: "amber", authUserId: `auth-${_id}`,
+      _id, username: _id, normalizedUsername: _id, accentColor: "amber", authUserId: `auth-${_id}`,
       avatarStorageId: _id === "b" ? "avatar-b" : null,
       timeZone: "Europe/Prague", defaultDrink: null,
     })),
@@ -52,6 +53,7 @@ function fixture() {
         },
         async unique() { assert.ok(rows.length <= 1); return rows[0] ?? null; },
         async collect() { return rows; },
+        async take(count) { return rows.slice(0, count); },
       };
     },
   };
@@ -61,6 +63,21 @@ function fixture() {
   } });
   return { tables, db, ctx };
 }
+
+test("public profiles and username lookup expose only public data and exclude the current user", async () => {
+  const f = fixture();
+  const fields = ["_id", "accentColor", "avatarUrl", "username"];
+  assert.deepEqual(Object.keys(await userQueries.get(f.ctx("a"), { userId: "b" })).sort(), fields);
+  await assert.rejects(userQueries.get(f.ctx("a"), { userId: "missing" }), /User not found/);
+  f.tables.user.find((user) => user._id === "b").normalizedUsername = "friend";
+  f.tables.user.find((user) => user._id === "a").normalizedUsername = "friend";
+  const matches = await userQueries.search(f.ctx("a"), { username: "  Fríend  " });
+  assert.deepEqual(matches.map((user) => user._id), ["b"]);
+  assert.deepEqual(Object.keys(matches[0]).sort(), fields);
+  assert.deepEqual(await userQueries.search(f.ctx("a"), { username: "missing" }), []);
+  await assert.rejects(userQueries.search(f.ctx("a"), { username: "ab" }));
+  await assert.rejects(userQueries.search(f.ctx("a"), { username: "a".repeat(21) }));
+});
 
 test("requests use one canonical pair, require explicit acceptance and preserve timestamps on retries", async () => {
   const f = fixture();

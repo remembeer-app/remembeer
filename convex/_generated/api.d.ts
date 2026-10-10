@@ -42,6 +42,7 @@ import type * as user from "../user.js";
 import type * as user_currentUser from "../user/currentUser.js";
 import type * as user_deletion from "../user/deletion.js";
 import type * as user_mutation from "../user/mutation.js";
+import type * as user_publicProfile from "../user/publicProfile.js";
 import type * as user_query from "../user/query.js";
 
 import type {
@@ -85,6 +86,7 @@ declare const fullApi: ApiFromModules<{
   "user/currentUser": typeof user_currentUser;
   "user/deletion": typeof user_deletion;
   "user/mutation": typeof user_mutation;
+  "user/publicProfile": typeof user_publicProfile;
   "user/query": typeof user_query;
 }>;
 
