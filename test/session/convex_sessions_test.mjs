@@ -20,7 +20,7 @@ const { sessions, sessionQueries, members, memberQueries, logs, deleteUserData }
   await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
 
 function fixture() {
-  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], drinkLog: [], drink: [], badge: [] };
+  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], drinkLog: [], drink: [], badge: [], friendship: [] };
   let sequence = 0;
   const collected = [];
   const sessionGets = [];

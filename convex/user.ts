@@ -2,6 +2,8 @@ import * as mutation from "./user/mutation";
 import * as query from "./user/query";
 
 export const current = query.current.public();
+export const get = query.get.public();
+export const search = query.search.public();
 export const ensureCurrent = mutation.ensureCurrent.public();
 export const updateUsername = mutation.updateUsername.public();
 export const updateAccentColor = mutation.updateAccentColor.public();

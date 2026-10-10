@@ -10,7 +10,6 @@ import 'package:remembeer/activity/widget/session_photo_viewer.dart';
 import 'package:remembeer/auth/page/change_password_page.dart';
 import 'package:remembeer/auth/page/login_page.dart';
 import 'package:remembeer/auth/page/register_page.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/page/change_avatar_page.dart';
 import 'package:remembeer/common/widget/nav_bar.dart';
@@ -267,10 +266,7 @@ class ProfileRoute extends GoRouteData with $ProfileRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return ProfilePage(
-      userId: get<AuthService>().authenticatedUser.uid,
-      showTitle: false,
-    );
+    return const ProfilePage(showTitle: false);
   }
 }
 
@@ -315,7 +311,7 @@ class FriendRequestsRoute extends GoRouteData with $FriendRequestsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return FriendRequestsPage();
+    return const FriendRequestsPage();
   }
 }
 

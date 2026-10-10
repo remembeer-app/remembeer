@@ -1,7 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
-import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/service/user_service.dart';
@@ -11,8 +9,6 @@ void main() {
     final userController = _FakeUserController();
     final service = UserService(
       authService: _FakeAuthService(),
-      notificationService: _FakeNotificationService(),
-      friendRequestController: _FakeFriendRequestController(),
       userController: userController,
     );
 
@@ -44,16 +40,6 @@ class _FakeUserController implements UserController {
 }
 
 class _FakeAuthService implements AuthService {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _FakeNotificationService implements NotificationService {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
-}
-
-class _FakeFriendRequestController implements FriendRequestController {
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

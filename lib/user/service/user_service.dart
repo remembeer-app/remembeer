@@ -2,29 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/extension/searchable.dart';
 import 'package:remembeer/common/util/invariant.dart';
-import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
-import 'package:remembeer/friend_request/model/friend_request.dart';
-import 'package:remembeer/friend_request/model/friend_request_create.dart';
-import 'package:remembeer/friend_request/model/friendship_status.dart';
-import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/controller/user_controller.dart';
 import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:rxdart/rxdart.dart';
 
 class UserService {
   final AuthService authService;
-  final NotificationService notificationService;
-  final FriendRequestController friendRequestController;
   final UserController userController;
 
-  const UserService({
-    required this.authService,
-    required this.notificationService,
-    required this.friendRequestController,
-    required this.userController,
-  });
+  const UserService({required this.authService, required this.userController});
 
   Future<UserModel> get currentUser => userController.currentUser;
 
@@ -34,32 +21,6 @@ class UserService {
 
   Stream<UserModel> userStreamFor(String userId) =>
       userController.streamById(userId);
-
-  Future<List<UserModel>> searchUsersByUsernameOrEmail(String query) async {
-    final trimmedQuery = query.trim();
-    if (trimmedQuery.isEmpty) {
-      return [];
-    }
-
-    return userController.searchUsersByUsernameOrEmail(trimmedQuery);
-  }
-
-  Stream<List<FriendRequest>> pendingFriendRequests() =>
-      friendRequestController.pendingFriendRequests();
-
-  Stream<List<UserModel>> friendsFor(String userId) {
-    return userController.streamById(userId).switchMap((user) {
-      if (user.friends.isEmpty) {
-        return Stream.value([]);
-      }
-
-      final friendStreams = user.friends
-          .map(userController.streamById)
-          .toList();
-
-      return Rx.combineLatestList(friendStreams);
-    });
-  }
 
   Future<void> createDefaultUser({String? username}) async {
     final authenticatedUser = authService.authenticatedUser;
@@ -100,105 +61,6 @@ class UserService {
     );
 
     await userController.createOrUpdateUser(updatedUser);
-  }
-
-  Future<void> sendFriendRequest(String toUserId) async {
-    final currentUser = await userController.currentUser;
-
-    await friendRequestController.createSingle(
-      FriendRequestCreate(
-        toUserId: toUserId,
-        senderUsername: currentUser.username,
-      ),
-    );
-  }
-
-  Future<void> revokeFriendRequest(String otherUserId) async {
-    final request =
-        (await friendRequestController.getRequestBetween(otherUserId).first) ??
-        never(
-          'No friend request found between current user and $otherUserId to revoke.',
-        );
-
-    await friendRequestController.deleteSingle(request);
-  }
-
-  Future<void> acceptFriendRequest(String otherUserId) async {
-    final request =
-        (await friendRequestController.getRequestBetween(otherUserId).first) ??
-        never(
-          'No friend request found between current user and $otherUserId to accept.',
-        );
-
-    final currentUser = await userController.currentUser;
-    final currentUserId = currentUser.id;
-
-    final batch = friendRequestController.batch;
-
-    userController
-      ..addFriendToInBatch(
-        userId: currentUserId,
-        friendId: otherUserId,
-        batch: batch,
-      )
-      ..addFriendToInBatch(
-        userId: otherUserId,
-        friendId: currentUserId,
-        batch: batch,
-      );
-    friendRequestController.deleteSingleInBatch(request, batch);
-
-    await batch.commit();
-
-    await notificationService.notifyFriendRequestAccepted(
-      otherUserId,
-      currentUser.id,
-      currentUser.username,
-    );
-  }
-
-  Future<void> denyFriendRequest(FriendRequest request) async {
-    await friendRequestController.deleteSingle(request);
-  }
-
-  Future<void> removeFriend(String otherUserId) async {
-    final currentUserId = authService.authenticatedUser.uid;
-
-    final batch = userController.batch;
-
-    userController
-      ..removeFriendFromInBatch(
-        userId: currentUserId,
-        friendId: otherUserId,
-        batch: batch,
-      )
-      ..removeFriendFromInBatch(
-        userId: otherUserId,
-        friendId: currentUserId,
-        batch: batch,
-      );
-
-    await batch.commit();
-  }
-
-  Stream<FriendshipStatus> friendshipStatus(String otherUserId) {
-    return Rx.combineLatest2(
-      currentUserStream,
-      friendRequestController.getRequestBetween(otherUserId),
-      (currentUser, request) {
-        if (currentUser.friends.contains(otherUserId)) {
-          return FriendshipStatus.friends;
-        }
-
-        if (request == null) {
-          return FriendshipStatus.notFriends;
-        }
-
-        return (request.userId == currentUser.id)
-            ? FriendshipStatus.requestSent
-            : FriendshipStatus.requestReceived;
-      },
-    );
   }
 
   Future<void> updateBadgeVisibility(String badgeId, bool isShown) async {

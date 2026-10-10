@@ -18,7 +18,7 @@ class UserListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: UserAvatar(user: user),
+        leading: UserAvatar(avatarUrl: user.avatarUrl),
         title: Text(
           user.username,
           style: const TextStyle(fontWeight: FontWeight.bold),

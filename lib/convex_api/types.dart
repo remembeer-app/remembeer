@@ -73,6 +73,37 @@ typedef DrinkLogDocument = ({
   double creationTime,
 });
 
+enum FriendshipDocumentStatus {
+  pendingValue('pending'),
+  acceptedValue('accepted');
+
+  const FriendshipDocumentStatus(this.value);
+  final Object? value;
+
+  static FriendshipDocumentStatus fromJson(dynamic raw) {
+    switch (raw) {
+      case 'pending':
+        return FriendshipDocumentStatus.pendingValue;
+      case 'accepted':
+        return FriendshipDocumentStatus.acceptedValue;
+      default:
+        throw FormatException(
+          'Expected one of pending, accepted for FriendshipDocumentStatus',
+        );
+    }
+  }
+}
+
+typedef FriendshipDocument = ({
+  UserId userAId,
+  UserId userBId,
+  UserId requestedById,
+  FriendshipDocumentStatus status,
+  double updatedAt,
+  FriendshipId id,
+  double creationTime,
+});
+
 sealed class SessionDocument {
   const SessionDocument();
   UserId get ownerId;

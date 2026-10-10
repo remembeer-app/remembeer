@@ -118,7 +118,7 @@ class SessionCard extends StatelessWidget {
         ...members.take(avatarsOnSessionPreview).map((member) {
           return Padding(
             padding: const EdgeInsets.only(right: 4),
-            child: UserAvatar(user: member, size: 16),
+            child: UserAvatar(avatarUrl: member.avatarUrl, size: 16),
           );
         }),
 

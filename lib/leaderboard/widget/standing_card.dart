@@ -53,7 +53,7 @@ class StandingCard extends StatelessWidget {
                 ),
               ),
               const Gap(8),
-              UserAvatar(user: entry.user),
+              UserAvatar(avatarUrl: entry.user.avatarUrl),
               const Gap(12),
               Expanded(
                 child: Text(

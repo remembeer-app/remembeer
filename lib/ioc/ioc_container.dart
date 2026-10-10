@@ -13,7 +13,6 @@ import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
-import 'package:remembeer/friend_request/controller/friend_request_controller.dart';
 import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
 import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/service/month_service.dart';
@@ -91,9 +90,6 @@ class IoCContainer {
   static void _registerControllers() {
     get
       ..registerSingleton(DrinkController(authService: get<AuthService>()))
-      ..registerSingleton(
-        FriendRequestController(authService: get<AuthService>()),
-      )
       ..registerSingleton(UserController(authService: get<AuthService>()))
       ..registerSingleton(
         UserSettingsController(authService: get<AuthService>()),
@@ -124,8 +120,6 @@ class IoCContainer {
       ..registerSingleton(
         UserService(
           authService: get<AuthService>(),
-          notificationService: get<NotificationService>(),
-          friendRequestController: get<FriendRequestController>(),
           userController: get<UserController>(),
         ),
       )

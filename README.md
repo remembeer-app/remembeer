@@ -19,6 +19,13 @@ cp .env.local.example .env.local
 Never put secrets in `.env.client`; Flutter packages the entire file in the
 application.
 
+For local Android emulator development, set
+`CONVEX_CLOUD_ORIGIN=http://10.0.2.2:3210` in `.env`, matching `CONVEX_URL`
+in `.env.client`. Convex uses this origin for upload and download URLs;
+`127.0.0.1` points to the emulator itself. After changing `.env`, run
+`docker compose up -d backend`. For a physical device, use your computer's
+LAN address in both settings instead.
+
 CI builds populate `.env.client` from repository secrets, including
 `CONVEX_SITE_URL`.
 

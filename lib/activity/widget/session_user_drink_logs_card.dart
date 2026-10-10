@@ -30,7 +30,7 @@ class SessionUserDrinkLogsCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                UserAvatar(user: user, size: 16),
+                UserAvatar(avatarUrl: user.avatarUrl, size: 16),
                 const Gap(8),
                 Text(
                   user.username,

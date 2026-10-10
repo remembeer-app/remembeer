@@ -750,3 +750,130 @@ class UserCurrentQuery extends StatelessWidget {
     );
   }
 }
+
+/// Flutter widget for user:get.
+class UserGetTypeQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const UserGetTypeQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+    required this.userId,
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const UserGetTypeQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    required this.userId,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, GetTypeResult)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(BuildContext, ConvexQuerySnapshot<GetTypeResult>)?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final UserId userId;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<GetTypeArgs, GetTypeResult>.snapshot(
+        query: getValueQueryReference,
+        args: (userId: userId),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<GetTypeArgs, GetTypeResult>(
+      query: getValueQueryReference,
+      args: (userId: userId),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}
+
+/// Flutter widget for user:search.
+class UserSearchQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const UserSearchQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+    required this.username,
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const UserSearchQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    required this.username,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, List<SearchResultItem>)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(
+    BuildContext,
+    ConvexQuerySnapshot<List<SearchResultItem>>,
+  )?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final String username;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<SearchArgs, List<SearchResultItem>>.snapshot(
+        query: searchQueryReference,
+        args: (username: username),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<SearchArgs, List<SearchResultItem>>(
+      query: searchQueryReference,
+      args: (username: username),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}

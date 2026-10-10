@@ -20,6 +20,10 @@ import type * as drink_seedData from "../drink/seedData.js";
 import type * as drinkLog from "../drinkLog.js";
 import type * as drinkLog_mutation from "../drinkLog/mutation.js";
 import type * as drinkLog_query from "../drinkLog/query.js";
+import type * as friendship from "../friendship.js";
+import type * as friendship_mutation from "../friendship/mutation.js";
+import type * as friendship_query from "../friendship/query.js";
+import type * as friendship_relation from "../friendship/relation.js";
 import type * as http from "../http.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_authenticated from "../lib/authenticated.js";
@@ -38,6 +42,7 @@ import type * as user from "../user.js";
 import type * as user_currentUser from "../user/currentUser.js";
 import type * as user_deletion from "../user/deletion.js";
 import type * as user_mutation from "../user/mutation.js";
+import type * as user_publicProfile from "../user/publicProfile.js";
 import type * as user_query from "../user/query.js";
 
 import type {
@@ -59,6 +64,10 @@ declare const fullApi: ApiFromModules<{
   drinkLog: typeof drinkLog;
   "drinkLog/mutation": typeof drinkLog_mutation;
   "drinkLog/query": typeof drinkLog_query;
+  friendship: typeof friendship;
+  "friendship/mutation": typeof friendship_mutation;
+  "friendship/query": typeof friendship_query;
+  "friendship/relation": typeof friendship_relation;
   http: typeof http;
   "lib/auth": typeof lib_auth;
   "lib/authenticated": typeof lib_authenticated;
@@ -77,6 +86,7 @@ declare const fullApi: ApiFromModules<{
   "user/currentUser": typeof user_currentUser;
   "user/deletion": typeof user_deletion;
   "user/mutation": typeof user_mutation;
+  "user/publicProfile": typeof user_publicProfile;
   "user/query": typeof user_query;
 }>;
 

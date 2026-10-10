@@ -1,4 +1,5 @@
 import { syncSessionIndex } from "../sessionMember/sessionIndex";
+import { listForUser } from "../friendship/relation";
 import type { MutationCtx } from "../_generated/server";
 
 // TODO(ohtenkay): This should be anonymized instead of deleted, something that will satisfy GDPR requirements.
@@ -8,6 +9,11 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     .withIndex("by_authUserId", (q) => q.eq("authUserId", authUserId))
     .unique();
   if (!user) return;
+
+  const friendships = await listForUser(ctx, user._id);
+  for (const friendship of friendships) {
+    await ctx.db.delete("friendship", friendship._id);
+  }
 
   const logs = await ctx.db
     .query("drinkLog")
