@@ -108,6 +108,8 @@ test("account deletion removes all owned logs, including soft-deleted ones", asy
     session: [],
     sessionMember: [],
     friendship: [],
+    leaderboard: [],
+    leaderboardMember: [],
   };
   const ctx = { db: {
     query(table) {
