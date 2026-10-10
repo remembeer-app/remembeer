@@ -275,7 +275,7 @@ class LeaderboardsRoute extends GoRouteData with $LeaderboardsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return LeaderboardsPage();
+    return const LeaderboardsPage();
   }
 }
 
@@ -357,7 +357,7 @@ class CreateLeaderboardRoute extends GoRouteData with $CreateLeaderboardRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return CreateLeaderboardPage();
+    return const CreateLeaderboardPage();
   }
 }
 

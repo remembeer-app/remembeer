@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
-import 'package:remembeer/leaderboard/model/leaderboard.dart';
+import 'package:remembeer/convex_api/widgets/leaderboard.dart';
+import 'package:remembeer/convex_api/widgets/user.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_card.dart';
 import 'package:remembeer/routes.dart';
 
 class LeaderboardsPage extends StatelessWidget {
-  LeaderboardsPage({super.key});
-
-  final _leaderboardController = get<LeaderboardController>();
+  const LeaderboardsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,21 +46,25 @@ class LeaderboardsPage extends StatelessWidget {
   }
 
   Widget _buildLeaderboardList() {
-    return AsyncBuilder<List<Leaderboard>>(
-      stream: _leaderboardController.entitiesStreamWhereCurrentUserIsMember,
-      builder: (context, leaderboards) {
-        if (leaderboards.isEmpty) {
-          return _buildEmptyState(context);
-        }
+    return UserCurrentQuery(
+      builder: (context, user) => LeaderboardListCurrentQuery(
+        builder: (context, leaderboards) {
+          if (leaderboards.isEmpty) {
+            return _buildEmptyState(context);
+          }
 
-        return ListView.builder(
-          itemCount: leaderboards.length,
-          itemBuilder: (context, index) {
-            final leaderboard = leaderboards[index];
-            return LeaderboardCard(leaderboard: leaderboard);
-          },
-        );
-      },
+          return ListView.builder(
+            itemCount: leaderboards.length,
+            itemBuilder: (context, index) {
+              final leaderboard = leaderboards[index];
+              return LeaderboardCard(
+                leaderboard: leaderboard,
+                currentUserId: user.id,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 

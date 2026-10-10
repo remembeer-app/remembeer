@@ -3,15 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/common/widget/page_template.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart';
+import 'package:remembeer/convex_api/widgets/leaderboard.dart';
+import 'package:remembeer/convex_api/widgets/user.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/leaderboard/model/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
-import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/service/month_service.dart';
-import 'package:remembeer/leaderboard/type/leaderboard_entry.dart';
+import 'package:remembeer/leaderboard/widget/leaderboard_standings.dart';
 import 'package:remembeer/leaderboard/widget/month_selector.dart';
 import 'package:remembeer/leaderboard/widget/standing_card.dart';
 import 'package:remembeer/routes.dart';
@@ -26,7 +28,6 @@ class LeaderboardDetailPage extends StatefulWidget {
 }
 
 class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
-  final _leaderboardService = get<LeaderboardService>();
   final _monthService = get<MonthService>();
 
   var _sortType = LeaderboardType.beers;
@@ -39,14 +40,21 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AsyncBuilder<Leaderboard>(
-      stream: _leaderboardService.streamById(widget.leaderboardId),
-      builder: _buildPage,
+    return UserCurrentQuery(
+      builder: (_, user) => LeaderboardGetTypeQuery(
+        id: LeaderboardId(widget.leaderboardId),
+        builder: (_, result) =>
+            _buildPage(context, result.leaderboard, user.id),
+      ),
     );
   }
 
-  Widget _buildPage(BuildContext context, Leaderboard leaderboard) {
-    final isOwner = _leaderboardService.isOwner(leaderboard);
+  Widget _buildPage(
+    BuildContext context,
+    LeaderboardDocument leaderboard,
+    UserId currentUserId,
+  ) {
+    final isOwner = leaderboard.ownerId == currentUserId;
     final icon = LeaderboardIcon.fromName(leaderboard.iconName);
 
     return PageTemplate(
@@ -65,7 +73,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
           const Gap(8),
           _buildSortToggle(),
           const Gap(16),
-          Expanded(child: _buildStandingsList(leaderboard)),
+          Expanded(child: _buildStandingsList(leaderboard, currentUserId)),
         ],
       ),
     );
@@ -73,36 +81,51 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
 
   Widget _buildActionButtons(
     BuildContext context,
-    Leaderboard leaderboard,
+    LeaderboardDocument leaderboard,
     bool isOwner,
   ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        IconButton(
-          onPressed: () => _showInviteCodeDialog(context, leaderboard),
-          icon: const Icon(Icons.share),
-        ),
-        if (isOwner)
-          IconButton(
-            onPressed: () => ManageLeaderboardRoute(
-              leaderboardId: leaderboard.id,
-            ).push<void>(context),
-            icon: const Icon(Icons.settings),
-          )
-        else
-          IconButton(
-            onPressed: () => _showLeaveConfirmationDialog(context, leaderboard),
-            icon: const Icon(Icons.logout),
-            color: Theme.of(context).colorScheme.error,
+    return LeaderboardLeaveMutation(
+      builder: (_, leave, snapshot) => Column(
+        children: [
+          if (snapshot.error case final error?)
+            ErrorMessageBox(message: error.toString()),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: () => _showInviteCodeDialog(context, leaderboard),
+                icon: const Icon(Icons.share),
+              ),
+              if (isOwner)
+                IconButton(
+                  onPressed: () => ManageLeaderboardRoute(
+                    leaderboardId: leaderboard.id.value,
+                  ).push<void>(context),
+                  icon: const Icon(Icons.settings),
+                )
+              else
+                IconButton(
+                  onPressed: snapshot.isLoading
+                      ? null
+                      : () => _showLeaveConfirmationDialog(
+                          context,
+                          leaderboard,
+                          leave,
+                        ),
+                  icon: const Icon(Icons.logout),
+                  color: Theme.of(context).colorScheme.error,
+                ),
+            ],
           ),
-      ],
+        ],
+      ),
     );
   }
 
   void _showLeaveConfirmationDialog(
     BuildContext context,
-    Leaderboard leaderboard,
+    LeaderboardDocument leaderboard,
+    LeaderboardLeaveMutationExecutor leave,
   ) {
     showConfirmationDialog(
       context: context,
@@ -110,15 +133,20 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
       text: 'Are you sure you want to leave "${leaderboard.name}"?',
       submitButtonText: 'Leave',
       onPressed: () async {
-        await _leaderboardService.leaveLeaderboard(leaderboard);
-        if (context.mounted) {
-          const LeaderboardsRoute().go(context);
-        }
+        leave.run(
+          id: leaderboard.id,
+          onSuccess: (_) {
+            if (context.mounted) const LeaderboardsRoute().go(context);
+          },
+        );
       },
     );
   }
 
-  void _showInviteCodeDialog(BuildContext context, Leaderboard leaderboard) {
+  void _showInviteCodeDialog(
+    BuildContext context,
+    LeaderboardDocument leaderboard,
+  ) {
     final theme = Theme.of(context);
     final inviteCode = leaderboard.inviteCode;
 
@@ -192,11 +220,17 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
     );
   }
 
-  Widget _buildStandingsList(Leaderboard leaderboard) {
-    return AsyncBuilder<List<LeaderboardEntry>>(
-      stream: _leaderboardService.standingsStreamFor(leaderboard),
+  Widget _buildStandingsList(
+    LeaderboardDocument leaderboard,
+    UserId currentUserId,
+  ) {
+    return LeaderboardStandings(
+      id: leaderboard.id,
+      useSelectedMonth: true,
       builder: (context, standings) {
-        final sortedStandings = List<LeaderboardEntry>.from(standings);
+        final sortedStandings = List<StandingsResultEntriesItem>.from(
+          standings.entries,
+        );
         if (_sortType == LeaderboardType.beers) {
           sortedStandings.sort(
             (a, b) => a.rankByBeers.compareTo(b.rankByBeers),
@@ -211,7 +245,11 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
           itemCount: sortedStandings.length,
           itemBuilder: (context, index) {
             final entry = sortedStandings[index];
-            return StandingCard(entry: entry, sortType: _sortType);
+            return StandingCard(
+              entry: entry,
+              sortType: _sortType,
+              isCurrentUser: entry.user.id == currentUserId,
+            );
           },
         );
       },
