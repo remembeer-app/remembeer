@@ -1,25 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/drink_icon.dart';
+import 'package:remembeer/convex_api/modules/user.dart';
 import 'package:remembeer/convex_api/types.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/constants.dart';
-import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/service/user_stats_service.dart';
 
 const _iconSize = 30.0;
 
 class ConsumptionSection extends StatelessWidget {
-  final UserModel user;
+  const ConsumptionSection({super.key, required this.userStats});
 
-  ConsumptionSection({super.key, required this.user});
-
-  final _userStatsService = get<UserStatsService>();
+  final StatsResult userStats;
 
   @override
   Widget build(BuildContext context) {
-    final userStats = _userStatsService.fromUser(user);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

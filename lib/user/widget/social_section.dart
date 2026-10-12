@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/convex_api/modules/user.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/service/user_stats_service.dart';
 
 class SocialSection extends StatelessWidget {
   final UserModel user;
   final bool isCurrentUser;
 
-  SocialSection({super.key, required this.user, required this.isCurrentUser});
+  const SocialSection({
+    super.key,
+    required this.user,
+    required this.isCurrentUser,
+    required this.userStats,
+  });
 
-  final _userStatsService = get<UserStatsService>();
+  final StatsResult userStats;
 
   @override
   Widget build(BuildContext context) {
-    final userStats = _userStatsService.fromUser(user);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -25,7 +27,7 @@ class SocialSection extends StatelessWidget {
           color: userStats.isStreakActive
               ? Colors.orange.shade700
               : Colors.grey,
-          value: userStats.streakDays.toString(),
+          value: userStats.streakDays.toInt().toString(),
           label: 'Day Streak',
         ),
         const Gap(12),
