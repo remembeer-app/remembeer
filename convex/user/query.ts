@@ -3,7 +3,7 @@ import { WithZod } from "fluent-convex/zod";
 import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
 import type { Doc, Id } from "../_generated/dataModel";
-import { logicalDayAt, logicalDayBoundaries } from "../lib/logicalDay";
+import { LogicalDay } from "../lib/logicalDay";
 import { beerVolumeMl } from "../leaderboard/constants";
 import { publicUser, publicUserValidator } from "./publicProfile";
 import { normalizeUsername, updateUsernameInputValidator } from "./schema";
@@ -69,14 +69,11 @@ export const stats = authQuery
   .handler(async (ctx, { userId }) => {
     const user = await ctx.db.get("user", userId);
     if (!user) throw new ConvexError("User not found");
+    const userDay = new LogicalDay(user);
     const now = Date.now();
-    const today = Temporal.PlainDate.from(
-      logicalDayAt(now, user.endOfDayBoundary, user.timeZone),
-    );
+    const today = Temporal.PlainDate.from(userDay.at(now));
     const firstDay = today.subtract({ days: 29 }).toString();
-    let nextRefreshAt = logicalDayBoundaries(
-      today.toString(), user.endOfDayBoundary, user.timeZone,
-    ).end;
+    let nextRefreshAt = userDay.boundaries(today.toString()).end;
     // shortcut: reads the full user history, revisit when Convex query read limits become a constraint.
     const logs = await ctx.db
       .query("drinkLog")
@@ -106,9 +103,7 @@ export const stats = authQuery
         ? log.volumeMl / beerVolumeMl
         : 0;
       const alcohol = (log.volumeMl * drink.alcoholPercentage) / 100;
-      const day = logicalDayAt(
-        log.consumedAt, user.endOfDayBoundary, user.timeZone,
-      );
+      const day = userDay.at(log.consumedAt);
       totalBeersConsumed += beers;
       totalAlcoholConsumed += alcohol;
       if (day >= firstDay) {

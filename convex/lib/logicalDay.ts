@@ -1,39 +1,42 @@
-export function logicalDayBoundaries(
-  date: string,
-  endOfDayBoundary: number,
-  timeZone: string,
-) {
-  const day = Temporal.PlainDate.from(date);
-  const options = {
+export class LogicalDay {
+  private readonly timeZone: string;
+  private readonly endOfDayBoundary: number;
+
+  constructor({
     timeZone,
-    plainTime: {
-      hour: Math.floor(endOfDayBoundary / 60),
-      minute: endOfDayBoundary % 60,
-    },
-  };
+    endOfDayBoundary,
+  }: {
+    timeZone: string;
+    endOfDayBoundary: number;
+  }) {
+    this.timeZone = timeZone;
+    this.endOfDayBoundary = endOfDayBoundary;
+  }
 
-  return {
-    start: day.toZonedDateTime(options).epochMilliseconds,
-    end: day.add({ days: 1 }).toZonedDateTime(options).epochMilliseconds,
-  };
-}
+  at(timestamp: number) {
+    const local = Temporal.Instant.fromEpochMilliseconds(timestamp)
+      .toZonedDateTimeISO(this.timeZone)
+      .toPlainDate();
+    const date = timestamp < this.boundaries(local.toString()).start
+      ? local.subtract({ days: 1 })
+      : local;
 
-export function logicalDayAt(
-  at: number,
-  endOfDayBoundary: number,
-  timeZone: string,
-) {
-  const local =
-    Temporal.Instant.fromEpochMilliseconds(at).toZonedDateTimeISO(timeZone);
-  const date =
-    at <
-    logicalDayBoundaries(
-      local.toPlainDate().toString(),
-      endOfDayBoundary,
-      timeZone,
-    ).start
-      ? local.toPlainDate().subtract({ days: 1 })
-      : local.toPlainDate();
+    return date.toString();
+  }
 
-  return date.toString();
+  boundaries(date: string) {
+    const day = Temporal.PlainDate.from(date);
+    const options = {
+      timeZone: this.timeZone,
+      plainTime: {
+        hour: Math.floor(this.endOfDayBoundary / 60),
+        minute: this.endOfDayBoundary % 60,
+      },
+    };
+
+    return {
+      start: day.toZonedDateTime(options).epochMilliseconds,
+      end: day.add({ days: 1 }).toZonedDateTime(options).epochMilliseconds,
+    };
+  }
 }

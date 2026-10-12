@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { z } from "zod";
 import { authQuery } from "../lib/authenticated";
-import { logicalDayBoundaries, logicalDayAt } from "../lib/logicalDay";
+import { LogicalDay } from "../lib/logicalDay";
 import { schema } from "../schema";
 import { listForDayHandler } from "../session/query";
 
@@ -37,20 +37,13 @@ export const listForDay = authQuery
     }),
   )
   .handler(async (ctx, { date: selectedDate, at }) => {
-    const today = logicalDayAt(
-      at,
-      ctx.user.endOfDayBoundary,
-      ctx.user.timeZone,
-    );
+    const day = new LogicalDay(ctx.user);
+    const today = day.at(at);
 
     const date =
       selectedDate === undefined || selectedDate > today ? today : selectedDate;
 
-    const { start, end } = logicalDayBoundaries(
-      date,
-      ctx.user.endOfDayBoundary,
-      ctx.user.timeZone,
-    );
+    const { start, end } = day.boundaries(date);
 
     const logs = await ctx.db
       .query("drinkLog")

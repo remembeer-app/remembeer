@@ -3,7 +3,7 @@ import { WithZod } from "fluent-convex/zod";
 import { z } from "zod";
 import { convexToZod } from "convex-helpers/server/zod4";
 import { authQuery } from "../lib/authenticated";
-import { logicalDayAt, logicalDayBoundaries } from "../lib/logicalDay";
+import { LogicalDay } from "../lib/logicalDay";
 import { schema } from "../schema";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
 import type { Doc, Id } from "../_generated/dataModel";
@@ -161,32 +161,18 @@ export const standings = authQuery
   )
   .handler(async (ctx, { id, month: selectedMonth }) => {
     const { leaderboard } = await requireLeaderboardAccess(ctx, id);
-    const { timeZone, endOfDayBoundary } = leaderboard;
-    const currentMonth = logicalDayAt(
-      Date.now(),
-      endOfDayBoundary,
-      timeZone,
-    ).slice(0, 7);
+    const day = new LogicalDay(leaderboard);
+    const currentMonth = day.at(Date.now()).slice(0, 7);
     const month = selectedMonth ?? currentMonth;
     if (month > currentMonth)
       throw new ConvexError("Cannot view a future reporting month");
     const firstDay = Temporal.PlainDate.from(`${month}-01`);
-    const start = logicalDayBoundaries(
-      firstDay.toString(),
-      endOfDayBoundary,
-      timeZone,
-    ).start;
-    const end = logicalDayBoundaries(
-      firstDay.add({ months: 1 }).toString(),
-      endOfDayBoundary,
-      timeZone,
-    ).start;
-    const nextMonthAt = logicalDayBoundaries(
+    const start = day.boundaries(firstDay.toString()).start;
+    const end = day.boundaries(firstDay.add({ months: 1 }).toString()).start;
+    const nextMonthAt = day.boundaries(
       Temporal.PlainDate.from(`${currentMonth}-01`)
         .add({ months: 1 })
         .toString(),
-      endOfDayBoundary,
-      timeZone,
     ).start;
     const memberships = (await listMemberships(ctx, id)).filter(
       (m) => m.status === "joined",
