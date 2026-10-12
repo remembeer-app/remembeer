@@ -5,22 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:remembeer/friend_request/page/friend_requests_page.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/user/page/friends_list_page.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user/page/search_user_page.dart';
-import 'package:remembeer/user/service/user_stats_service.dart';
 import 'package:remembeer/user/widget/social_section.dart';
 
 void main() {
-  setUp(() => get.registerSingleton(UserStatsService()));
-  tearDown(get.reset);
   Future<void> mount(WidgetTester tester, _Client client, Widget page) async {
     tester.view.physicalSize = const Size(1000, 1600);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     addTearDown(client.dispose);
+    addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
     await tester.pumpWidget(
       ConvexProvider(
         client: client,
@@ -191,6 +188,7 @@ void main() {
         ],
       );
       addTearDown(router.dispose);
+      addTearDown(() => tester.pumpWidget(const SizedBox.shrink()));
       await tester.pumpWidget(
         ConvexProvider(
           client: client,
@@ -294,6 +292,17 @@ Map<String, dynamic> _request(String id, String otherId, String senderId) => {
 
 class _Client implements ConvexRuntimeClient {
   final responses = <String, dynamic>{
+    'user:stats': {
+      'totalBeersConsumed': 0,
+      'totalAlcoholConsumed': 0,
+      'beersConsumedLast30Days': 0,
+      'alcoholConsumedLast30Days': 0,
+      'streakDays': 0,
+      'isStreakActive': false,
+      'nextRefreshAt': DateTime.now()
+          .add(const Duration(days: 1))
+          .millisecondsSinceEpoch,
+    },
     'user:current': _user,
     'badge:listCurrent': <Object?>[],
     'user:get': _friend,
