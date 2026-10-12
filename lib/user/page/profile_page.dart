@@ -14,6 +14,7 @@ import 'package:remembeer/user/model/user_model.dart';
 import 'package:remembeer/user/widget/badges_section.dart';
 import 'package:remembeer/user/widget/consumption_section.dart';
 import 'package:remembeer/user/widget/friendship_actions.dart';
+import 'package:remembeer/user/widget/profile_stats.dart';
 import 'package:remembeer/user/widget/social_section.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -60,7 +61,7 @@ class ProfilePage extends StatelessWidget {
     AccentColorKey accentColor, {
     required bool isCurrentUser,
   }) {
-    // TODO(ohtenkay): Replace display-only empty email, search data, and monthly stats with Convex profile data.
+    // TODO(ohtenkay): Replace display-only empty email and search data with Convex profile data.
     final user = UserModel(
       id: id.value,
       username: username,
@@ -70,52 +71,56 @@ class ProfilePage extends StatelessWidget {
       searchableUsername: '',
       // TODO(ohtenkay): Replace default empty badges/friends for other users when public Convex queries exist.
     );
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildProfileHeader(
-            context: context,
-            user: user,
-            isCurrentUser: isCurrentUser,
-          ),
-          const Gap(16),
-          if (isCurrentUser)
-            FriendshipListCurrentQuery(
-              builder: (context, friends) => SocialSection(
-                user: user.copyWith(
-                  friends: friends.map((friend) => friend.id.value).toSet(),
+    return ProfileStats(
+      userId: id,
+      builder: (context, stats) => SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _buildProfileHeader(
+              context: context,
+              user: user,
+              isCurrentUser: isCurrentUser,
+            ),
+            const Gap(16),
+            if (isCurrentUser)
+              FriendshipListCurrentQuery(
+                builder: (context, friends) => SocialSection(
+                  user: user.copyWith(
+                    friends: friends.map((friend) => friend.id.value).toSet(),
+                  ),
+                  isCurrentUser: true,
+                  userStats: stats,
                 ),
-                isCurrentUser: true,
-              ),
-            )
-          else
-            SocialSection(user: user, isCurrentUser: false),
-          const Gap(12),
-          if (isCurrentUser)
-            BadgeListCurrentQuery(
-              builder: (context, badges) => BadgesSection(
-                user: user.copyWith(
-                  unlockedBadges: {
-                    for (final badge in badges)
-                      if (getBadgeByIdOrNull(badge.badgeKey) != null)
-                        badge.badgeKey: UnlockedBadge(
-                          badgeId: badge.badgeKey,
-                          unlockedAt: DateTime.fromMillisecondsSinceEpoch(
-                            badge.unlockedAt.toInt(),
+              )
+            else
+              SocialSection(user: user, isCurrentUser: false, userStats: stats),
+            const Gap(12),
+            if (isCurrentUser)
+              BadgeListCurrentQuery(
+                builder: (context, badges) => BadgesSection(
+                  user: user.copyWith(
+                    unlockedBadges: {
+                      for (final badge in badges)
+                        if (getBadgeByIdOrNull(badge.badgeKey) != null)
+                          badge.badgeKey: UnlockedBadge(
+                            badgeId: badge.badgeKey,
+                            unlockedAt: DateTime.fromMillisecondsSinceEpoch(
+                              badge.unlockedAt.toInt(),
+                            ),
+                            isShown: badge.isShown,
                           ),
-                          isShown: badge.isShown,
-                        ),
-                  },
+                    },
+                  ),
                 ),
-              ),
-            )
-          else
-            BadgesSection(user: user),
-          const Gap(12),
-          ConsumptionSection(user: user),
-        ],
+              )
+            else
+              BadgesSection(user: user),
+            const Gap(12),
+            ConsumptionSection(userStats: stats),
+          ],
+        ),
       ),
     );
   }

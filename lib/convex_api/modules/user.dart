@@ -163,6 +163,47 @@ class UserApi {
   ConvexQueryReference<SearchArgs, List<SearchResultItem>> get searchQuery =>
       searchQueryReference;
 
+  Future<StatsResult> stats({
+    Optional<double> refreshAt = const Optional.absent(),
+    required UserId userId,
+  }) async {
+    final raw$ = await _client.query(
+      'user:stats',
+      _encodeStatsArgs((refreshAt: refreshAt, userId: userId)),
+    );
+    return _decodeStatsResult(raw$);
+  }
+
+  TypedConvexSubscription<StatsResult> statsSubscribe({
+    Optional<double> refreshAt = const Optional.absent(),
+    required UserId userId,
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:stats',
+      _encodeStatsArgs((refreshAt: refreshAt, userId: userId)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<StatsResult>(_decodeStatsResult(value));
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<StatsResult>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<StatsResult>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<StatsResult>(subscription$, typedStream$);
+  }
+
+  ConvexQueryReference<StatsArgs, StatsResult> get statsQuery =>
+      statsQueryReference;
+
   Future<Null> updateAccentColor({
     required UpdateAccentColorArgsAccentColor accentColor,
   }) async {
@@ -702,6 +743,128 @@ SearchArgs _decodeSearchArgs(dynamic raw) {
   return (username: expectString(map['username'], label: 'SearchArgsUsername'));
 }
 
+typedef StatsResult = ({
+  double alcoholConsumedLast30Days,
+  double beersConsumedLast30Days,
+  bool isStreakActive,
+  double nextRefreshAt,
+  double streakDays,
+  double totalAlcoholConsumed,
+  double totalBeersConsumed,
+});
+
+Map<String, dynamic> _encodeStatsResult(StatsResult value$) {
+  final (
+    alcoholConsumedLast30Days: alcoholConsumedLast30Days,
+    beersConsumedLast30Days: beersConsumedLast30Days,
+    isStreakActive: isStreakActive,
+    nextRefreshAt: nextRefreshAt,
+    streakDays: streakDays,
+    totalAlcoholConsumed: totalAlcoholConsumed,
+    totalBeersConsumed: totalBeersConsumed,
+  ) = value$;
+  return <String, dynamic>{
+    'alcoholConsumedLast30Days': alcoholConsumedLast30Days,
+    'beersConsumedLast30Days': beersConsumedLast30Days,
+    'isStreakActive': isStreakActive,
+    'nextRefreshAt': nextRefreshAt,
+    'streakDays': streakDays,
+    'totalAlcoholConsumed': totalAlcoholConsumed,
+    'totalBeersConsumed': totalBeersConsumed,
+  };
+}
+
+StatsResult _decodeStatsResult(dynamic raw) {
+  final map = expectMap(raw, label: 'StatsResult');
+  if (!map.containsKey('alcoholConsumedLast30Days')) {
+    throw FormatException(
+      'Missing required field "alcoholConsumedLast30Days" for StatsResult',
+    );
+  }
+  if (!map.containsKey('beersConsumedLast30Days')) {
+    throw FormatException(
+      'Missing required field "beersConsumedLast30Days" for StatsResult',
+    );
+  }
+  if (!map.containsKey('isStreakActive')) {
+    throw FormatException(
+      'Missing required field "isStreakActive" for StatsResult',
+    );
+  }
+  if (!map.containsKey('nextRefreshAt')) {
+    throw FormatException(
+      'Missing required field "nextRefreshAt" for StatsResult',
+    );
+  }
+  if (!map.containsKey('streakDays')) {
+    throw FormatException(
+      'Missing required field "streakDays" for StatsResult',
+    );
+  }
+  if (!map.containsKey('totalAlcoholConsumed')) {
+    throw FormatException(
+      'Missing required field "totalAlcoholConsumed" for StatsResult',
+    );
+  }
+  if (!map.containsKey('totalBeersConsumed')) {
+    throw FormatException(
+      'Missing required field "totalBeersConsumed" for StatsResult',
+    );
+  }
+  return (
+    alcoholConsumedLast30Days: expectDouble(
+      map['alcoholConsumedLast30Days'],
+      label: 'StatsResultAlcoholConsumedLast30Days',
+    ),
+    beersConsumedLast30Days: expectDouble(
+      map['beersConsumedLast30Days'],
+      label: 'StatsResultBeersConsumedLast30Days',
+    ),
+    isStreakActive: expectBool(
+      map['isStreakActive'],
+      label: 'StatsResultIsStreakActive',
+    ),
+    nextRefreshAt: expectDouble(
+      map['nextRefreshAt'],
+      label: 'StatsResultNextRefreshAt',
+    ),
+    streakDays: expectDouble(map['streakDays'], label: 'StatsResultStreakDays'),
+    totalAlcoholConsumed: expectDouble(
+      map['totalAlcoholConsumed'],
+      label: 'StatsResultTotalAlcoholConsumed',
+    ),
+    totalBeersConsumed: expectDouble(
+      map['totalBeersConsumed'],
+      label: 'StatsResultTotalBeersConsumed',
+    ),
+  );
+}
+
+typedef StatsArgs = ({Optional<double> refreshAt, UserId userId});
+
+Map<String, dynamic> _encodeStatsArgs(StatsArgs value$) {
+  final (refreshAt: refreshAt, userId: userId) = value$;
+  return <String, dynamic>{
+    if (refreshAt.isDefined) 'refreshAt': refreshAt.value,
+    'userId': userId.value,
+  };
+}
+
+StatsArgs _decodeStatsArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'StatsArgs');
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for StatsArgs');
+  }
+  return (
+    refreshAt: map.containsKey('refreshAt')
+        ? Optional.of(
+            expectDouble(map['refreshAt'], label: 'StatsArgsRefreshAt'),
+          )
+        : const Optional.absent(),
+    userId: UserId(expectString(map['userId'], label: 'StatsArgsUserId')),
+  );
+}
+
 enum UpdateAccentColorArgsAccentColor {
   amberValue('amber'),
   roseValue('rose'),
@@ -990,6 +1153,15 @@ searchQueryReference = ConvexQueryReference(
   encodeResult: (value) =>
       value.map((item) => _encodeSearchResultItem(item)).toList(),
 );
+
+final ConvexQueryReference<StatsArgs, StatsResult> statsQueryReference =
+    ConvexQueryReference(
+      name: 'user:stats',
+      encode: (args) => _encodeStatsArgs(args),
+      decodeArgs: (raw) => _decodeStatsArgs(raw),
+      decode: (raw) => _decodeStatsResult(raw),
+      encodeResult: (value) => _encodeStatsResult(value),
+    );
 
 final ConvexMutationReference<UpdateAccentColorArgs, void>
 updateAccentColorMutationReference = ConvexMutationReference(

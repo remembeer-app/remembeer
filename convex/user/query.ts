@@ -2,6 +2,9 @@ import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
+import type { Doc, Id } from "../_generated/dataModel";
+import { LogicalDay } from "../lib/logicalDay";
+import { beerVolumeMl } from "../leaderboard/constants";
 import { publicUser, publicUserValidator } from "./publicProfile";
 import { normalizeUsername, updateUsernameInputValidator } from "./schema";
 
@@ -47,5 +50,77 @@ export const current = authQuery
       avatarUrl: avatarStorageId
         ? await ctx.storage.getUrl(avatarStorageId)
         : null,
+    };
+  });
+
+export const stats = authQuery
+  .input({ userId: v.id("user"), refreshAt: v.optional(v.number()) })
+  .returns(
+    v.object({
+      totalBeersConsumed: v.number(),
+      totalAlcoholConsumed: v.number(),
+      beersConsumedLast30Days: v.number(),
+      alcoholConsumedLast30Days: v.number(),
+      streakDays: v.number(),
+      isStreakActive: v.boolean(),
+      nextRefreshAt: v.number(),
+    }),
+  )
+  .handler(async (ctx, { userId }) => {
+    const user = await ctx.db.get("user", userId);
+    if (!user) throw new ConvexError("User not found");
+    const userDay = new LogicalDay(user);
+    const now = Date.now();
+    const today = Temporal.PlainDate.from(userDay.at(now));
+    const firstDay = today.subtract({ days: 29 }).toString();
+    let nextRefreshAt = userDay.boundaries(today.toString()).end;
+    // shortcut: reads the full user history, revisit when Convex query read limits become a constraint.
+    const logs = await ctx.db
+      .query("drinkLog")
+      .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) =>
+        q.eq("userId", userId).eq("deletedAt", null),
+      )
+      .collect();
+    const drinks = new Map<Id<"drink">, Doc<"drink">>();
+    const drinkingDays = new Set<string>();
+    let totalBeersConsumed = 0;
+    let totalAlcoholConsumed = 0;
+    let beersConsumedLast30Days = 0;
+    let alcoholConsumedLast30Days = 0;
+    for (const log of logs) {
+      if (log.consumedAt > now) {
+        nextRefreshAt = Math.min(nextRefreshAt, log.consumedAt);
+        continue;
+      }
+      let drink = drinks.get(log.drinkId);
+      if (!drink) {
+        const referencedDrink = await ctx.db.get("drink", log.drinkId);
+        if (!referencedDrink) throw new ConvexError("A logged drink is missing");
+        drink = referencedDrink;
+        drinks.set(log.drinkId, drink);
+      }
+      const beers = drink.drinkCategory.kind === "beer"
+        ? log.volumeMl / beerVolumeMl
+        : 0;
+      const alcohol = (log.volumeMl * drink.alcoholPercentage) / 100;
+      const day = userDay.at(log.consumedAt);
+      totalBeersConsumed += beers;
+      totalAlcoholConsumed += alcohol;
+      if (day >= firstDay) {
+        beersConsumedLast30Days += beers;
+        alcoholConsumedLast30Days += alcohol;
+      }
+      if (alcohol > 0) drinkingDays.add(day);
+    }
+    const isStreakActive = drinkingDays.has(today.toString());
+    let day = isStreakActive ? today : today.subtract({ days: 1 });
+    let streakDays = 0;
+    while (drinkingDays.has(day.toString())) {
+      streakDays++;
+      day = day.subtract({ days: 1 });
+    }
+    return {
+      totalBeersConsumed, totalAlcoholConsumed, beersConsumedLast30Days,
+      alcoholConsumedLast30Days, streakDays, isStreakActive, nextRefreshAt,
     };
   });

@@ -1,5 +1,4 @@
 import { v } from "convex/values";
-import { logicalDayBoundaries } from "./logicalDay";
 import { convex } from "./builder";
 
 const timeZoneSearchLimit = 20;
@@ -7,7 +6,7 @@ const timeZoneSearchLimit = 20;
 export function isValidTimeZone(timeZone: string) {
   if (!/^[A-Za-z]/.test(timeZone)) return false;
   try {
-    logicalDayBoundaries("2000-01-01", 0, timeZone);
+    Temporal.Instant.fromEpochMilliseconds(0).toZonedDateTimeISO(timeZone);
     return true;
   } catch {
     return false;

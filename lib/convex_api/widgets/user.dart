@@ -877,3 +877,68 @@ class UserSearchQuery extends StatelessWidget {
     );
   }
 }
+
+/// Flutter widget for user:stats.
+class UserStatsQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const UserStatsQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+    this.refreshAt = const Optional.absent(),
+    required this.userId,
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const UserStatsQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    this.refreshAt = const Optional.absent(),
+    required this.userId,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, StatsResult)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(BuildContext, ConvexQuerySnapshot<StatsResult>)?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final Optional<double> refreshAt;
+  final UserId userId;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<StatsArgs, StatsResult>.snapshot(
+        query: statsQueryReference,
+        args: (refreshAt: refreshAt, userId: userId),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<StatsArgs, StatsResult>(
+      query: statsQueryReference,
+      args: (refreshAt: refreshAt, userId: userId),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}
