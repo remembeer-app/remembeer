@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gap/gap.dart';
+import 'package:intl/intl.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/error_message_box.dart';
@@ -9,10 +10,8 @@ import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/leaderboard.dart';
 import 'package:remembeer/convex_api/widgets/leaderboard.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
-import 'package:remembeer/leaderboard/service/month_service.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_standings.dart';
 import 'package:remembeer/leaderboard/widget/month_selector.dart';
 import 'package:remembeer/leaderboard/widget/standing_card.dart';
@@ -28,15 +27,8 @@ class LeaderboardDetailPage extends StatefulWidget {
 }
 
 class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
-  final _monthService = get<MonthService>();
-
   var _sortType = LeaderboardType.beers;
-
-  @override
-  void initState() {
-    super.initState();
-    _monthService.resetToCurrentMonth();
-  }
+  String? _selectedMonth;
 
   @override
   Widget build(BuildContext context) {
@@ -69,10 +61,6 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
       child: Column(
         children: [
           _buildActionButtons(context, leaderboard, isOwner),
-          MonthSelector(),
-          const Gap(8),
-          _buildSortToggle(),
-          const Gap(16),
           Expanded(child: _buildStandingsList(leaderboard, currentUserId)),
         ],
       ),
@@ -226,7 +214,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
   ) {
     return LeaderboardStandings(
       id: leaderboard.id,
-      useSelectedMonth: true,
+      month: _selectedMonth,
       builder: (context, standings) {
         final sortedStandings = List<StandingsResultEntriesItem>.from(
           standings.entries,
@@ -241,18 +229,45 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
           );
         }
 
-        return ListView.builder(
-          itemCount: sortedStandings.length,
-          itemBuilder: (context, index) {
-            final entry = sortedStandings[index];
-            return StandingCard(
-              entry: entry,
-              sortType: _sortType,
-              isCurrentUser: entry.user.id == currentUserId,
-            );
-          },
+        final date = DateFormat('yyyy-MM').parseStrict(standings.month);
+        final isCurrentMonth = standings.month == standings.currentMonth;
+        return Column(
+          children: [
+            MonthSelector(
+              month: date,
+              onPrevious: date.year == 0 && date.month == 1
+                  ? null
+                  : () => _selectMonth(date, -1, standings.currentMonth),
+              onNext: isCurrentMonth
+                  ? null
+                  : () => _selectMonth(date, 1, standings.currentMonth),
+            ),
+            const Gap(8),
+            _buildSortToggle(),
+            const Gap(16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: sortedStandings.length,
+                itemBuilder: (context, index) {
+                  final entry = sortedStandings[index];
+                  return StandingCard(
+                    entry: entry,
+                    sortType: _sortType,
+                    isCurrentUser: entry.user.id == currentUserId,
+                  );
+                },
+              ),
+            ),
+          ],
         );
       },
     );
+  }
+
+  void _selectMonth(DateTime date, int offset, String currentMonth) {
+    final month = DateFormat(
+      'yyyy-MM',
+    ).format(DateTime(date.year, date.month + offset));
+    setState(() => _selectedMonth = month == currentMonth ? null : month);
   }
 }

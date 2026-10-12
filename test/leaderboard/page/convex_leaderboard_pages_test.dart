@@ -4,28 +4,22 @@ import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/leaderboard/page/create_leaderboard_page.dart';
 import 'package:remembeer/leaderboard/page/join_leaderboard_page.dart';
 import 'package:remembeer/leaderboard/page/leaderboard_detail_page.dart';
 import 'package:remembeer/leaderboard/page/leaderboards_page.dart';
 import 'package:remembeer/leaderboard/page/manage_leaderboard_page.dart';
 import 'package:remembeer/leaderboard/page/update_leaderboard_name_page.dart';
-import 'package:remembeer/leaderboard/service/month_service.dart';
 import 'package:toastification/toastification.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  late MonthService months;
   late _Client client;
 
   setUp(() {
-    months = MonthService();
     client = _Client();
-    get.registerSingleton(months);
   });
   tearDown(() async {
-    await get.reset();
     await client.dispose();
   });
 
@@ -47,7 +41,6 @@ void main() {
   Future<void> finish(WidgetTester tester) async {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
-    months.dispose();
     expect(client.activeSubscriptions, 0);
   }
 
@@ -238,17 +231,69 @@ void main() {
   );
 
   testWidgets(
+    'month selection is local to each detail page and resets on reopening',
+    (tester) async {
+      const firstKey = ValueKey('first');
+      await mount(
+        tester,
+        const Row(
+          children: [
+            Expanded(
+              child: LeaderboardDetailPage(
+                key: firstKey,
+                leaderboardId: 'board',
+              ),
+            ),
+            Expanded(
+              child: LeaderboardDetailPage(
+                key: ValueKey('second'),
+                leaderboardId: 'other-board',
+              ),
+            ),
+          ],
+        ),
+      );
+      await tester.tap(
+        find.descendant(
+          of: find.byKey(firstKey),
+          matching: find.byIcon(Icons.chevron_left),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('December 2025'), findsOneWidget);
+      expect(find.text('January 2026'), findsOneWidget);
+      await mount(
+        tester,
+        const LeaderboardDetailPage(
+          key: ValueKey('reopened'),
+          leaderboardId: 'board',
+        ),
+      );
+      expect(find.text('January 2026'), findsOneWidget);
+      expect(find.text('December 2025'), findsNothing);
+      await finish(tester);
+      final requestCount = client.requests.length;
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+      expect(client.requests.length, requestCount);
+    },
+  );
+
+  testWidgets(
     'rollover and resume refresh generated queries without advancing historical selection',
     (tester) async {
+      client.nextMonthAt = DateTime.now()
+          .add(const Duration(seconds: 1))
+          .millisecondsSinceEpoch;
       await mount(tester, const LeaderboardDetailPage(leaderboardId: 'board'));
       final firstRefresh = client.requests
           .lastWhere((request) => request.name == 'leaderboard:standings')
           .args['refreshAt'];
-      client.currentMonth = '2026-02';
-      months.updateReportingMonth(
-        '2026-01',
-        DateTime.now().millisecondsSinceEpoch,
-      );
+      client
+        ..currentMonth = '2026-02'
+        ..nextMonthAt += const Duration(days: 28).inMilliseconds;
+      await tester.pump(const Duration(seconds: 2));
       await tester.pumpAndSettle();
       expect(find.text('February 2026'), findsOneWidget);
       expect(
@@ -366,6 +411,9 @@ class _Client implements ConvexRuntimeClient {
   final _events = <String, StreamController<void>>{};
   var currentUserId = 'owner';
   var currentMonth = '2026-01';
+  var nextMonthAt = DateTime.now()
+      .add(const Duration(days: 30))
+      .millisecondsSinceEpoch;
   var joinResult = 'success';
   var failMutation = false;
   var activeSubscriptions = 0;
@@ -375,9 +423,7 @@ class _Client implements ConvexRuntimeClient {
     'leaderboard:standings' => {
       'currentMonth': currentMonth,
       'month': args['month'] ?? currentMonth,
-      'nextMonthAt': DateTime.now()
-          .add(const Duration(days: 30))
-          .millisecondsSinceEpoch,
+      'nextMonthAt': nextMonthAt,
       'entries': [
         {
           'user': _profile(currentUserId, 'Owner'),

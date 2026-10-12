@@ -13,7 +13,6 @@ import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
-import 'package:remembeer/leaderboard/service/month_service.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
@@ -44,7 +43,6 @@ class IoCContainer {
       ..registerSingleton(FirebaseAuth.instance)
       ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
       ..registerSingleton(NotificationService())
-      ..registerSingleton(MonthService())
       ..registerSingleton(LocationService())
       ..registerSingleton(UserStatsService())
       ..registerSingleton(BadgeService());
