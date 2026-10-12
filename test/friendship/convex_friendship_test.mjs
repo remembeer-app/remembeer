@@ -28,7 +28,7 @@ function fixture() {
       avatarStorageId: _id === "b" ? "avatar-b" : null,
       timeZone: "Europe/Prague", defaultDrink: null,
     })),
-    friendship: [], drinkLog: [], drink: [], badge: [], session: [], sessionMember: [],
+    friendship: [], drinkLog: [], drink: [], badge: [], session: [], sessionMember: [], leaderboard: [], leaderboardMember: [],
   };
   let sequence = 0;
   const db = {

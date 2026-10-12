@@ -1,35 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/leaderboard/model/leaderboard.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
-import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
+import 'package:remembeer/leaderboard/widget/leaderboard_standings.dart';
 import 'package:remembeer/routes.dart';
 
 class LeaderboardCard extends StatelessWidget {
-  final Leaderboard leaderboard;
+  final ListCurrentResultItem leaderboard;
+  final UserId currentUserId;
 
-  LeaderboardCard({super.key, required this.leaderboard});
-
-  final _leaderboardService = get<LeaderboardService>();
+  const LeaderboardCard({
+    super.key,
+    required this.leaderboard,
+    required this.currentUserId,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final memberCount = leaderboard.memberIds.length;
-    final icon = LeaderboardIcon.fromName(leaderboard.iconName);
+    final memberCount = leaderboard.memberCount.toInt();
+    final icon = LeaderboardIcon.fromName(leaderboard.leaderboard.iconName);
 
     return Card(
       child: ListTile(
         onTap: () => LeaderboardDetailRoute(
-          leaderboardId: leaderboard.id,
+          leaderboardId: leaderboard.leaderboard.id.value,
         ).push<void>(context),
         leading: CircleAvatar(
           backgroundColor: theme.colorScheme.primaryContainer,
           child: Icon(icon.icon, color: theme.colorScheme.onPrimaryContainer),
         ),
-        title: Text(leaderboard.name, style: theme.textTheme.titleMedium),
+        title: Text(
+          leaderboard.leaderboard.name,
+          style: theme.textTheme.titleMedium,
+        ),
         subtitle: Text(
           '$memberCount ${memberCount == 1 ? 'member' : 'members'}',
           style: theme.textTheme.bodySmall,
@@ -40,14 +45,21 @@ class LeaderboardCard extends StatelessWidget {
   }
 
   Widget _buildStandingInfo(BuildContext context, ThemeData theme) {
-    return AsyncBuilder(
-      stream: _leaderboardService.currentUserStandingStreamFor(leaderboard),
+    return LeaderboardStandings(
+      id: leaderboard.leaderboard.id,
       waitingBuilder: (_) => const SizedBox(
         width: 24,
         height: 24,
         child: CircularProgressIndicator(strokeWidth: 2),
       ),
-      builder: (context, leaderboardEntry) {
+      errorBuilder: (context, error) => Tooltip(
+        message: error.toString(),
+        child: const Icon(Icons.error_outline),
+      ),
+      builder: (context, standings) {
+        final leaderboardEntry = standings.entries
+            .where((entry) => entry.user.id == currentUserId)
+            .firstOrNull;
         if (leaderboardEntry == null) {
           return const Icon(Icons.chevron_right);
         }
@@ -58,13 +70,13 @@ class LeaderboardCard extends StatelessWidget {
             _buildRankChip(
               theme,
               Icons.sports_bar,
-              leaderboardEntry.rankByBeers,
+              leaderboardEntry.rankByBeers.toInt(),
             ),
             const Gap(4),
             _buildRankChip(
               theme,
               Icons.local_bar,
-              leaderboardEntry.rankByAlcohol,
+              leaderboardEntry.rankByAlcohol.toInt(),
             ),
             const Gap(4),
             const Icon(Icons.chevron_right),

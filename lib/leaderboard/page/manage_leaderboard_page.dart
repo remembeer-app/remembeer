@@ -1,49 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/leaderboard/model/leaderboard.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart';
+import 'package:remembeer/convex_api/widgets/leaderboard.dart';
+import 'package:remembeer/convex_api/widgets/user.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
-import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
 import 'package:remembeer/leaderboard/widget/banned_member_card.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_icon_picker.dart';
 import 'package:remembeer/leaderboard/widget/member_card.dart';
 import 'package:remembeer/routes.dart';
-import 'package:remembeer/user/controller/user_controller.dart';
-import 'package:remembeer/user/model/user_model.dart';
 
 class ManageLeaderboardPage extends StatelessWidget {
   final String leaderboardId;
 
-  ManageLeaderboardPage({super.key, required this.leaderboardId});
-
-  final _userController = get<UserController>();
-  final _leaderboardService = get<LeaderboardService>();
+  const ManageLeaderboardPage({super.key, required this.leaderboardId});
 
   @override
   Widget build(BuildContext context) {
     return PageTemplate(
       title: const Text('Manage Leaderboard'),
-      child: AsyncBuilder<Leaderboard>(
-        stream: _leaderboardService.streamById(leaderboardId),
-        builder: (context, currentLeaderboard) {
-          return Column(
-            children: [
-              _buildHeader(context, currentLeaderboard),
-              const Gap(24),
-              _buildMembersSection(context, currentLeaderboard),
-              const Gap(16),
-              _buildDeleteButton(context, currentLeaderboard),
-            ],
-          );
-        },
+      child: UserCurrentQuery(
+        builder: (_, user) => LeaderboardGetTypeQuery(
+          id: LeaderboardId(leaderboardId),
+          builder: (_, result) {
+            if (result.leaderboard.ownerId != user.id) {
+              return const Center(
+                child: Text('Only the owner can manage this leaderboard.'),
+              );
+            }
+            return Column(
+              children: [
+                _buildHeader(context, result.leaderboard),
+                const Gap(24),
+                _buildMembersSection(context, result),
+                const Gap(16),
+                _buildDeleteButton(context, result.leaderboard),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, Leaderboard currentLeaderboard) {
+  Widget _buildHeader(
+    BuildContext context,
+    LeaderboardDocument currentLeaderboard,
+  ) {
     final theme = Theme.of(context);
     final icon = LeaderboardIcon.fromName(currentLeaderboard.iconName);
 
@@ -104,38 +110,52 @@ class ManageLeaderboardPage extends StatelessWidget {
 
   void _showIconPickerDialog(
     BuildContext context,
-    Leaderboard currentLeaderboard,
+    LeaderboardDocument currentLeaderboard,
   ) {
     var selectedIcon = LeaderboardIcon.fromName(currentLeaderboard.iconName);
 
     showDialog<void>(
       context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Choose Icon'),
-          content: LeaderboardIconPicker(
-            selectedIcon: selectedIcon,
-            onIconSelected: (icon) {
-              setDialogState(() => selectedIcon = icon);
-            },
+      builder: (dialogContext) => LeaderboardUpdateMutation(
+        builder: (_, update, snapshot) => StatefulBuilder(
+          builder: (context, setDialogState) => AlertDialog(
+            title: const Text('Choose Icon'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LeaderboardIconPicker(
+                  selectedIcon: selectedIcon,
+                  onIconSelected: (icon) =>
+                      setDialogState(() => selectedIcon = icon),
+                ),
+                if (snapshot.error case final error?)
+                  ErrorMessageBox(message: error.toString()),
+              ],
+            ),
+            scrollable: true,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel'),
+              ),
+              FilledButton(
+                onPressed: snapshot.isLoading
+                    ? null
+                    : () => update.run(
+                        id: currentLeaderboard.id,
+                        iconName: Optional.of(
+                          UpdateArgsIconName.fromJson(selectedIcon.name),
+                        ),
+                        onSuccess: (_) {
+                          if (dialogContext.mounted) {
+                            Navigator.of(dialogContext).pop();
+                          }
+                        },
+                      ),
+                child: const Text('Save'),
+              ),
+            ],
           ),
-          scrollable: true,
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                await _leaderboardService.updateLeaderboardIcon(
-                  leaderboard: currentLeaderboard,
-                  newIconName: selectedIcon.name,
-                );
-              },
-              child: const Text('Save'),
-            ),
-          ],
         ),
       ),
     );
@@ -143,23 +163,23 @@ class ManageLeaderboardPage extends StatelessWidget {
 
   Widget _buildMembersSection(
     BuildContext context,
-    Leaderboard currentLeaderboard,
+    GetTypeResult currentLeaderboard,
   ) {
     return Expanded(
       child: ListView(
         children: [
           _buildSectionHeader(
             context,
-            'Members (${currentLeaderboard.memberIds.length})',
+            'Members (${currentLeaderboard.members.length})',
           ),
-          _buildMembersList(currentLeaderboard),
-          if (currentLeaderboard.bannedMemberIds.isNotEmpty) ...[
+          _buildMembersList(context, currentLeaderboard),
+          if (currentLeaderboard.bannedMembers.isNotEmpty) ...[
             const Gap(24),
             _buildSectionHeader(
               context,
-              'Banned (${currentLeaderboard.bannedMemberIds.length})',
+              'Banned (${currentLeaderboard.bannedMembers.length})',
             ),
-            _buildBannedMembersList(currentLeaderboard),
+            _buildBannedMembersList(context, currentLeaderboard),
           ],
         ],
       ),
@@ -182,67 +202,89 @@ class ManageLeaderboardPage extends StatelessWidget {
 
   void _navigateToUpdateName(
     BuildContext context,
-    Leaderboard currentLeaderboard,
+    LeaderboardDocument currentLeaderboard,
   ) {
     UpdateLeaderboardNameRoute(
-      leaderboardId: currentLeaderboard.id,
+      leaderboardId: currentLeaderboard.id.value,
     ).push<void>(context);
   }
 
-  Widget _buildMembersList(Leaderboard currentLeaderboard) {
-    final memberIds = currentLeaderboard.memberIds.toList();
-    final ownerId = currentLeaderboard.userId;
-
-    return Column(
-      children: memberIds.map((userId) {
-        final isOwner = userId == ownerId;
-
-        return AsyncBuilder<UserModel>(
-          future: _userController.findById(userId),
-          builder: (context, user) {
-            return MemberCard(
-              user: user,
-              isOwner: isOwner,
-              onRemove: () => _showRemoveConfirmationDialog(
-                context,
-                currentLeaderboard,
-                user,
+  Widget _buildMembersList(BuildContext context, GetTypeResult result) =>
+      Column(
+        children: result.members
+            .map(
+              (user) => LeaderboardRemoveMutation(
+                key: ValueKey(user.id),
+                builder: (_, remove, removeState) => LeaderboardBanMutation(
+                  builder: (_, ban, banState) {
+                    final busy = removeState.isLoading || banState.isLoading;
+                    return Column(
+                      children: [
+                        MemberCard(
+                          user: user,
+                          isOwner: user.id == result.leaderboard.ownerId,
+                          onRemove: busy
+                              ? null
+                              : () => _showRemoveConfirmationDialog(
+                                  context,
+                                  result.leaderboard,
+                                  user,
+                                  remove,
+                                ),
+                          onBan: busy
+                              ? null
+                              : () => _showBanConfirmationDialog(
+                                  context,
+                                  result.leaderboard,
+                                  user,
+                                  ban,
+                                ),
+                        ),
+                        if (removeState.error ?? banState.error
+                            case final error?)
+                          ErrorMessageBox(message: error.toString()),
+                      ],
+                    );
+                  },
+                ),
               ),
-              onBan: () =>
-                  _showBanConfirmationDialog(context, currentLeaderboard, user),
-            );
-          },
-        );
-      }).toList(),
-    );
-  }
+            )
+            .toList(),
+      );
 
-  Widget _buildBannedMembersList(Leaderboard currentLeaderboard) {
-    final bannedMemberIds = currentLeaderboard.bannedMemberIds.toList();
-
-    return Column(
-      children: bannedMemberIds.map((userId) {
-        return AsyncBuilder<UserModel>(
-          future: _userController.findById(userId),
-          builder: (context, user) {
-            return BannedMemberCard(
-              user: user,
-              onUnban: () => _showUnbanConfirmationDialog(
-                context,
-                currentLeaderboard,
-                user,
+  Widget _buildBannedMembersList(BuildContext context, GetTypeResult result) =>
+      Column(
+        children: result.bannedMembers
+            .map(
+              (user) => LeaderboardUnbanMutation(
+                key: ValueKey(user.id),
+                builder: (_, unban, snapshot) => Column(
+                  children: [
+                    BannedMemberCard(
+                      user: user,
+                      onUnban: snapshot.isLoading
+                          ? null
+                          : () => _showUnbanConfirmationDialog(
+                              context,
+                              result.leaderboard,
+                              user,
+                              unban,
+                            ),
+                    ),
+                    if (snapshot.error case final error?)
+                      ErrorMessageBox(message: error.toString()),
+                  ],
+                ),
               ),
-            );
-          },
-        );
-      }).toList(),
-    );
-  }
+            )
+            .toList(),
+      );
 
   void _showRemoveConfirmationDialog(
     BuildContext context,
-    Leaderboard currentLeaderboard,
-    UserModel user,
+    LeaderboardDocument currentLeaderboard,
+    GetTypeResultMembersItem user,
+    LeaderboardRemoveMutationExecutor remove,
   ) {
     showConfirmationDialog(
       context: context,
@@ -250,17 +292,17 @@ class ManageLeaderboardPage extends StatelessWidget {
       text:
           'Are you sure you want to remove "${user.username}" from the leaderboard?',
       submitButtonText: 'Remove',
-      onPressed: () => _leaderboardService.removeMember(
-        leaderboard: currentLeaderboard,
-        memberId: user.id,
-      ),
+      onPressed: () async {
+        remove.run(id: currentLeaderboard.id, userId: user.id);
+      },
     );
   }
 
   void _showBanConfirmationDialog(
     BuildContext context,
-    Leaderboard currentLeaderboard,
-    UserModel user,
+    LeaderboardDocument currentLeaderboard,
+    GetTypeResultMembersItem user,
+    LeaderboardBanMutationExecutor ban,
   ) {
     showConfirmationDialog(
       context: context,
@@ -268,17 +310,17 @@ class ManageLeaderboardPage extends StatelessWidget {
       text:
           'Are you sure you want to ban "${user.username}" from the leaderboard?',
       submitButtonText: 'Ban',
-      onPressed: () => _leaderboardService.banMember(
-        leaderboard: currentLeaderboard,
-        memberId: user.id,
-      ),
+      onPressed: () async {
+        ban.run(id: currentLeaderboard.id, userId: user.id);
+      },
     );
   }
 
   void _showUnbanConfirmationDialog(
     BuildContext context,
-    Leaderboard currentLeaderboard,
-    UserModel user,
+    LeaderboardDocument currentLeaderboard,
+    GetTypeResultBannedMembersItem user,
+    LeaderboardUnbanMutationExecutor unban,
   ) {
     showConfirmationDialog(
       context: context,
@@ -286,34 +328,47 @@ class ManageLeaderboardPage extends StatelessWidget {
       text:
           'Are you sure you want to unban "${user.username}"? They will be able to rejoin the leaderboard.',
       submitButtonText: 'Unban',
-      onPressed: () => _leaderboardService.unbanMember(
-        leaderboard: currentLeaderboard,
-        memberId: user.id,
-      ),
+      onPressed: () async {
+        unban.run(id: currentLeaderboard.id, userId: user.id);
+      },
     );
   }
 
   Widget _buildDeleteButton(
     BuildContext context,
-    Leaderboard currentLeaderboard,
+    LeaderboardDocument currentLeaderboard,
   ) {
     final theme = Theme.of(context);
 
-    return OutlinedButton.icon(
-      onPressed: () =>
-          _showDeleteConfirmationDialog(context, currentLeaderboard),
-      style: OutlinedButton.styleFrom(
-        foregroundColor: theme.colorScheme.error,
-        side: BorderSide(color: theme.colorScheme.error),
+    return LeaderboardSoftDeleteMutation(
+      builder: (_, remove, snapshot) => Column(
+        children: [
+          if (snapshot.error case final error?)
+            ErrorMessageBox(message: error.toString()),
+          OutlinedButton.icon(
+            onPressed: snapshot.isLoading
+                ? null
+                : () => _showDeleteConfirmationDialog(
+                    context,
+                    currentLeaderboard,
+                    remove,
+                  ),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: theme.colorScheme.error,
+              side: BorderSide(color: theme.colorScheme.error),
+            ),
+            icon: const Icon(Icons.delete),
+            label: const Text('Delete Leaderboard'),
+          ),
+        ],
       ),
-      icon: const Icon(Icons.delete),
-      label: const Text('Delete Leaderboard'),
     );
   }
 
   void _showDeleteConfirmationDialog(
     BuildContext context,
-    Leaderboard currentLeaderboard,
+    LeaderboardDocument currentLeaderboard,
+    LeaderboardSoftDeleteMutationExecutor remove,
   ) {
     showConfirmationDialog(
       context: context,
@@ -324,10 +379,12 @@ class ManageLeaderboardPage extends StatelessWidget {
       submitButtonText: 'Delete',
       isDestructive: true,
       onPressed: () async {
-        await _leaderboardService.deleteLeaderboard(currentLeaderboard);
-        if (context.mounted) {
-          const LeaderboardsRoute().go(context);
-        }
+        remove.run(
+          id: currentLeaderboard.id,
+          onSuccess: (_) {
+            if (context.mounted) const LeaderboardsRoute().go(context);
+          },
+        );
       },
     );
   }

@@ -62,6 +62,7 @@ class _LeaderboardFormState extends State<LeaderboardForm> {
               ],
             ),
           ),
+          form.buildErrorMessage(),
           _buildSubmitButton(form),
         ],
       ),

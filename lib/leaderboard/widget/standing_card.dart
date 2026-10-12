@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
-import 'package:remembeer/leaderboard/type/leaderboard_entry.dart';
 import 'package:remembeer/routes.dart';
 
 class StandingCard extends StatelessWidget {
-  final LeaderboardEntry entry;
+  final StandingsResultEntriesItem entry;
+  final bool isCurrentUser;
   final LeaderboardType sortType;
 
-  StandingCard({super.key, required this.entry, required this.sortType});
-
-  final _authService = get<AuthService>();
+  const StandingCard({
+    super.key,
+    required this.entry,
+    required this.sortType,
+    required this.isCurrentUser,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final rank = sortType == LeaderboardType.beers
-        ? entry.rankByBeers
-        : entry.rankByAlcohol;
+        ? entry.rankByBeers.toInt()
+        : entry.rankByAlcohol.toInt();
     final value = sortType == LeaderboardType.beers
         ? entry.beersConsumed
         : entry.alcoholConsumedMl;
@@ -85,9 +87,9 @@ class StandingCard extends StatelessWidget {
       };
 
   VoidCallback? _navigateToUserPage(BuildContext context) {
-    final isCurrentUser = entry.user.id == _authService.authenticatedUser.uid;
     if (isCurrentUser) return null;
 
-    return () => UserProfileRoute(userId: entry.user.id).push<void>(context);
+    return () =>
+        UserProfileRoute(userId: entry.user.id.value).push<void>(context);
   }
 }

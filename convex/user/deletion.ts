@@ -15,6 +15,27 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     await ctx.db.delete("friendship", friendship._id);
   }
 
+  const leaderboards = await ctx.db
+    .query("leaderboard")
+    .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
+    .collect();
+  const deletionTime = Date.now();
+  for (const leaderboard of leaderboards) {
+    if (leaderboard.deletedAt === null) {
+      await ctx.db.patch("leaderboard", leaderboard._id, {
+        deletedAt: deletionTime,
+        updatedAt: deletionTime,
+      });
+    }
+  }
+  const leaderboardMemberships = await ctx.db
+    .query("leaderboardMember")
+    .withIndex("by_userId_and_status", (q) => q.eq("userId", user._id))
+    .collect();
+  for (const member of leaderboardMemberships) {
+    await ctx.db.delete("leaderboardMember", member._id);
+  }
+
   const logs = await ctx.db
     .query("drinkLog")
     .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) =>

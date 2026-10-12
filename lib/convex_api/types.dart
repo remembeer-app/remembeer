@@ -104,6 +104,49 @@ typedef FriendshipDocument = ({
   double creationTime,
 });
 
+typedef LeaderboardDocument = ({
+  UserId ownerId,
+  String name,
+  String iconName,
+  String inviteCode,
+  String timeZone,
+  double endOfDayBoundary,
+  double updatedAt,
+  double? deletedAt,
+  LeaderboardId id,
+  double creationTime,
+});
+
+enum LeaderboardMemberDocumentStatus {
+  joinedValue('joined'),
+  bannedValue('banned');
+
+  const LeaderboardMemberDocumentStatus(this.value);
+  final Object? value;
+
+  static LeaderboardMemberDocumentStatus fromJson(dynamic raw) {
+    switch (raw) {
+      case 'joined':
+        return LeaderboardMemberDocumentStatus.joinedValue;
+      case 'banned':
+        return LeaderboardMemberDocumentStatus.bannedValue;
+      default:
+        throw FormatException(
+          'Expected one of joined, banned for LeaderboardMemberDocumentStatus',
+        );
+    }
+  }
+}
+
+typedef LeaderboardMemberDocument = ({
+  LeaderboardId leaderboardId,
+  UserId userId,
+  LeaderboardMemberDocumentStatus status,
+  double updatedAt,
+  LeaderboardMemberId id,
+  double creationTime,
+});
+
 sealed class SessionDocument {
   const SessionDocument();
   UserId get ownerId;

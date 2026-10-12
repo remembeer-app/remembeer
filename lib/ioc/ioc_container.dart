@@ -13,9 +13,6 @@ import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
-import 'package:remembeer/leaderboard/controller/leaderboard_controller.dart';
-import 'package:remembeer/leaderboard/service/leaderboard_service.dart';
-import 'package:remembeer/leaderboard/service/month_service.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
@@ -46,7 +43,6 @@ class IoCContainer {
       ..registerSingleton(FirebaseAuth.instance)
       ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
       ..registerSingleton(NotificationService())
-      ..registerSingleton(MonthService())
       ..registerSingleton(LocationService())
       ..registerSingleton(UserStatsService())
       ..registerSingleton(BadgeService());
@@ -94,9 +90,6 @@ class IoCContainer {
       ..registerSingleton(
         UserSettingsController(authService: get<AuthService>()),
       )
-      ..registerSingleton(
-        LeaderboardController(authService: get<AuthService>()),
-      )
       ..registerSingleton(SessionController(authService: get<AuthService>()))
       ..registerSingleton(PartyController())
       ..registerSingleton(PartyEventController())
@@ -128,14 +121,6 @@ class IoCContainer {
           authService: get<AuthService>(),
           userSettingsController: get<UserSettingsController>(),
           notificationService: get<NotificationService>(),
-        ),
-      )
-      ..registerSingleton(
-        LeaderboardService(
-          authService: get<AuthService>(),
-          leaderboardController: get<LeaderboardController>(),
-          userController: get<UserController>(),
-          monthService: get<MonthService>(),
         ),
       )
       ..registerSingleton(
