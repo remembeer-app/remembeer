@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { convexToZod } from "convex-helpers/server/zod4";
 import { z } from "zod";
 
-const drinkCategoryValidator = v.union(
+export const drinkCategoryValidator = v.union(
   v.object({ kind: v.literal("beer") }),
   v.object({ kind: v.literal("cider") }),
   v.object({ kind: v.literal("cocktail") }),

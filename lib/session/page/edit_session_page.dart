@@ -23,7 +23,8 @@ class EditSessionPage extends StatelessWidget {
       builder: (context, session) => UserCurrentQuery(
         builder: (context, user) => SessionMemberListForSessionQuery(
           sessionId: session.id,
-          builder: (context, members) {
+          builder: (context, entries) {
+            final members = entries.map((entry) => entry.member);
             final isOwner = session.ownerId == user.id;
             final isAdmin =
                 isOwner ||

@@ -1,9 +1,12 @@
 import { ConvexError, v } from "convex/values";
+import { convexToZod } from "convex-helpers/server/zod4";
+import { WithZod } from "fluent-convex/zod";
 import type { Id } from "../_generated/dataModel";
 import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
 import { getMembership, requireSessionAccess } from "../session/access";
 import { sessionIndexFields } from "./sessionIndex";
-import { sessionMemberRoleValidator } from "./schema";
+import { partyMemberValidator, sessionMemberRoleValidator } from "./schema";
+import { defaultPartyMemberFields } from "./constants";
 
 const sessionInput = { sessionId: v.id("session") };
 const targetInput = { ...sessionInput, userId: v.id("user") };
@@ -34,7 +37,15 @@ export const invite = authMutation
     };
 
     if (member) await ctx.db.patch("sessionMember", member._id, fields);
-    else await ctx.db.insert("sessionMember", { sessionId, userId, ...fields });
+    else
+      await ctx.db.insert("sessionMember", {
+        ...(session.kind === "party"
+          ? defaultPartyMemberFields
+          : { kind: "sessionMember" as const }),
+        sessionId,
+        userId,
+        ...fields,
+      });
 
     return null;
   });
@@ -150,6 +161,36 @@ export const setRole = authMutation
     await ctx.db.patch("sessionMember", member._id, {
       sessionMemberRole: role,
       updatedAt: Date.now(),
+    });
+
+    return null;
+  });
+
+export const setClass = authMutation
+  .extend(WithZod)
+  .input(
+    convexToZod(partyMemberValidator.pick("sessionId", "userId", "selectedClass")),
+  )
+  .returns(v.null())
+  .handler(async (ctx, { sessionId, userId, selectedClass }) => {
+    const { session } = await requireSessionAccess(ctx, sessionId, "admin");
+    if (session.kind !== "party" || session.endedAt !== null)
+      throw new ConvexError("Classes can only be changed in ongoing parties");
+
+    const member = await getMembership(ctx, sessionId, userId);
+    if (
+      !member ||
+      member.kind !== "partyMember" ||
+      member.sessionMemberStatus.kind !== "joined"
+    )
+      throw new ConvexError("Only joined party members can have classes assigned");
+    if (member.selectedClass?.kind === selectedClass?.kind) return null;
+
+    const now = Date.now();
+    await ctx.db.patch("sessionMember", member._id, {
+      selectedClass,
+      classChangedAt: now,
+      updatedAt: now,
     });
 
     return null;

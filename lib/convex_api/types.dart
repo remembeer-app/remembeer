@@ -295,17 +295,93 @@ final class Admin extends SessionMemberRole {
   const Admin();
 }
 
-typedef SessionMemberDocument = ({
-  SessionId sessionId,
-  UserId userId,
-  SessionMemberStatus sessionMemberStatus,
-  SessionMemberRole sessionMemberRole,
-  double updatedAt,
-  double? sessionEndedAt,
-  double? sessionDeletedAt,
-  SessionMemberId id,
-  double creationTime,
-});
+sealed class SessionMemberDocument {
+  const SessionMemberDocument();
+  SessionId get sessionId;
+  UserId get userId;
+  SessionMemberStatus get sessionMemberStatus;
+  SessionMemberRole get sessionMemberRole;
+  double get updatedAt;
+  double? get sessionEndedAt;
+  double? get sessionDeletedAt;
+  SessionMemberId get id;
+  double get creationTime;
+  bool get isSessionMember => this is SessionMember;
+  bool get isPartyMember => this is PartyMember;
+}
+
+final class SessionMember extends SessionMemberDocument {
+  const SessionMember({
+    required this.sessionId,
+    required this.userId,
+    required this.sessionMemberStatus,
+    required this.sessionMemberRole,
+    required this.updatedAt,
+    required this.sessionEndedAt,
+    required this.sessionDeletedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final UserId userId;
+
+  final SessionMemberStatus sessionMemberStatus;
+
+  final SessionMemberRole sessionMemberRole;
+
+  final double updatedAt;
+
+  final double? sessionEndedAt;
+
+  final double? sessionDeletedAt;
+
+  final SessionMemberId id;
+
+  final double creationTime;
+}
+
+final class PartyMember extends SessionMemberDocument {
+  const PartyMember({
+    required this.sessionId,
+    required this.userId,
+    required this.sessionMemberStatus,
+    required this.sessionMemberRole,
+    required this.updatedAt,
+    required this.sessionEndedAt,
+    required this.sessionDeletedAt,
+    required this.selectedClass,
+    required this.classChangedAt,
+    required this.beerpongOptIn,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final UserId userId;
+
+  final SessionMemberStatus sessionMemberStatus;
+
+  final SessionMemberRole sessionMemberRole;
+
+  final double updatedAt;
+
+  final double? sessionEndedAt;
+
+  final double? sessionDeletedAt;
+
+  final DrinkCategory? selectedClass;
+
+  final double? classChangedAt;
+
+  final bool beerpongOptIn;
+
+  final SessionMemberId id;
+
+  final double creationTime;
+}
 
 enum UserDocumentAccentColor {
   amberValue('amber'),

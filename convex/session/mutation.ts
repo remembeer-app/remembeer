@@ -7,6 +7,7 @@ import {
 } from "./schema";
 import { syncSessionIndex } from "../sessionMember/sessionIndex";
 import { requireSessionAccess } from "./access";
+import { defaultPartyMemberFields } from "../sessionMember/constants";
 import {
   defaultPartyQuestMinIntervalMinutes,
   defaultPartyQuestMaxIntervalMinutes,
@@ -29,6 +30,7 @@ export const create = authMutation
     });
 
     await ctx.db.insert("sessionMember", {
+      kind: "sessionMember",
       sessionId,
       userId: ctx.user._id,
       sessionMemberStatus: { kind: "joined" },
@@ -110,6 +112,17 @@ export const promoteToParty = authMutation
       },
       updatedAt: now,
     });
+
+    const members = await ctx.db
+      .query("sessionMember")
+      .withIndex("by_sessionId_and_userId", (q) => q.eq("sessionId", id))
+      .collect();
+    for (const member of members) {
+      await ctx.db.patch("sessionMember", member._id, {
+        ...defaultPartyMemberFields,
+        updatedAt: now,
+      });
+    }
 
     return null;
   });

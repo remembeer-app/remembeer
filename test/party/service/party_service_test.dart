@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/convex_api/types.dart' hide Party, Session;
+import 'package:remembeer/convex_api/types.dart'
+    show DrinkCategory, Spirit, Wine;
 import 'package:remembeer/party/controller/party_command_client.dart';
 import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/party/model/party.dart';

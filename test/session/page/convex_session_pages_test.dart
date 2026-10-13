@@ -1,8 +1,11 @@
 import 'dart:async';
 
+import 'package:dartvex/dartvex.dart';
 import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:remembeer/convex_api/api.dart'
+    show ConvexApi, SessionId, UserId, Wine;
 import 'package:remembeer/session/page/add_friends_to_session_page.dart';
 import 'package:remembeer/session/page/create_session_page.dart';
 import 'package:remembeer/session/page/edit_session_page.dart';
@@ -11,6 +14,30 @@ import 'package:remembeer/session/page/session_management_page.dart';
 import 'package:toastification/toastification.dart';
 
 void main() {
+  test('generated class mutation encodes assignments and clearing', () async {
+    final client = _Client();
+    addTearDown(client.dispose);
+    final api = ConvexApi(_Caller(client));
+    await api.sessionMember.setClass(
+      sessionId: const SessionId('session'),
+      userId: const UserId('member'),
+      selectedClass: const Wine(),
+    );
+    expect(client.last.name, 'sessionMember:setClass');
+    expect(client.last.args, <String, dynamic>{
+      'sessionId': 'session',
+      'userId': 'member',
+      'selectedClass': {'kind': 'wine'},
+    });
+    await api.sessionMember.setClass(
+      sessionId: const SessionId('session'),
+      userId: const UserId('member'),
+      selectedClass: null,
+    );
+    expect(client.last.args['selectedClass'], isNull);
+    expect(client.last.args.containsKey('selectedClass'), isTrue);
+  });
+
   Future<void> mount(WidgetTester tester, _Client client, Widget page) async {
     tester.view.physicalSize = const Size(1000, 1600);
     tester.view.devicePixelRatio = 1;
@@ -106,6 +133,21 @@ void main() {
         },
       };
       client.emit('session:get');
+      client.responses['sessionMember:listForSession'] = [
+        for (final userId in ['owner', 'member'])
+          {
+            'member': {
+              ..._member(userId, userId == 'owner' ? 'admin' : 'member')
+                ..remove('username'),
+              'kind': 'partyMember',
+              'selectedClass': {'kind': 'wine'},
+              'classChangedAt': 1500,
+              'beerpongOptIn': false,
+            },
+            'username': userId,
+          },
+      ];
+      client.emit('sessionMember:listForSession');
       await tester.pumpAndSettle();
       expect(find.text('Turn into Party'), findsNothing);
       await tester.tap(find.text('Reopen session'));
@@ -202,6 +244,7 @@ Map<String, dynamic> _member(String id, String role) => {
   '_id': 'membership-$id',
   '_creationTime': 1,
   'sessionId': 'session',
+  'kind': 'sessionMember',
   'userId': id,
   'sessionMemberStatus': {'kind': 'joined'},
   'sessionMemberRole': {'kind': role},
@@ -211,14 +254,32 @@ Map<String, dynamic> _member(String id, String role) => {
   'updatedAt': 1,
 };
 
+class _Caller implements ConvexFunctionCaller {
+  _Caller(this.client);
+  final _Client client;
+
+  @override
+  Future<dynamic> mutate(String name, [Map<String, dynamic>? args]) =>
+      client.mutate(name, args ?? const {});
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
 class _Client implements ConvexRuntimeClient {
   final responses = <String, dynamic>{
     'session:get': _session,
     'session:listCurrent': [_session],
     'user:current': _user,
     'sessionMember:listForSession': [
-      _member('owner', 'admin'),
-      _member('member', 'member'),
+      {
+        'member': _member('owner', 'admin')..remove('username'),
+        'username': 'owner',
+      },
+      {
+        'member': _member('member', 'member')..remove('username'),
+        'username': 'member',
+      },
     ],
     'sessionMember:findInvitee': [
       {'_id': 'invitee', 'username': 'Someone'},

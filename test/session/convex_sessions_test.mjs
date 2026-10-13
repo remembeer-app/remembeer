@@ -71,6 +71,8 @@ test("creation validates fields and atomically constructs the owner membership",
   assert.equal(session.deletedAt, null);
   assert.equal(f.member(id, "owner").sessionMemberStatus.kind, "joined");
   assert.equal(f.member(id, "owner").sessionMemberRole.kind, "admin");
+  assert.equal(f.member(id, "owner").kind, "sessionMember");
+  assert.equal("selectedClass" in f.member(id, "owner"), false);
   const input = { name: "Name", description: "", startedAt: 1 };
   for (const invalid of [ { name: "  a " }, { name: "a".repeat(31) }, { description: "a".repeat(501) }, { startedAt: 1.5 }, { startedAt: Infinity }, { startedAt: 8640000000000001 } ]) {
     await assert.rejects(sessions.create(f.owner, { ...input, ...invalid }));
@@ -129,12 +131,108 @@ test("shared session CRUD and promotion enforce roles, ranges and union kinds", 
   await assert.rejects(sessionQueries.get(f.owner, { id: "missing" }));
 });
 
+test("party promotion converts all memberships and party invitations preserve gameplay state", async () => {
+  const f = fixture(); const id = await f.create();
+  f.tables.user.push({ _id: "declined" }, { _id: "newcomer" });
+  await f.join(id, "admin"); await f.join(id, "member");
+  await members.setRole(f.owner, { ...target(id, "admin"), role: { kind: "admin" } });
+  await members.leave(f.ctx("member"), { sessionId: id });
+  await members.invite(f.owner, target(id, "invitee"));
+  await members.invite(f.owner, target(id, "other"));
+  await members.ban(f.owner, target(id, "other"));
+  await members.invite(f.owner, target(id, "declined"));
+  await members.decline(f.ctx("declined"), { sessionId: id });
+  const before = structuredClone(f.tables.sessionMember);
+  await sessions.promoteToParty(f.ctx("admin"), { id });
+  for (const original of before) {
+    assert.deepEqual(f.member(id, original.userId), {
+      ...original,
+      kind: "partyMember", selectedClass: null, classChangedAt: null, beerpongOptIn: false,
+      updatedAt: (await f.db.get("session", id)).activatedAt,
+    });
+  }
+  await members.accept(f.ctx("invitee"), { sessionId: id });
+  assert.equal(f.member(id, "invitee").kind, "partyMember");
+  await members.invite(f.owner, target(id, "newcomer"));
+  assert.equal(f.member(id, "newcomer").kind, "partyMember");
+  assert.equal(f.member(id, "newcomer").selectedClass, null);
+  assert.equal(f.member(id, "newcomer").classChangedAt, null);
+  assert.equal(f.member(id, "newcomer").beerpongOptIn, false);
+  const invitations = await memberQueries.listInvitations(f.ctx("newcomer"), {});
+  assert.equal(invitations[0].member.kind, "partyMember");
+  assert.equal(invitations[0].session.kind, "party");
+  await members.accept(f.ctx("newcomer"), { sessionId: id });
+  await members.setClass(f.owner, { ...target(id, "newcomer"), selectedClass: { kind: "beer" } });
+  await f.db.patch("sessionMember", f.member(id, "newcomer")._id, { beerpongOptIn: true });
+  const player = structuredClone(f.member(id, "newcomer"));
+  await sessions.promoteToParty(f.owner, { id });
+  assert.deepEqual(f.member(id, "newcomer"), player);
+  await members.leave(f.ctx("newcomer"), { sessionId: id });
+  await members.invite(f.owner, target(id, "newcomer"));
+  await members.accept(f.ctx("newcomer"), { sessionId: id });
+  assert.equal(f.member(id, "newcomer")._id, player._id);
+  assert.deepEqual(f.member(id, "newcomer").selectedClass, player.selectedClass);
+  assert.equal(f.member(id, "newcomer").classChangedAt, player.classChangedAt);
+  assert.equal(f.member(id, "newcomer").beerpongOptIn, true);
+  const roster = await memberQueries.listForSession(f.ctx("newcomer"), { sessionId: id });
+  assert.ok(roster.every((row) => row.member.kind === "partyMember" && row.member.sessionMemberStatus.kind === "joined"));
+});
+
+test("only party admins assign and clear classes of joined members", async () => {
+  const f = fixture(); const id = await f.create();
+  await f.join(id, "admin"); await f.join(id, "member");
+  await members.setRole(f.owner, { ...target(id, "admin"), role: { kind: "admin" } });
+  const input = { ...target(id, "member"), selectedClass: { kind: "beer" } };
+  await assert.rejects(members.setClass(f.owner, input), /ongoing parties/);
+  await sessions.promoteToParty(f.owner, { id });
+  for (const actor of ["member", "other"]) {
+    await assert.rejects(members.setClass(f.ctx(actor), input), /permission/);
+  }
+  await members.setClass(f.owner, input);
+  const assigned = structuredClone(f.member(id, "member"));
+  assert.deepEqual(assigned.selectedClass, { kind: "beer" });
+  assert.equal(assigned.classChangedAt, assigned.updatedAt);
+  assert.ok(Number.isFinite(assigned.classChangedAt));
+  await members.setClass(f.ctx("admin"), input);
+  assert.deepEqual(f.member(id, "member"), assigned);
+  for (const kind of ["cider", "cocktail", "spirit", "wine"]) {
+    await members.setClass(f.ctx("admin"), { ...input, selectedClass: { kind } });
+    assert.deepEqual(f.member(id, "member").selectedClass, { kind });
+  }
+  for (const selectedClass of [{ kind: "water" }, "beer", {}]) {
+    await assert.rejects(members.setClass(f.owner, { ...input, selectedClass }));
+  }
+  await members.setClass(f.ctx("admin"), { ...target(id, "owner"), selectedClass: { kind: "beer" } });
+  assert.deepEqual(f.member(id, "owner").selectedClass, { kind: "beer" });
+  await members.setClass(f.ctx("admin"), { ...input, selectedClass: null });
+  const cleared = structuredClone(f.member(id, "member"));
+  assert.equal(cleared.selectedClass, null);
+  assert.ok(Number.isFinite(cleared.classChangedAt));
+  await members.setClass(f.owner, { ...input, selectedClass: null });
+  assert.deepEqual(f.member(id, "member"), cleared);
+  await assert.rejects(members.setClass(f.owner, { ...input, userId: "missing" }), /joined party members/);
+  await members.invite(f.owner, target(id, "invitee"));
+  await assert.rejects(members.setClass(f.owner, { ...input, userId: "invitee" }), /joined party members/);
+  await members.leave(f.ctx("member"), { sessionId: id });
+  await assert.rejects(members.setClass(f.owner, input), /joined party members/);
+  await members.ban(f.owner, target(id, "member"));
+  await assert.rejects(members.setClass(f.owner, input), /joined party members/);
+  await members.remove(f.owner, target(id, "admin"));
+  await assert.rejects(members.setClass(f.ctx("admin"), { ...input, userId: "owner" }), /permission/);
+  await sessions.update(f.owner, { id, endedAt: 2000 });
+  await assert.rejects(members.setClass(f.owner, { ...input, userId: "owner" }), /ongoing parties/);
+  await sessions.softDelete(f.owner, { id });
+  await assert.rejects(members.setClass(f.owner, { ...input, userId: "owner" }), /Session not found/);
+});
+
 test("invitations, acceptance, decline, leave and re-invitation keep one row and reset roles", async () => {
   const f = fixture(); const id = await f.create(); const input = target(id, "invitee");
   await assert.rejects(members.invite(f.ctx("other"), input));
   await assert.rejects(members.invite(f.owner, target(id, "missing")));
   await members.invite(f.owner, input);
   const invited = structuredClone(f.member(id, "invitee"));
+  assert.equal(invited.kind, "sessionMember");
+  assert.equal("selectedClass" in invited, false);
   await members.invite(f.owner, input);
   assert.deepEqual(f.member(id, "invitee"), invited);
   assert.equal((await memberQueries.listInvitations(f.ctx("invitee"), {}))[0].session._id, id);
@@ -215,8 +313,8 @@ test("roster privacy exposes only joined rows to ordinary members", async () => 
   assert.equal((await memberQueries.listForSession(f.owner, { sessionId: id })).length, 4);
   assert.equal((await memberQueries.listForSession(f.ctx("admin"), { sessionId: id })).length, 4);
   const roster = await memberQueries.listForSession(f.ctx("member"), { sessionId: id });
-  assert.deepEqual(roster.map((row) => row.userId), ["owner", "member", "admin"]);
-  assert.equal(roster.some((row) => "authUserId" in row), false);
+  assert.deepEqual(roster.map((row) => row.member.userId), ["owner", "member", "admin"]);
+  assert.equal(roster.some((row) => "authUserId" in row.member), false);
   await assert.rejects(memberQueries.listForSession(f.ctx("other"), { sessionId: id }));
 });
 
@@ -273,7 +371,7 @@ test("invitation lookup requires admin access and only returns public identifier
   assert.deepEqual(await memberQueries.findInvitee(f.owner, { sessionId: id, username: "missing" }), []);
   const roster = await memberQueries.listForSession(f.owner, { sessionId: id });
   assert.equal(roster[0].username, "owner");
-  assert.equal(roster.some((row) => "authUserId" in row), false);
+  assert.equal(roster.some((row) => "authUserId" in row.member), false);
 });
 
 
@@ -305,7 +403,7 @@ test("day queries skip old owned and joined history before collecting or loading
   const row = (_id, ownerId, endedAt) => ({ _id, ownerId, kind: "session", name: _id, description: "", startedAt: 0, endedAt, updatedAt: 1, deletedAt: null });
   for (let i = 0; i < 1000; i++) {
     f.tables.session.push(row(`owned-${i}`, "owner", 500), row(`joined-${i}`, "other", 500));
-    f.tables.sessionMember.push({ _id: `membership-${i}`, sessionId: `joined-${i}`, userId: "owner", sessionMemberStatus: { kind: "joined" }, sessionMemberRole: { kind: "member" }, sessionEndedAt: 500, sessionDeletedAt: null });
+    f.tables.sessionMember.push({ _id: `membership-${i}`, kind: "sessionMember", sessionId: `joined-${i}`, userId: "owner", sessionMemberStatus: { kind: "joined" }, sessionMemberRole: { kind: "member" }, sessionEndedAt: 500, sessionDeletedAt: null });
   }
   f.tables.session.push(row("ongoing", "owner", null), row("ends-today", "owner", 1500));
   const result = await sessionQueries.listForDayHandler(f.owner, 1000, 2000, new Set(["owned-0"]));

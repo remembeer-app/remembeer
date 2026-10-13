@@ -12,7 +12,7 @@ import { requireSessionAccess } from "../session/access";
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
   .returns(
-    v.array(schema.doc("sessionMember").extend({ username: v.string() })),
+    v.array(v.object({ member: schema.doc("sessionMember"), username: v.string() })),
   )
   .handler(async (ctx, { sessionId }) => {
     const { isAdmin } = await requireSessionAccess(ctx, sessionId, "joined");
@@ -34,7 +34,7 @@ export const listForSession = authQuery
 
     return Promise.all(
       members.map(async (member) => ({
-        ...member,
+        member,
         username:
           (await ctx.db.get("user", member.userId))?.username ??
           "Unavailable user",

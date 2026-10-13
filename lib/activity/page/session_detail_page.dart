@@ -22,7 +22,8 @@ class SessionDetailPage extends StatelessWidget {
       builder: (context, session) => UserCurrentQuery(
         builder: (context, user) => SessionMemberListForSessionQuery(
           sessionId: session.id,
-          builder: (context, members) {
+          builder: (context, entries) {
+            final members = entries.map((entry) => entry.member);
             final owner = user.id == session.ownerId;
             final admin =
                 owner ||
