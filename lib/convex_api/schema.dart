@@ -3,6 +3,12 @@
 
 import 'runtime.dart';
 
+class ScheduledFunctionsId extends ConvexTableId {
+  const ScheduledFunctionsId(super.value);
+
+  static const String tableName = '_scheduled_functions';
+}
+
 class StorageId extends ConvexTableId {
   const StorageId(super.value);
 

@@ -771,6 +771,129 @@ SessionMemberDocument _decodeSessionMemberDocument(dynamic raw) {
   );
 }
 
+Map<String, dynamic> _encodePartyModules(PartyModules value$) {
+  final (
+    socialQuestsEnabled: socialQuestsEnabled,
+    adminChallengesEnabled: adminChallengesEnabled,
+    beerpongEnabled: beerpongEnabled,
+  ) = value$;
+  return <String, dynamic>{
+    'socialQuestsEnabled': socialQuestsEnabled,
+    'adminChallengesEnabled': adminChallengesEnabled,
+    'beerpongEnabled': beerpongEnabled,
+  };
+}
+
+PartyModules _decodePartyModules(dynamic raw) {
+  final map = expectMap(raw, label: 'PartyModules');
+  if (!map.containsKey('socialQuestsEnabled')) {
+    throw FormatException(
+      'Missing required field "socialQuestsEnabled" for PartyModules',
+    );
+  }
+  if (!map.containsKey('adminChallengesEnabled')) {
+    throw FormatException(
+      'Missing required field "adminChallengesEnabled" for PartyModules',
+    );
+  }
+  if (!map.containsKey('beerpongEnabled')) {
+    throw FormatException(
+      'Missing required field "beerpongEnabled" for PartyModules',
+    );
+  }
+  return (
+    socialQuestsEnabled: expectBool(
+      map['socialQuestsEnabled'],
+      label: 'PartyModulesSocialQuestsEnabled',
+    ),
+    adminChallengesEnabled: expectBool(
+      map['adminChallengesEnabled'],
+      label: 'PartyModulesAdminChallengesEnabled',
+    ),
+    beerpongEnabled: expectBool(
+      map['beerpongEnabled'],
+      label: 'PartyModulesBeerpongEnabled',
+    ),
+  );
+}
+
+Map<String, dynamic> _encodePartyQuestSchedule(PartyQuestSchedule value$) {
+  final (
+    minIntervalMinutes: minIntervalMinutes,
+    maxIntervalMinutes: maxIntervalMinutes,
+    defaultDurationMinutes: defaultDurationMinutes,
+    nextQuestAt: nextQuestAt,
+    scheduledFunctionId: scheduledFunctionId,
+  ) = value$;
+  return <String, dynamic>{
+    'minIntervalMinutes': minIntervalMinutes,
+    'maxIntervalMinutes': maxIntervalMinutes,
+    'defaultDurationMinutes': defaultDurationMinutes,
+    'nextQuestAt': nextQuestAt,
+    'scheduledFunctionId': switch (scheduledFunctionId) {
+      null => null,
+      final v$ => v$.value,
+    },
+  };
+}
+
+PartyQuestSchedule _decodePartyQuestSchedule(dynamic raw) {
+  final map = expectMap(raw, label: 'PartyQuestSchedule');
+  if (!map.containsKey('minIntervalMinutes')) {
+    throw FormatException(
+      'Missing required field "minIntervalMinutes" for PartyQuestSchedule',
+    );
+  }
+  if (!map.containsKey('maxIntervalMinutes')) {
+    throw FormatException(
+      'Missing required field "maxIntervalMinutes" for PartyQuestSchedule',
+    );
+  }
+  if (!map.containsKey('defaultDurationMinutes')) {
+    throw FormatException(
+      'Missing required field "defaultDurationMinutes" for PartyQuestSchedule',
+    );
+  }
+  if (!map.containsKey('nextQuestAt')) {
+    throw FormatException(
+      'Missing required field "nextQuestAt" for PartyQuestSchedule',
+    );
+  }
+  if (!map.containsKey('scheduledFunctionId')) {
+    throw FormatException(
+      'Missing required field "scheduledFunctionId" for PartyQuestSchedule',
+    );
+  }
+  return (
+    minIntervalMinutes: expectDouble(
+      map['minIntervalMinutes'],
+      label: 'PartyQuestScheduleMinIntervalMinutes',
+    ),
+    maxIntervalMinutes: expectDouble(
+      map['maxIntervalMinutes'],
+      label: 'PartyQuestScheduleMaxIntervalMinutes',
+    ),
+    defaultDurationMinutes: expectDouble(
+      map['defaultDurationMinutes'],
+      label: 'PartyQuestScheduleDefaultDurationMinutes',
+    ),
+    nextQuestAt: map['nextQuestAt'] == null
+        ? null
+        : expectDouble(
+            map['nextQuestAt'],
+            label: 'PartyQuestScheduleNextQuestAt',
+          ),
+    scheduledFunctionId: map['scheduledFunctionId'] == null
+        ? null
+        : ScheduledFunctionsId(
+            expectString(
+              map['scheduledFunctionId'],
+              label: 'PartyQuestScheduleScheduledFunctionId',
+            ),
+          ),
+  );
+}
+
 Map<String, dynamic> _encodeSessionDocument(SessionDocument value) {
   switch (value) {
     case Session(
@@ -804,6 +927,10 @@ Map<String, dynamic> _encodeSessionDocument(SessionDocument value) {
       endedAt: final endedAt,
       updatedAt: final updatedAt,
       deletedAt: final deletedAt,
+      activatedAt: final activatedAt,
+      activatedByUserId: final activatedByUserId,
+      modules: final modules,
+      questSchedule: final questSchedule,
       id: final id,
       creationTime: final creationTime,
     ):
@@ -816,6 +943,10 @@ Map<String, dynamic> _encodeSessionDocument(SessionDocument value) {
         'endedAt': endedAt,
         'updatedAt': updatedAt,
         'deletedAt': deletedAt,
+        'activatedAt': activatedAt,
+        'activatedByUserId': activatedByUserId.value,
+        'modules': _encodePartyModules(modules),
+        'questSchedule': _encodePartyQuestSchedule(questSchedule),
         '_id': id.value,
         '_creationTime': creationTime,
       };
@@ -912,6 +1043,22 @@ SessionDocument _decodeSessionDocument(dynamic raw) {
       if (!map.containsKey('deletedAt')) {
         throw FormatException('Missing required field "deletedAt" for Party');
       }
+      if (!map.containsKey('activatedAt')) {
+        throw FormatException('Missing required field "activatedAt" for Party');
+      }
+      if (!map.containsKey('activatedByUserId')) {
+        throw FormatException(
+          'Missing required field "activatedByUserId" for Party',
+        );
+      }
+      if (!map.containsKey('modules')) {
+        throw FormatException('Missing required field "modules" for Party');
+      }
+      if (!map.containsKey('questSchedule')) {
+        throw FormatException(
+          'Missing required field "questSchedule" for Party',
+        );
+      }
       if (!map.containsKey('_id')) {
         throw FormatException('Missing required field "_id" for Party');
       }
@@ -943,6 +1090,18 @@ SessionDocument _decodeSessionDocument(dynamic raw) {
         deletedAt: map['deletedAt'] == null
             ? null
             : expectDouble(map['deletedAt'], label: 'SessionDocumentDeletedAt'),
+        activatedAt: expectDouble(
+          map['activatedAt'],
+          label: 'PartyActivatedAt',
+        ),
+        activatedByUserId: UserId(
+          expectString(
+            map['activatedByUserId'],
+            label: 'PartyActivatedByUserId',
+          ),
+        ),
+        modules: _decodePartyModules(map['modules']),
+        questSchedule: _decodePartyQuestSchedule(map['questSchedule']),
         id: SessionId(expectString(map['_id'], label: 'SessionDocumentId')),
         creationTime: expectDouble(
           map['_creationTime'],

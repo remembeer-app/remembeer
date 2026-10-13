@@ -90,6 +90,20 @@ void main() {
         ..._session,
         'kind': 'party',
         'endedAt': 2000,
+        'activatedAt': 1500,
+        'activatedByUserId': 'owner',
+        'modules': {
+          'socialQuestsEnabled': false,
+          'adminChallengesEnabled': false,
+          'beerpongEnabled': false,
+        },
+        'questSchedule': {
+          'minIntervalMinutes': 15,
+          'maxIntervalMinutes': 45,
+          'defaultDurationMinutes': 15,
+          'nextQuestAt': null,
+          'scheduledFunctionId': null,
+        },
       };
       client.emit('session:get');
       await tester.pumpAndSettle();

@@ -7,6 +7,11 @@ import {
 } from "./schema";
 import { syncSessionIndex } from "../sessionMember/sessionIndex";
 import { requireSessionAccess } from "./access";
+import {
+  defaultPartyQuestMinIntervalMinutes,
+  defaultPartyQuestMaxIntervalMinutes,
+  defaultPartyQuestDurationMinutes,
+} from "./constants";
 
 export const create = authMutation
   .extend(WithZod)
@@ -86,7 +91,25 @@ export const promoteToParty = authMutation
     if (session.endedAt !== null)
       throw new ConvexError("Only ongoing sessions can become parties");
 
-    await ctx.db.patch("session", id, { kind: "party", updatedAt: Date.now() });
+    const now = Date.now();
+    await ctx.db.patch("session", id, {
+      kind: "party",
+      activatedAt: now,
+      activatedByUserId: ctx.user._id,
+      modules: {
+        socialQuestsEnabled: false,
+        adminChallengesEnabled: false,
+        beerpongEnabled: false,
+      },
+      questSchedule: {
+        minIntervalMinutes: defaultPartyQuestMinIntervalMinutes,
+        maxIntervalMinutes: defaultPartyQuestMaxIntervalMinutes,
+        defaultDurationMinutes: defaultPartyQuestDurationMinutes,
+        nextQuestAt: null,
+        scheduledFunctionId: null,
+      },
+      updatedAt: now,
+    });
 
     return null;
   });

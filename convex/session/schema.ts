@@ -21,6 +21,20 @@ export const sessionValidator = v.object({
 export const partyValidator = v.object({
   ...commonFields,
   kind: v.literal("party"),
+  activatedAt: v.number(),
+  activatedByUserId: v.id("user"),
+  modules: v.object({
+    socialQuestsEnabled: v.boolean(),
+    adminChallengesEnabled: v.boolean(),
+    beerpongEnabled: v.boolean(),
+  }),
+  questSchedule: v.object({
+    minIntervalMinutes: v.number(),
+    maxIntervalMinutes: v.number(),
+    defaultDurationMinutes: v.number(),
+    nextQuestAt: v.nullable(v.number()),
+    scheduledFunctionId: v.nullable(v.id("_scheduled_functions")),
+  }),
 });
 
 export const sessionTable = defineTable(

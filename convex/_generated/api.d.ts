@@ -37,6 +37,7 @@ import type * as lib_logicalDay from "../lib/logicalDay.js";
 import type * as lib_timeZone from "../lib/timeZone.js";
 import type * as session from "../session.js";
 import type * as session_access from "../session/access.js";
+import type * as session_constants from "../session/constants.js";
 import type * as session_mutation from "../session/mutation.js";
 import type * as session_query from "../session/query.js";
 import type * as sessionMember from "../sessionMember.js";
@@ -86,6 +87,7 @@ declare const fullApi: ApiFromModules<{
   "lib/timeZone": typeof lib_timeZone;
   session: typeof session;
   "session/access": typeof session_access;
+  "session/constants": typeof session_constants;
   "session/mutation": typeof session_mutation;
   "session/query": typeof session_query;
   sessionMember: typeof sessionMember;

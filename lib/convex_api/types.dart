@@ -147,6 +147,20 @@ typedef LeaderboardMemberDocument = ({
   double creationTime,
 });
 
+typedef PartyModules = ({
+  bool socialQuestsEnabled,
+  bool adminChallengesEnabled,
+  bool beerpongEnabled,
+});
+
+typedef PartyQuestSchedule = ({
+  double minIntervalMinutes,
+  double maxIntervalMinutes,
+  double defaultDurationMinutes,
+  double? nextQuestAt,
+  ScheduledFunctionsId? scheduledFunctionId,
+});
+
 sealed class SessionDocument {
   const SessionDocument();
   UserId get ownerId;
@@ -203,6 +217,10 @@ final class Party extends SessionDocument {
     required this.endedAt,
     required this.updatedAt,
     required this.deletedAt,
+    required this.activatedAt,
+    required this.activatedByUserId,
+    required this.modules,
+    required this.questSchedule,
     required this.id,
     required this.creationTime,
   });
@@ -220,6 +238,14 @@ final class Party extends SessionDocument {
   final double updatedAt;
 
   final double? deletedAt;
+
+  final double activatedAt;
+
+  final UserId activatedByUserId;
+
+  final PartyModules modules;
+
+  final PartyQuestSchedule questSchedule;
 
   final SessionId id;
 

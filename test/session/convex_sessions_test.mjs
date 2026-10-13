@@ -64,6 +64,9 @@ test("creation validates fields and atomically constructs the owner membership",
   assert.equal(session.name, "Evening");
   assert.equal(session.description, "Test");
   assert.equal(session.kind, "session");
+  assert.equal("activatedAt" in session, false);
+  assert.equal("modules" in session, false);
+  assert.equal("questSchedule" in session, false);
   assert.equal(session.endedAt, null);
   assert.equal(session.deletedAt, null);
   assert.equal(f.member(id, "owner").sessionMemberStatus.kind, "joined");
@@ -95,9 +98,30 @@ test("shared session CRUD and promotion enforce roles, ranges and union kinds", 
   await sessions.promoteToParty(f.ctx("admin"), { id });
   const party = structuredClone(await f.db.get("session", id));
   assert.equal(party.kind, "party");
+  assert.equal(party._id, id);
+  assert.equal(party.activatedByUserId, "admin");
+  assert.equal(party.activatedAt, party.updatedAt);
+  assert.ok(Number.isFinite(party.activatedAt));
+  assert.deepEqual(party.modules, {
+    socialQuestsEnabled: false,
+    adminChallengesEnabled: false,
+    beerpongEnabled: false,
+  });
+  assert.deepEqual(party.questSchedule, {
+    minIntervalMinutes: 15,
+    maxIntervalMinutes: 45,
+    defaultDurationMinutes: 15,
+    nextQuestAt: null,
+    scheduledFunctionId: null,
+  });
   await sessions.promoteToParty(f.owner, { id });
   assert.deepEqual(await f.db.get("session", id), party);
   await sessions.update(f.ctx("admin"), { id, name: "Party renamed", endedAt: 2000 });
+  const archived = await f.db.get("session", id);
+  assert.equal(archived.activatedAt, party.activatedAt);
+  assert.equal(archived.activatedByUserId, "admin");
+  assert.deepEqual(archived.modules, party.modules);
+  assert.deepEqual(archived.questSchedule, party.questSchedule);
   assert.equal((await sessionQueries.get(f.ctx("member"), { id })).kind, "party");
   assert.equal((await sessionQueries.listCurrent(f.ctx("member"), {})).length, 1);
   assert.equal((await sessionQueries.listCurrent(f.ctx("other"), {})).length, 0);
