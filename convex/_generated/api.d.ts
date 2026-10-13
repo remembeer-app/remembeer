@@ -35,6 +35,8 @@ import type * as lib_authenticated from "../lib/authenticated.js";
 import type * as lib_builder from "../lib/builder.js";
 import type * as lib_logicalDay from "../lib/logicalDay.js";
 import type * as lib_timeZone from "../lib/timeZone.js";
+import type * as partyQuest_catalog from "../partyQuest/catalog.js";
+import type * as partyQuest_constants from "../partyQuest/constants.js";
 import type * as session from "../session.js";
 import type * as session_access from "../session/access.js";
 import type * as session_constants from "../session/constants.js";
@@ -86,6 +88,8 @@ declare const fullApi: ApiFromModules<{
   "lib/builder": typeof lib_builder;
   "lib/logicalDay": typeof lib_logicalDay;
   "lib/timeZone": typeof lib_timeZone;
+  "partyQuest/catalog": typeof partyQuest_catalog;
+  "partyQuest/constants": typeof partyQuest_constants;
   session: typeof session;
   "session/access": typeof session_access;
   "session/constants": typeof session_constants;

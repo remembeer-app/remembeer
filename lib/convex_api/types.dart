@@ -147,6 +147,740 @@ typedef LeaderboardMemberDocument = ({
   double creationTime,
 });
 
+enum PartyQuestDocumentStatus {
+  activeValue('active'),
+  expiredValue('expired'),
+  cancelledValue('cancelled');
+
+  const PartyQuestDocumentStatus(this.value);
+  final Object? value;
+
+  static PartyQuestDocumentStatus fromJson(dynamic raw) {
+    switch (raw) {
+      case 'active':
+        return PartyQuestDocumentStatus.activeValue;
+      case 'expired':
+        return PartyQuestDocumentStatus.expiredValue;
+      case 'cancelled':
+        return PartyQuestDocumentStatus.cancelledValue;
+      default:
+        throw FormatException(
+          'Expected one of active, expired, cancelled for PartyQuestDocumentStatus',
+        );
+    }
+  }
+}
+
+typedef PartyQuestDocumentEligiblePairsItem = ({
+  UserId firstUserId,
+  UserId secondUserId,
+});
+
+typedef PartyQuestDocumentSelectionsItem = ({
+  UserId userId,
+  UserId selectedUserId,
+  double selectedAt,
+});
+
+typedef PartyQuestDocumentResultsItem = ({
+  UserId firstUserId,
+  UserId secondUserId,
+  double completedAt,
+});
+
+sealed class PartyQuestDocument {
+  const PartyQuestDocument();
+  SessionId get sessionId;
+  String get title;
+  String get instructions;
+  double get pointsUnits;
+  double get startsAt;
+  double get endsAt;
+  PartyQuestDocumentStatus get status;
+  List<UserId> get eligibleMemberIds;
+  List<PartyQuestDocumentEligiblePairsItem> get eligiblePairs;
+  List<PartyQuestDocumentSelectionsItem> get selections;
+  List<PartyQuestDocumentResultsItem> get results;
+  double get updatedAt;
+  PartyQuestId get id;
+  double get creationTime;
+  bool get isToastWithClass => this is ToastWithClass;
+  bool get isSameAccent => this is SameAccent;
+  bool get isDifferentAccent => this is DifferentAccent;
+  bool get isNewAlly => this is NewAlly;
+  bool get isSameClass => this is SameClass;
+  bool get isDifferentClass => this is DifferentClass;
+  bool get isBottomQuarter => this is BottomQuarter;
+  bool get isLeader => this is Leader;
+  bool get isTopThree => this is TopThree;
+  bool get isOppositeRankingHalves => this is OppositeRankingHalves;
+  bool get isNearbyRank => this is NearbyRank;
+  bool get isDifferentBeerpongTeam => this is DifferentBeerpongTeam;
+  bool get isSameBeerpongTeam => this is SameBeerpongTeam;
+  bool get isFinalistTeam => this is FinalistTeam;
+}
+
+final class ToastWithClass extends PartyQuestDocument {
+  const ToastWithClass({
+    required this.drinkCategory,
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final DrinkCategory drinkCategory;
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class SameAccent extends PartyQuestDocument {
+  const SameAccent({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class DifferentAccent extends PartyQuestDocument {
+  const DifferentAccent({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class NewAlly extends PartyQuestDocument {
+  const NewAlly({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class SameClass extends PartyQuestDocument {
+  const SameClass({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class DifferentClass extends PartyQuestDocument {
+  const DifferentClass({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class BottomQuarter extends PartyQuestDocument {
+  const BottomQuarter({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class Leader extends PartyQuestDocument {
+  const Leader({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class TopThree extends PartyQuestDocument {
+  const TopThree({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class OppositeRankingHalves extends PartyQuestDocument {
+  const OppositeRankingHalves({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class NearbyRank extends PartyQuestDocument {
+  const NearbyRank({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class DifferentBeerpongTeam extends PartyQuestDocument {
+  const DifferentBeerpongTeam({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class SameBeerpongTeam extends PartyQuestDocument {
+  const SameBeerpongTeam({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
+final class FinalistTeam extends PartyQuestDocument {
+  const FinalistTeam({
+    required this.sessionId,
+    required this.title,
+    required this.instructions,
+    required this.pointsUnits,
+    required this.startsAt,
+    required this.endsAt,
+    required this.status,
+    required this.eligibleMemberIds,
+    required this.eligiblePairs,
+    required this.selections,
+    required this.results,
+    required this.updatedAt,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final SessionId sessionId;
+
+  final String title;
+
+  final String instructions;
+
+  final double pointsUnits;
+
+  final double startsAt;
+
+  final double endsAt;
+
+  final PartyQuestDocumentStatus status;
+
+  final List<UserId> eligibleMemberIds;
+
+  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
+
+  final List<PartyQuestDocumentSelectionsItem> selections;
+
+  final List<PartyQuestDocumentResultsItem> results;
+
+  final double updatedAt;
+
+  final PartyQuestId id;
+
+  final double creationTime;
+}
+
 typedef PartyModules = ({
   bool socialQuestsEnabled,
   bool adminChallengesEnabled,
