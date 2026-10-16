@@ -25,6 +25,7 @@ function fixture() {
   let sequence = 0;
   const collected = [];
   const sessionGets = [];
+  const membershipReads = [];
   const db = {
     async get(table, id) { if (table === "session") sessionGets.push(id); return structuredClone(tables[table].find((row) => row._id === id) ?? null); },
     async insert(table, fields) { const id = `${table}-${++sequence}`; tables[table].push({ _id: id, _creationTime: 1, ...structuredClone(fields) }); return id; },
@@ -41,7 +42,11 @@ function fixture() {
           };
           range(q); return this;
         },
-        async unique() { assert.ok(rows.length <= 1); return rows[0] ?? null; },
+        async unique() {
+          assert.ok(rows.length <= 1);
+          if (table === "sessionMember") membershipReads.push(rows[0]?.userId ?? null);
+          return rows[0] ?? null;
+        },
         async collect() { collected.push({ table, count: rows.length }); return rows; },
         async take(count) { return rows.slice(0, count); },
 
@@ -54,7 +59,7 @@ function fixture() {
   const create = () => sessions.create(owner, { name: " Evening ", description: " Test ", startedAt: 1000 });
   const member = (sessionId, userId) => tables.sessionMember.find((row) => row.sessionId === sessionId && row.userId === userId);
   const join = async (sessionId, userId) => { await members.invite(owner, { sessionId, userId }); await members.accept(ctx(userId), { sessionId }); };
-  return { tables, db, ctx, owner, create, member, join, collected, sessionGets };
+  return { tables, db, ctx, owner, create, member, join, collected, sessionGets, membershipReads };
 }
 
 const target = (sessionId, userId) => ({ sessionId, userId });
@@ -542,3 +547,78 @@ test("beerpong opt-in belongs to the current joined member of an ongoing enabled
   await sessions.softDelete(f.owner, { id });
   await assert.rejects(members.setBeerpongOptIn(f.owner, input), /not found/);
 });
+
+for (const registered of [false, true]) {
+  const invoke = (endpoint, ctx, input) => registered
+    ? endpoint.public()._handler(ctx, input)
+    : endpoint(ctx, input);
+  const mode = registered ? "registered" : "direct";
+
+  test(`${mode} self class access reuses caller membership and preserves repeated selections`, async () => {
+    const f = fixture();
+    const id = await f.create();
+    await f.join(id, "member");
+    await sessions.promoteToParty(f.owner, { id });
+    const writes = [];
+    const patch = f.db.patch;
+    f.db.patch = async (...args) => { writes.push(args); return patch(...args); };
+    const input = { sessionId: id, userId: "member", selectedClass: { kind: "beer" } };
+
+    f.membershipReads.length = 0;
+    await invoke(members.setClass, f.ctx("member"), input);
+    assert.deepEqual(f.membershipReads, ["member"]);
+    assert.equal(writes.length, 1);
+    assert.equal(f.member(id, "member").selectedClass.kind, "beer");
+
+    writes.length = 0;
+    f.membershipReads.length = 0;
+    assert.equal(await invoke(members.setClass, f.ctx("member"), input), null);
+    assert.deepEqual(f.membershipReads, ["member"]);
+    assert.deepEqual(writes, []);
+
+    await assert.rejects(invoke(members.setClass, f.ctx("member"), {
+      ...input, selectedClass: { kind: "wine" },
+    }), /Only admins can change/);
+    assert.deepEqual(writes, []);
+  });
+
+  test(`${mode} moderation keeps caller and target memberships separate and protects owners and admins`, async () => {
+    const f = fixture();
+    const id = await f.create();
+    await f.join(id, "admin");
+    await members.setRole(f.owner, {
+      sessionId: id, userId: "admin", role: { kind: "admin" },
+    });
+    const writes = [];
+    const patch = f.db.patch;
+    f.db.patch = async (...args) => { writes.push(args); return patch(...args); };
+
+    f.membershipReads.length = 0;
+    await assert.rejects(invoke(members.remove, f.ctx("admin"), {
+      sessionId: id, userId: "owner",
+    }), /owner cannot be moderated/);
+    assert.deepEqual(f.membershipReads, ["admin"]);
+    assert.deepEqual(writes, []);
+
+    f.membershipReads.length = 0;
+    await assert.rejects(invoke(members.remove, f.ctx("admin"), {
+      sessionId: id, userId: "admin",
+    }), /Only the owner can moderate admins/);
+    assert.deepEqual(f.membershipReads, ["admin"]);
+    assert.deepEqual(writes, []);
+
+    f.membershipReads.length = 0;
+    await invoke(members.remove, f.owner, { sessionId: id, userId: "admin" });
+    assert.deepEqual(f.membershipReads, ["owner", "admin"]);
+    assert.equal(f.member(id, "owner").sessionMemberStatus.kind, "joined");
+    assert.equal(f.member(id, "owner").sessionMemberRole.kind, "admin");
+    assert.equal(f.member(id, "admin").sessionMemberStatus.kind, "left");
+    assert.equal(writes.length, 1);
+
+    writes.length = 0;
+    assert.equal(await invoke(members.remove, f.owner, {
+      sessionId: id, userId: "admin",
+    }), null);
+    assert.deepEqual(writes, []);
+  });
+}

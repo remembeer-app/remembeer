@@ -83,6 +83,7 @@ import type * as session_constants from "../session/constants.js";
 import type * as session_mutation from "../session/mutation.js";
 import type * as session_query from "../session/query.js";
 import type * as sessionMember from "../sessionMember.js";
+import type * as sessionMember_access from "../sessionMember/access.js";
 import type * as sessionMember_constants from "../sessionMember/constants.js";
 import type * as sessionMember_mutation from "../sessionMember/mutation.js";
 import type * as sessionMember_query from "../sessionMember/query.js";
@@ -176,6 +177,7 @@ declare const fullApi: ApiFromModules<{
   "session/mutation": typeof session_mutation;
   "session/query": typeof session_query;
   sessionMember: typeof sessionMember;
+  "sessionMember/access": typeof sessionMember_access;
   "sessionMember/constants": typeof sessionMember_constants;
   "sessionMember/mutation": typeof sessionMember_mutation;
   "sessionMember/query": typeof sessionMember_query;

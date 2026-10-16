@@ -8,14 +8,21 @@ import { v } from "convex/values";
 import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
 import { requireSessionAccess } from "../session/access";
+import { access } from "../lib/access";
+import type { Id } from "../_generated/dataModel";
 
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
   .returns(
     v.array(v.object({ member: schema.doc("sessionMember"), username: v.string() })),
   )
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
+      .extend,
+  )
   .handler(async (ctx, { sessionId }) => {
-    const { isAdmin } = await requireSessionAccess(ctx, sessionId, "joined");
+    const { isAdmin } = ctx;
 
     const members = await (isAdmin
       ? ctx.db
@@ -82,9 +89,12 @@ export const findInvitee = authQuery
     }),
   )
   .returns(v.array(v.object({ _id: v.id("user"), username: v.string() })))
-  .handler(async (ctx, { sessionId, username }) => {
-    await requireSessionAccess(ctx, sessionId, "admin");
-
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+      .extend,
+  )
+  .handler(async (ctx, { username }) => {
     const users = await ctx.db
       .query("user")
       .withIndex("by_normalizedUsername", (q) =>

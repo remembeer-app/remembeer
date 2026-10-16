@@ -1,3 +1,9 @@
+import {
+  loadTargetMember,
+  requireTargetMember,
+  requireCanModerateTarget,
+  requireJoinedTargetPartyMember,
+} from "../../convex/sessionMember/access";
 import { loadDrink, requireDrinkOwner, requireUndeletedDrink } from "../../convex/drink/access";
 import { loadQuest } from "../../convex/partyQuest/access";
 import { requireSessionAccess } from "../../convex/session/access";
@@ -224,3 +230,29 @@ access<Record<never, never>>().use((): { safe: true } | { db: object } => ({ saf
 access<Record<never, never>>().use((): Record<string, unknown> => ({}));
 // @ts-expect-error Existing context objects must not be returned as access additions.
 access<Record<never, never>>().use((ctx) => ctx);
+
+// Target guards narrow the target without changing the caller's membership.
+const targetMemberAccess = access<{
+  sessionId: Id<"session">;
+  userId: Id<"user">;
+}>()
+  .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+  .use(loadTargetMember);
+// @ts-expect-error The target may be missing until its existence is checked.
+targetMemberAccess.use(requireCanModerateTarget);
+// @ts-expect-error Target loading requires a loaded session and caller membership.
+access<{ userId: Id<"user"> }>().use(loadTargetMember);
+
+targetMemberAccess
+  .use(requireTargetMember)
+  .use(requireCanModerateTarget)
+  .use(requireJoinedTargetPartyMember)
+  .use((ctx) => {
+    const targetId: Id<"sessionMember"> = ctx.targetMember._id;
+    const kind: "partyMember" = ctx.targetMember.kind;
+    const selectedClass = ctx.targetMember.selectedClass;
+    // @ts-expect-error Proving the target exists does not prove the caller does.
+    const callerId: Id<"sessionMember"> = ctx.member._id;
+
+    return { targetId, kind, selectedClass, callerId };
+  });
