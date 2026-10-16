@@ -59,6 +59,28 @@ function fixture() {
 
 const target = (sessionId, userId) => ({ sessionId, userId });
 
+test("party owners and joined members can opt in and out of beerpong draws", async () => {
+  const f = fixture();
+  const id = await f.create();
+  await f.join(id, "member");
+  await sessions.promoteToParty(f.owner, { id });
+  f.tables.session[0].modules.beerpongEnabled = true;
+
+  for (const actor of ["owner", "member"]) {
+    for (const optedIn of [true, false]) {
+      const otherActor = actor === "owner" ? "member" : "owner";
+      const otherBefore = structuredClone(f.member(id, otherActor));
+      const before = Date.now();
+      assert.equal(await members.setBeerpongOptIn(f.ctx(actor), {
+        sessionId: id, optedIn,
+      }), null);
+      assert.equal(f.member(id, actor).beerpongOptIn, optedIn);
+      assert.ok(f.member(id, actor).updatedAt >= before);
+      assert.deepEqual(f.member(id, otherActor), otherBefore);
+    }
+  }
+});
+
 test("creation validates fields and atomically constructs the owner membership", async () => {
   const f = fixture();
   const id = await f.create();

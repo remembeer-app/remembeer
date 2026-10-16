@@ -26,7 +26,7 @@ export async function requireSessionAccess(
 
   const isOwner = session.ownerId === ctx.user._id;
 
-  const member = isOwner ? null : await getMembership(ctx, id, ctx.user._id);
+  const member = await getMembership(ctx, id, ctx.user._id);
 
   const isJoined = member?.sessionMemberStatus.kind === "joined";
 
