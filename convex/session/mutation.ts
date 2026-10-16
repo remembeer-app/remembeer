@@ -8,7 +8,7 @@ import {
   updateSessionInputValidator,
 } from "./schema";
 import { syncSessionIndex } from "../sessionMember/sessionIndex";
-import { withSessionAccess } from "./withSessionAccess";
+import { sessionAccess } from "./access";
 import { defaultPartyMemberFields } from "../sessionMember/constants";
 import {
   defaultPartyQuestMinIntervalMinutes,
@@ -49,7 +49,7 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateSessionInputValidator)
   .returns(v.null())
-  .extend(withSessionAccess("admin"))
+  .extend(sessionAccess("admin").extend)
   .handler(async (ctx, { id, ...input }) => {
     const { session } = ctx;
 
@@ -83,7 +83,7 @@ export const update = authMutation
 export const softDelete = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
-  .extend(withSessionAccess("owner"))
+  .extend(sessionAccess("owner").extend)
   .handler(async (ctx, { id }) => {
     const { session } = ctx;
 
@@ -100,7 +100,7 @@ export const softDelete = authMutation
 export const promoteToParty = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
-  .extend(withSessionAccess("admin"))
+  .extend(sessionAccess("admin").extend)
   .handler(async (ctx, { id }) => {
     const { session } = ctx;
     if (session.kind === "party") return null;

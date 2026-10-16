@@ -2,7 +2,7 @@ import { ConvexError } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { access } from "../lib/access";
 
-export function withCustomDrinkAccess() {
+export function customDrinkAccess() {
   return access<{ id: Id<"drink"> }>()
     .use(async (ctx, input) => {
       const drink = await ctx.db.get("drink", input.id);
@@ -19,6 +19,5 @@ export function withCustomDrinkAccess() {
       }
 
       return { drink };
-    })
-    .extend;
+    });
 }

@@ -1,3 +1,10 @@
+import { customDrinkAccess } from "../../convex/drink/access";
+import { sessionAccess } from "../../convex/session/access";
+import { leaderboardAccess } from "../../convex/leaderboard/access";
+import { editableTournamentAccess } from "../../convex/beerpongTournament/access";
+import { editableTeamAccess } from "../../convex/beerpongTeam/access";
+import { editableMatchAccess } from "../../convex/beerpongMatch/access";
+import { editableChallengeAccess } from "../../convex/partyChallenge/access";
 import type { RegisteredQuery, RegisteredMutation } from "convex/server";
 import { v } from "convex/values";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -55,7 +62,7 @@ const publicQueryOutput: QueryResult = "name";
 // @ts-expect-error Returns must retain their validator-derived type.
 const invalidQueryOutput: QueryResult = 123;
 
-const sessionAccess = access<{ id: Id<"session"> }>()
+const loadedSession = access<{ id: Id<"session"> }>()
   .use(async (ctx, { id }) => {
     const session = await ctx.db.get("session", id);
     if (!session) throw new Error("Missing session");
@@ -63,7 +70,7 @@ const sessionAccess = access<{ id: Id<"session"> }>()
     return { session };
   });
 
-sessionAccess
+loadedSession
   .use(partyAccess)
   .use(ongoingPartyAccess)
   .use((ctx) => {
@@ -74,7 +81,7 @@ sessionAccess
   });
 
 // @ts-expect-error Party-only steps require the party narrowing step first.
-sessionAccess.use(ongoingPartyAccess);
+loadedSession.use(ongoingPartyAccess);
 // @ts-expect-error A step cannot access a resource before it has been loaded.
 access<{ id: Id<"drink"> }>().use((ctx) => ({ drink: ctx.drink }));
 
@@ -112,3 +119,16 @@ authQuery.input({ id: v.id("partyQuest") }).returns(v.string()).extend(questAcce
 authQuery.input({ id: v.id("drink") }).returns(v.string()).extend(questAccess("id").extend);
 void questById;
 void questByQuestId;
+
+// Feature factories all return chains that can be extended before registration.
+customDrinkAccess().use((ctx) => ({ drinkName: ctx.drink.name }));
+sessionAccess("admin").use((ctx) => ({ sessionName: ctx.session.name }));
+leaderboardAccess("owner").use((ctx) => ({ boardName: ctx.leaderboard.name }));
+editableTeamAccess().use((ctx) => ({ teamName: ctx.team.name }));
+editableMatchAccess().use((ctx) => ({ matchRound: ctx.match.round }));
+editableChallengeAccess().use((ctx) => ({ challengeTitle: ctx.challenge.title }));
+editableTournamentAccess().use((ctx) => {
+  const partyKind: "party" = ctx.session.kind;
+
+  return { partyKind, tournamentName: ctx.tournament.name };
+});

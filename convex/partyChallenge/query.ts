@@ -2,8 +2,7 @@ import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
-import { requireParty } from "./access";
-import { withChallengeAccess } from "./withChallengeAccess";
+import { requireParty, challengeAccess } from "./access";
 
 function visibleChallenge(
   challenge: Doc<"partyChallenge">,
@@ -25,7 +24,7 @@ function visibleChallenge(
 export const get = authQuery
   .input({ id: v.id("partyChallenge") })
   .returns(schema.doc("partyChallenge"))
-  .extend(withChallengeAccess("joined"))
+  .extend(challengeAccess().extend)
   .handler(async (ctx) => visibleChallenge(ctx.challenge, ctx.session));
 
 export const listForSession = authQuery

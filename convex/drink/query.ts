@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
 import { schema } from "../schema";
-import { withCustomDrinkAccess } from "./withCustomDrinkAccess";
+import { customDrinkAccess } from "./access";
 
 export const listCustom = authQuery
   .returns(v.array(schema.doc("drink")))
@@ -37,5 +37,5 @@ export const get = authQuery
     id: v.id("drink"),
   })
   .returns(schema.doc("drink"))
-  .extend(withCustomDrinkAccess())
+  .extend(customDrinkAccess().extend)
   .handler(async (ctx) => ctx.drink);

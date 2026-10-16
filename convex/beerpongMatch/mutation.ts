@@ -1,13 +1,13 @@
 import { ConvexError, v } from "convex/values";
 import { authMutation } from "../lib/authenticated";
-import { withMatchAccess } from "./withMatchAccess";
+import { editableMatchAccess } from "./access";
 import { downstreamMatches, matchResolver } from "./resolution";
 
 function resultMutation(correcting: boolean) {
   return authMutation
     .input({ id: v.id("beerpongMatch"), winnerTeamId: v.id("beerpongTeam") })
     .returns(v.null())
-    .extend(withMatchAccess())
+    .extend(editableMatchAccess().extend)
     .handler(async (ctx, { id, winnerTeamId }) => {
       const { match, tournament } = ctx;
       if (tournament.status !== "active")

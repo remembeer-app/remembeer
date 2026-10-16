@@ -2,14 +2,13 @@ import { v } from "convex/values";
 import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
 import { matchResolver } from "../beerpongMatch/resolution";
-import { withTournamentAccess } from "./withTournamentAccess";
-import { withBeerpongPartyAccess } from "./withBeerpongPartyAccess";
+import { tournamentAccess, beerpongPartyAccess } from "./access";
 import { tournamentPlacements } from "./scoring";
 
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
   .returns(v.array(schema.doc("beerpongTournament")))
-  .extend(withBeerpongPartyAccess("joined"))
+  .extend(beerpongPartyAccess().extend)
   .handler(async (ctx, { sessionId }) => {
     return await ctx.db.query("beerpongTournament")
       .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
@@ -35,7 +34,7 @@ export const get = authQuery
     // Placements are final only after finalization, and include every team.
     placements: v.array(v.object({ teamId: v.id("beerpongTeam"), placement: v.number() })),
   }))
-  .extend(withTournamentAccess("joined"))
+  .extend(tournamentAccess().extend)
   .handler(async (ctx, { id }) => {
     const { tournament } = ctx;
 

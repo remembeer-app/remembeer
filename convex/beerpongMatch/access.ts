@@ -1,14 +1,12 @@
 import { ConvexError } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { access } from "../lib/access";
-import { partyAccess, ongoingPartyAccess } from "../party/access";
 import {
   loadTournament,
-  tournamentSessionAccess,
-  beerpongEnabledAccess,
+  requireEditableBeerpongParty,
 } from "../beerpongTournament/access";
 
-export function withMatchAccess() {
+export function editableMatchAccess() {
   return access<{ id: Id<"beerpongMatch"> }>()
     .use(async (ctx, { id }) => {
       const match = await ctx.db.get("beerpongMatch", id);
@@ -19,9 +17,5 @@ export function withMatchAccess() {
       return { match };
     })
     .use((ctx) => loadTournament(ctx, { id: ctx.match.tournamentId }))
-    .use(tournamentSessionAccess("admin"))
-    .use(partyAccess)
-    .use(ongoingPartyAccess)
-    .use(beerpongEnabledAccess)
-    .extend;
+    .use((ctx) => requireEditableBeerpongParty(ctx, ctx.tournament.sessionId));
 }

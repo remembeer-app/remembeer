@@ -13,11 +13,12 @@ import {
   inviteCodeLength,
   inviteCodeCharacters,
 } from "./constants";
-import { getMembership, listMemberships } from "./access";
 import {
-  withLeaderboardAccess,
+  getMembership,
+  listMemberships,
+  leaderboardAccess,
   type LeaderboardAccess,
-} from "./withLeaderboardAccess";
+} from "./access";
 
 const idInput = { id: v.id("leaderboard") };
 const memberInput = { ...idInput, userId: v.id("user") };
@@ -69,7 +70,7 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateLeaderboardInputValidator)
   .returns(v.null())
-  .extend(withLeaderboardAccess("owner"))
+  .extend(leaderboardAccess("owner").extend)
   .handler(async (ctx, { id, ...input }) => {
     const { leaderboard } = ctx;
 
@@ -85,7 +86,7 @@ export const update = authMutation
 export const softDelete = authMutation
   .input(idInput)
   .returns(v.null())
-  .extend(withLeaderboardAccess("owner"))
+  .extend(leaderboardAccess("owner").extend)
   .handler(async (ctx, { id }) => {
     const now = Date.now();
     await ctx.db.patch("leaderboard", id, { deletedAt: now, updatedAt: now });
@@ -132,7 +133,7 @@ export const join = authMutation
 export const leave = authMutation
   .input(idInput)
   .returns(v.null())
-  .extend(withLeaderboardAccess("member"))
+  .extend(leaderboardAccess("member").extend)
   .handler(async (ctx) => {
     const { isOwner, member } = ctx;
     if (isOwner)
@@ -146,19 +147,19 @@ export const leave = authMutation
 export const remove = authMutation
   .input(memberInput)
   .returns(v.null())
-  .extend(withLeaderboardAccess("owner"))
+  .extend(leaderboardAccess("owner").extend)
   .handler((ctx, input) => changeMember(ctx, input, "remove"));
 
 export const ban = authMutation
   .input(memberInput)
   .returns(v.null())
-  .extend(withLeaderboardAccess("owner"))
+  .extend(leaderboardAccess("owner").extend)
   .handler((ctx, input) => changeMember(ctx, input, "ban"));
 
 export const unban = authMutation
   .input(memberInput)
   .returns(v.null())
-  .extend(withLeaderboardAccess("owner"))
+  .extend(leaderboardAccess("owner").extend)
   .handler((ctx, input) => changeMember(ctx, input, "unban"));
 
 async function changeMember(

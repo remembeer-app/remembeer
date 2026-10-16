@@ -1,6 +1,9 @@
 import { ConvexError } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import type { AuthQueryCtx } from "../lib/authenticated";
+import { access } from "../lib/access";
+
+type SessionPermission = "read" | "joined" | "admin" | "owner" | "membership";
 
 export function getMembership(
   ctx: AuthQueryCtx,
@@ -18,7 +21,7 @@ export function getMembership(
 export async function requireSessionAccess(
   ctx: AuthQueryCtx,
   id: Id<"session">,
-  permission: "read" | "joined" | "admin" | "owner" | "membership" = "read",
+  permission: SessionPermission = "read",
 ) {
   const session = await ctx.db.get("session", id);
   if (!session || session.deletedAt !== null)
@@ -46,4 +49,9 @@ export async function requireSessionAccess(
     throw new ConvexError("You do not have permission to access this session");
 
   return { session, member, isOwner, isAdmin };
+}
+
+export function sessionAccess(permission: SessionPermission) {
+  return access<{ id: Id<"session"> }>()
+    .use((ctx, { id }) => requireSessionAccess(ctx, id, permission));
 }

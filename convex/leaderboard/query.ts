@@ -7,8 +7,7 @@ import { LogicalDay } from "../lib/logicalDay";
 import { schema } from "../schema";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
 import type { Doc, Id } from "../_generated/dataModel";
-import { listMemberships } from "./access";
-import { withLeaderboardAccess } from "./withLeaderboardAccess";
+import { listMemberships, leaderboardAccess } from "./access";
 import {
   beerVolumeMl,
   inviteCodeLength,
@@ -68,7 +67,7 @@ export const get = authQuery
       bannedMembers: v.array(publicUserValidator),
     }),
   )
-  .extend(withLeaderboardAccess("member"))
+  .extend(leaderboardAccess("member").extend)
   .handler(async (ctx, { id }) => {
     const { leaderboard, isOwner } = ctx;
 
@@ -168,7 +167,7 @@ export const standings = authQuery
       ),
     }),
   )
-  .extend(withLeaderboardAccess("member"))
+  .extend(leaderboardAccess("member").extend)
   .handler(async (ctx, { id, month: selectedMonth }) => {
     const { leaderboard } = ctx;
 

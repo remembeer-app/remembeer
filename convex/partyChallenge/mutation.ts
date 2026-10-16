@@ -4,8 +4,7 @@ import { convexToZod } from "convex-helpers/server/zod4";
 import { z } from "zod";
 import { authMutation } from "../lib/authenticated";
 import { getMembership } from "../session/access";
-import { requireParty } from "./access";
-import { withChallengeAccess } from "./withChallengeAccess";
+import { requireParty, editableChallengeAccess } from "./access";
 import { activeChallenges, scheduleExpiry, stopChallenges } from "./lifecycle";
 import {
   maxChallengeTitleLength,
@@ -91,7 +90,7 @@ export const update = authMutation
   .extend(WithZod)
   .input(fields.partial().extend({ id: convexToZod(v.id("partyChallenge")) }))
   .returns(v.null())
-  .extend(withChallengeAccess("admin"))
+  .extend(editableChallengeAccess().extend)
   .handler(async (ctx, { id, durationMinutes, ...input }) => {
     const { challenge } = ctx;
 
@@ -126,7 +125,7 @@ export const update = authMutation
 export const addWinner = authMutation
   .input({ ...idInput, userId: v.id("user") })
   .returns(v.null())
-  .extend(withChallengeAccess("admin"))
+  .extend(editableChallengeAccess().extend)
   .handler(async (ctx, { id, userId }) => {
     const { challenge } = ctx;
 
@@ -154,7 +153,7 @@ export const addWinner = authMutation
 export const removeWinner = authMutation
   .input({ ...idInput, userId: v.id("user") })
   .returns(v.null())
-  .extend(withChallengeAccess("admin"))
+  .extend(editableChallengeAccess().extend)
   .handler(async (ctx, { id, userId }) => {
     const { challenge } = ctx;
 
@@ -170,7 +169,7 @@ function close(status: "completed" | "cancelled") {
   return authMutation
     .input(idInput)
     .returns(v.null())
-    .extend(withChallengeAccess("admin"))
+    .extend(editableChallengeAccess().extend)
     .handler(async (ctx, { id }) => {
       const { challenge } = ctx;
       if (challenge.status === status) return null;
