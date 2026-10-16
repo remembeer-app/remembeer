@@ -28,6 +28,7 @@ void main() {
         expect(caller.mutations.last.args['drinkId'], 'drink');
         expect(caller.mutations.last.args['sessionId'], isNull);
         expect(caller.mutations.last.args['location'], isNull);
+        expect(caller.mutations.last.args.containsKey('consumedAt'), isFalse);
       }
       caller.defaultDrink = null;
       final count = caller.mutations.length;

@@ -442,6 +442,24 @@ test("day queries skip old owned and joined history before collecting or loading
   assert.deepEqual(f.sessionGets, ["owned-0"]);
 });
 
+test("quick add uses server time when the consumed time is omitted", async () => {
+  const f = fixture();
+  f.tables.drink.push({ _id: "beer", ownerId: null, deletedAt: null });
+  const now = 1000000;
+  const originalNow = Date.now;
+  Date.now = () => now;
+  try {
+    const id = await logs.create(f.owner, {
+      sessionId: null, drinkId: "beer", volumeMl: 500, location: null,
+    });
+    const log = f.tables.drinkLog.find(log => log._id === id);
+    assert.equal(log.consumedAt, now);
+    assert.equal(log.updatedAt, now);
+    await logs.update(f.owner, { id, volumeMl: 250 });
+    assert.equal(log.consumedAt, now);
+  } finally { Date.now = originalNow; }
+});
+
 test("drink creates and updates reject future instants, including unchanged legacy timestamps", async () => {
   const f = fixture();
   f.tables.drink.push({ _id: "beer", ownerId: null, deletedAt: null });

@@ -35,7 +35,7 @@ export const createDrinkLogInputValidator = convexToZod(
     "location",
   ),
 ).extend({
-  consumedAt: z.number().int(),
+  consumedAt: z.number().int().optional(),
   volumeMl: z.number().positive(),
   location: z
     .object({

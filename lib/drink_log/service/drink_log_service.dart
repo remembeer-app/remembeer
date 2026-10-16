@@ -38,7 +38,6 @@ class DrinkLogService {
     }
     await _api.drinkLog.create(
       drinkId: drink.id,
-      consumedAt: DateTime.now().millisecondsSinceEpoch.toDouble(),
       volumeMl: drink.drinkCategory.defaultVolume.toDouble(),
       sessionId: null,
       location: location,

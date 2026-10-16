@@ -15,11 +15,13 @@ export const create = authMutation
   .returns(schema.id("drinkLog"))
   .handler(async (ctx, input) => {
     const now = Date.now();
-    requireConsumedTime(input.consumedAt, now);
+    const consumedAt = input.consumedAt ?? now;
+    requireConsumedTime(consumedAt, now);
     await checkReferences(ctx, input);
 
     return await ctx.db.insert("drinkLog", {
       ...input,
+      consumedAt,
       userId: ctx.user._id,
       updatedAt: now,
       deletedAt: null,
