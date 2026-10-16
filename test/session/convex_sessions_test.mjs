@@ -104,6 +104,37 @@ test("creation validates fields and atomically constructs the owner membership",
   assert.equal(f.tables.session.length, 1);
 });
 
+test("session access runs once for registered handlers and after input validation", async () => {
+  const f = fixture();
+  const id = await f.create();
+  f.sessionGets.length = 0;
+
+  const session = await sessionQueries.get.public()._handler(f.owner, { id });
+  assert.equal(session._id, id);
+  assert.deepEqual(f.sessionGets, [id]);
+
+  f.sessionGets.length = 0;
+  await assert.rejects(
+    sessions.update.public()._handler(f.owner, { id, name: "x" }),
+  );
+  assert.deepEqual(f.sessionGets, []);
+  assert.equal(f.tables.session[0].name, "Evening");
+
+  await assert.rejects(
+    sessions.update.public()._handler(f.ctx("other"), { id, name: "Changed" }),
+    /permission/,
+  );
+  assert.deepEqual(f.sessionGets, [id]);
+  assert.equal(f.tables.session[0].name, "Evening");
+
+  f.sessionGets.length = 0;
+  assert.equal(await sessions.update.public()._handler(f.owner, {
+    id, name: " Changed ",
+  }), null);
+  assert.deepEqual(f.sessionGets, [id]);
+  assert.equal(f.tables.session[0].name, "Changed");
+});
+
 test("shared session CRUD and promotion enforce roles, ranges and union kinds", async () => {
   const f = fixture(); const id = await f.create();
   await f.join(id, "admin"); await f.join(id, "member");

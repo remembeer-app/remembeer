@@ -2,14 +2,14 @@ import { v } from "convex/values";
 import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
 import { schema } from "../schema";
 import type { Id } from "../_generated/dataModel";
-import { getMembership, requireSessionAccess } from "./access";
+import { getMembership } from "./access";
+import { withSessionAccess } from "./withSessionAccess";
 
 export const get = authQuery
   .input({ id: v.id("session") })
   .returns(schema.doc("session"))
-  .handler(
-    async (ctx, { id }) => (await requireSessionAccess(ctx, id)).session,
-  );
+  .extend(withSessionAccess("read"))
+  .handler(async (ctx) => ctx.session);
 
 export const listCurrent = authQuery
   .input({})

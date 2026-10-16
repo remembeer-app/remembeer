@@ -8,7 +8,7 @@ import {
   updateSessionInputValidator,
 } from "./schema";
 import { syncSessionIndex } from "../sessionMember/sessionIndex";
-import { requireSessionAccess } from "./access";
+import { withSessionAccess } from "./withSessionAccess";
 import { defaultPartyMemberFields } from "../sessionMember/constants";
 import {
   defaultPartyQuestMinIntervalMinutes,
@@ -49,8 +49,9 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateSessionInputValidator)
   .returns(v.null())
+  .extend(withSessionAccess("admin"))
   .handler(async (ctx, { id, ...input }) => {
-    const { session } = await requireSessionAccess(ctx, id, "admin");
+    const { session } = ctx;
 
     const startedAt = input.startedAt ?? session.startedAt;
     const endedAt =
@@ -82,8 +83,9 @@ export const update = authMutation
 export const softDelete = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
+  .extend(withSessionAccess("owner"))
   .handler(async (ctx, { id }) => {
-    const { session } = await requireSessionAccess(ctx, id, "owner");
+    const { session } = ctx;
 
     const now = Date.now();
 
@@ -98,8 +100,9 @@ export const softDelete = authMutation
 export const promoteToParty = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
+  .extend(withSessionAccess("admin"))
   .handler(async (ctx, { id }) => {
-    const { session } = await requireSessionAccess(ctx, id, "admin");
+    const { session } = ctx;
     if (session.kind === "party") return null;
 
     if (session.endedAt !== null)
