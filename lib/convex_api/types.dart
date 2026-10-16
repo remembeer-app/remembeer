@@ -13,6 +13,126 @@ typedef BadgeDocument = ({
   double creationTime,
 });
 
+enum BeerpongMatchDocumentKind {
+  mainValue('main'),
+  thirdPlaceValue('thirdPlace');
+
+  const BeerpongMatchDocumentKind(this.value);
+  final Object? value;
+
+  static BeerpongMatchDocumentKind fromJson(dynamic raw) {
+    switch (raw) {
+      case 'main':
+        return BeerpongMatchDocumentKind.mainValue;
+      case 'thirdPlace':
+        return BeerpongMatchDocumentKind.thirdPlaceValue;
+      default:
+        throw FormatException(
+          'Expected one of main, thirdPlace for BeerpongMatchDocumentKind',
+        );
+    }
+  }
+}
+
+sealed class SlotA {
+  const SlotA();
+  bool get isTeam => this is Team;
+  bool get isWinner => this is Winner;
+  bool get isLoser => this is Loser;
+  bool get isBye => this is Bye;
+}
+
+final class Team extends SlotA {
+  const Team({required this.teamId});
+
+  final BeerpongTeamId teamId;
+}
+
+final class Winner extends SlotA {
+  const Winner({required this.matchId});
+
+  final BeerpongMatchId matchId;
+}
+
+final class Loser extends SlotA {
+  const Loser({required this.matchId});
+
+  final BeerpongMatchId matchId;
+}
+
+final class Bye extends SlotA {
+  const Bye();
+}
+
+typedef BeerpongMatchDocument = ({
+  BeerpongTournamentId tournamentId,
+  double round,
+  double position,
+  BeerpongMatchDocumentKind kind,
+  SlotA slotA,
+  SlotA slotB,
+  BeerpongTeamId? winnerTeamId,
+  double? completedAt,
+  double updatedAt,
+  BeerpongMatchId id,
+  double creationTime,
+});
+
+typedef BeerpongTeamDocument = ({
+  BeerpongTournamentId tournamentId,
+  String name,
+  List<UserId> memberUserIds,
+  double updatedAt,
+  BeerpongTeamId id,
+  double creationTime,
+});
+
+enum BeerpongTournamentDocumentStatus {
+  enrollmentValue('enrollment'),
+  setupValue('setup'),
+  activeValue('active'),
+  completedValue('completed'),
+  cancelledValue('cancelled');
+
+  const BeerpongTournamentDocumentStatus(this.value);
+  final Object? value;
+
+  static BeerpongTournamentDocumentStatus fromJson(dynamic raw) {
+    switch (raw) {
+      case 'enrollment':
+        return BeerpongTournamentDocumentStatus.enrollmentValue;
+      case 'setup':
+        return BeerpongTournamentDocumentStatus.setupValue;
+      case 'active':
+        return BeerpongTournamentDocumentStatus.activeValue;
+      case 'completed':
+        return BeerpongTournamentDocumentStatus.completedValue;
+      case 'cancelled':
+        return BeerpongTournamentDocumentStatus.cancelledValue;
+      default:
+        throw FormatException(
+          'Expected one of enrollment, setup, active, completed, cancelled for BeerpongTournamentDocumentStatus',
+        );
+    }
+  }
+}
+
+typedef BeerpongTournamentDocument = ({
+  SessionId sessionId,
+  String name,
+  BeerpongTournamentDocumentStatus status,
+  double teamCount,
+  bool thirdPlaceEnabled,
+  double firstPlacePointsUnits,
+  double secondPlacePointsUnits,
+  double thirdPlacePointsUnits,
+  UserId createdByUserId,
+  double updatedAt,
+  double? completedAt,
+  BeerpongTournamentId id,
+  double creationTime,
+});
+
 sealed class DrinkCategory {
   const DrinkCategory();
   bool get isBeer => this is Beer;

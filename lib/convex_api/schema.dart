@@ -21,6 +21,24 @@ class BadgeId extends ConvexTableId {
   static const String tableName = 'badge';
 }
 
+class BeerpongMatchId extends ConvexTableId {
+  const BeerpongMatchId(super.value);
+
+  static const String tableName = 'beerpongMatch';
+}
+
+class BeerpongTeamId extends ConvexTableId {
+  const BeerpongTeamId(super.value);
+
+  static const String tableName = 'beerpongTeam';
+}
+
+class BeerpongTournamentId extends ConvexTableId {
+  const BeerpongTournamentId(super.value);
+
+  static const String tableName = 'beerpongTournament';
+}
+
 class DrinkId extends ConvexTableId {
   const DrinkId(super.value);
 

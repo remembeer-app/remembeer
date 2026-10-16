@@ -1,6 +1,9 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND.
 
 export 'widgets/badge.dart';
+export 'widgets/beerpongMatch.dart';
+export 'widgets/beerpongTeam.dart';
+export 'widgets/beerpongTournament.dart';
 export 'widgets/drink.dart';
 export 'widgets/drinkLog.dart';
 export 'widgets/friendship.dart';

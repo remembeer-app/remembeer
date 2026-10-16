@@ -2,6 +2,9 @@
 // ignore_for_file: type=lint, unused_element, unused_import, unused_local_variable
 
 import './modules/badge.dart';
+import './modules/beerpongMatch.dart';
+import './modules/beerpongTeam.dart';
+import './modules/beerpongTournament.dart';
 import './modules/drink.dart';
 import './modules/drinkLog.dart';
 import './modules/friendship.dart';
@@ -28,6 +31,10 @@ class ConvexApi {
   final ConvexFunctionCaller _client;
 
   BadgeApi get badge => BadgeApi(_client);
+  BeerpongMatchApi get beerpongMatch => BeerpongMatchApi(_client);
+  BeerpongTeamApi get beerpongTeam => BeerpongTeamApi(_client);
+  BeerpongTournamentApi get beerpongTournament =>
+      BeerpongTournamentApi(_client);
   DrinkApi get drink => DrinkApi(_client);
   DrinkLogApi get drinkLog => DrinkLogApi(_client);
   FriendshipApi get friendship => FriendshipApi(_client);
