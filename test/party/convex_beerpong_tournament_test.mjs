@@ -5,23 +5,23 @@ import { fixture } from "../support/party_fixture.mjs";
 
 const { outputFiles } = await build({
   stdin: {
-    contents: 'export { create, draw, start } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam"; export * as results from "./convex/beerpongMatch";',
+    contents: 'export { create, draw, start, finalize } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam"; export * as results from "./convex/beerpongMatch"; export { standings } from "./convex/party/query"; export { activity } from "./convex/party/activity"; export { loadQuestContext } from "./convex/partyQuest/context";',
     resolveDir: process.cwd(),
   },
   bundle: true, platform: "node", format: "esm", write: false,
   plugins: [{ name: "authenticated-context", setup(builder) {
     builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
-      contents: 'import { createBuilder } from "fluent-convex"; export const authMutation = createBuilder().mutation();',
+      contents: 'import { createBuilder } from "fluent-convex"; export const authMutation = createBuilder().mutation(); export const authQuery = createBuilder().query();',
       loader: "ts",
     }));
   } }],
 });
-const { create, draw, start, teams, results } = await import(
+const { create, draw, start, finalize, teams, results, standings, activity, loadQuestContext } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`,
 );
 
 function setup() {
-  const f = fixture();
+  const f = fixture(standings);
   f.tables.beerpongTournament = [];
   f.tables.beerpongTeam = [];
   f.tables.beerpongMatch = [];
@@ -49,16 +49,18 @@ function setup() {
 }
 
 function enroll(f, userId) {
-  f.tables.user.push({ _id: userId });
+  f.tables.user.push({ _id: userId, username: userId, accentColor: "amber" });
   f.tables.sessionMember.push({
     _id: `member-${userId}`, sessionId: "party", userId, kind: "partyMember",
     sessionMemberStatus: { kind: "joined" },
-    sessionMemberRole: { kind: "member" }, beerpongOptIn: true,
+    sessionMemberRole: { kind: "member" }, beerpongOptIn: true, selectedClass: null,
   });
 }
 
 const runDraw = (f, id, actor = "owner") => draw._handler(f.ctx(actor), { id });
 const runStart = (f, id, actor = "owner") => start._handler(f.ctx(actor), { id });
+const runFinalize = (f, id, actor = "owner") => finalize._handler(f.ctx(actor), { id });
+const readActivity = (f, args = {}) => activity(f.ctx("owner"), { sessionId: "party", ...args });
 
 test("owner and joined admins create enrollment tournaments without drawing teams", async () => {
   const f = setup();
@@ -529,9 +531,9 @@ test("start isolates tournaments and ignores opt-in changes after the draw", asy
   assert.equal(f.tables.beerpongMatch.filter(match => match.tournamentId === other).length, 1);
 });
 
-async function matchSetup(teamCount = 4, thirdPlaceEnabled = true) {
+async function matchSetup(teamCount = 4, thirdPlaceEnabled = true, settings = {}) {
   const f = setup();
-  const tournamentId = await f.run({ teamCount, thirdPlaceEnabled });
+  const tournamentId = await f.run({ teamCount, thirdPlaceEnabled, ...settings });
   for (let index = 0; index < teamCount; index++) enroll(f, `p${index}`);
   await runDraw(f, tournamentId);
   await runStart(f, tournamentId);
@@ -708,4 +710,181 @@ test("results reject missing, cyclic, and foreign bracket source references with
     await assert.rejects(f.runResult("recordResult", final._id, winner), source === "self" ? /cycle/ : /source match not found/);
     assert.deepEqual(f.tables, saved);
   }
+});
+
+test("finalization derives podium points across all bracket sizes, with tied third without a playoff", async () => {
+  for (let count = 2; count <= 16; count++) {
+    for (const thirdPlace of [false, true]) {
+      const f = await matchSetup(count, thirdPlace);
+      await playAll(f);
+      assert.ok((await f.read()).entries.every(entry => entry.beerpongScoreUnits === 0));
+      assert.deepEqual((await readActivity(f)).entries, []);
+      const savedTeams = structuredClone(f.tables.beerpongTeam);
+      const savedMatches = structuredClone(f.tables.beerpongMatch);
+      const before = Date.now();
+      assert.equal(await runFinalize(f, f.tournamentId, "b"), null);
+      const tournament = f.tables.beerpongTournament[0];
+      assert.equal(tournament.status, "completed");
+      assert.ok(tournament.completedAt >= before && tournament.completedAt <= Date.now());
+      assert.equal(tournament.updatedAt, tournament.completedAt);
+      assert.ok(!("results" in tournament));
+      assert.deepEqual(f.tables.beerpongTeam, savedTeams);
+      assert.deepEqual(f.tables.beerpongMatch, savedMatches);
+      const entries = (await readActivity(f)).entries;
+      const rank = (await f.read()).entries;
+      const expectedThird = count === 2 ? 0 : (thirdPlace || count === 3) ? 1 : 2;
+      assert.equal(entries.filter(entry => entry.placement === 1).length, 1);
+      assert.equal(entries.filter(entry => entry.placement === 2).length, 1);
+      assert.equal(entries.filter(entry => entry.placement === 3).length, expectedThird);
+      assert.equal(entries.reduce((sum, entry) => sum + entry.scoreUnits, 0), 50000 + 10000 * expectedThird);
+      for (const award of entries) {
+        const row = rank.find(entry => entry.userId === award.userId);
+        assert.equal(award.kind, "beerpongPlacement");
+        assert.equal(award.tournamentId, f.tournamentId);
+        assert.equal(award.tournamentName, "Friday cup");
+        assert.equal(award.occurredAt, tournament.completedAt);
+        assert.equal(award.scoreUnits, row.beerpongScoreUnits);
+        assert.equal(row.scoreUnits, row.beerpongScoreUnits);
+      }
+      const saved = structuredClone(f.tables);
+      await runFinalize(f, f.tournamentId);
+      assert.deepEqual(f.tables, saved);
+      assert.deepEqual((await readActivity(f)).entries, entries);
+    }
+  }
+});
+
+test("final rosters receive deterministic integer splits shared by standings, activity and quest ranks", async () => {
+  const f = await matchSetup(4, true, {
+    firstPlacePointsUnits: 30001, secondPlacePointsUnits: 20002, thirdPlacePointsUnits: 10003,
+  });
+  await playAll(f);
+  const final = f.tables.beerpongMatch.find(match => match.round === 2 && match.kind === "main");
+  const champion = f.tables.beerpongTeam.find(team => team._id === final.winnerTeamId);
+  const originalPlayer = champion.memberUserIds[0];
+  for (const userId of ["p4", "p5"]) enroll(f, userId);
+  await teams.removeMember._handler(f.ctx("owner"), { id: champion._id, userId: originalPlayer });
+  for (const userId of ["p5", "a", "p4"])
+    await teams.addMember._handler(f.ctx("owner"), { id: champion._id, userId });
+  await runFinalize(f, f.tournamentId);
+  const awards = (await readActivity(f)).entries;
+  const winners = awards.filter(award => award.teamId === champion._id);
+  assert.deepEqual(winners.map(award => [award.userId, award.scoreUnits]).toSorted(),
+    [["a", 10001], ["p4", 10000], ["p5", 10000]]);
+  assert.ok(awards.every(award => award.userId !== originalPlayer));
+  assert.equal(awards.reduce((sum, award) => sum + award.scoreUnits, 0), 60006);
+  const rank = (await f.read()).entries;
+  for (const entry of rank) {
+    assert.equal(entry.beerpongScoreUnits,
+      awards.filter(award => award.userId === entry.userId).reduce((sum, award) => sum + award.scoreUnits, 0));
+  }
+  assert.equal(rank.find(entry => entry.userId === originalPlayer).beerpongScoreUnits, 0);
+  const context = await loadQuestContext(f.ctx("owner"), "party", f.now);
+  assert.equal(context.players.find(player => player.userId === "a").scoreUnits, 10001);
+  // Source order never decides who receives remainder units.
+  champion.memberUserIds.reverse();
+  assert.deepEqual((await readActivity(f)).entries, awards);
+});
+
+test("finalization requires all results, including bronze, and rejects incomplete brackets and invalid rosters", async () => {
+  const f = await matchSetup();
+  await assert.rejects(runFinalize(f, f.tournamentId), /All matches/);
+  for (const match of f.tables.beerpongMatch.filter(match => match.kind === "main")) {
+    await f.runResult("recordResult", match._id, matchOpponents(f, match)[0]);
+  }
+  await assert.rejects(runFinalize(f, f.tournamentId), /All matches/);
+  assert.equal(f.tables.beerpongTournament[0].status, "active");
+  assert.ok((await f.read()).entries.every(entry => entry.beerpongScoreUnits === 0));
+  for (const [change, error] of [
+    [f => { f.tables.beerpongTeam[0].memberUserIds = []; }, /at least one/],
+    [f => { f.tables.beerpongTeam.pop(); }, /team count/],
+    [f => { f.tables.beerpongTeam[1].memberUserIds.push(f.tables.beerpongTeam[0].memberUserIds[0]); }, /multiple teams/],
+    [f => { f.tables.beerpongMatch.pop(); }, /incomplete/],
+    [f => { f.tables.beerpongMatch[0].winnerTeamId = "foreign-team"; }, /invalid/],
+    [f => { f.tables.beerpongMatch[0].completedAt = null; }, /All matches/],
+  ]) {
+    const g = await matchSetup(); await playAll(g); change(g);
+    const saved = structuredClone(g.tables);
+    await assert.rejects(runFinalize(g, g.tournamentId), error);
+    assert.deepEqual(g.tables, saved);
+  }
+});
+
+test("finalization enforces admin and party lifecycle guards and locks every roster/result mutation", async () => {
+  const f = await matchSetup(); await playAll(f);
+  for (const actor of ["a", "other", "invited", "left", "banned"]) {
+    if (["invited", "left", "banned"].includes(actor)) f.member(actor).sessionMemberRole.kind = "admin";
+    await assert.rejects(runFinalize(f, f.tournamentId, actor), /permission/);
+  }
+  await assert.rejects(runFinalize(f, "missing"), /Tournament not found/);
+  for (const status of ["enrollment", "setup", "cancelled"]) {
+    f.tables.beerpongTournament[0].status = status;
+    await assert.rejects(runFinalize(f, f.tournamentId), /active/);
+  }
+  f.tables.beerpongTournament[0].status = "active";
+  for (const [field, value, error] of [
+    ["endedAt", 1, /read-only/], ["deletedAt", 1, /not found/],
+    ["modules", { beerpongEnabled: false }, /disabled/], ["kind", "session", /party/],
+  ]) {
+    const original = f.tables.session[0][field]; f.tables.session[0][field] = value;
+    await assert.rejects(runFinalize(f, f.tournamentId), error);
+    f.tables.session[0][field] = original;
+  }
+  await runFinalize(f, f.tournamentId);
+  const saved = structuredClone(f.tables);
+  const [first, second] = f.tables.beerpongTeam;
+  for (const [action, args] of teamActions({ first, second }))
+    await assert.rejects(teams[action]._handler(f.ctx("owner"), args), /setup or active/);
+  for (const action of ["recordResult", "correctResult"]) {
+    const match = f.tables.beerpongMatch[0];
+    await assert.rejects(f.runResult(action, match._id, match.winnerTeamId), /active/);
+  }
+  await assert.rejects(runDraw(f, f.tournamentId), /enrollment/);
+  await assert.rejects(runStart(f, f.tournamentId), /setup/);
+  assert.deepEqual(f.tables, saved);
+});
+
+test("beerpong history supports filters and stable pagination; awards survive membership changes and party end", async () => {
+  const f = await matchSetup(); await playAll(f);
+  const champion = f.tables.beerpongTeam.find(team => team._id === f.tables.beerpongMatch
+    .find(match => match.kind === "main" && match.round === 2).winnerTeamId);
+  await teams.addMember._handler(f.ctx("owner"), { id: champion._id, userId: "a" });
+  await runFinalize(f, f.tournamentId);
+  const all = (await readActivity(f, { kinds: ["beerpongPlacement"] })).entries;
+  assert.equal(all.length, 4);
+  assert.equal(new Set(all.map(entry => entry.id)).size, all.length);
+  const teamAwards = await readActivity(f, { participantIds: ["a"], kinds: ["beerpongPlacement"] });
+  assert.equal(teamAwards.entries.length, 2);
+  assert.ok(teamAwards.entries.every(entry => entry.teamId === champion._id));
+  assert.equal((await readActivity(f, { kinds: ["drinkLog"] })).entries.length, 0);
+  const paged = []; let cursor;
+  do {
+    const page = await readActivity(f, { pageSize: 1, ...(cursor ? { cursor } : {}) });
+    paged.push(...page.entries); cursor = page.nextCursor;
+  } while (cursor);
+  assert.deepEqual(paged, all);
+  f.member("a").sessionMemberStatus.kind = "left";
+  f.tables.user = f.tables.user.filter(user => user._id !== "a");
+  f.tables.session[0].endedAt = Date.now();
+  f.tables.session[0].modules.beerpongEnabled = false;
+  assert.deepEqual((await readActivity(f)).entries, all);
+  assert.ok(!(await f.read()).entries.some(entry => entry.userId === "a"));
+  const teammate = champion.memberUserIds.find(userId => userId !== "a");
+  assert.equal((await f.read()).entries.find(entry => entry.userId === teammate).beerpongScoreUnits, 15000);
+});
+
+test("completed tournaments accumulate points while unfinished, cancelled and foreign tournaments do not", async () => {
+  const f = await matchSetup(); await playAll(f); await runFinalize(f, f.tournamentId);
+  const initial = (await readActivity(f)).entries;
+  const id = await f.run(); await runDraw(f, id); await runStart(f, id); await playAll(f);
+  assert.deepEqual((await readActivity(f)).entries, initial);
+  f.tables.beerpongTournament[1].status = "cancelled";
+  assert.deepEqual((await readActivity(f)).entries, initial);
+  f.tables.beerpongTournament[1].status = "active";
+  await runFinalize(f, id);
+  const all = (await readActivity(f)).entries;
+  assert.equal(all.length, initial.length * 2);
+  assert.equal((await f.read()).entries.reduce((sum, entry) => sum + entry.beerpongScoreUnits, 0), 120000);
+  f.tables.beerpongTournament[1].sessionId = "foreign";
+  assert.deepEqual((await readActivity(f)).entries, initial);
 });

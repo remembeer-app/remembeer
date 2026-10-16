@@ -94,6 +94,51 @@ void main() {
   });
 
   test(
+    'activity decodes beerpong placement allocations and their filter',
+    () async {
+      final caller = _Caller()
+        ..response = {
+          'entries': [
+            {
+              'kind': 'beerpongPlacement',
+              'id': 'beerpong-award',
+              'occurredAt': 2000.0,
+              'participantIds': ['a', 'b'],
+              'tournamentId': 'tournament',
+              'tournamentName': 'Friday cup',
+              'teamId': 'team',
+              'teamName': 'The Bees',
+              'placement': 1.0,
+              'userId': 'a',
+              'scoreUnits': 15001.0,
+            },
+          ],
+          'users': <dynamic>[],
+          'hasMore': false,
+          'nextCursor': null,
+        };
+      final api = ConvexApi(caller).party;
+      final result = await api.activity(
+        sessionId: const SessionId('party'),
+        kinds: const Optional.of([
+          party.ActivityArgsKindsItem.beerpongPlacementValue,
+        ]),
+      );
+      final award = result.entries.single as party.BeerpongPlacement;
+      expect(award.tournamentId, const BeerpongTournamentId('tournament'));
+      expect(award.tournamentName, 'Friday cup');
+      expect(award.teamId, const BeerpongTeamId('team'));
+      expect(award.teamName, 'The Bees');
+      expect(award.placement, 1);
+      expect(award.userId, const UserId('a'));
+      expect(award.participantIds, [const UserId('a'), const UserId('b')]);
+      expect(award.scoreUnits, 15001);
+      expect(caller.args?['kinds'], ['beerpongPlacement']);
+      expect(api.activityQuery.encodeResult(result), caller.response);
+    },
+  );
+
+  test(
     'activity omits absent options and decodes an exhausted empty page',
     () async {
       final caller = _Caller()

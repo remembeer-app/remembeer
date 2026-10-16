@@ -39,6 +39,7 @@ function fixture() {
       beerpongOptIn: false,
     })),
     partyChallenge: [], partyQuest: [], drinkLog: [], drink: [], friendship: [], leaderboard: [], leaderboardMember: [], badge: [],
+    beerpongTournament: [], beerpongTeam: [], beerpongMatch: [],
   };
   const reads = [];
   const clock = questScheduler();

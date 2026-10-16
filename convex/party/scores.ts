@@ -2,6 +2,7 @@ import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { drinkScoreBreakdown } from "./scoring";
+import { loadBeerpongAwards } from "../beerpongTournament/scoring";
 
 export async function loadPartyScores(
   ctx: QueryCtx,
@@ -28,6 +29,7 @@ export async function loadPartyScores(
         classBonusScoreUnits: 0,
         questScoreUnits: 0,
         challengeScoreUnits: 0,
+        beerpongScoreUnits: 0,
         wonChallengeCount: 0,
         completedQuestCount: 0,
         scoreUnits: 0,
@@ -62,6 +64,10 @@ export async function loadPartyScores(
       entry.wonChallengeCount++;
     }
   }
+  for (const award of await loadBeerpongAwards(ctx, sessionId)) {
+    const entry = byId.get(award.userId);
+    if (entry) entry.beerpongScoreUnits += award.scoreUnits;
+  }
   const drinks = new Map<Id<"drink">, Doc<"drink">>();
   const logs = await ctx.db
     .query("drinkLog")
@@ -93,13 +99,15 @@ export async function loadPartyScores(
       entry.baseDrinkScoreUnits +
       entry.classBonusScoreUnits +
       entry.questScoreUnits +
-      entry.challengeScoreUnits;
+      entry.challengeScoreUnits +
+      entry.beerpongScoreUnits;
     if (
       ![
         entry.baseDrinkScoreUnits,
         entry.classBonusScoreUnits,
         entry.questScoreUnits,
         entry.challengeScoreUnits,
+        entry.beerpongScoreUnits,
         entry.scoreUnits,
       ].every(Number.isSafeInteger)
     )

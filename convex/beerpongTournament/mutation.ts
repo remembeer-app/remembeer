@@ -5,6 +5,7 @@ import { z } from "zod";
 import { authMutation } from "../lib/authenticated";
 import { requireEnabledPartyAdmin } from "./access";
 import { createBracket } from "./bracket";
+import { loadTournamentAwards } from "./scoring";
 import {
   maxTournamentNameLength,
   minTeamCount,
@@ -139,5 +140,23 @@ export const start = authMutation
     const now = Date.now();
     await createBracket(ctx, tournament, teams.map((team) => team._id), now);
     await ctx.db.patch("beerpongTournament", id, { status: "active", updatedAt: now });
+    return null;
+  });
+
+export const finalize = authMutation
+  .input({ id: v.id("beerpongTournament") })
+  .returns(v.null())
+  .handler(async (ctx, { id }) => {
+    const tournament = await ctx.db.get("beerpongTournament", id);
+    if (!tournament) throw new ConvexError("Tournament not found");
+    await requireEnabledPartyAdmin(ctx, tournament.sessionId);
+    if (tournament.status === "completed") return null;
+    if (tournament.status !== "active")
+      throw new ConvexError("Only an active tournament can be finalized");
+    await loadTournamentAwards(ctx, tournament);
+    const now = Date.now();
+    await ctx.db.patch("beerpongTournament", id, {
+      status: "completed", completedAt: now, updatedAt: now,
+    });
     return null;
   });

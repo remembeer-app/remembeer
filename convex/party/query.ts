@@ -24,6 +24,7 @@ export const standings = authQuery
           classBonusScoreUnits: v.number(),
           questScoreUnits: v.number(),
           challengeScoreUnits: v.number(),
+          beerpongScoreUnits: v.number(),
           wonChallengeCount: v.number(),
           completedQuestCount: v.number(),
           drinkCount: v.number(),

@@ -5,6 +5,7 @@ import { requireSessionAccess } from "../session/access";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
 import { drinkCategoryValidator } from "../drink/schema";
 import { drinkScoreBreakdown } from "./scoring";
+import { loadBeerpongAwards } from "../beerpongTournament/scoring";
 import {
   partyActivityDefaultPageSize,
   partyActivityMaxPageSize,
@@ -15,6 +16,7 @@ const kindValidator = v.union(
   v.literal("drinkLog"),
   v.literal("socialQuest"),
   v.literal("partyChallenge"),
+  v.literal("beerpongPlacement"),
 );
 const common = {
   id: v.string(),
@@ -22,6 +24,17 @@ const common = {
   participantIds: v.array(v.id("user")),
 };
 const entryValidator = v.union(
+  v.object({
+    ...common,
+    kind: v.literal("beerpongPlacement"),
+    tournamentId: v.id("beerpongTournament"),
+    tournamentName: v.string(),
+    teamId: v.id("beerpongTeam"),
+    teamName: v.string(),
+    placement: v.number(),
+    userId: v.id("user"),
+    scoreUnits: v.number(),
+  }),
   v.object({
     ...common,
     kind: v.literal("partyChallenge"),
@@ -106,7 +119,7 @@ export const activity = authQuery
           `Page size must be an integer from 1 to ${partyActivityMaxPageSize}`,
         );
       const now = Date.now();
-      const [members, logs, quests, challenges] = await Promise.all([
+      const [members, logs, quests, challenges, beerpongAwards] = await Promise.all([
         ctx.db
           .query("sessionMember")
           .withIndex("by_sessionId_and_userId", (q) =>
@@ -129,6 +142,7 @@ export const activity = authQuery
             q.eq("sessionId", sessionId),
           )
           .collect(),
+        loadBeerpongAwards(ctx, sessionId),
       ]);
       const classes = new Map(
         members.map((member) => [
@@ -211,6 +225,13 @@ export const activity = authQuery
             scoreUnits: challenge.pointsUnits,
           });
         }
+      }
+      for (const award of beerpongAwards) {
+        entries.push({
+          ...award,
+          kind: "beerpongPlacement",
+          id: JSON.stringify(["beerpongPlacement", award.tournamentId, award.teamId, award.userId]),
+        });
       }
       const filtered = entries
         .filter(

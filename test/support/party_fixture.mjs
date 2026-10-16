@@ -14,6 +14,7 @@ export function fixture(standings) {
     drink: [{ _id: "beer", name: "Beer", drinkCategory: { kind: "beer" }, alcoholPercentage: 5, deletedAt: null },
       { _id: "wine", name: "Wine", drinkCategory: { kind: "wine" }, alcoholPercentage: 12, deletedAt: null }],
     drinkLog: [], partyChallenge: [], partyQuest: [],
+    beerpongTournament: [], beerpongTeam: [], beerpongMatch: [],
   };
   const reads = [];
   const db = {

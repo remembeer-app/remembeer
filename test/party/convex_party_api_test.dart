@@ -16,11 +16,12 @@ void main() {
       expect(entry.user?.username, 'Alice');
       expect(entry.selectedClass, const Beer());
       expect(entry.rank, 1);
-      expect(entry.scoreUnits, 52500);
+      expect(entry.scoreUnits, 62501);
       expect(entry.baseDrinkScoreUnits, 25000);
       expect(entry.classBonusScoreUnits, 2500);
       expect(entry.questScoreUnits, 25000);
       expect(entry.challengeScoreUnits, 0);
+      expect(entry.beerpongScoreUnits, 10001);
       expect(entry.wonChallengeCount, 0);
       expect(entry.completedQuestCount, 1);
       expect(entry.drinkCount, 1);
@@ -67,11 +68,12 @@ const _entry = <String, dynamic>{
   },
   'selectedClass': {'kind': 'beer'},
   'rank': 1,
-  'scoreUnits': 52500,
+  'scoreUnits': 62501,
   'baseDrinkScoreUnits': 25000,
   'classBonusScoreUnits': 2500,
   'questScoreUnits': 25000,
   'challengeScoreUnits': 0,
+  'beerpongScoreUnits': 10001,
   'wonChallengeCount': 0,
   'completedQuestCount': 1,
   'drinkCount': 1,

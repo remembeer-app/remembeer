@@ -46,6 +46,17 @@ class BeerpongTournamentApi {
   ConvexMutationReference<DrawArgs, void> get drawMutation =>
       drawMutationReference;
 
+  Future<Null> finalize({required BeerpongTournamentId id}) async {
+    await _client.mutate(
+      'beerpongTournament:finalize',
+      _encodeFinalizeArgs((id: id)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<FinalizeArgs, void> get finalizeMutation =>
+      finalizeMutationReference;
+
   Future<Null> start({required BeerpongTournamentId id}) async {
     await _client.mutate(
       'beerpongTournament:start',
@@ -162,6 +173,23 @@ DrawArgs _decodeDrawArgs(dynamic raw) {
   );
 }
 
+typedef FinalizeArgs = ({BeerpongTournamentId id});
+
+Map<String, dynamic> _encodeFinalizeArgs(FinalizeArgs value$) {
+  final (id: id) = value$;
+  return <String, dynamic>{'id': id.value};
+}
+
+FinalizeArgs _decodeFinalizeArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'FinalizeArgs');
+  if (!map.containsKey('id')) {
+    throw FormatException('Missing required field "id" for FinalizeArgs');
+  }
+  return (
+    id: BeerpongTournamentId(expectString(map['id'], label: 'FinalizeArgsId')),
+  );
+}
+
 typedef StartArgs = ({BeerpongTournamentId id});
 
 Map<String, dynamic> _encodeStartArgs(StartArgs value$) {
@@ -191,6 +219,13 @@ final ConvexMutationReference<DrawArgs, void> drawMutationReference =
     ConvexMutationReference(
       name: 'beerpongTournament:draw',
       encode: (args) => _encodeDrawArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexMutationReference<FinalizeArgs, void> finalizeMutationReference =
+    ConvexMutationReference(
+      name: 'beerpongTournament:finalize',
+      encode: (args) => _encodeFinalizeArgs(args),
       decode: (raw) => null,
     );
 
