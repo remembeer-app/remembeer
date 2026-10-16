@@ -18,6 +18,7 @@ import type * as beerpongTeam_constants from "../beerpongTeam/constants.js";
 import type * as beerpongTeam_mutation from "../beerpongTeam/mutation.js";
 import type * as beerpongTournament from "../beerpongTournament.js";
 import type * as beerpongTournament_access from "../beerpongTournament/access.js";
+import type * as beerpongTournament_bracket from "../beerpongTournament/bracket.js";
 import type * as beerpongTournament_constants from "../beerpongTournament/constants.js";
 import type * as beerpongTournament_mutation from "../beerpongTournament/mutation.js";
 import type * as drink from "../drink.js";
@@ -99,6 +100,7 @@ declare const fullApi: ApiFromModules<{
   "beerpongTeam/mutation": typeof beerpongTeam_mutation;
   beerpongTournament: typeof beerpongTournament;
   "beerpongTournament/access": typeof beerpongTournament_access;
+  "beerpongTournament/bracket": typeof beerpongTournament_bracket;
   "beerpongTournament/constants": typeof beerpongTournament_constants;
   "beerpongTournament/mutation": typeof beerpongTournament_mutation;
   drink: typeof drink;

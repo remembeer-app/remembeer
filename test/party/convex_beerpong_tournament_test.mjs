@@ -5,7 +5,7 @@ import { fixture } from "../support/party_fixture.mjs";
 
 const { outputFiles } = await build({
   stdin: {
-    contents: 'export { create, draw } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam";',
+    contents: 'export { create, draw, start } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam";',
     resolveDir: process.cwd(),
   },
   bundle: true, platform: "node", format: "esm", write: false,
@@ -16,7 +16,7 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { create, draw, teams } = await import(
+const { create, draw, start, teams } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`,
 );
 
@@ -58,6 +58,7 @@ function enroll(f, userId) {
 }
 
 const runDraw = (f, id, actor = "owner") => draw._handler(f.ctx(actor), { id });
+const runStart = (f, id, actor = "owner") => start._handler(f.ctx(actor), { id });
 
 test("owner and joined admins create enrollment tournaments without drawing teams", async () => {
   const f = setup();
@@ -373,4 +374,157 @@ test("team names are trimmed and bounded; missing teams/tournaments and foreign 
   for (const [name, args] of teamActions(f)) await assert.rejects(f.runTeam(name, args), /permission/);
   f.tables.beerpongTournament = [];
   await assert.rejects(f.runTeam("rename", { id: f.first._id, name: "New" }), /Tournament not found/);
+});
+
+test("start builds valid single-elimination brackets for every supported team count", async () => {
+  for (let teamCount = 2; teamCount <= 16; teamCount++) {
+    for (const thirdPlaceEnabled of [false, true]) {
+      const f = setup();
+      const id = await f.run({ teamCount, thirdPlaceEnabled });
+      for (let index = 0; index < teamCount; index++) enroll(f, `p${index}`);
+      await runDraw(f, id);
+      const roster = structuredClone(f.tables.beerpongTeam);
+      const before = Date.now();
+      assert.equal(await runStart(f, id, "b"), null);
+      const matches = f.tables.beerpongMatch;
+      const size = 2 ** Math.ceil(Math.log2(teamCount));
+      const rounds = Math.log2(size);
+      const main = matches.filter(match => match.kind === "main");
+      const bronze = matches.filter(match => match.kind === "thirdPlace");
+      assert.equal(main.length, size - 1);
+      assert.equal(bronze.length, thirdPlaceEnabled && teamCount >= 4 ? 1 : 0);
+      assert.deepEqual(f.tables.beerpongTeam, roster);
+      assert.equal(f.tables.beerpongTournament[0].status, "active");
+      const timestamp = f.tables.beerpongTournament[0].updatedAt;
+      assert.ok(timestamp >= before && timestamp <= Date.now());
+      assert.equal(f.tables.beerpongTournament[0].completedAt, null);
+      const firstRound = main.filter(match => match.round === 1);
+      const slots = firstRound.flatMap(match => [match.slotA, match.slotB]);
+      assert.deepEqual(slots.filter(slot => slot.kind === "team").map(slot => slot.teamId).toSorted(),
+        roster.map(team => team._id).toSorted());
+      assert.equal(slots.filter(slot => slot.kind === "bye").length, size - teamCount);
+      assert.equal(main.filter(match => match.winnerTeamId !== null).length, size - teamCount);
+      const byId = new Map(matches.map(match => [match._id, match]));
+      const positions = new Set();
+      for (const match of matches) {
+        assert.equal(match.tournamentId, id);
+        assert.equal(match.updatedAt, timestamp);
+        const key = `${match.round}:${match.position}`;
+        assert.ok(!positions.has(key)); positions.add(key);
+        for (const slot of [match.slotA, match.slotB]) {
+          if (slot.kind === "winner" || slot.kind === "loser") {
+            const source = byId.get(slot.matchId);
+            assert.ok(source);
+            assert.equal(source.round, match.round - 1);
+            assert.equal(source.kind, "main");
+          }
+        }
+        if ([match.slotA, match.slotB].some(slot => slot.kind === "bye")) {
+          const opponent = [match.slotA, match.slotB].find(slot => slot.kind === "team");
+          assert.ok(opponent);
+          assert.equal(match.winnerTeamId, opponent.teamId);
+          assert.equal(match.completedAt, timestamp);
+        } else {
+          assert.equal(match.winnerTeamId, null);
+          assert.equal(match.completedAt, null);
+        }
+      }
+      for (let round = 1; round <= rounds; round++)
+        assert.equal(main.filter(match => match.round === round).length, size / (2 ** round));
+      if (bronze.length) {
+        assert.equal(bronze[0].round, rounds);
+        const final = main.find(match => match.round === rounds);
+        assert.deepEqual([bronze[0].slotA, bronze[0].slotB],
+          [final.slotA, final.slotB].map(slot => ({ ...slot, kind: "loser" })));
+      }
+      // Resolve a complete hypothetical tournament to verify every path is playable.
+      const outcomes = new Map();
+      const resolve = slot => slot.kind === "bye" ? null : slot.kind === "team"
+        ? slot.teamId : outcomes.get(slot.matchId)[slot.kind];
+      let games = 0;
+      for (const match of matches) {
+        const a = resolve(match.slotA); const b = resolve(match.slotB);
+        assert.ok(a || b);
+        if (a && b) { assert.notEqual(a, b); games++; }
+        outcomes.set(match._id, { winner: a ?? b, loser: a && b ? b : null });
+      }
+      assert.equal(games, teamCount - 1 + bronze.length);
+      const saved = structuredClone(f.tables);
+      await assert.rejects(runStart(f, id), /setup/);
+      assert.deepEqual(f.tables, saved);
+    }
+  }
+});
+
+test("start shuffles team positions independently of the earlier player draw", async () => {
+  const f = setup();
+  const id = await f.run({ teamCount: 4 });
+  for (let index = 0; index < 4; index++) enroll(f, `p${index}`);
+  await runDraw(f, id);
+  const original = Math.random;
+  let calls = 0;
+  Math.random = () => { calls++; return 0; };
+  try { await runStart(f, id); } finally { Math.random = original; }
+  assert.equal(calls, 3);
+  const ids = f.tables.beerpongTeam.map(team => team._id);
+  const slots = f.tables.beerpongMatch.filter(match => match.round === 1)
+    .flatMap(match => [match.slotA.teamId, match.slotB.teamId]);
+  assert.deepEqual(slots, [ids[1], ids[0], ids[2], ids[3]]);
+});
+
+test("start enforces admin access, setup status, and ongoing enabled party state", async () => {
+  const f = await teamSetup();
+  for (const actor of ["a", "other", "invited", "left", "banned"]) {
+    if (["invited", "left", "banned"].includes(actor)) f.member(actor).sessionMemberRole.kind = "admin";
+    await assert.rejects(runStart(f, f.tournamentId, actor), /permission/);
+  }
+  await assert.rejects(runStart(f, "missing"), /Tournament not found/);
+  for (const status of ["enrollment", "active", "completed", "cancelled"]) {
+    f.tables.beerpongTournament[0].status = status;
+    await assert.rejects(runStart(f, f.tournamentId), /setup/);
+  }
+  assert.deepEqual(f.tables.beerpongMatch, []);
+  for (const [fields, error] of [
+    [{ kind: "session" }, /party/], [{ endedAt: 1000 }, /read-only/],
+    [{ deletedAt: 1000 }, /not found/], [{ modules: { beerpongEnabled: false } }, /disabled/],
+  ]) {
+    const f = await teamSetup();
+    Object.assign(f.tables.session[0], fields);
+    const saved = structuredClone(f.tables);
+    await assert.rejects(runStart(f, f.tournamentId), error);
+    assert.deepEqual(f.tables, saved);
+  }
+  const other = await teamSetup();
+  other.tables.session.push({ ...other.tables.session[0], _id: "private", ownerId: "other" });
+  other.tables.beerpongTournament[0].sessionId = "private";
+  await assert.rejects(runStart(other, other.tournamentId), /permission/);
+});
+
+test("invalid rosters, team counts, or an existing bracket prevent start without writes", async () => {
+  for (const [change, error] of [
+    [f => { f.first.memberUserIds = []; }, /at least one/],
+    [f => { f.tables.beerpongTeam.pop(); }, /team count/],
+    [f => { f.second.memberUserIds.push(f.first.memberUserIds[0]); }, /multiple teams/],
+    [f => { f.first.memberUserIds.push(f.first.memberUserIds[0]); }, /multiple teams/],
+    [f => { f.member(f.first.memberUserIds[0]).sessionMemberStatus.kind = "left"; }, /joined party/],
+    [f => { f.member(f.first.memberUserIds[0]).kind = "sessionMember"; }, /joined party/],
+    [f => { f.tables.beerpongMatch.push({ _id: "existing", tournamentId: f.tournamentId }); }, /already has a bracket/],
+  ]) {
+    const f = await teamSetup(); change(f);
+    const saved = structuredClone(f.tables);
+    await assert.rejects(runStart(f, f.tournamentId), error);
+    assert.deepEqual(f.tables, saved);
+  }
+});
+
+test("start isolates tournaments and ignores opt-in changes after the draw", async () => {
+  const f = await teamSetup();
+  const other = await f.run({ teamCount: 2 });
+  await runDraw(f, other);
+  for (const member of f.tables.sessionMember) member.beerpongOptIn = false;
+  await runStart(f, f.tournamentId);
+  assert.ok(f.tables.beerpongMatch.every(match => match.tournamentId === f.tournamentId));
+  assert.equal(f.tables.beerpongTournament.find(row => row._id === other).status, "setup");
+  await runStart(f, other);
+  assert.equal(f.tables.beerpongMatch.filter(match => match.tournamentId === other).length, 1);
 });
