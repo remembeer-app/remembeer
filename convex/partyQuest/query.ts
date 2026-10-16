@@ -3,6 +3,9 @@ import type { Doc } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
 import { requireSessionAccess } from "../session/access";
 import { schema } from "../schema";
+import { loadQuestContext } from "./context";
+import { eligiblePairs } from "./eligibility";
+import { publicUser, publicUserValidator } from "../user/publicProfile";
 
 function visibleQuest(
   quest: Doc<"partyQuest">,
@@ -52,4 +55,51 @@ export const listForSession = authQuery
       .order("desc")
       .collect();
     return quests.map((quest) => visibleQuest(quest, session, ctx.user._id));
+  });
+
+// Partner eligibility is evaluated by the same rules used to confirm a pair.
+export const partners = authQuery
+  .input({ questId: v.id("partyQuest") })
+  .returns(v.array(publicUserValidator))
+  .handler(async (ctx, { questId }) => {
+    const quest = await ctx.db.get("partyQuest", questId);
+    if (!quest) throw new ConvexError("Quest not found");
+    const { session } = await requireSessionAccess(
+      ctx,
+      quest.sessionId,
+      "joined",
+    );
+    const now = Date.now();
+    if (
+      session.kind !== "party" ||
+      session.endedAt !== null ||
+      !session.modules.socialQuestsEnabled ||
+      quest.status !== "active" ||
+      now < quest.startsAt ||
+      now >= quest.endsAt
+    )
+      return [];
+    const completed = new Set(
+      quest.results.flatMap((result) => [
+        result.firstUserId,
+        result.secondUserId,
+      ]),
+    );
+    if (completed.has(ctx.user._id)) return [];
+    const { players, previousPairs, finalistTeamIds } = await loadQuestContext(
+      ctx,
+      quest.sessionId,
+      now,
+    );
+    const ids = eligiblePairs(quest, players, previousPairs, finalistTeamIds)
+      .flatMap((pair) =>
+        pair.firstUserId === ctx.user._id
+          ? [pair.secondUserId]
+          : pair.secondUserId === ctx.user._id
+            ? [pair.firstUserId]
+            : [],
+      )
+      .filter((id) => !completed.has(id));
+    const users = await Promise.all(ids.map((id) => publicUser(ctx, id)));
+    return users.filter((user) => user !== null);
   });

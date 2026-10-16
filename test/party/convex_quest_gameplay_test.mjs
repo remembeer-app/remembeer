@@ -657,3 +657,45 @@ test("completed tournaments retain finalist eligibility", async () => {
   await f.select(quest._id, "a", "c");
   assert.equal(await f.select(quest._id, "c", "a"), true);
 });
+
+test("partner query uses live eligibility, hides completed participants, and never exposes private choices", async () => {
+  const f = fixture(); await f.enable(0.99999);
+  const quest = f.tables.partyQuest.at(-1);
+  const partners = actor => q.partners(f.ctx(actor), { questId: quest._id });
+  assert.deepEqual((await partners("a")).map(user => user._id), ["b", "c"]);
+  assert.deepEqual(await partners("owner"), []); // No selected class.
+  assert.ok((await partners("a")).every(user => Object.keys(user).sort().join() === "_id,accentColor,avatarUrl,username"));
+  await f.select(quest._id, "b", "a");
+  assert.deepEqual((await partners("a")).map(user => user._id), ["b", "c"]);
+  await f.select(quest._id, "a", "b");
+  assert.deepEqual(await partners("a"), []);
+  assert.deepEqual(await partners("c"), []);
+  await assert.rejects(partners("other"), /permission/);
+  await assert.rejects(q.partners(f.ctx("a"), { questId: "missing" }), /not found/);
+});
+
+test("partner query reflects beerpong rosters and disables selection for inactive quests and parties", async () => {
+  const f = beerpongFixture(); await f.enable(0.99999);
+  const quest = f.tables.partyQuest.at(-1);
+  const partners = () => q.partners(f.ctx("a"), { questId: quest._id });
+  assert.deepEqual((await partners()).map(user => user._id), ["b"]);
+  f.tables.beerpongTeam[0].memberUserIds = ["a"];
+  assert.deepEqual(await partners(), []);
+  f.tables.beerpongTeam[0].memberUserIds = ["a", "b"];
+  f.player("b").sessionMemberStatus.kind = "left";
+  assert.deepEqual(await partners(), []);
+  f.player("b").sessionMemberStatus.kind = "joined";
+  for (const status of ["expired", "cancelled"]) {
+    quest.status = status;
+    assert.deepEqual(await partners(), []);
+  }
+  quest.status = "active";
+  quest.endsAt = Date.now() - 1;
+  assert.deepEqual(await partners(), []);
+  quest.endsAt = Date.now() + 60000;
+  f.tables.session[0].modules.socialQuestsEnabled = false;
+  assert.deepEqual(await partners(), []);
+  f.tables.session[0].modules.socialQuestsEnabled = true;
+  f.tables.session[0].endedAt = Date.now();
+  assert.deepEqual(await partners(), []);
+});

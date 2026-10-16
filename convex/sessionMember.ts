@@ -14,3 +14,5 @@ export const setRole = mutation.setRole.public();
 export const setClass = mutation.setClass.public();
 
 export const findInvitee = query.findInvitee.public();
+
+export const setBeerpongOptIn = mutation.setBeerpongOptIn.public();

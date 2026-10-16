@@ -11,3 +11,5 @@ export const listForSession = query.listForSession.public();
 export const setSchedule = mutation.setSchedule.public();
 export const expire = scheduled.expire.internal();
 export const issue = scheduled.issue.internal();
+
+export const partners = query.partners.public();

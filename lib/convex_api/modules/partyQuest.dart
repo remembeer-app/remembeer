@@ -104,6 +104,56 @@ class PartyQuestApi {
   ConvexQueryReference<ListForSessionArgs, List<PartyQuestDocument>>
   get listForSessionQuery => listForSessionQueryReference;
 
+  Future<List<PartnersResultItem>> partners({
+    required PartyQuestId questId,
+  }) async {
+    final raw$ = await _client.query(
+      'partyQuest:partners',
+      _encodePartnersArgs((questId: questId)),
+    );
+    return expectList(
+      raw$,
+      label: 'PartnersResult',
+    ).map((item) => _decodePartnersResultItem(item)).toList();
+  }
+
+  TypedConvexSubscription<List<PartnersResultItem>> partnersSubscribe({
+    required PartyQuestId questId,
+  }) {
+    final subscription$ = _client.subscribe(
+      'partyQuest:partners',
+      _encodePartnersArgs((questId: questId)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<List<PartnersResultItem>>(
+            expectList(
+              value,
+              label: 'PartnersResult',
+            ).map((item) => _decodePartnersResultItem(item)).toList(),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<List<PartnersResultItem>>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<List<PartnersResultItem>>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<List<PartnersResultItem>>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<PartnersArgs, List<PartnersResultItem>>
+  get partnersQuery => partnersQueryReference;
+
   Future<bool> selectPartner({
     required PartyQuestId questId,
     required UserId selectedUserId,
@@ -2169,6 +2219,121 @@ ListForSessionArgs _decodeListForSessionArgs(dynamic raw) {
   );
 }
 
+enum PartnersResultItemAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const PartnersResultItemAccentColor(this.value);
+  final Object? value;
+
+  static PartnersResultItemAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return PartnersResultItemAccentColor.amberValue;
+      case 'rose':
+        return PartnersResultItemAccentColor.roseValue;
+      case 'violet':
+        return PartnersResultItemAccentColor.violetValue;
+      case 'sky':
+        return PartnersResultItemAccentColor.skyValue;
+      case 'emerald':
+        return PartnersResultItemAccentColor.emeraldValue;
+      case 'lime':
+        return PartnersResultItemAccentColor.limeValue;
+      case 'orange':
+        return PartnersResultItemAccentColor.orangeValue;
+      case 'fuchsia':
+        return PartnersResultItemAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for PartnersResultItemAccentColor',
+        );
+    }
+  }
+}
+
+typedef PartnersResultItem = ({
+  UserId id,
+  PartnersResultItemAccentColor accentColor,
+  String? avatarUrl,
+  String username,
+});
+
+Map<String, dynamic> _encodePartnersResultItem(PartnersResultItem value$) {
+  final (
+    id: id,
+    accentColor: accentColor,
+    avatarUrl: avatarUrl,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_id': id.value,
+    'accentColor': accentColor.value,
+    'avatarUrl': avatarUrl,
+    'username': username,
+  };
+}
+
+PartnersResultItem _decodePartnersResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'PartnersResultItem');
+  if (!map.containsKey('_id')) {
+    throw FormatException(
+      'Missing required field "_id" for PartnersResultItem',
+    );
+  }
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for PartnersResultItem',
+    );
+  }
+  if (!map.containsKey('avatarUrl')) {
+    throw FormatException(
+      'Missing required field "avatarUrl" for PartnersResultItem',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for PartnersResultItem',
+    );
+  }
+  return (
+    id: UserId(expectString(map['_id'], label: 'PartnersResultItemId')),
+    accentColor: PartnersResultItemAccentColor.fromJson(map['accentColor']),
+    avatarUrl: map['avatarUrl'] == null
+        ? null
+        : expectString(map['avatarUrl'], label: 'PartnersResultItemAvatarUrl'),
+    username: expectString(
+      map['username'],
+      label: 'PartnersResultItemUsername',
+    ),
+  );
+}
+
+typedef PartnersArgs = ({PartyQuestId questId});
+
+Map<String, dynamic> _encodePartnersArgs(PartnersArgs value$) {
+  final (questId: questId) = value$;
+  return <String, dynamic>{'questId': questId.value};
+}
+
+PartnersArgs _decodePartnersArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'PartnersArgs');
+  if (!map.containsKey('questId')) {
+    throw FormatException('Missing required field "questId" for PartnersArgs');
+  }
+  return (
+    questId: PartyQuestId(
+      expectString(map['questId'], label: 'PartnersArgsQuestId'),
+    ),
+  );
+}
+
 typedef SelectPartnerArgs = ({PartyQuestId questId, UserId selectedUserId});
 
 Map<String, dynamic> _encodeSelectPartnerArgs(SelectPartnerArgs value$) {
@@ -2335,6 +2500,19 @@ listForSessionQueryReference = ConvexQueryReference(
   ).map((item) => _decodePartyQuestDocument(item)).toList(),
   encodeResult: (value) =>
       value.map((item) => _encodePartyQuestDocument(item)).toList(),
+);
+
+final ConvexQueryReference<PartnersArgs, List<PartnersResultItem>>
+partnersQueryReference = ConvexQueryReference(
+  name: 'partyQuest:partners',
+  encode: (args) => _encodePartnersArgs(args),
+  decodeArgs: (raw) => _decodePartnersArgs(raw),
+  decode: (raw) => expectList(
+    raw,
+    label: 'PartnersResult',
+  ).map((item) => _decodePartnersResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodePartnersResultItem(item)).toList(),
 );
 
 final ConvexMutationReference<SelectPartnerArgs, bool>

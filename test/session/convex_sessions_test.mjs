@@ -178,16 +178,17 @@ test("party promotion converts all memberships and party invitations preserve ga
   assert.ok(roster.every((row) => row.member.kind === "partyMember" && row.member.sessionMemberStatus.kind === "joined"));
 });
 
-test("only party admins assign and clear classes of joined members", async () => {
+test("members choose their own class while admins manage joined member classes", async () => {
   const f = fixture(); const id = await f.create();
   await f.join(id, "admin"); await f.join(id, "member");
   await members.setRole(f.owner, { ...target(id, "admin"), role: { kind: "admin" } });
   const input = { ...target(id, "member"), selectedClass: { kind: "beer" } };
   await assert.rejects(members.setClass(f.owner, input), /ongoing parties/);
   await sessions.promoteToParty(f.owner, { id });
-  for (const actor of ["member", "other"]) {
-    await assert.rejects(members.setClass(f.ctx(actor), input), /permission/);
-  }
+  await members.setClass(f.ctx("member"), input);
+  assert.deepEqual(f.member(id, "member").selectedClass, { kind: "beer" });
+  await assert.rejects(members.setClass(f.ctx("other"), input), /permission/);
+  await assert.rejects(members.setClass(f.ctx("member"), { ...input, userId: "admin" }), /permission/);
   await members.setClass(f.owner, input);
   const assigned = structuredClone(f.member(id, "member"));
   assert.deepEqual(assigned.selectedClass, { kind: "beer" });
@@ -437,4 +438,28 @@ test("drink creates and updates reject future instants, including unchanged lega
     const pastId = await logs.create(f.owner, { ...input, consumedAt: now - 86400000 });
     assert.equal(f.tables.drinkLog.find(log => log._id === pastId).consumedAt, now - 86400000);
   } finally { Date.now = originalNow; }
+});
+
+
+test("beerpong opt-in belongs to the current joined member of an ongoing enabled party", async () => {
+  const f = fixture(); const id = await f.create(); await f.join(id, "member");
+  const input = { sessionId: id, optedIn: true };
+  await assert.rejects(members.setBeerpongOptIn(f.ctx("member"), input), /ongoing party/);
+  await sessions.promoteToParty(f.owner, { id });
+  await assert.rejects(members.setBeerpongOptIn(f.ctx("member"), input), /beerpong enabled/);
+  f.tables.session[0].modules.beerpongEnabled = true;
+  await members.setBeerpongOptIn(f.ctx("member"), input);
+  assert.equal(f.member(id, "member").beerpongOptIn, true);
+  assert.equal(f.member(id, "owner").beerpongOptIn, false);
+  await members.setBeerpongOptIn(f.ctx("member"), { ...input, optedIn: false });
+  assert.equal(f.member(id, "member").beerpongOptIn, false);
+  await assert.rejects(members.setBeerpongOptIn(f.ctx("other"), input), /permission/);
+  await members.invite(f.owner, target(id, "invitee"));
+  await assert.rejects(members.setBeerpongOptIn(f.ctx("invitee"), input), /permission/);
+  await members.leave(f.ctx("member"), { sessionId: id });
+  await assert.rejects(members.setBeerpongOptIn(f.ctx("member"), input), /permission/);
+  await sessions.update(f.owner, { id, endedAt: 2000 });
+  await assert.rejects(members.setBeerpongOptIn(f.owner, input), /ongoing party/);
+  await sessions.softDelete(f.owner, { id });
+  await assert.rejects(members.setBeerpongOptIn(f.owner, input), /not found/);
 });

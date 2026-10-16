@@ -235,6 +235,20 @@ class SessionMemberApi {
   ConvexMutationReference<RemoveArgs, void> get removeMutation =>
       removeMutationReference;
 
+  Future<Null> setBeerpongOptIn({
+    required bool optedIn,
+    required SessionId sessionId,
+  }) async {
+    await _client.mutate(
+      'sessionMember:setBeerpongOptIn',
+      _encodeSetBeerpongOptInArgs((optedIn: optedIn, sessionId: sessionId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<SetBeerpongOptInArgs, void>
+  get setBeerpongOptInMutation => setBeerpongOptInMutationReference;
+
   Future<Null> setClass({
     required DrinkCategory? selectedClass,
     required SessionId sessionId,
@@ -1281,6 +1295,33 @@ RemoveArgs _decodeRemoveArgs(dynamic raw) {
   );
 }
 
+typedef SetBeerpongOptInArgs = ({bool optedIn, SessionId sessionId});
+
+Map<String, dynamic> _encodeSetBeerpongOptInArgs(SetBeerpongOptInArgs value$) {
+  final (optedIn: optedIn, sessionId: sessionId) = value$;
+  return <String, dynamic>{'optedIn': optedIn, 'sessionId': sessionId.value};
+}
+
+SetBeerpongOptInArgs _decodeSetBeerpongOptInArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SetBeerpongOptInArgs');
+  if (!map.containsKey('optedIn')) {
+    throw FormatException(
+      'Missing required field "optedIn" for SetBeerpongOptInArgs',
+    );
+  }
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for SetBeerpongOptInArgs',
+    );
+  }
+  return (
+    optedIn: expectBool(map['optedIn'], label: 'SetBeerpongOptInArgsOptedIn'),
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'SetBeerpongOptInArgsSessionId'),
+    ),
+  );
+}
+
 typedef SetClassArgs = ({
   DrinkCategory? selectedClass,
   SessionId sessionId,
@@ -1467,6 +1508,13 @@ final ConvexMutationReference<RemoveArgs, void> removeMutationReference =
       encode: (args) => _encodeRemoveArgs(args),
       decode: (raw) => null,
     );
+
+final ConvexMutationReference<SetBeerpongOptInArgs, void>
+setBeerpongOptInMutationReference = ConvexMutationReference(
+  name: 'sessionMember:setBeerpongOptIn',
+  encode: (args) => _encodeSetBeerpongOptInArgs(args),
+  decode: (raw) => null,
+);
 
 final ConvexMutationReference<SetClassArgs, void> setClassMutationReference =
     ConvexMutationReference(

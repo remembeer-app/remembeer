@@ -5,7 +5,7 @@ import { fixture } from "../support/party_fixture.mjs";
 
 const { outputFiles } = await build({
   stdin: {
-    contents: 'export { create, draw, start, finalize, get as getTournament, listForSession } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam"; export * as results from "./convex/beerpongMatch"; export { standings } from "./convex/party/query"; export { activity } from "./convex/party/activity"; export { loadQuestContext } from "./convex/partyQuest/context";',
+    contents: 'export { create, draw, start, finalize, setEnabled, get as getTournament, listForSession } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam"; export * as results from "./convex/beerpongMatch"; export { standings } from "./convex/party/query"; export { activity } from "./convex/party/activity"; export { loadQuestContext } from "./convex/partyQuest/context";',
     resolveDir: process.cwd(),
   },
   bundle: true, platform: "node", format: "esm", write: false,
@@ -16,7 +16,7 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { create, draw, start, finalize, getTournament, listForSession, teams, results, standings, activity, loadQuestContext } = await import(
+const { create, draw, start, finalize, setEnabled, getTournament, listForSession, teams, results, standings, activity, loadQuestContext } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`,
 );
 
@@ -1044,4 +1044,25 @@ test("quest finalists follow recorded semifinal results and corrections", async 
   assert.deepEqual([...(await context()).finalistTeamIds], [first]);
   await f.runResult("correctResult", semi._id, second);
   assert.deepEqual([...(await context()).finalistTeamIds], [second]);
+});
+
+
+test("beerpong module toggles require an ongoing party admin and preserve other modules", async () => {
+  const f = setup();
+  Object.assign(f.tables.session[0].modules, { socialQuestsEnabled: true, partyChallengesEnabled: true });
+  const input = { sessionId: "party", enabled: false };
+  for (const actor of ["a", "other", "invited", "left", "banned"])
+    await assert.rejects(setEnabled._handler(f.ctx(actor), input), /permission/);
+  await setEnabled._handler(f.ctx("owner"), input);
+  assert.deepEqual(f.tables.session[0].modules, { beerpongEnabled: false, socialQuestsEnabled: true, partyChallengesEnabled: true });
+  await setEnabled._handler(f.ctx("b"), { ...input, enabled: true });
+  assert.equal(f.tables.session[0].modules.beerpongEnabled, true);
+  for (const patch of [{ kind: "session" }, { endedAt: 1 }]) {
+    const saved = structuredClone(f.tables.session[0]);
+    Object.assign(f.tables.session[0], patch);
+    await assert.rejects(setEnabled._handler(f.ctx("owner"), input), /ongoing party/);
+    Object.assign(f.tables.session[0], saved);
+  }
+  f.tables.session[0].deletedAt = 1;
+  await assert.rejects(setEnabled._handler(f.ctx("owner"), input), /not found/);
 });

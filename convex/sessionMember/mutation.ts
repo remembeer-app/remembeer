@@ -169,11 +169,17 @@ export const setRole = authMutation
 export const setClass = authMutation
   .extend(WithZod)
   .input(
-    convexToZod(partyMemberValidator.pick("sessionId", "userId", "selectedClass")),
+    convexToZod(
+      partyMemberValidator.pick("sessionId", "userId", "selectedClass"),
+    ),
   )
   .returns(v.null())
   .handler(async (ctx, { sessionId, userId, selectedClass }) => {
-    const { session } = await requireSessionAccess(ctx, sessionId, "admin");
+    const { session } = await requireSessionAccess(
+      ctx,
+      sessionId,
+      userId === ctx.user._id ? "joined" : "admin",
+    );
     if (session.kind !== "party" || session.endedAt !== null)
       throw new ConvexError("Classes can only be changed in ongoing parties");
 
@@ -183,7 +189,9 @@ export const setClass = authMutation
       member.kind !== "partyMember" ||
       member.sessionMemberStatus.kind !== "joined"
     )
-      throw new ConvexError("Only joined party members can have classes assigned");
+      throw new ConvexError(
+        "Only joined party members can have classes assigned",
+      );
     if (member.selectedClass?.kind === selectedClass?.kind) return null;
 
     const now = Date.now();
@@ -192,5 +200,31 @@ export const setClass = authMutation
       updatedAt: now,
     });
 
+    return null;
+  });
+
+export const setBeerpongOptIn = authMutation
+  .input({ sessionId: v.id("session"), optedIn: v.boolean() })
+  .returns(v.null())
+  .handler(async (ctx, { sessionId, optedIn }) => {
+    const { session, member } = await requireSessionAccess(
+      ctx,
+      sessionId,
+      "joined",
+    );
+    if (
+      session.kind !== "party" ||
+      session.endedAt !== null ||
+      !session.modules.beerpongEnabled
+    )
+      throw new ConvexError(
+        "An ongoing party with beerpong enabled is required",
+      );
+    if (member?.kind !== "partyMember")
+      throw new ConvexError("Party membership required");
+    await ctx.db.patch("sessionMember", member._id, {
+      beerpongOptIn: optedIn,
+      updatedAt: Date.now(),
+    });
     return null;
   });

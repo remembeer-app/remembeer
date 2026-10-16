@@ -144,6 +144,20 @@ class BeerpongTournamentApi {
   ConvexQueryReference<ListForSessionArgs, List<BeerpongTournamentDocument>>
   get listForSessionQuery => listForSessionQueryReference;
 
+  Future<Null> setEnabled({
+    required bool enabled,
+    required SessionId sessionId,
+  }) async {
+    await _client.mutate(
+      'beerpongTournament:setEnabled',
+      _encodeSetEnabledArgs((enabled: enabled, sessionId: sessionId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<SetEnabledArgs, void> get setEnabledMutation =>
+      setEnabledMutationReference;
+
   Future<Null> start({required BeerpongTournamentId id}) async {
     await _client.mutate(
       'beerpongTournament:start',
@@ -952,6 +966,33 @@ ListForSessionArgs _decodeListForSessionArgs(dynamic raw) {
   );
 }
 
+typedef SetEnabledArgs = ({bool enabled, SessionId sessionId});
+
+Map<String, dynamic> _encodeSetEnabledArgs(SetEnabledArgs value$) {
+  final (enabled: enabled, sessionId: sessionId) = value$;
+  return <String, dynamic>{'enabled': enabled, 'sessionId': sessionId.value};
+}
+
+SetEnabledArgs _decodeSetEnabledArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SetEnabledArgs');
+  if (!map.containsKey('enabled')) {
+    throw FormatException(
+      'Missing required field "enabled" for SetEnabledArgs',
+    );
+  }
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for SetEnabledArgs',
+    );
+  }
+  return (
+    enabled: expectBool(map['enabled'], label: 'SetEnabledArgsEnabled'),
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'SetEnabledArgsSessionId'),
+    ),
+  );
+}
+
 typedef StartArgs = ({BeerpongTournamentId id});
 
 Map<String, dynamic> _encodeStartArgs(StartArgs value$) {
@@ -1011,6 +1052,13 @@ listForSessionQueryReference = ConvexQueryReference(
   ).map((item) => _decodeBeerpongTournamentDocument(item)).toList(),
   encodeResult: (value) =>
       value.map((item) => _encodeBeerpongTournamentDocument(item)).toList(),
+);
+
+final ConvexMutationReference<SetEnabledArgs, void>
+setEnabledMutationReference = ConvexMutationReference(
+  name: 'beerpongTournament:setEnabled',
+  encode: (args) => _encodeSetEnabledArgs(args),
+  decode: (raw) => null,
 );
 
 final ConvexMutationReference<StartArgs, void> startMutationReference =

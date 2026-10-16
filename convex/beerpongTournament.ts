@@ -7,3 +7,5 @@ export const start = mutation.start.public();
 export const finalize = mutation.finalize.public();
 export const get = query.get.public();
 export const listForSession = query.listForSession.public();
+
+export const setEnabled = mutation.setEnabled.public();

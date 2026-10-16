@@ -15,13 +15,6 @@ import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
-import 'package:remembeer/party/controller/party_controller.dart';
-import 'package:remembeer/party/controller/party_event_controller.dart';
-import 'package:remembeer/party/controller/party_game_controller.dart';
-import 'package:remembeer/party/service/beerpong_service.dart';
-import 'package:remembeer/party/service/party_challenge_service.dart';
-import 'package:remembeer/party/service/party_quest_service.dart';
-import 'package:remembeer/party/service/party_service.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/service/session_picture_service.dart';
 import 'package:remembeer/session/service/session_service.dart';
@@ -90,10 +83,7 @@ class IoCContainer {
       ..registerSingleton(
         UserSettingsController(authService: get<AuthService>()),
       )
-      ..registerSingleton(SessionController(authService: get<AuthService>()))
-      ..registerSingleton(PartyController())
-      ..registerSingleton(PartyEventController())
-      ..registerSingleton(PartyGameController());
+      ..registerSingleton(SessionController(authService: get<AuthService>()));
   }
 
   static void _registerServices() {
@@ -130,33 +120,6 @@ class IoCContainer {
           userSettingsController: get<UserSettingsController>(),
           userService: get<UserService>(),
           notificationService: get<NotificationService>(),
-          partyController: get<PartyController>(),
-        ),
-      )
-      ..registerSingleton(
-        PartyService(
-          authService: get<AuthService>(),
-          sessionController: get<SessionController>(),
-          partyController: get<PartyController>(),
-        ),
-      )
-      ..registerSingleton(
-        PartyChallengeService(
-          partyController: get<PartyController>(),
-          gameController: get<PartyGameController>(),
-          eventController: get<PartyEventController>(),
-        ),
-      )
-      ..registerSingleton(
-        PartyQuestService(
-          partyController: get<PartyController>(),
-          gameController: get<PartyGameController>(),
-        ),
-      )
-      ..registerSingleton(
-        BeerpongService(
-          partyController: get<PartyController>(),
-          gameController: get<PartyGameController>(),
         ),
       )
       ..registerSingleton(

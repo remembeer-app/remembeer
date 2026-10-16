@@ -1,367 +1,211 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/common/widget/loading_form.dart';
-import 'package:remembeer/drink/extension/convex_drink_category_extension.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/party/constants.dart';
-import 'package:remembeer/party/model/party_challenge.dart';
-import 'package:remembeer/party/model/party_member.dart';
-import 'package:remembeer/party/model/party_state.dart';
+import 'package:remembeer/common/action/confirmation_dialog.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
+import 'package:remembeer/common/widget/page_template.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/widgets/beerpongTournament.dart';
+import 'package:remembeer/convex_api/widgets/partyChallenge.dart';
+import 'package:remembeer/convex_api/widgets/partyQuest.dart';
+import 'package:remembeer/convex_api/widgets/session.dart';
+import 'package:remembeer/convex_api/widgets/sessionMember.dart';
 import 'package:remembeer/party/model/party_tab.dart';
-import 'package:remembeer/party/page/party_profile_page.dart';
-import 'package:remembeer/party/service/beerpong_service.dart';
-import 'package:remembeer/party/service/party_challenge_service.dart';
-import 'package:remembeer/party/service/party_quest_service.dart';
-import 'package:remembeer/party/service/party_service.dart';
-import 'package:remembeer/party/widget/beerpong_management_section.dart';
-import 'package:remembeer/party/widget/challenge_card.dart';
-import 'package:remembeer/party/widget/party_module_settings.dart';
+import 'package:remembeer/party/widget/party_class_selector.dart';
+import 'package:remembeer/party/widget/party_creation_forms.dart';
+import 'package:remembeer/party/widget/party_scope.dart';
+import 'package:remembeer/party/widget/quest_schedule_form.dart';
 import 'package:remembeer/routes.dart';
-import 'package:remembeer/session/service/session_service.dart';
-import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user_settings/widget/settings_page.dart';
-
-typedef PartyManagementSectionBuilder =
-    Widget Function(BuildContext context, PartyState state);
 
 class PartyManagementPage extends StatelessWidget {
-  PartyManagementPage({
+  const PartyManagementPage({
     super.key,
     required this.sessionId,
     this.tab = PartyTab.activity,
-    PartyService? partyService,
-    SessionService? sessionService,
-    PartyChallengeService? challengeService,
-    PartyQuestService? questService,
-    this.beerpongService,
-    this.beerpongSectionBuilder,
-  }) : _partyService = partyService ?? get<PartyService>(),
-       _sessionService = sessionService ?? get<SessionService>(),
-       _challengeService = challengeService ?? get<PartyChallengeService>(),
-       _questService = questService ?? get<PartyQuestService>();
-
+  });
   final String sessionId;
   final PartyTab tab;
-  final PartyService _partyService;
-  final SessionService _sessionService;
-  final PartyChallengeService _challengeService;
-  final PartyQuestService _questService;
-  final BeerpongService? beerpongService;
-  final PartyManagementSectionBuilder? beerpongSectionBuilder;
 
   @override
-  Widget build(BuildContext context) {
-    return SettingsPage(
-      title: 'Manage Party',
-      autmaticallyImplyLeading: true,
-      hint: 'Module changes affect this Party only.',
-      padding: const EdgeInsets.all(16),
-      child: AsyncBuilder<PartyState>(
-        stream: _partyService.stateStream(sessionId),
-        builder: (context, state) {
-          if (state.isArchived) {
-            return const Center(
-              child: Text('This Party is archived and read-only.'),
-            );
-          }
-          if (!state.isAdmin) {
-            return const Center(
-              child: Text('Only Party admins can manage this Party.'),
-            );
-          }
-          return AsyncBuilder<List<PartyMember>>(
-            stream: _partyService.membersStream(sessionId),
-            builder: (context, partyMembers) => AsyncBuilder<List<UserModel>>(
-              stream: _sessionService.sessionMembersStream(sessionId),
-              builder: (context, users) =>
-                  _buildContent(context, state, partyMembers, users),
-            ),
+  Widget build(BuildContext context) => PageTemplate(
+    title: const Text('Manage party'),
+    child: PartyScope(
+      sessionId: sessionId,
+      builder: (context, party, userId, members, isAdmin) {
+        if (!isAdmin || party.endedAt != null) {
+          return const Center(
+            child: Text('Only admins can manage an ongoing party.'),
           );
-        },
-      ),
-    );
-  }
-
-  Widget _buildContent(
-    BuildContext context,
-    PartyState state,
-    List<PartyMember> partyMembers,
-    List<UserModel> users,
-  ) => ListView(
-    children: [
-      if (state.party.moduleSettings.partyChallengesEnabled) ...[
-        _ChallengeManagementSection(
-          sessionId: sessionId,
-          state: state,
-          service: _challengeService,
-        ),
-        const Gap(24),
-      ],
-      PartyModuleSettingsPanel(
-        settings: state.party.moduleSettings,
-        schedule: state.party.questSchedule,
-        onSaveSettings: (settings) =>
-            _challengeService.setModuleSettings(sessionId, settings),
-        onSaveSchedule: (schedule) =>
-            _questService.setSchedule(sessionId, schedule),
-        hasActiveQuest: state.party.activeQuestId != null,
-        onStartNextQuest: () => _questService.startNextQuest(sessionId),
-      ),
-      if (state.party.moduleSettings.socialQuestsEnabled) ...[
-        const Gap(24),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.handshake_outlined),
-            title: const Text('Quest catalog'),
-            subtitle: const Text('Review and enable built-in quest templates.'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => PartyQuestManagementRoute(
-              sessionId: sessionId,
-              tab: tab,
-            ).push<void>(context),
-          ),
-        ),
-      ],
-      if (state.party.moduleSettings.beerpongEnabled) ...[
-        const Gap(24),
-        beerpongSectionBuilder?.call(context, state) ??
-            BeerpongManagementSection(
-              state: state,
-              service: beerpongService ?? get<BeerpongService>(),
-              partyMembersStream: _partyService.membersStream(sessionId),
-            ),
-      ],
-      const Gap(24),
-      _buildMembers(context, state, partyMembers, users),
-    ],
-  );
-
-  Widget _buildMembers(
-    BuildContext context,
-    PartyState state,
-    List<PartyMember> partyMembers,
-    List<UserModel> users,
-  ) {
-    final activeMembers = partyMembers
-        .where(
-          (member) =>
-              member.isActive &&
-              state.session.memberIds.contains(member.userId),
-        )
-        .toList();
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text('Member classes', style: Theme.of(context).textTheme.titleLarge),
-        const Gap(4),
-        Text(
-          'Class changes affect future drinks only.',
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const Gap(8),
-        for (final member in activeMembers)
-          if (users.where((user) => user.id == member.userId).firstOrNull
-              case final user?)
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.shield_outlined),
-                title: Text(user.username),
-                subtitle: Text(
-                  member.selectedClass?.displayName ?? 'No class selected',
-                ),
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () => Navigator.of(context).push<void>(
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        PartyProfilePage(sessionId: sessionId, user: user),
+        }
+        return ListView(
+          children: [
+            PartyQuestSetEnabledMutation(
+              builder: (context, setEnabled, state) => Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text('Social quests'),
+                    value: party.modules.socialQuestsEnabled,
+                    onChanged: state.isLoading
+                        ? null
+                        : (value) => setEnabled.run(
+                            sessionId: party.id,
+                            enabled: value,
+                          ),
                   ),
-                ),
+                  if (state.error case final error?)
+                    ErrorMessageBox(message: error.toString()),
+                ],
               ),
             ),
-      ],
-    );
-  }
-}
-
-class _ChallengeManagementSection extends StatelessWidget {
-  const _ChallengeManagementSection({
-    required this.sessionId,
-    required this.state,
-    required this.service,
-  });
-
-  final String sessionId;
-  final PartyState state;
-  final PartyChallengeService service;
-
-  @override
-  Widget build(BuildContext context) => AsyncBuilder<List<PartyChallenge>>(
-    stream: service.challengesStream(sessionId),
-    builder: (context, challenges) {
-      final active = challenges
-          .where((challenge) => challenge.id == state.party.activeChallengeId)
-          .firstOrNull;
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            'Party challenges',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const Gap(4),
-          Text(
-            'Start one timed challenge and award any number of members.',
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const Gap(8),
-          if (active != null)
-            ChallengeCard(
-              challenge: active,
-              onTap: () => PartyChallengeRoute(
-                sessionId: sessionId,
-                challengeId: active.id,
-                tab: PartyTab.games,
-              ).push<void>(context),
-            )
-          else
-            _ChallengeCreationForm(
-              onCreate:
-                  ({
-                    required title,
-                    required instructions,
-                    required points,
-                    required durationMinutes,
-                  }) => service.createChallenge(
-                    sessionId: sessionId,
-                    title: title,
-                    instructions: instructions,
-                    points: points,
-                    durationMinutes: durationMinutes,
+            PartyChallengeSetEnabledMutation(
+              builder: (context, setEnabled, state) => Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text('Challenges'),
+                    value: party.modules.partyChallengesEnabled,
+                    onChanged: state.isLoading
+                        ? null
+                        : (value) => setEnabled.run(
+                            sessionId: party.id,
+                            enabled: value,
+                          ),
                   ),
+                  if (state.error case final error?)
+                    ErrorMessageBox(message: error.toString()),
+                ],
+              ),
             ),
-        ],
-      );
-    },
-  );
-}
-
-class _ChallengeCreationForm extends StatefulWidget {
-  const _ChallengeCreationForm({required this.onCreate});
-
-  final Future<void> Function({
-    required String title,
-    required String instructions,
-    required int points,
-    required int durationMinutes,
-  })
-  onCreate;
-
-  @override
-  State<_ChallengeCreationForm> createState() => _ChallengeCreationFormState();
-}
-
-class _ChallengeCreationFormState extends State<_ChallengeCreationForm> {
-  final _titleController = TextEditingController();
-  final _instructionsController = TextEditingController();
-  final _pointsController = TextEditingController(text: '50');
-  final _durationController = TextEditingController(text: '5');
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _instructionsController.dispose();
-    _pointsController.dispose();
-    _durationController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => Card(
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: LoadingForm(
-        builder: (form) => Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            form.buildTextField(
-              controller: _titleController,
-              label: 'Challenge title',
-              maxLength: maxPartyChallengeTitleLength,
-              validator: _required,
-            ),
-            const Gap(12),
-            form.buildTextField(
-              controller: _instructionsController,
-              label: 'Instructions',
-              maxLength: maxPartyChallengeInstructionsLength,
-              minLines: 3,
-              validator: _required,
-            ),
-            const Gap(12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: form.buildTextField(
-                    controller: _pointsController,
-                    label: 'Points',
-                    keyboardType: TextInputType.number,
-                    validator: (value) => _integerInRange(
-                      value,
-                      minPartyChallengePoints,
-                      maxPartyChallengePoints,
-                    ),
+            BeerpongTournamentSetEnabledMutation(
+              builder: (context, setEnabled, state) => Column(
+                children: [
+                  SwitchListTile(
+                    title: const Text('Beerpong'),
+                    value: party.modules.beerpongEnabled,
+                    onChanged: state.isLoading
+                        ? null
+                        : (value) => setEnabled.run(
+                            sessionId: party.id,
+                            enabled: value,
+                          ),
                   ),
-                ),
-                const Gap(12),
-                Expanded(
-                  child: form.buildTextField(
-                    controller: _durationController,
-                    label: 'Minutes',
-                    keyboardType: TextInputType.number,
-                    isLastField: true,
-                    validator: (value) => _integerInRange(
-                      value,
-                      minPartyChallengeDurationMinutes,
-                      maxPartyChallengeDurationMinutes,
-                    ),
-                  ),
-                ),
-              ],
+                  if (state.error case final error?)
+                    ErrorMessageBox(message: error.toString()),
+                ],
+              ),
             ),
-            form.buildErrorMessage(),
             const Gap(16),
-            form.buildSubmitButton(
-              text: 'Start challenge',
-              onSubmit: () async {
-                await widget.onCreate(
-                  title: _titleController.text,
-                  instructions: _instructionsController.text,
-                  points: int.parse(_pointsController.text),
-                  durationMinutes: int.parse(_durationController.text),
-                );
-                showSuccessNotification('Challenge started.');
-              },
+            QuestScheduleForm(
+              key: ValueKey((
+                party.questSchedule.minIntervalMinutes,
+                party.questSchedule.maxIntervalMinutes,
+                party.questSchedule.defaultDurationMinutes,
+              )),
+              party: party,
+            ),
+            if (party.modules.socialQuestsEnabled)
+              PartyQuestStartNextMutation(
+                builder: (context, start, state) => Column(
+                  children: [
+                    OutlinedButton(
+                      onPressed: state.isLoading
+                          ? null
+                          : () => start.run(
+                              sessionId: party.id,
+                              onSuccess: (id) {
+                                if (context.mounted) {
+                                  PartyQuestRoute(
+                                    sessionId: sessionId,
+                                    questId: id.value,
+                                  ).push<void>(context);
+                                }
+                              },
+                            ),
+                      child: const Text('Start or open current quest'),
+                    ),
+                    if (state.error case final error?)
+                      ErrorMessageBox(message: error.toString()),
+                  ],
+                ),
+              ),
+            if (party.modules.partyChallengesEnabled) ...[
+              const Gap(24),
+              Text(
+                'Create challenge',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              PartyChallengeForm(sessionId: party.id),
+            ],
+            if (party.modules.beerpongEnabled) ...[
+              const Gap(24),
+              Text(
+                'Create tournament',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              PartyTournamentForm(sessionId: party.id),
+            ],
+            const Gap(24),
+            Text(
+              'Member classes',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            for (final entry in members.where(
+              (entry) => entry.member.sessionMemberStatus.isJoined,
+            ))
+              if (entry.member case final PartyMember member)
+                ExpansionTile(
+                  title: Text(entry.username),
+                  children: [
+                    SessionMemberSetClassMutation(
+                      builder: (context, setClass, state) => Column(
+                        children: [
+                          PartyClassSelector(
+                            selectedClass: member.selectedClass,
+                            onSubmit: (category) => setClass(
+                              sessionId: party.id,
+                              userId: member.userId,
+                              selectedClass: category,
+                            ),
+                          ),
+                          if (state.error case final error?)
+                            ErrorMessageBox(message: error.toString()),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+            const Gap(24),
+            SessionUpdateMutation(
+              builder: (context, update, state) => Column(
+                children: [
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.archive_outlined),
+                    label: const Text('End party'),
+                    onPressed: state.isLoading
+                        ? null
+                        : () => showConfirmationDialog(
+                            context: context,
+                            title: 'End party?',
+                            text: 'Gameplay will become read-only.',
+                            submitButtonText: 'End party',
+                            isDestructive: true,
+                            onPressed: () async {
+                              await update(
+                                id: party.id,
+                                endedAt: Optional.of(
+                                  DateTime.now().millisecondsSinceEpoch
+                                      .toDouble(),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                  if (state.error case final error?)
+                    ErrorMessageBox(message: error.toString()),
+                ],
+              ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     ),
   );
-}
-
-String? _required(String? value) =>
-    value == null || value.trim().isEmpty ? 'This field is required.' : null;
-
-String? _integerInRange(String? value, int minimum, int maximum) {
-  final parsed = int.tryParse(value ?? '');
-  return parsed == null || parsed < minimum || parsed > maximum
-      ? 'Use $minimum-$maximum.'
-      : null;
 }

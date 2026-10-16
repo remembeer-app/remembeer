@@ -245,6 +245,76 @@ class BeerpongTournamentFinalizeMutation extends StatelessWidget {
   );
 }
 
+/// Callable typed mutation for beerpongTournament:setEnabled.
+class BeerpongTournamentSetEnabledMutationExecutor {
+  /// Creates an executor backed by the mutation widget.
+  const BeerpongTournamentSetEnabledMutationExecutor(this._mutate);
+
+  final Future<void> Function(SetEnabledArgs) _mutate;
+
+  /// Runs the mutation.
+  Future<void> call({required bool enabled, required SessionId sessionId}) =>
+      _mutate((enabled: enabled, sessionId: sessionId));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required bool enabled,
+    required SessionId sessionId,
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((enabled: enabled, sessionId: sessionId)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
+}
+
+/// Flutter widget for beerpongTournament:setEnabled.
+class BeerpongTournamentSetEnabledMutation extends StatelessWidget {
+  /// Creates a typed mutation widget.
+  const BeerpongTournamentSetEnabledMutation({
+    super.key,
+    required this.builder,
+    this.client,
+    this.optimisticUpdate,
+    this.mode = MutationMode.single,
+  });
+
+  /// Builds the UI with the callable mutation and current request state.
+  final Widget Function(
+    BuildContext,
+    BeerpongTournamentSetEnabledMutationExecutor,
+    ConvexRequestSnapshot<void>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  /// Optional optimistic update for the mutation.
+  final TypedOptimisticUpdate<SetEnabledArgs>? optimisticUpdate;
+
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
+  @override
+  Widget build(BuildContext context) => ConvexMutation<SetEnabledArgs, void>(
+    mutation: setEnabledMutationReference,
+    client: client,
+    typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
+    builder: (context, mutate, snapshot) => builder(
+      context,
+      BeerpongTournamentSetEnabledMutationExecutor(mutate),
+      snapshot,
+    ),
+  );
+}
+
 /// Callable typed mutation for beerpongTournament:start.
 class BeerpongTournamentStartMutationExecutor {
   /// Creates an executor backed by the mutation widget.
