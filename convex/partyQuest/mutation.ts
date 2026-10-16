@@ -154,13 +154,10 @@ export const selectPartner = authMutation
         selection.selectedUserId === ctx.user._id,
     );
     if (matched) {
-      const { players, previousPairs } = await loadQuestContext(
-        ctx,
-        quest.sessionId,
-        now,
-      );
+      const { players, previousPairs, finalistTeamIds } =
+        await loadQuestContext(ctx, quest.sessionId, now);
       if (
-        !eligiblePairs(quest, players, previousPairs).some(
+        !eligiblePairs(quest, players, previousPairs, finalistTeamIds).some(
           (candidate) =>
             candidate.firstUserId === pair.firstUserId &&
             candidate.secondUserId === pair.secondUserId,

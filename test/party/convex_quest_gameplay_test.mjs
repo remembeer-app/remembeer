@@ -60,6 +60,7 @@ function fixture() {
           return this;
         },
         order(direction) { if (direction === "desc") rows = [...rows].reverse(); return this; },
+        async first() { return structuredClone(rows[0] ?? null); },
         async collect() { return structuredClone(rows); },
         async unique() { assert.ok(rows.length <= 1); return structuredClone(rows[0] ?? null); },
       };
@@ -517,4 +518,142 @@ test("automatic cycles preserve stages and avoid repeats while excluding beerpon
   assert.equal(f.tables.partyQuest.length, 33);
   assert.equal(f.tables.partyQuest.filter(q => q.status === "active").length, 1);
   assert.equal(f.jobs.filter(j => j.state === "pending").length, 1);
+});
+
+function beerpongFixture(stage = 5) {
+  const f = fixture();
+  f.tables.session[0].modules.beerpongEnabled = true;
+  const definition = builtInQuests.find(quest => quest.kind === "sameAccent");
+  for (let index = 0; index < stage; index++) f.tables.partyQuest.push({
+    ...definition, _id: `past-${index}`, _creationTime: index, sessionId: "party",
+    startsAt: index, endsAt: index + 1, status: "expired", selections: [], results: [],
+  });
+  f.tables.beerpongTournament.push({
+    _id: "tournament", _creationTime: 1, sessionId: "party", status: "setup", teamCount: 2,
+    thirdPlaceEnabled: false, firstPlacePointsUnits: 3000, secondPlacePointsUnits: 2000,
+    thirdPlacePointsUnits: 1000, completedAt: null,
+  });
+  f.tables.beerpongTeam.push(
+    { _id: "team-a", tournamentId: "tournament", memberUserIds: ["a", "b"] },
+    { _id: "team-b", tournamentId: "tournament", memberUserIds: ["c"] },
+  );
+  return f;
+}
+
+function addFinal(f, slotA = { kind: "team", teamId: "team-a" }, slotB = { kind: "team", teamId: "team-b" }) {
+  f.tables.beerpongTournament[0].status = "active";
+  f.tables.beerpongMatch.push({
+    _id: "final", tournamentId: "tournament", kind: "main", round: 2, position: 1,
+    slotA, slotB, winnerTeamId: null, completedAt: null,
+  });
+}
+
+for (const [kind, partner] of [["sameBeerpongTeam", "b"], ["differentBeerpongTeam", "c"]]) {
+  test(`${kind} issues from assigned teams and validates mutual completion`, async () => {
+    const f = beerpongFixture();
+    if (kind === "differentBeerpongTeam") f.tables.beerpongTeam[0].memberUserIds = ["a"];
+    await f.enable(0.99999);
+    const quest = f.tables.partyQuest.at(-1);
+    assert.equal(quest.kind, kind);
+    assert.equal(await f.select(quest._id, "a", partner), false);
+    assert.equal(await f.select(quest._id, partner, "a"), true);
+    assert.deepEqual(quest.results.map(({ firstUserId, secondUserId }) => ({ firstUserId, secondUserId })), [memberPair("a", partner)]);
+    // A retry cannot award the pair twice.
+    assert.equal(await f.select(quest._id, partner, "a"), true);
+    assert.equal(quest.results.length, 1);
+  });
+}
+
+test("team changes are rechecked at completion and recorded results survive later changes", async () => {
+  const f = beerpongFixture(); await f.enable(0.99999);
+  const quest = f.tables.partyQuest.at(-1);
+  await f.select(quest._id, "a", "b");
+  f.tables.beerpongTeam[0].memberUserIds = ["a"];
+  f.tables.beerpongTeam[1].memberUserIds = ["b", "c"];
+  await assert.rejects(f.select(quest._id, "b", "a"), /does not currently qualify/);
+  assert.equal(quest.results.length, 0);
+  f.tables.beerpongTeam[0].memberUserIds = ["a", "b"];
+  f.tables.beerpongTeam[1].memberUserIds = ["c"];
+  assert.equal(await f.select(quest._id, "b", "a"), true);
+  f.tables.beerpongTeam[0].memberUserIds = [];
+  assert.equal(await f.select(quest._id, "b", "a"), true);
+  assert.equal(quest.results.length, 1);
+});
+
+for (const state of ["disabled", "missing", "enrollment", "cancelled", "otherParty", "noEligiblePlayers"]) {
+  test(`beerpong quests stay unavailable with ${state} context`, async () => {
+    const f = beerpongFixture(10);
+    if (state === "disabled") f.tables.session[0].modules.beerpongEnabled = false;
+    if (state === "missing") f.tables.beerpongTournament = [];
+    if (["enrollment", "cancelled"].includes(state)) {
+      // A newer tournament must hide assignments from the older setup.
+      f.tables.beerpongTournament.push({ _id: "new", _creationTime: 2, sessionId: "party", status: state });
+    }
+    if (state === "otherParty") f.tables.beerpongTournament[0].sessionId = "another-party";
+    if (state === "noEligiblePlayers") {
+      f.player("a").selectedClass = null;
+      f.player("b").sessionMemberStatus.kind = "left";
+      f.player("c").sessionMemberStatus.kind = "banned";
+    }
+    await f.enable(0.99999);
+    const quest = f.tables.partyQuest.at(-1);
+    assert.ok(!["sameBeerpongTeam", "differentBeerpongTeam", "finalistTeam"].includes(quest.kind));
+    // Even a previously issued team quest cannot complete using stale context.
+    Object.assign(quest, builtInQuests.find(q => q.kind === "sameBeerpongTeam"));
+    if (state !== "noEligiblePlayers") {
+      await f.select(quest._id, "a", "b");
+      await assert.rejects(f.select(quest._id, "b", "a"), /does not currently qualify/);
+      assert.equal(quest.results.length, 0);
+    }
+  });
+}
+
+test("scheduled issuance enables team quests after the early stage", async () => {
+  const f = beerpongFixture(4); await f.enable(0.99999);
+  assert.equal(f.tables.partyQuest.at(-1).kind, "sameClass");
+  await f.run(f.jobs.at(-1));
+  await withRandom(0.99999, () => f.run(f.jobs.at(-1)));
+  assert.equal(f.tables.partyQuest.at(-1).kind, "sameBeerpongTeam");
+});
+
+test("finalist quests require the final stage and a resolved path to the main final", async () => {
+  const early = beerpongFixture(5); addFinal(early); await early.enable(0.99999);
+  assert.equal(early.tables.partyQuest.at(-1).kind, "sameBeerpongTeam");
+  const f = beerpongFixture(10);
+  addFinal(f, { kind: "winner", matchId: "semi-a" }, { kind: "winner", matchId: "semi-b" });
+  f.tables.beerpongMatch.push(
+    { _id: "semi-a", tournamentId: "tournament", kind: "main", round: 1, position: 1,
+      slotA: { kind: "team", teamId: "team-a" }, slotB: { kind: "bye" }, winnerTeamId: null },
+    { _id: "semi-b", tournamentId: "tournament", kind: "main", round: 1, position: 2,
+      slotA: { kind: "team", teamId: "team-b" }, slotB: { kind: "team", teamId: "team-c" }, winnerTeamId: null },
+    // A ready bronze match must not make its teams finalists.
+    { _id: "bronze", tournamentId: "tournament", kind: "thirdPlace", round: 2, position: 2,
+      slotA: { kind: "team", teamId: "team-a" }, slotB: { kind: "team", teamId: "team-b" }, winnerTeamId: null },
+  );
+  await f.enable(0.99999);
+  assert.equal(f.tables.partyQuest.at(-1).kind, "sameBeerpongTeam");
+  f.tables.partyQuest.at(-1).status = "expired";
+  f.tables.beerpongMatch.find(m => m._id === "semi-a").winnerTeamId = "team-a";
+  await withRandom(0.99999, f.start);
+  const quest = f.tables.partyQuest.at(-1);
+  assert.equal(quest.kind, "finalistTeam");
+  // Only one partner needs a finalist team; the other can be unassigned.
+  f.tables.beerpongTeam[1].memberUserIds = [];
+  await f.select(quest._id, "a", "c");
+  // Clearing/correcting the semifinal removes eligibility before completion.
+  f.tables.beerpongMatch.find(m => m._id === "semi-a").winnerTeamId = null;
+  await assert.rejects(f.select(quest._id, "c", "a"), /does not currently qualify/);
+  f.tables.beerpongMatch.find(m => m._id === "semi-a").winnerTeamId = "team-a";
+  assert.equal(await f.select(quest._id, "c", "a"), true);
+});
+
+test("completed tournaments retain finalist eligibility", async () => {
+  const f = beerpongFixture(10); addFinal(f);
+  Object.assign(f.tables.beerpongTournament[0], { status: "completed", completedAt: Date.now() - 1 });
+  Object.assign(f.tables.beerpongMatch[0], { round: 1, winnerTeamId: "team-a", completedAt: Date.now() - 1 });
+  await f.enable(0.99999);
+  const quest = f.tables.partyQuest.at(-1);
+  assert.equal(quest.kind, "finalistTeam");
+  await f.select(quest._id, "a", "c");
+  assert.equal(await f.select(quest._id, "c", "a"), true);
 });

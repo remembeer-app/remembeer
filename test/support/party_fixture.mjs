@@ -4,7 +4,8 @@ export function fixture(standings) {
   const now = 1000000;
   const tables = {
     user: ["owner", "a", "b", "unclassed", "invited", "left", "banned", "other"].map(_id => ({ _id, username: _id, accentColor: "amber", authUserId: `private-${_id}` })),
-    session: [{ _id: "party", ownerId: "owner", kind: "party", deletedAt: null, endedAt: null }],
+    session: [{ _id: "party", ownerId: "owner", kind: "party", deletedAt: null, endedAt: null,
+      modules: { socialQuestsEnabled: false, partyChallengesEnabled: false, beerpongEnabled: false } }],
     sessionMember: ["owner", "a", "b", "unclassed", "invited", "left", "banned"].map(userId => ({
       _id: `member-${userId}`, sessionId: "party", userId, kind: "partyMember",
       selectedClass: userId === "unclassed" ? null : { kind: "beer" },

@@ -47,6 +47,7 @@ function setup() {
       const rows = await collect();
       return direction === "desc" ? rows.reverse() : rows;
     };
+    query.first = async () => (await query.collect())[0] ?? null;
     return query;
   };
   const input = {
@@ -795,6 +796,8 @@ test("final rosters receive deterministic integer splits shared by standings, ac
   assert.equal(rank.find(entry => entry.userId === originalPlayer).beerpongScoreUnits, 0);
   const context = await loadQuestContext(f.ctx("owner"), "party", f.now);
   assert.equal(context.players.find(player => player.userId === "a").scoreUnits, 10001);
+  assert.equal(context.players.find(player => player.userId === "a").beerpongTeamId, champion._id);
+  assert.ok(context.finalistTeamIds.has(champion._id));
   // Source order never decides who receives remainder units.
   champion.memberUserIds.reverse();
   assert.deepEqual((await readActivity(f)).entries, awards);
@@ -1028,4 +1031,17 @@ test("detail never includes teams or matches from another tournament, and reject
   await assert.rejects(readTournament(f, id, "a"), /permission/);
   await assert.rejects(listTournaments(f, "private", "a"), /permission/);
   assert.equal((await listTournaments(f)).length, 1);
+});
+
+
+test("quest finalists follow recorded semifinal results and corrections", async () => {
+  const f = await matchSetup(4);
+  const context = () => loadQuestContext(f.ctx("owner"), "party", f.now);
+  assert.equal((await context()).finalistTeamIds.size, 0);
+  const semi = f.tables.beerpongMatch.find(match => match.kind === "main" && match.round === 1);
+  const [first, second] = matchOpponents(f, semi);
+  await f.runResult("recordResult", semi._id, first);
+  assert.deepEqual([...(await context()).finalistTeamIds], [first]);
+  await f.runResult("correctResult", semi._id, second);
+  assert.deepEqual([...(await context()).finalistTeamIds], [second]);
 });

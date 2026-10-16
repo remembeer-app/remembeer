@@ -3,6 +3,8 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { builtInQuests } from "./catalog";
+import { loadQuestContext } from "./context";
+import { eligiblePairs } from "./eligibility";
 import {
   earlyQuestCount,
   regularQuestCount,
@@ -182,11 +184,22 @@ export async function issueQuest(
     drinkCategory?: { kind: string };
   }) => `${quest.kind}:${quest.drinkCategory?.kind ?? ""}`;
   const used = new Set(cycle.map(identity));
+  const beerpongContext =
+    party.modules.beerpongEnabled && cycleCount >= earlyQuestCount
+      ? await loadQuestContext(ctx, party._id, now)
+      : null;
   const candidates = builtInQuests.filter(
     (quest) =>
-      !["differentBeerpongTeam", "sameBeerpongTeam", "finalistTeam"].includes(
+      (!["differentBeerpongTeam", "sameBeerpongTeam", "finalistTeam"].includes(
         quest.kind,
-      ) &&
+      ) ||
+        (beerpongContext !== null &&
+          eligiblePairs(
+            quest,
+            beerpongContext.players,
+            beerpongContext.previousPairs,
+            beerpongContext.finalistTeamIds,
+          ).length > 0)) &&
       (quest.availability === "early" ||
         (quest.availability === "regular" && cycleCount >= earlyQuestCount) ||
         (quest.availability === "final" && cycleCount >= regularQuestCount)),
