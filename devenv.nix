@@ -8,7 +8,6 @@
     flutter.enable = true;
 
     platforms.version = [
-      "34" # needed for firestore
       "35" # needed for jni (cached network image)
       "36"
     ];

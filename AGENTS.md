@@ -1,28 +1,28 @@
 # AGENTS.md
 
-Improtant note:
-This branch is a full backend rewrite. Do not care about preserving data, breaking changes or preserving app behavior. The goal is to incrementally migrate to a new architecture using Convex. The changes can break existing flows and features and that is fine.
-
-This file provides guidance to AI agents when working with code in this repository.
+This file provides guidance to AI agents working in this repository.
 
 ## Project Overview
 
-Remembeer is a Flutter mobile app (iOS & Android) for tracking drinks with social features: sessions, leaderboards, badges, and friends. Backend is Firebase (Auth, Firestore, Storage, Cloud Functions, Messaging). Firebase region: europe-west4.
+Remembeer is a Flutter mobile app (iOS and Android) for tracking drinks with
+sessions, parties, leaderboards, badges, and friends. Convex is the only backend;
+Better Auth handles authentication. Missing features are separate work. Use
+hardcoded placeholders with TODOs when their data is not available yet.
 
 ## Common Commands
 
 ```bash
-# Install dependencies
 flutter pub get
+npm ci
 
-# Run code generation (freezed, json_serializable, go_router_builder)
+# Generate Freezed, JSON serialization, and typed routes
 dart run build_runner build --delete-conflicting-outputs
 
-# Format
+# Generate Convex TypeScript bindings and the typed Dart API/widgets
+npm run convex:generate
+
 dart format .
 npm run format
-
-# Lint (strict — CI uses --fatal-warnings)
 flutter analyze --fatal-warnings
 npm run check
 ```
@@ -30,92 +30,80 @@ npm run check
 JavaScript/TypeScript uses npm-locked Oxlint (including type-aware promise rules)
 and Oxfmt. Keep Oxfmt defaults; `.oxfmtrc.json` only controls exclusions. Run
 `npm run lint:fix` for safe lint fixes. Generated Convex bindings, native platform
-files, lockfiles, and build output are excluded from formatting. In devenv,
-`oxlint`, `oxfmt`, `js-check`, and `js-fix` expose the same local tools as CI.
+files, lockfiles, and build output are excluded from formatting.
 
-**CI checks that generated files (`*.g.dart`, `*.freezed.dart`) are committed and up-to-date.** Always run build_runner after changing models or routes and commit the generated output.
+CI checks generated output. Run build_runner after changing Freezed models or
+routes and commit generated output. Run `npm run convex:generate` after changing
+the backend schema or public endpoints. Existing tests and test plumbing have
+been removed; a new suite will be designed separately.
 
 ## Architecture
 
-### Layered Feature Structure
+### Flutter features
 
-Each feature lives in `lib/<feature>/` with up to four layers:
+Feature UI lives in `lib/<feature>/page/` and `widget/`. Pages use generated
+Convex query/mutation widgets from `lib/convex_api/widgets/`; services use the
+typed `ConvexApi`. Generated API code lives in `lib/convex_api/` and must not be
+edited manually. Keep presentation models small; business rules and access
+checks belong in Convex.
 
-| Layer           | Directory          | Role                                                                                                                                         |
-| --------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Model**       | `model/`           | Immutable data classes via freezed. Entities extend `Entity` (has `userId`, timestamps, soft-delete `deletedAt`). DTOs extend `ValueObject`. |
-| **Controller**  | `controller/`      | Firestore CRUD. Extend `CrudController<T extends Entity, U extends ValueObject>`. No business logic.                                         |
-| **Service**     | `service/`         | Business logic. Use RxDart (`BehaviorSubject`, `combineLatest`, `switchMap`) for reactive state.                                             |
-| **Page/Widget** | `page/`, `widget/` | UI. Pages are full screens; widgets are reusable components.                                                                                 |
+### Dependency injection and startup
 
-### Dependency Injection
+GetIt registrations live in `lib/ioc/ioc_container.dart`; access them with
+`get<T>()`. The container registers the Convex client/runtime, Better Auth
+provider, typed API, `ConvexAuthService`, location, drink logging, app icons, and
+avatar services. `main.dart` loads `.env.client` and initializes the app icon
+service and quick-add channel. Client environment values are `CONVEX_URL` and
+`CONVEX_SITE_URL`; do not put backend secrets in this bundled file.
 
-GetIt via `lib/ioc/ioc_container.dart`. All singletons registered in `IoCContainer.initialize()` in order: basic services, then controllers, then services. Access with `get<T>()`.
+### Routing and code generation
 
-### Routing
+go_router with go_router_builder provides typed routes in `lib/routes.dart` and
+`routes.g.dart`. NavbarShellRoute has Profile, Leaderboards, Drink, Activity, and
+Settings tabs. Freezed and json_serializable generate model implementations and
+JSON serialization where needed. Keep all generated output committed.
 
-go_router with go_router_builder for type-safe routes. Route definitions in `lib/routes.dart`, generated code in `routes.g.dart`. NavbarShellRoute provides 5 bottom tabs: Profile, Leaderboards, Drink (home), Activity, Settings.
+### Backend
 
-### Code Generation
+Convex schema lives in `convex/schema.ts` with feature schemas, queries,
+mutations, access helpers, and scheduled work under `convex/`. Better Auth is
+configured in `convex/auth.ts`, `auth.config.ts`, and `http.ts`. Enforce access
+and ownership on the server; use generated ID types in Flutter. Global drinks
+have `ownerId: null`. Follow each table's schema for deletion and ownership.
 
-Three generators are used by the project:
+### Shared conventions
 
-- **freezed**: Immutable data classes (`*.freezed.dart`)
-- **json_serializable**: JSON serialization with `explicit_to_json: true` (`*.g.dart`)
-- **go_router_builder**: Type-safe routes (`routes.g.dart`)
+Put feature constants in `lib/<feature>/constants.dart`. Use existing shared
+forms, query/mutation widgets, and theme conventions. Do not revive legacy
+backend layers for deferred functionality.
 
-### Key Patterns
+### Logical days
 
-- **Feature constants**: Each feature folder has a `constants.dart` file (e.g., `lib/user/constants.dart`, `lib/auth/constants.dart`). Put magic numbers, default values, and config constants there — not inline in code.
-- **Soft deletes**: Entities use `deletedAt` field, never hard-deleted from Firestore
-- **Server timestamps**: `withServerCreateTimestamps()`, `withServerUpdateTimestamp()`, `withServerDeleteTimestamps()` extension methods on JSON maps
-- **Ownership**: All entities have a `userId` field; Firestore rules enforce ownership-based access
-- **Global entities**: Some entities (e.g., seed drinks) use a special `globalUserId` and cannot be modified from the app
+A user's day ends at their configurable `endOfDayBoundary` (default 06:00), in
+their configured time zone. A drink at 02:00 on Jan 2 therefore belongs to Jan 1
+with the default boundary. Backend date logic lives in
+`convex/lib/logicalDay.ts` and `convex/lib/timeZone.ts`; Flutter display helpers
+live in `lib/date/util/date_utils.dart`.
 
-### Date Handling — Logical Days and End-of-Day Boundary
+Always account for the day boundary and time zone. Current day queries and stats
+provide refresh times for rollover; keep app resume and timer refresh behavior.
+Do not assume midnight as the cutoff.
 
-"Today" is not midnight-to-midnight. Each user has a configurable `endOfDayBoundary` (default 06:00 AM, stored on `UserModel`). A timestamp **before** the boundary belongs to the **previous** logical day. For example, with a 06:00 boundary, a drink at 02:00 AM on Jan 2nd counts as Jan 1st.
+### Seeding global drinks
 
-The core function is `effectiveDate(DateTime originalDate, TimeOfDay endOfDayBoundary)` in `lib/date/util/date_utils.dart` — it shifts the date back by one day if the time is before the boundary.
-
-This affects all date-sensitive logic:
-
-- **DateService** (`lib/date/service/date_service.dart`): The date selector's `selectedDateStateStream` applies the boundary to both the selected date and "today". `selectedDateBoundaries()` returns a `(start, end)` time window for the logical day — used by `DrinkService` and `SessionService` to query Firestore for a day's drinks/sessions.
-- **DrinkService**: Uses `_effectiveDate()` to determine which logical day a drink belongs to when adding/updating/deleting, so user stats (monthly/daily) are attributed to the correct day.
-- **UserStatsService**: Uses `effectiveDate` to determine the current logical day for stats calculations.
-- **SessionDivider widget**: Uses `effectiveDate` to decide whether a session started "today" or on a past day.
-
-When working with dates in this codebase, always account for the boundary — never assume midnight as the day cutoff.
-
-### Cloud Functions
-
-Python 3.13 functions in `functions/main.py` — push notification triggers for friend requests and session invites.
-
-### Seeding Global Drinks
-
-`assets/seed_data/drinks.json` holds the global catalog bundled into the internal
-Convex mutation `drink:seedGlobal`. Deploy changes to the JSON before running it.
+`assets/seed_data/drinks.json` is bundled into internal mutation
+`drink:seedGlobal`. Deploy catalog changes before running it.
 
 ```bash
-# Preview changes on the configured development deployment
 npm run seed:drinks -- '{"dryRun":true}'
-
-# Apply them on the configured development deployment
 npm run seed:drinks
-
-# Apply them on production after deploying the updated backend
 npm run seed:drinks -- --prod
 ```
 
-The same internal mutation can be run from the Convex dashboard's Functions page
-with `{}` or `{"dryRun":true}`. It cannot be called by Flutter clients.
-
-Seed-managed global drinks have `ownerId: null` and a stable `seedKey` taken from
-the seed file's `id`. Seeding inserts missing entries, updates changed entries,
-restores returning entries, and soft-deletes seed-managed entries removed from
-the file. Unchanged rows retain their timestamps; custom drinks and unmanaged
-global drinks are untouched. The mutation returns counts for every operation.
-The legacy `npm run seed` script still targets Firestore.
+The dashboard can run the same mutation with `{}` or `{"dryRun":true}`. Seed
+entries use stable `seedKey` values from JSON IDs. Seeding creates, updates,
+restores, and retires managed entries while leaving custom/unmanaged drinks and
+unchanged timestamps alone. Flutter clients cannot call this internal mutation.
 
 ### Dynamic App Icon
 
@@ -136,7 +124,7 @@ Adding a phase means: a new SVG, a new enum value in `AppIconPhase`, a new alias
 
 ### Quick Add Home Screen Widget
 
-A one-tap "+1" widget that logs the user's default drink. Both platforms end up calling `quickAddPressed` on the `quick_add_action` method channel, which `lib/main.dart` handles with `DrinkService.addDefaultDrink()`; there is no widget-specific Dart code.
+A one-tap "+1" widget that logs the user's default drink. Both platforms end up calling `quickAddPressed` on the `quick_add_action` method channel, which `lib/main.dart` handles with `DrinkLogService.addDefaultDrinkLog()`; there is no widget-specific Dart code.
 
 - **Android**: `QuickAddWidgetProvider.kt` (layout `res/layout/quick_add_widget_layout.xml`, colors in `res/values/colors.xml`) launches `MainActivity` with the `QUICK_ADD_ACTION` intent, which invokes the channel method.
 - **iOS**: the `QuickAddWidgetExtension` target (`ios/QuickAddWidget/`, WidgetKit, `systemSmall` only) opens `remembeer://quick-add`. The `remembeer` URL scheme is registered in `Runner/Info.plist`; `AppDelegate.swift` registers itself as a Flutter scene life cycle delegate, matches the URL on both cold start (`scene:willConnectToSession:options:`) and warm start (`scene:openURLContexts:`), and invokes the channel method once the `FlutterViewController` has rendered its first frame (earlier messages would be dropped by the engine). The extension's bundle id is `cz.remembeer.com.QuickAddWidget`; its version comes from `Flutter/Generated.xcconfig`, and release builds expect a manual provisioning profile named `Remembeer Quick Add Widget App Store` (see `ios/ExportOptions.plist`).

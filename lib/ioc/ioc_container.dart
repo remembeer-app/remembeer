@@ -1,28 +1,14 @@
 import 'package:dartvex/dartvex.dart';
 import 'package:dartvex_auth_better/dartvex_auth_better.dart';
 import 'package:dartvex_flutter/dartvex_flutter.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get_it/get_it.dart';
-import 'package:remembeer/activity/service/activity_service.dart';
 import 'package:remembeer/app_icon/service/app_icon_service.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/avatar/service/avatar_service.dart';
-import 'package:remembeer/badge/service/badge_service.dart';
 import 'package:remembeer/convex_api/api.dart';
-import 'package:remembeer/drink/controller/drink_controller.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/location/service/location_service.dart';
-import 'package:remembeer/notification/service/notification_service.dart';
-import 'package:remembeer/session/controller/session_controller.dart';
-import 'package:remembeer/session/service/session_picture_service.dart';
-import 'package:remembeer/session/service/session_service.dart';
-import 'package:remembeer/user/controller/user_controller.dart';
-import 'package:remembeer/user/service/user_service.dart';
-import 'package:remembeer/user/service/user_stats_service.dart';
-import 'package:remembeer/user_settings/controller/user_settings_controller.dart';
-import 'package:remembeer/user_settings/service/user_settings_service.dart';
 
 final get = GetIt.instance;
 
@@ -32,15 +18,7 @@ class IoCContainer {
   static void initialize() {
     _registerConvex();
 
-    get
-      ..registerSingleton(FirebaseAuth.instance)
-      ..registerSingleton(AuthService(firebaseAuth: get<FirebaseAuth>()))
-      ..registerSingleton(NotificationService())
-      ..registerSingleton(LocationService())
-      ..registerSingleton(UserStatsService())
-      ..registerSingleton(BadgeService());
-
-    _registerControllers();
+    get.registerSingleton(LocationService());
     _registerServices();
   }
 
@@ -76,16 +54,6 @@ class IoCContainer {
       );
   }
 
-  static void _registerControllers() {
-    get
-      ..registerSingleton(DrinkController(authService: get<AuthService>()))
-      ..registerSingleton(UserController(authService: get<AuthService>()))
-      ..registerSingleton(
-        UserSettingsController(authService: get<AuthService>()),
-      )
-      ..registerSingleton(SessionController(authService: get<AuthService>()));
-  }
-
   static void _registerServices() {
     get
       ..registerSingleton(
@@ -101,46 +69,11 @@ class IoCContainer {
         ),
       )
       ..registerSingleton(
-        UserService(
-          authService: get<AuthService>(),
-          userController: get<UserController>(),
-        ),
-      )
-      ..registerSingleton(
-        UserSettingsService(
-          authService: get<AuthService>(),
-          userSettingsController: get<UserSettingsController>(),
-          notificationService: get<NotificationService>(),
-        ),
-      )
-      ..registerSingleton(
-        SessionService(
-          authService: get<AuthService>(),
-          sessionController: get<SessionController>(),
-          userSettingsController: get<UserSettingsController>(),
-          userService: get<UserService>(),
-          notificationService: get<NotificationService>(),
-        ),
-      )
-      ..registerSingleton(
         AvatarService(
           api: get<ConvexApi>(),
           storage: ConvexStorage(
             get<ConvexClientWithAuth<BetterAuthSession>>(),
           ),
-        ),
-      )
-      ..registerSingleton(
-        ActivityService(
-          authService: get<AuthService>(),
-          sessionController: get<SessionController>(),
-          userController: get<UserController>(),
-        ),
-      )
-      ..registerSingleton(
-        SessionPictureService(
-          authService: get<AuthService>(),
-          sessionController: get<SessionController>(),
         ),
       );
   }

@@ -5,8 +5,6 @@ const minUsernameLength = 3;
 const maxUsernameLength = 20;
 const maxBadgesShown = 6;
 const profilePageHeading = TextStyle(fontSize: 20, fontWeight: FontWeight.bold);
-const globalUserId = 'global';
-const deletedUserUsername = 'Deleted user';
 const defaultEndOfDayBoundary = TimeOfDay(hour: 6, minute: 0);
 const defaultTimeZone = 'UTC';
 const searchDebounceDuration = Duration(milliseconds: 500);
@@ -69,11 +67,5 @@ const accentColorPalette = <AccentColorKey, AccentColor>{
   ),
 };
 
-AccentColorKey defaultAccentColorFor(String stableSeed) {
-  var hash = 0;
-  for (final codeUnit in stableSeed.codeUnits) {
-    hash = (hash * 31 + codeUnit) & 0xFFFFFFFF;
-  }
-
-  return AccentColorKey.values[hash % AccentColorKey.values.length];
-}
+// TODO(ohtenkay): Load other users' friend counts from a public Convex query.
+const unavailableProfileFriendCount = 0;

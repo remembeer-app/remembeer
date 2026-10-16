@@ -2,6 +2,8 @@
 
 So that you may never forget how many beers you have consumed.
 
+Convex is the only backend. Authentication uses Better Auth.
+
 ## Environment
 
 Copy each tracked template to its untracked counterpart:
@@ -96,5 +98,3 @@ entries are updated, returning entries are restored, and removed entries are
 soft-deleted. Custom drinks and global drinks without a `seedKey` are untouched.
 The returned counts show created, updated, restored, retired, and unchanged
 entries. A dry run performs no writes. Unchanged drinks retain their timestamps.
-
-`npm run seed` remains the legacy Firestore seeder.

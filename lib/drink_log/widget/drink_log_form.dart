@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:remembeer/common/widget/app_form.dart';
 import 'package:remembeer/convex_api/schema.dart';
 import 'package:remembeer/convex_api/types.dart';
@@ -17,13 +17,13 @@ class DrinkLogForm extends StatefulWidget {
   final DrinkDocument? initialDrink;
   final DateTime initialConsumedAt;
   final int initialVolume;
-  final GeoPoint? initialLocation;
+  final LatLng? initialLocation;
   final SessionId? initialSessionId;
   final Future<void> Function(
     DrinkDocument drink,
     DateTime consumedAt,
     int volumeInMilliliters,
-    GeoPoint? location,
+    LatLng? location,
     SessionId? sessionId,
   )
   onSubmit;
@@ -46,7 +46,7 @@ class _DrinkLogFormState extends State<DrinkLogForm> {
   late DrinkDocument? _selectedDrink = widget.initialDrink;
   late DateTime _selectedConsumedAt = widget.initialConsumedAt;
   late SessionId? _sessionId = widget.initialSessionId;
-  late GeoPoint? _location = widget.initialLocation;
+  late LatLng? _location = widget.initialLocation;
   late final _volumeController = TextEditingController(
     text: widget.initialVolume.toString(),
   );

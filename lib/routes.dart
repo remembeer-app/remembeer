@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:remembeer/account_deletion/page/delete_account_page.dart';
 import 'package:remembeer/activity/page/activity_page.dart';
 import 'package:remembeer/activity/page/party_events_page.dart';
@@ -498,7 +498,7 @@ class LocationPickerRoute extends GoRouteData with $LocationPickerRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) {
-    return LocationPage(location: GeoPoint(latitude, longitude));
+    return LocationPage(location: LatLng(latitude, longitude));
   }
 }
 

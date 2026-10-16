@@ -7,7 +7,6 @@
     "convex:generate": "npm run convex:codegen && npm run dartvex:codegen && dart format lib/convex_api",
     "convex:typecheck": "tsc -p convex/tsconfig.json",
     "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api --flutter-widgets",
-    "seed": "node scripts/seed_drinks.mjs",
     "seed:drinks": "convex run drink:seedGlobal",
     "lint": "oxlint --max-warnings=0 convex scripts",
     "lint:fix": "npm run lint -- --fix",
@@ -25,7 +24,6 @@
   },
   "devDependencies": {
     "@types/node": "^24",
-    "firebase-admin": "^14.5.0",
     "oxfmt": "0.73.0",
     "oxlint": "1.88.0",
     "oxlint-tsgolint": "7.0.2004",

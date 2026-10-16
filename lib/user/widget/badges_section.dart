@@ -6,17 +6,17 @@ import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/badge/widget/badge_icon.dart';
 import 'package:remembeer/user/constants.dart';
-import 'package:remembeer/user/model/user_model.dart';
 
 class BadgesSection extends StatelessWidget {
-  final UserModel user;
+  final List<UnlockedBadge> badges;
 
-  const BadgesSection({super.key, required this.user});
+  const BadgesSection({super.key, required this.badges});
 
   @override
   Widget build(BuildContext context) {
-    final shownBadges = user.shownBadges;
-    final allBadges = user.allBadges;
+    final allBadges = [...badges]
+      ..sort((a, b) => b.unlockedAt.compareTo(a.unlockedAt));
+    final shownBadges = allBadges.where((badge) => badge.isShown).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

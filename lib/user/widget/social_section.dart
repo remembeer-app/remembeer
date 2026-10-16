@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/convex_api/modules/user.dart';
 import 'package:remembeer/routes.dart';
-import 'package:remembeer/user/model/user_model.dart';
 
 class SocialSection extends StatelessWidget {
-  final UserModel user;
+  final String userId;
+  final int friendCount;
   final bool isCurrentUser;
 
   const SocialSection({
     super.key,
-    required this.user,
+    required this.userId,
+    required this.friendCount,
     required this.isCurrentUser,
     required this.userStats,
   });
@@ -34,10 +35,10 @@ class SocialSection extends StatelessWidget {
         _buildStatCard(
           icon: Icons.people_alt,
           color: Colors.blue.shade700,
-          value: user.friends.length.toString(),
+          value: friendCount.toString(),
           label: 'Friends',
           onTap: () {
-            final route = UserFriendsRoute(userId: user.id);
+            final route = UserFriendsRoute(userId: userId);
             if (isCurrentUser) {
               route.push<void>(context);
             } else {

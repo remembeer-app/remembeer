@@ -1,17 +1,17 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:remembeer/drink_log/constants.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/routes.dart';
 
-class DrinkLogLocationField extends FormField<GeoPoint> {
-  final ValueChanged<GeoPoint?> onChanged;
+class DrinkLogLocationField extends FormField<LatLng> {
+  final ValueChanged<LatLng?> onChanged;
 
   DrinkLogLocationField({
     super.key,
-    GeoPoint? initialLocation,
+    LatLng? initialLocation,
     super.enabled,
     required this.onChanged,
   }) : super(
@@ -21,10 +21,10 @@ class DrinkLogLocationField extends FormField<GeoPoint> {
        );
 
   @override
-  FormFieldState<GeoPoint> createState() => _DrinkLogLocationFieldState();
+  FormFieldState<LatLng> createState() => _DrinkLogLocationFieldState();
 }
 
-class _DrinkLogLocationFieldState extends FormFieldState<GeoPoint> {
+class _DrinkLogLocationFieldState extends FormFieldState<LatLng> {
   final _focusNode = FocusNode();
   final _locationService = get<LocationService>();
   var _isLoadingLocation = false;
@@ -37,7 +37,7 @@ class _DrinkLogLocationFieldState extends FormFieldState<GeoPoint> {
       ? 'Tap to set location'
       : '${value!.latitude.toStringAsFixed(5)}, ${value!.longitude.toStringAsFixed(5)}';
 
-  void _setLocation(GeoPoint? location) {
+  void _setLocation(LatLng? location) {
     didChange(location);
     widget.onChanged(location);
   }
@@ -111,7 +111,7 @@ class _DrinkLogLocationFieldState extends FormFieldState<GeoPoint> {
     );
   }
 
-  Future<GeoPoint?> _currentLocation() async {
+  Future<LatLng?> _currentLocation() async {
     setState(() {
       _isLoadingLocation = true;
       _locationError = null;
@@ -120,7 +120,7 @@ class _DrinkLogLocationFieldState extends FormFieldState<GeoPoint> {
       final position = await _locationService.getCurrentPosition();
       return position == null
           ? null
-          : GeoPoint(position.latitude, position.longitude);
+          : LatLng(position.latitude, position.longitude);
     } on Exception catch (error) {
       if (mounted) setState(() => _locationError = error.toString());
       return null;
@@ -136,7 +136,7 @@ class _DrinkLogLocationFieldState extends FormFieldState<GeoPoint> {
     final newLocation = await LocationPickerRoute(
       latitude: startLocation.latitude,
       longitude: startLocation.longitude,
-    ).push<GeoPoint>(context);
+    ).push<LatLng>(context);
     if (newLocation != null && mounted && widget.enabled) {
       _setLocation(newLocation);
     }

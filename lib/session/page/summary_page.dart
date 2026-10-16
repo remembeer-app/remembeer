@@ -7,6 +7,7 @@ class SummaryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const PageTemplate(
     title: Text('Summary'),
-    child: Center(child: Text('Session summaries are awaiting migration.')),
+    // TODO(ohtenkay): Load session summary data from Convex when implemented.
+    child: Center(child: Text('No summary yet.')),
   );
 }

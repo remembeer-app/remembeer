@@ -9,13 +9,14 @@ import 'package:remembeer/convex_api/widgets/badge.dart';
 import 'package:remembeer/convex_api/widgets/friendship.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
 import 'package:remembeer/routes.dart';
-import 'package:remembeer/user/model/accent_color.dart';
-import 'package:remembeer/user/model/user_model.dart';
+import 'package:remembeer/user/constants.dart';
 import 'package:remembeer/user/widget/badges_section.dart';
 import 'package:remembeer/user/widget/consumption_section.dart';
 import 'package:remembeer/user/widget/friendship_actions.dart';
 import 'package:remembeer/user/widget/profile_stats.dart';
 import 'package:remembeer/user/widget/social_section.dart';
+
+typedef _ProfileUser = ({String id, String username, String? avatarUrl});
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key, this.userId, this.showTitle = true});
@@ -34,7 +35,6 @@ class ProfilePage extends StatelessWidget {
             current.id,
             current.username,
             current.avatarUrl,
-            AccentColorKey.values.byName(current.accentColor.value! as String),
             isCurrentUser: true,
           );
         }
@@ -45,7 +45,6 @@ class ProfilePage extends StatelessWidget {
             user.id,
             user.username,
             user.avatarUrl,
-            AccentColorKey.values.byName(user.accentColor.value! as String),
             isCurrentUser: false,
           ),
         );
@@ -57,20 +56,10 @@ class ProfilePage extends StatelessWidget {
     BuildContext context,
     UserId id,
     String username,
-    String? avatarUrl,
-    AccentColorKey accentColor, {
+    String? avatarUrl, {
     required bool isCurrentUser,
   }) {
-    // TODO(ohtenkay): Replace display-only empty email and search data with Convex profile data.
-    final user = UserModel(
-      id: id.value,
-      username: username,
-      avatarUrl: avatarUrl,
-      accentColorKey: accentColor,
-      email: '',
-      searchableUsername: '',
-      // TODO(ohtenkay): Replace default empty badges/friends for other users when public Convex queries exist.
-    );
+    final user = (id: id.value, username: username, avatarUrl: avatarUrl);
     return ProfileStats(
       userId: id,
       builder: (context, stats) => SingleChildScrollView(
@@ -87,36 +76,39 @@ class ProfilePage extends StatelessWidget {
             if (isCurrentUser)
               FriendshipListCurrentQuery(
                 builder: (context, friends) => SocialSection(
-                  user: user.copyWith(
-                    friends: friends.map((friend) => friend.id.value).toSet(),
-                  ),
+                  userId: user.id,
+                  friendCount: friends.length,
                   isCurrentUser: true,
                   userStats: stats,
                 ),
               )
             else
-              SocialSection(user: user, isCurrentUser: false, userStats: stats),
+              SocialSection(
+                userId: user.id,
+                friendCount: unavailableProfileFriendCount,
+                isCurrentUser: false,
+                userStats: stats,
+              ),
             const Gap(12),
             if (isCurrentUser)
               BadgeListCurrentQuery(
                 builder: (context, badges) => BadgesSection(
-                  user: user.copyWith(
-                    unlockedBadges: {
-                      for (final badge in badges)
-                        if (getBadgeByIdOrNull(badge.badgeKey) != null)
-                          badge.badgeKey: UnlockedBadge(
-                            badgeId: badge.badgeKey,
-                            unlockedAt: DateTime.fromMillisecondsSinceEpoch(
-                              badge.unlockedAt.toInt(),
-                            ),
-                            isShown: badge.isShown,
+                  badges: [
+                    for (final badge in badges)
+                      if (getBadgeByIdOrNull(badge.badgeKey) != null)
+                        UnlockedBadge(
+                          badgeId: badge.badgeKey,
+                          unlockedAt: DateTime.fromMillisecondsSinceEpoch(
+                            badge.unlockedAt.toInt(),
                           ),
-                    },
-                  ),
+                          isShown: badge.isShown,
+                        ),
+                  ],
                 ),
               )
             else
-              BadgesSection(user: user),
+              // TODO(ohtenkay): Load public badges from Convex when available.
+              const BadgesSection(badges: []),
             const Gap(12),
             ConsumptionSection(userStats: stats),
           ],
@@ -127,7 +119,7 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildProfileHeader({
     required BuildContext context,
-    required UserModel user,
+    required _ProfileUser user,
     required bool isCurrentUser,
   }) {
     return Column(
@@ -147,7 +139,7 @@ class ProfilePage extends StatelessWidget {
   Widget _buildAvatar(
     BuildContext context,
     bool isCurrentUser,
-    UserModel user,
+    _ProfileUser user,
   ) {
     return InkWell(
       onTap: isCurrentUser
@@ -209,7 +201,7 @@ class ProfilePage extends StatelessWidget {
   Widget _buildUserName(
     bool isCurrentUser,
     BuildContext context,
-    UserModel user,
+    _ProfileUser user,
   ) {
     return InkWell(
       onTap: isCurrentUser
