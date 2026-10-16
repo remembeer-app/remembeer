@@ -64,28 +64,28 @@ def set_party_module_settings(request: Any) -> Mapping[str, Any]:
 
 
 @https_fn.on_call(region=REGION)
-def create_admin_challenge(request: Any) -> Mapping[str, Any]:
-    return party_challenges.create_admin_challenge(request)
+def create_party_challenge(request: Any) -> Mapping[str, Any]:
+    return party_challenges.create_party_challenge(request)
 
 
 @https_fn.on_call(region=REGION)
-def award_admin_challenge_winner(request: Any) -> Mapping[str, Any]:
-    return party_challenges.award_admin_challenge_winner(request)
+def award_party_challenge_winner(request: Any) -> Mapping[str, Any]:
+    return party_challenges.award_party_challenge_winner(request)
 
 
 @https_fn.on_call(region=REGION)
-def complete_admin_challenge(request: Any) -> Mapping[str, Any]:
-    return party_challenges.complete_admin_challenge(request)
+def complete_party_challenge(request: Any) -> Mapping[str, Any]:
+    return party_challenges.complete_party_challenge(request)
 
 
 @https_fn.on_call(region=REGION)
-def cancel_admin_challenge(request: Any) -> Mapping[str, Any]:
-    return party_challenges.cancel_admin_challenge(request)
+def cancel_party_challenge(request: Any) -> Mapping[str, Any]:
+    return party_challenges.cancel_party_challenge(request)
 
 
 @https_fn.on_call(region=REGION)
-def reverse_admin_challenge_winner(request: Any) -> Mapping[str, Any]:
-    return party_challenges.reverse_admin_challenge_winner(request)
+def reverse_party_challenge_winner(request: Any) -> Mapping[str, Any]:
+    return party_challenges.reverse_party_challenge_winner(request)
 
 
 @https_fn.on_call(region=REGION)

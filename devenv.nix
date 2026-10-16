@@ -36,6 +36,15 @@
     exec "${config.devenv.root}/node_modules/.bin/tsc" --lsp "$@"
   '';
 
+  # Keep CLI and editor tools on the same npm-locked versions as CI.
+  scripts.oxlint.exec = ''
+    exec "${config.devenv.root}/node_modules/.bin/oxlint" "$@"
+  '';
+
+  scripts.oxfmt.exec = ''
+    exec "${config.devenv.root}/node_modules/.bin/oxfmt" "$@"
+  '';
+
   scripts.createm.exec = ''
     set -euo pipefail
 

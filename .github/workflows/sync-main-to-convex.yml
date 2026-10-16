@@ -24,7 +24,7 @@ jobs:
       - name: Open or update pull request
         env:
           GH_TOKEN: ${{ github.token }}
-          PR_TITLE: 'chore: sync main into convex'
+          PR_TITLE: "chore: sync main into convex"
           PR_BODY: |
             `main` contains commits that are not yet in `convex`.
 

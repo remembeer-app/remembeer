@@ -40,13 +40,6 @@ void main() {
       '/drink-logs/parties/session-1/manage?tab=games',
     );
     expect(
-      const PartyQuestManagementRoute(
-        sessionId: 'session-1',
-        tab: PartyTab.games,
-      ).location,
-      '/drink-logs/parties/session-1/manage/quests?tab=games',
-    );
-    expect(
       const PartyQuestRoute(
         sessionId: 'session-1',
         questId: 'quest-1',

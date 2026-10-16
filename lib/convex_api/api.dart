@@ -2,11 +2,17 @@
 // ignore_for_file: type=lint, unused_element, unused_import, unused_local_variable
 
 import './modules/badge.dart';
+import './modules/beerpongMatch.dart';
+import './modules/beerpongTeam.dart';
+import './modules/beerpongTournament.dart';
 import './modules/drink.dart';
 import './modules/drinkLog.dart';
 import './modules/friendship.dart';
 import './modules/leaderboard.dart';
 import './modules/lib.dart';
+import './modules/party.dart';
+import './modules/partyChallenge.dart';
+import './modules/partyQuest.dart';
 import './modules/session.dart';
 import './modules/sessionMember.dart';
 import './modules/user.dart';
@@ -25,11 +31,18 @@ class ConvexApi {
   final ConvexFunctionCaller _client;
 
   BadgeApi get badge => BadgeApi(_client);
+  BeerpongMatchApi get beerpongMatch => BeerpongMatchApi(_client);
+  BeerpongTeamApi get beerpongTeam => BeerpongTeamApi(_client);
+  BeerpongTournamentApi get beerpongTournament =>
+      BeerpongTournamentApi(_client);
   DrinkApi get drink => DrinkApi(_client);
   DrinkLogApi get drinkLog => DrinkLogApi(_client);
   FriendshipApi get friendship => FriendshipApi(_client);
   LeaderboardApi get leaderboard => LeaderboardApi(_client);
   LibApi get lib => LibApi(_client);
+  PartyApi get party => PartyApi(_client);
+  PartyChallengeApi get partyChallenge => PartyChallengeApi(_client);
+  PartyQuestApi get partyQuest => PartyQuestApi(_client);
   SessionApi get session => SessionApi(_client);
   SessionMemberApi get sessionMember => SessionMemberApi(_client);
   UserApi get user => UserApi(_client);

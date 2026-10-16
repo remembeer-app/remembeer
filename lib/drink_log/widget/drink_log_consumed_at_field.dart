@@ -9,8 +9,11 @@ class DrinkLogConsumedAtField extends FormField<DateTime> {
     super.enabled,
     required this.onChanged,
   }) : super(
+         autovalidateMode: AutovalidateMode.onUserInteraction,
          validator: (value) => value == null
              ? 'Please select when you consumed the drink.'
+             : value.isAfter(DateTime.now())
+             ? 'Consumed time cannot be in the future.'
              : null,
          builder: (state) =>
              (state as _DrinkLogConsumedAtFieldState)._buildField(),
@@ -54,11 +57,12 @@ class _DrinkLogConsumedAtFieldState extends FormFieldState<DateTime> {
 
   Future<void> _selectDateTime() async {
     final selected = value!;
+    final now = DateTime.now();
     final date = await showDatePicker(
       context: context,
-      initialDate: selected,
+      initialDate: selected.isAfter(now) ? now : selected,
       firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
+      lastDate: now,
     );
     if (date == null || !mounted || !widget.enabled) return;
     final time = await showTimePicker(

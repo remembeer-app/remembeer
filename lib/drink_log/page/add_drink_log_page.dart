@@ -34,7 +34,9 @@ class AddDrinkLogPage extends StatelessWidget {
               onSubmit: (drink, consumedAt, volume, location, sessionId) async {
                 await create(
                   drinkId: drink.id,
-                  consumedAt: consumedAt.millisecondsSinceEpoch.toDouble(),
+                  consumedAt: Optional.of(
+                    consumedAt.millisecondsSinceEpoch.toDouble(),
+                  ),
                   volumeMl: volume.toDouble(),
                   location: location == null
                       ? null

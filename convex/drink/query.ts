@@ -1,7 +1,9 @@
-import { ConvexError, v } from "convex/values";
-import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
-import { schema } from "../schema";
+import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
+import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
+import { access } from "../lib/access";
+import { schema } from "../schema";
+import { loadDrink, requireDrinkOwner, requireUndeletedDrink } from "./access";
 
 export const listCustom = authQuery
   .returns(v.array(schema.doc("drink")))
@@ -14,9 +16,7 @@ export const listAvailable = authQuery
       listCustomHanlder(ctx),
       ctx.db
         .query("drink")
-        .withIndex("by_ownerId_and_deletedAt", (q) =>
-          q.eq("ownerId", null).eq("deletedAt", null),
-        )
+        .withIndex("by_ownerId_and_deletedAt", (q) => q.eq("ownerId", null).eq("deletedAt", null))
         .collect(),
     ]);
 
@@ -37,24 +37,8 @@ export const get = authQuery
     id: v.id("drink"),
   })
   .returns(schema.doc("drink"))
-  .handler(getCustomDrinkHandler);
-
-export async function getCustomDrinkHandler(
-  ctx: AuthQueryCtx,
-  { id }: { id: Id<"drink"> },
-) {
-  const drink = await ctx.db.get("drink", id);
-  if (!drink) {
-    throw new ConvexError("Drink not found");
-  }
-
-  if (drink.ownerId !== ctx.user._id) {
-    throw new ConvexError("You do not have permission to access this drink");
-  }
-
-  if (drink.deletedAt !== null) {
-    throw new ConvexError("Drink has been deleted");
-  }
-
-  return drink;
-}
+  .extend(
+    access<{ id: Id<"drink"> }>().use(loadDrink).use(requireDrinkOwner).use(requireUndeletedDrink)
+      .extend,
+  )
+  .handler(async (ctx) => ctx.drink);

@@ -40,8 +40,7 @@ export const listForDay = authQuery
     const day = new LogicalDay(ctx.user);
     const today = day.at(at);
 
-    const date =
-      selectedDate === undefined || selectedDate > today ? today : selectedDate;
+    const date = selectedDate === undefined || selectedDate > today ? today : selectedDate;
 
     const { start, end } = day.boundaries(date);
 
@@ -57,9 +56,7 @@ export const listForDay = authQuery
       .order(ctx.user.drinkLogSortOrder)
       .collect();
 
-    const referencedIds = new Set(
-      logs.map((log) => log.sessionId).filter((id) => id !== null),
-    );
+    const referencedIds = new Set(logs.map((log) => log.sessionId).filter((id) => id !== null));
 
     const sessions = await listForDayHandler(ctx, start, end, referencedIds);
 
@@ -78,8 +75,7 @@ export const listForDay = authQuery
         name: session.name,
         description: session.description,
         startedAtLocal: localTime(session.startedAt),
-        endedAtLocal:
-          session.endedAt === null ? null : localTime(session.endedAt),
+        endedAtLocal: session.endedAt === null ? null : localTime(session.endedAt),
       })),
       logs: await Promise.all(
         logs.map(async (log) => ({

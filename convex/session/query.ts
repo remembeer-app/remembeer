@@ -1,15 +1,18 @@
 import { v } from "convex/values";
-import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
-import { schema } from "../schema";
 import type { Id } from "../_generated/dataModel";
+import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
+import { access } from "../lib/access";
+import { schema } from "../schema";
 import { getMembership, requireSessionAccess } from "./access";
 
 export const get = authQuery
   .input({ id: v.id("session") })
   .returns(schema.doc("session"))
-  .handler(
-    async (ctx, { id }) => (await requireSessionAccess(ctx, id)).session,
-  );
+  .extend(
+    access<{ id: Id<"session"> }>().use((ctx, { id }) => requireSessionAccess(ctx, id, "read"))
+      .extend,
+  )
+  .handler(async (ctx) => ctx.session);
 
 export const listCurrent = authQuery
   .input({})
@@ -26,13 +29,11 @@ export async function listCurrentHandler(ctx: AuthQueryCtx) {
       .collect(),
     ctx.db
       .query("sessionMember")
-      .withIndex(
-        "by_userId_and_status_and_sessionDeletedAt_and_sessionEndedAt",
-        (q) =>
-          q
-            .eq("userId", ctx.user._id)
-            .eq("sessionMemberStatus.kind", "joined")
-            .eq("sessionDeletedAt", null),
+      .withIndex("by_userId_and_status_and_sessionDeletedAt_and_sessionEndedAt", (q) =>
+        q
+          .eq("userId", ctx.user._id)
+          .eq("sessionMemberStatus.kind", "joined")
+          .eq("sessionDeletedAt", null),
       )
       .collect(),
   ]);
@@ -68,9 +69,8 @@ export async function listForDayHandler(
           .query("session")
           .withIndex("by_ownerId_and_deletedAt_and_endedAt", (q) => {
             const range = q.eq("ownerId", ctx.user._id).eq("deletedAt", null);
-            return endedAt === null
-              ? range.eq("endedAt", null)
-              : range.gt("endedAt", endedAt);
+
+            return endedAt === null ? range.eq("endedAt", null) : range.gt("endedAt", endedAt);
           })
           .collect(),
       ),
@@ -79,18 +79,16 @@ export async function listForDayHandler(
       [null, start].map((endedAt) =>
         ctx.db
           .query("sessionMember")
-          .withIndex(
-            "by_userId_and_status_and_sessionDeletedAt_and_sessionEndedAt",
-            (q) => {
-              const range = q
-                .eq("userId", ctx.user._id)
-                .eq("sessionMemberStatus.kind", "joined")
-                .eq("sessionDeletedAt", null);
-              return endedAt === null
-                ? range.eq("sessionEndedAt", null)
-                : range.gt("sessionEndedAt", endedAt);
-            },
-          )
+          .withIndex("by_userId_and_status_and_sessionDeletedAt_and_sessionEndedAt", (q) => {
+            const range = q
+              .eq("userId", ctx.user._id)
+              .eq("sessionMemberStatus.kind", "joined")
+              .eq("sessionDeletedAt", null);
+
+            return endedAt === null
+              ? range.eq("sessionEndedAt", null)
+              : range.gt("sessionEndedAt", endedAt);
+          })
           .collect(),
       ),
     ),
@@ -98,17 +96,18 @@ export async function listForDayHandler(
       [...referencedIds].map(async (id) => {
         const session = await ctx.db.get("session", id);
         if (!session || session.deletedAt !== null) return null;
+
         if (session.ownerId === ctx.user._id) return session;
+
         const member = await getMembership(ctx, id, ctx.user._id);
+
         return member?.sessionMemberStatus.kind === "joined" ? session : null;
       }),
     ),
   ]);
 
   const joined = await Promise.all(
-    memberRanges
-      .flat()
-      .map((member) => ctx.db.get("session", member.sessionId)),
+    memberRanges.flat().map((member) => ctx.db.get("session", member.sessionId)),
   );
 
   const overlapping = [...ownedRanges.flat(), ...joined]

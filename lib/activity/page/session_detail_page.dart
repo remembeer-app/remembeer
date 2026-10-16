@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
@@ -22,7 +24,8 @@ class SessionDetailPage extends StatelessWidget {
       builder: (context, session) => UserCurrentQuery(
         builder: (context, user) => SessionMemberListForSessionQuery(
           sessionId: session.id,
-          builder: (context, members) {
+          builder: (context, entries) {
+            final members = entries.map((entry) => entry.member);
             final owner = user.id == session.ownerId;
             final admin =
                 owner ||
@@ -50,6 +53,58 @@ class SessionDetailPage extends StatelessWidget {
                         ? 'Still going'
                         : 'Ended ${_time(session.endedAt!)}',
                   ),
+                  const Gap(16),
+                  if (session.isParty) ...[
+                    FilledButton.icon(
+                      icon: const Icon(Icons.celebration),
+                      label: const Text('Open party'),
+                      onPressed: () =>
+                          PartyRoute(sessionId: sessionId).push<void>(context),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => ActivityPartyRankingRoute(
+                        sessionId: sessionId,
+                      ).push<void>(context),
+                      child: const Text('Party standings'),
+                    ),
+                    OutlinedButton(
+                      onPressed: () => ActivityPartyEventsRoute(
+                        sessionId: sessionId,
+                      ).push<void>(context),
+                      child: const Text('Party activity'),
+                    ),
+                  ] else if (admin && session.endedAt == null)
+                    SessionPromoteToPartyMutation(
+                      builder: (context, promote, state) => Column(
+                        children: [
+                          FilledButton.icon(
+                            icon: const Icon(Icons.celebration),
+                            label: const Text('Turn into party'),
+                            onPressed: state.isLoading
+                                ? null
+                                : () => showConfirmationDialog(
+                                    context: context,
+                                    title: 'Turn into party?',
+                                    text:
+                                        'Enable party classes, quests, challenges, and beerpong for this session.',
+                                    submitButtonText: 'Activate party',
+                                    onPressed: () async {
+                                      await promote(id: session.id);
+                                      if (context.mounted) {
+                                        unawaited(
+                                          PartyRoute(
+                                            sessionId: sessionId,
+                                          ).push<void>(context),
+                                        );
+                                      }
+                                    },
+                                  ),
+                          ),
+                          if (state.error case final error?)
+                            ErrorMessageBox(message: error.toString()),
+                        ],
+                      ),
+                    ),
                   const Gap(16),
                   FilledButton.icon(
                     icon: const Icon(Icons.add),

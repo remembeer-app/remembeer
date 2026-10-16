@@ -1,18 +1,12 @@
 import type { QueryCtx } from "../_generated/server";
 import type { Doc, Id } from "../_generated/dataModel";
 
-export function getFriendship(
-  ctx: QueryCtx,
-  userId: Id<"user">,
-  otherUserId: Id<"user">,
-) {
-  const [userAId, userBId] =
-    userId < otherUserId ? [userId, otherUserId] : [otherUserId, userId];
+export function getFriendship(ctx: QueryCtx, userId: Id<"user">, otherUserId: Id<"user">) {
+  const [userAId, userBId] = userId < otherUserId ? [userId, otherUserId] : [otherUserId, userId];
+
   return ctx.db
     .query("friendship")
-    .withIndex("by_pair", (q) =>
-      q.eq("userAId", userAId).eq("userBId", userBId),
-    )
+    .withIndex("by_pair", (q) => q.eq("userAId", userAId).eq("userBId", userBId))
     .unique();
 }
 
@@ -39,5 +33,6 @@ export async function listForUser(
       )
       .collect(),
   ]);
+
   return [...asA, ...asB];
 }

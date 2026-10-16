@@ -24,14 +24,16 @@ export const seedGlobal = convex
       .query("drink")
       .withIndex("by_ownerId_and_deletedAt", (q) => q.eq("ownerId", null))
       .collect();
+
     const byKey = new Map<string, (typeof existing)[number]>();
+
     for (const drink of existing) {
       if (drink.seedKey === undefined) continue;
+
       if (byKey.has(drink.seedKey)) {
-        throw new ConvexError(
-          `Duplicate global drink seed key: ${drink.seedKey}`,
-        );
+        throw new ConvexError(`Duplicate global drink seed key: ${drink.seedKey}`);
       }
+
       byKey.set(drink.seedKey, drink);
     }
 
@@ -45,6 +47,7 @@ export const seedGlobal = convex
       unchanged: 0,
     };
     const now = Date.now();
+
     for (const seed of seeds) {
       const drink = byKey.get(seed.seedKey);
       if (!drink) {
@@ -57,6 +60,7 @@ export const seedGlobal = convex
             updatedAt: now,
           });
         }
+
         continue;
       }
 
@@ -72,6 +76,7 @@ export const seedGlobal = convex
         result.unchanged++;
         continue;
       }
+
       if (!dryRun) {
         await ctx.db.patch("drink", drink._id, {
           ...seed,
@@ -82,8 +87,10 @@ export const seedGlobal = convex
     }
 
     const currentKeys = new Set(seeds.map((seed) => seed.seedKey));
+
     for (const [seedKey, drink] of byKey) {
       if (currentKeys.has(seedKey) || drink.deletedAt !== null) continue;
+
       result.retired++;
       if (!dryRun) {
         await ctx.db.patch("drink", drink._id, {
@@ -92,5 +99,6 @@ export const seedGlobal = convex
         });
       }
     }
+
     return result;
   });

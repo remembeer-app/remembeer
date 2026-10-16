@@ -179,7 +179,7 @@ def test_deterministic_award_id_rejects_different_content() -> None:
     transaction = Transaction(db.store)
     arguments = {
         "event_id": "challenge:one:winner:user-a",
-        "kind": "adminChallenge",
+        "kind": "partyChallenge",
         "recipient_user_id": "user-a",
         "participant_ids": ["user-a"],
         "source_collection": "challenges",

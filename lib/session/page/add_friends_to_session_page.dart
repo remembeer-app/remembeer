@@ -47,7 +47,8 @@ class _AddFriendsToSessionPageState extends State<AddFriendsToSessionPage> {
       builder: (context, session) => UserCurrentQuery(
         builder: (context, user) => SessionMemberListForSessionQuery(
           sessionId: session.id,
-          builder: (context, members) {
+          builder: (context, entries) {
+            final members = entries.map((entry) => entry.member);
             final isOwner = user.id == session.ownerId;
             final isAdmin =
                 isOwner ||
@@ -143,9 +144,9 @@ class _AddFriendsToSessionPageState extends State<AddFriendsToSessionPage> {
                               ),
                           ],
                           const SectionHeader(title: 'Members'),
-                          for (final member in members)
+                          for (final (:member, :username) in entries)
                             ListTile(
-                              title: Text(member.username),
+                              title: Text(username),
                               subtitle: Text(
                                 '${member.sessionMemberStatus.label}${member.sessionMemberRole.isAdmin ? ' · Admin' : ''}${member.userId == session.ownerId ? ' · Owner' : ''}',
                               ),
@@ -208,7 +209,7 @@ class _AddFriendsToSessionPageState extends State<AddFriendsToSessionPage> {
                                               ? 'Ban member'
                                               : 'Remove member',
                                           text:
-                                              '${action == 'ban' ? 'Ban' : 'Remove'} ${member.username} from this session?',
+                                              '${action == 'ban' ? 'Ban' : 'Remove'} $username from this session?',
                                           submitButtonText: action == 'ban'
                                               ? 'Ban'
                                               : 'Remove',

@@ -29,6 +29,35 @@ LAN address in both settings instead.
 CI builds populate `.env.client` from repository secrets, including
 `CONVEX_SITE_URL`.
 
+## TypeScript checks
+
+Install the Node 24 toolchain dependencies with `npm ci`.
+
+```bash
+npm run check         # Formatting, linting, and Convex type checking
+npm run lint:fix      # Apply safe lint fixes
+npm run format        # Apply Oxfmt formatting
+npm run format:check  # Check formatting without writing files
+```
+
+Oxfmt uses its default formatting and sorting behavior. Its configuration only
+excludes generated code, lockfiles, native platform files, dependencies, and
+build output. It formats handwritten JS/TS and supported project configuration
+and documentation files. Continue using `dart format .` for Dart.
+
+Oxlint checks `convex/`, `scripts/`, and `test/`, excluding generated Convex
+bindings. Type-aware rules detect unhandled and misused promises. Warnings fail
+checks; TypeScript compiler checking remains a separate step. Node test
+registration is allowed to leave promises to the test runner. The deliberate
+invalid expressions in the access type fixtures have narrow rule overrides.
+
+In `devenv shell`, `oxlint` and `oxfmt` use the npm-installed versions, including
+for editor integrations. Run `js-check` for all checks or `js-fix` to apply lint
+fixes and formatting. Run `npm ci` after dependency changes. Commit hooks are
+not installed automatically.
+
+CI runs the same checks in the TypeScript job, required by `Ready to merge`.
+
 ## Convex
 
 The Convex project lives in `convex/` at the repository root.

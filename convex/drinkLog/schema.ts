@@ -19,23 +19,13 @@ export const drinkLogTable = defineTable({
   updatedAt: v.number(),
   deletedAt: v.nullable(v.number()),
 })
-  .index("by_userId_and_deletedAt_and_consumedAt", [
-    "userId",
-    "deletedAt",
-    "consumedAt",
-  ])
+  .index("by_userId_and_deletedAt_and_consumedAt", ["userId", "deletedAt", "consumedAt"])
   .index("by_sessionId", ["sessionId"]);
 
 export const createDrinkLogInputValidator = convexToZod(
-  drinkLogTable.validator.pick(
-    "sessionId",
-    "drinkId",
-    "consumedAt",
-    "volumeMl",
-    "location",
-  ),
+  drinkLogTable.validator.pick("sessionId", "drinkId", "consumedAt", "volumeMl", "location"),
 ).extend({
-  consumedAt: z.number().int(),
+  consumedAt: z.number().int().optional(),
   volumeMl: z.number().positive(),
   location: z
     .object({

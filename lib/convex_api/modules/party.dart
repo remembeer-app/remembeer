@@ -1,0 +1,1320 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND.
+// ignore_for_file: type=lint, unused_element, unused_import, unused_local_variable
+
+import '../runtime.dart';
+import '../schema.dart';
+import '../types.dart';
+
+import 'package:dartvex/dartvex.dart';
+
+class PartyApi {
+  const PartyApi(this._client);
+
+  final ConvexFunctionCaller _client;
+
+  TypedConvexPaginatedQuery<ActivityPageItem> activity({
+    Optional<List<ActivityArgsKindsItem>> kinds = const Optional.absent(),
+    Optional<List<UserId>> participantIds = const Optional.absent(),
+    required SessionId sessionId,
+    int pageSize = 20,
+  }) {
+    return TypedConvexPaginatedQuery<ActivityPageItem>(
+      _client.paginatedQuery('party:activity', <String, dynamic>{
+        if (kinds.isDefined)
+          'kinds': kinds.value.map((item) => item.value).toList(),
+        if (participantIds.isDefined)
+          'participantIds': participantIds.value
+              .map((item) => item.value)
+              .toList(),
+        'sessionId': sessionId.value,
+      }, pageSize: pageSize),
+      (dynamic raw) => _decodeActivityPageItem(raw),
+    );
+  }
+
+  ConvexPaginatedQueryReference<ActivityArgs, ActivityPageItem>
+  get activityPaginatedQuery => activityPaginatedQueryReference;
+
+  Future<StandingsResult> standings({required SessionId sessionId}) async {
+    final raw$ = await _client.query(
+      'party:standings',
+      _encodeStandingsArgs((sessionId: sessionId)),
+    );
+    return _decodeStandingsResult(raw$);
+  }
+
+  TypedConvexSubscription<StandingsResult> standingsSubscribe({
+    required SessionId sessionId,
+  }) {
+    final subscription$ = _client.subscribe(
+      'party:standings',
+      _encodeStandingsArgs((sessionId: sessionId)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<StandingsResult>(
+            _decodeStandingsResult(value),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<StandingsResult>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<StandingsResult>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<StandingsResult>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<StandingsArgs, StandingsResult> get standingsQuery =>
+      standingsQueryReference;
+}
+
+Map<String, dynamic> _encodeDrinkCategory(DrinkCategory value) {
+  switch (value) {
+    case Beer():
+      return <String, dynamic>{'kind': 'beer'};
+    case Cider():
+      return <String, dynamic>{'kind': 'cider'};
+    case Cocktail():
+      return <String, dynamic>{'kind': 'cocktail'};
+    case Spirit():
+      return <String, dynamic>{'kind': 'spirit'};
+    case Wine():
+      return <String, dynamic>{'kind': 'wine'};
+  }
+}
+
+DrinkCategory _decodeDrinkCategory(dynamic raw) {
+  final map = expectMap(raw, label: 'DrinkCategory');
+  if (!map.containsKey('kind')) {
+    throw FormatException('Missing discriminator "kind" for DrinkCategory');
+  }
+  final discriminator = expectString(map['kind'], label: 'DrinkCategoryKind');
+  switch (discriminator) {
+    case 'beer':
+      return const Beer();
+    case 'cider':
+      return const Cider();
+    case 'cocktail':
+      return const Cocktail();
+    case 'spirit':
+      return const Spirit();
+    case 'wine':
+      return const Wine();
+    default:
+      throw FormatException(
+        'Unknown DrinkCategory discriminator: $discriminator',
+      );
+  }
+}
+
+sealed class ActivityPageItemEntry {
+  const ActivityPageItemEntry();
+  String get id;
+  double get occurredAt;
+  List<UserId> get participantIds;
+  double get scoreUnits;
+  bool get isBeerpongPlacement => this is BeerpongPlacement;
+  bool get isPartyChallenge => this is PartyChallenge;
+  bool get isDrinkLog => this is DrinkLog;
+  bool get isSocialQuest => this is SocialQuest;
+}
+
+final class BeerpongPlacement extends ActivityPageItemEntry {
+  const BeerpongPlacement({
+    required this.id,
+    required this.occurredAt,
+    required this.participantIds,
+    required this.placement,
+    required this.scoreUnits,
+    required this.teamId,
+    required this.teamName,
+    required this.tournamentId,
+    required this.tournamentName,
+    required this.userId,
+  });
+
+  final String id;
+
+  final double occurredAt;
+
+  final List<UserId> participantIds;
+
+  final double placement;
+
+  final double scoreUnits;
+
+  final BeerpongTeamId teamId;
+
+  final String teamName;
+
+  final BeerpongTournamentId tournamentId;
+
+  final String tournamentName;
+
+  final UserId userId;
+}
+
+final class PartyChallenge extends ActivityPageItemEntry {
+  const PartyChallenge({
+    required this.challengeId,
+    required this.challengeTitle,
+    required this.id,
+    required this.occurredAt,
+    required this.participantIds,
+    required this.scoreUnits,
+    required this.userId,
+  });
+
+  final PartyChallengeId challengeId;
+
+  final String challengeTitle;
+
+  final String id;
+
+  final double occurredAt;
+
+  final List<UserId> participantIds;
+
+  final double scoreUnits;
+
+  final UserId userId;
+}
+
+final class DrinkLog extends ActivityPageItemEntry {
+  const DrinkLog({
+    required this.alcoholMl,
+    required this.baseDrinkScoreUnits,
+    required this.classBonusScoreUnits,
+    required this.drinkCategory,
+    required this.drinkId,
+    required this.drinkLogId,
+    required this.drinkName,
+    required this.id,
+    required this.occurredAt,
+    required this.participantIds,
+    required this.scoreUnits,
+    required this.userId,
+    required this.volumeMl,
+  });
+
+  final double alcoholMl;
+
+  final double baseDrinkScoreUnits;
+
+  final double classBonusScoreUnits;
+
+  final DrinkCategory drinkCategory;
+
+  final DrinkId drinkId;
+
+  final DrinkLogId drinkLogId;
+
+  final String drinkName;
+
+  final String id;
+
+  final double occurredAt;
+
+  final List<UserId> participantIds;
+
+  final double scoreUnits;
+
+  final UserId userId;
+
+  final double volumeMl;
+}
+
+final class SocialQuest extends ActivityPageItemEntry {
+  const SocialQuest({
+    required this.firstUserId,
+    required this.id,
+    required this.occurredAt,
+    required this.participantIds,
+    required this.questId,
+    required this.questTitle,
+    required this.scoreUnits,
+    required this.secondUserId,
+  });
+
+  final UserId firstUserId;
+
+  final String id;
+
+  final double occurredAt;
+
+  final List<UserId> participantIds;
+
+  final PartyQuestId questId;
+
+  final String questTitle;
+
+  final double scoreUnits;
+
+  final UserId secondUserId;
+}
+
+Map<String, dynamic> _encodeActivityPageItemEntry(ActivityPageItemEntry value) {
+  switch (value) {
+    case BeerpongPlacement(
+      id: final id,
+      occurredAt: final occurredAt,
+      participantIds: final participantIds,
+      placement: final placement,
+      scoreUnits: final scoreUnits,
+      teamId: final teamId,
+      teamName: final teamName,
+      tournamentId: final tournamentId,
+      tournamentName: final tournamentName,
+      userId: final userId,
+    ):
+      return <String, dynamic>{
+        'kind': 'beerpongPlacement',
+        'id': id,
+        'occurredAt': occurredAt,
+        'participantIds': participantIds.map((item) => item.value).toList(),
+        'placement': placement,
+        'scoreUnits': scoreUnits,
+        'teamId': teamId.value,
+        'teamName': teamName,
+        'tournamentId': tournamentId.value,
+        'tournamentName': tournamentName,
+        'userId': userId.value,
+      };
+    case PartyChallenge(
+      challengeId: final challengeId,
+      challengeTitle: final challengeTitle,
+      id: final id,
+      occurredAt: final occurredAt,
+      participantIds: final participantIds,
+      scoreUnits: final scoreUnits,
+      userId: final userId,
+    ):
+      return <String, dynamic>{
+        'kind': 'partyChallenge',
+        'challengeId': challengeId.value,
+        'challengeTitle': challengeTitle,
+        'id': id,
+        'occurredAt': occurredAt,
+        'participantIds': participantIds.map((item) => item.value).toList(),
+        'scoreUnits': scoreUnits,
+        'userId': userId.value,
+      };
+    case DrinkLog(
+      alcoholMl: final alcoholMl,
+      baseDrinkScoreUnits: final baseDrinkScoreUnits,
+      classBonusScoreUnits: final classBonusScoreUnits,
+      drinkCategory: final drinkCategory,
+      drinkId: final drinkId,
+      drinkLogId: final drinkLogId,
+      drinkName: final drinkName,
+      id: final id,
+      occurredAt: final occurredAt,
+      participantIds: final participantIds,
+      scoreUnits: final scoreUnits,
+      userId: final userId,
+      volumeMl: final volumeMl,
+    ):
+      return <String, dynamic>{
+        'kind': 'drinkLog',
+        'alcoholMl': alcoholMl,
+        'baseDrinkScoreUnits': baseDrinkScoreUnits,
+        'classBonusScoreUnits': classBonusScoreUnits,
+        'drinkCategory': _encodeDrinkCategory(drinkCategory),
+        'drinkId': drinkId.value,
+        'drinkLogId': drinkLogId.value,
+        'drinkName': drinkName,
+        'id': id,
+        'occurredAt': occurredAt,
+        'participantIds': participantIds.map((item) => item.value).toList(),
+        'scoreUnits': scoreUnits,
+        'userId': userId.value,
+        'volumeMl': volumeMl,
+      };
+    case SocialQuest(
+      firstUserId: final firstUserId,
+      id: final id,
+      occurredAt: final occurredAt,
+      participantIds: final participantIds,
+      questId: final questId,
+      questTitle: final questTitle,
+      scoreUnits: final scoreUnits,
+      secondUserId: final secondUserId,
+    ):
+      return <String, dynamic>{
+        'kind': 'socialQuest',
+        'firstUserId': firstUserId.value,
+        'id': id,
+        'occurredAt': occurredAt,
+        'participantIds': participantIds.map((item) => item.value).toList(),
+        'questId': questId.value,
+        'questTitle': questTitle,
+        'scoreUnits': scoreUnits,
+        'secondUserId': secondUserId.value,
+      };
+  }
+}
+
+ActivityPageItemEntry _decodeActivityPageItemEntry(dynamic raw) {
+  final map = expectMap(raw, label: 'ActivityPageItemEntry');
+  if (!map.containsKey('kind')) {
+    throw FormatException(
+      'Missing discriminator "kind" for ActivityPageItemEntry',
+    );
+  }
+  final discriminator = expectString(
+    map['kind'],
+    label: 'ActivityPageItemEntryKind',
+  );
+  switch (discriminator) {
+    case 'beerpongPlacement':
+      if (!map.containsKey('id')) {
+        throw FormatException(
+          'Missing required field "id" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('occurredAt')) {
+        throw FormatException(
+          'Missing required field "occurredAt" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('participantIds')) {
+        throw FormatException(
+          'Missing required field "participantIds" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('placement')) {
+        throw FormatException(
+          'Missing required field "placement" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('scoreUnits')) {
+        throw FormatException(
+          'Missing required field "scoreUnits" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('teamId')) {
+        throw FormatException(
+          'Missing required field "teamId" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('teamName')) {
+        throw FormatException(
+          'Missing required field "teamName" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('tournamentId')) {
+        throw FormatException(
+          'Missing required field "tournamentId" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('tournamentName')) {
+        throw FormatException(
+          'Missing required field "tournamentName" for BeerpongPlacement',
+        );
+      }
+      if (!map.containsKey('userId')) {
+        throw FormatException(
+          'Missing required field "userId" for BeerpongPlacement',
+        );
+      }
+      return BeerpongPlacement(
+        id: expectString(map['id'], label: 'ActivityPageItemEntryId'),
+        occurredAt: expectDouble(
+          map['occurredAt'],
+          label: 'ActivityPageItemEntryOccurredAt',
+        ),
+        participantIds:
+            expectList(
+                  map['participantIds'],
+                  label: 'ActivityPageItemEntryParticipantIds',
+                )
+                .map(
+                  (item) => UserId(
+                    expectString(
+                      item,
+                      label: 'ActivityPageItemEntryParticipantIdsItem',
+                    ),
+                  ),
+                )
+                .toList(),
+        placement: expectDouble(
+          map['placement'],
+          label: 'BeerpongPlacementPlacement',
+        ),
+        scoreUnits: expectDouble(
+          map['scoreUnits'],
+          label: 'ActivityPageItemEntryScoreUnits',
+        ),
+        teamId: BeerpongTeamId(
+          expectString(map['teamId'], label: 'BeerpongPlacementTeamId'),
+        ),
+        teamName: expectString(
+          map['teamName'],
+          label: 'BeerpongPlacementTeamName',
+        ),
+        tournamentId: BeerpongTournamentId(
+          expectString(
+            map['tournamentId'],
+            label: 'BeerpongPlacementTournamentId',
+          ),
+        ),
+        tournamentName: expectString(
+          map['tournamentName'],
+          label: 'BeerpongPlacementTournamentName',
+        ),
+        userId: UserId(
+          expectString(map['userId'], label: 'BeerpongPlacementUserId'),
+        ),
+      );
+    case 'partyChallenge':
+      if (!map.containsKey('challengeId')) {
+        throw FormatException(
+          'Missing required field "challengeId" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('challengeTitle')) {
+        throw FormatException(
+          'Missing required field "challengeTitle" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('id')) {
+        throw FormatException('Missing required field "id" for PartyChallenge');
+      }
+      if (!map.containsKey('occurredAt')) {
+        throw FormatException(
+          'Missing required field "occurredAt" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('participantIds')) {
+        throw FormatException(
+          'Missing required field "participantIds" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('scoreUnits')) {
+        throw FormatException(
+          'Missing required field "scoreUnits" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('userId')) {
+        throw FormatException(
+          'Missing required field "userId" for PartyChallenge',
+        );
+      }
+      return PartyChallenge(
+        challengeId: PartyChallengeId(
+          expectString(map['challengeId'], label: 'PartyChallengeChallengeId'),
+        ),
+        challengeTitle: expectString(
+          map['challengeTitle'],
+          label: 'PartyChallengeChallengeTitle',
+        ),
+        id: expectString(map['id'], label: 'ActivityPageItemEntryId'),
+        occurredAt: expectDouble(
+          map['occurredAt'],
+          label: 'ActivityPageItemEntryOccurredAt',
+        ),
+        participantIds:
+            expectList(
+                  map['participantIds'],
+                  label: 'ActivityPageItemEntryParticipantIds',
+                )
+                .map(
+                  (item) => UserId(
+                    expectString(
+                      item,
+                      label: 'ActivityPageItemEntryParticipantIdsItem',
+                    ),
+                  ),
+                )
+                .toList(),
+        scoreUnits: expectDouble(
+          map['scoreUnits'],
+          label: 'ActivityPageItemEntryScoreUnits',
+        ),
+        userId: UserId(
+          expectString(map['userId'], label: 'PartyChallengeUserId'),
+        ),
+      );
+    case 'drinkLog':
+      if (!map.containsKey('alcoholMl')) {
+        throw FormatException(
+          'Missing required field "alcoholMl" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('baseDrinkScoreUnits')) {
+        throw FormatException(
+          'Missing required field "baseDrinkScoreUnits" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('classBonusScoreUnits')) {
+        throw FormatException(
+          'Missing required field "classBonusScoreUnits" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('drinkCategory')) {
+        throw FormatException(
+          'Missing required field "drinkCategory" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('drinkId')) {
+        throw FormatException('Missing required field "drinkId" for DrinkLog');
+      }
+      if (!map.containsKey('drinkLogId')) {
+        throw FormatException(
+          'Missing required field "drinkLogId" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('drinkName')) {
+        throw FormatException(
+          'Missing required field "drinkName" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('id')) {
+        throw FormatException('Missing required field "id" for DrinkLog');
+      }
+      if (!map.containsKey('occurredAt')) {
+        throw FormatException(
+          'Missing required field "occurredAt" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('participantIds')) {
+        throw FormatException(
+          'Missing required field "participantIds" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('scoreUnits')) {
+        throw FormatException(
+          'Missing required field "scoreUnits" for DrinkLog',
+        );
+      }
+      if (!map.containsKey('userId')) {
+        throw FormatException('Missing required field "userId" for DrinkLog');
+      }
+      if (!map.containsKey('volumeMl')) {
+        throw FormatException('Missing required field "volumeMl" for DrinkLog');
+      }
+      return DrinkLog(
+        alcoholMl: expectDouble(map['alcoholMl'], label: 'DrinkLogAlcoholMl'),
+        baseDrinkScoreUnits: expectDouble(
+          map['baseDrinkScoreUnits'],
+          label: 'DrinkLogBaseDrinkScoreUnits',
+        ),
+        classBonusScoreUnits: expectDouble(
+          map['classBonusScoreUnits'],
+          label: 'DrinkLogClassBonusScoreUnits',
+        ),
+        drinkCategory: _decodeDrinkCategory(map['drinkCategory']),
+        drinkId: DrinkId(
+          expectString(map['drinkId'], label: 'DrinkLogDrinkId'),
+        ),
+        drinkLogId: DrinkLogId(
+          expectString(map['drinkLogId'], label: 'DrinkLogDrinkLogId'),
+        ),
+        drinkName: expectString(map['drinkName'], label: 'DrinkLogDrinkName'),
+        id: expectString(map['id'], label: 'ActivityPageItemEntryId'),
+        occurredAt: expectDouble(
+          map['occurredAt'],
+          label: 'ActivityPageItemEntryOccurredAt',
+        ),
+        participantIds:
+            expectList(
+                  map['participantIds'],
+                  label: 'ActivityPageItemEntryParticipantIds',
+                )
+                .map(
+                  (item) => UserId(
+                    expectString(
+                      item,
+                      label: 'ActivityPageItemEntryParticipantIdsItem',
+                    ),
+                  ),
+                )
+                .toList(),
+        scoreUnits: expectDouble(
+          map['scoreUnits'],
+          label: 'ActivityPageItemEntryScoreUnits',
+        ),
+        userId: UserId(expectString(map['userId'], label: 'DrinkLogUserId')),
+        volumeMl: expectDouble(map['volumeMl'], label: 'DrinkLogVolumeMl'),
+      );
+    case 'socialQuest':
+      if (!map.containsKey('firstUserId')) {
+        throw FormatException(
+          'Missing required field "firstUserId" for SocialQuest',
+        );
+      }
+      if (!map.containsKey('id')) {
+        throw FormatException('Missing required field "id" for SocialQuest');
+      }
+      if (!map.containsKey('occurredAt')) {
+        throw FormatException(
+          'Missing required field "occurredAt" for SocialQuest',
+        );
+      }
+      if (!map.containsKey('participantIds')) {
+        throw FormatException(
+          'Missing required field "participantIds" for SocialQuest',
+        );
+      }
+      if (!map.containsKey('questId')) {
+        throw FormatException(
+          'Missing required field "questId" for SocialQuest',
+        );
+      }
+      if (!map.containsKey('questTitle')) {
+        throw FormatException(
+          'Missing required field "questTitle" for SocialQuest',
+        );
+      }
+      if (!map.containsKey('scoreUnits')) {
+        throw FormatException(
+          'Missing required field "scoreUnits" for SocialQuest',
+        );
+      }
+      if (!map.containsKey('secondUserId')) {
+        throw FormatException(
+          'Missing required field "secondUserId" for SocialQuest',
+        );
+      }
+      return SocialQuest(
+        firstUserId: UserId(
+          expectString(map['firstUserId'], label: 'SocialQuestFirstUserId'),
+        ),
+        id: expectString(map['id'], label: 'ActivityPageItemEntryId'),
+        occurredAt: expectDouble(
+          map['occurredAt'],
+          label: 'ActivityPageItemEntryOccurredAt',
+        ),
+        participantIds:
+            expectList(
+                  map['participantIds'],
+                  label: 'ActivityPageItemEntryParticipantIds',
+                )
+                .map(
+                  (item) => UserId(
+                    expectString(
+                      item,
+                      label: 'ActivityPageItemEntryParticipantIdsItem',
+                    ),
+                  ),
+                )
+                .toList(),
+        questId: PartyQuestId(
+          expectString(map['questId'], label: 'SocialQuestQuestId'),
+        ),
+        questTitle: expectString(
+          map['questTitle'],
+          label: 'SocialQuestQuestTitle',
+        ),
+        scoreUnits: expectDouble(
+          map['scoreUnits'],
+          label: 'ActivityPageItemEntryScoreUnits',
+        ),
+        secondUserId: UserId(
+          expectString(map['secondUserId'], label: 'SocialQuestSecondUserId'),
+        ),
+      );
+    default:
+      throw FormatException(
+        'Unknown ActivityPageItemEntry discriminator: $discriminator',
+      );
+  }
+}
+
+enum ActivityPageItemUsersItemAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const ActivityPageItemUsersItemAccentColor(this.value);
+  final Object? value;
+
+  static ActivityPageItemUsersItemAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return ActivityPageItemUsersItemAccentColor.amberValue;
+      case 'rose':
+        return ActivityPageItemUsersItemAccentColor.roseValue;
+      case 'violet':
+        return ActivityPageItemUsersItemAccentColor.violetValue;
+      case 'sky':
+        return ActivityPageItemUsersItemAccentColor.skyValue;
+      case 'emerald':
+        return ActivityPageItemUsersItemAccentColor.emeraldValue;
+      case 'lime':
+        return ActivityPageItemUsersItemAccentColor.limeValue;
+      case 'orange':
+        return ActivityPageItemUsersItemAccentColor.orangeValue;
+      case 'fuchsia':
+        return ActivityPageItemUsersItemAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for ActivityPageItemUsersItemAccentColor',
+        );
+    }
+  }
+}
+
+typedef ActivityPageItemUsersItem = ({
+  UserId id,
+  ActivityPageItemUsersItemAccentColor accentColor,
+  String? avatarUrl,
+  String username,
+});
+
+Map<String, dynamic> _encodeActivityPageItemUsersItem(
+  ActivityPageItemUsersItem value$,
+) {
+  final (
+    id: id,
+    accentColor: accentColor,
+    avatarUrl: avatarUrl,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_id': id.value,
+    'accentColor': accentColor.value,
+    'avatarUrl': avatarUrl,
+    'username': username,
+  };
+}
+
+ActivityPageItemUsersItem _decodeActivityPageItemUsersItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ActivityPageItemUsersItem');
+  if (!map.containsKey('_id')) {
+    throw FormatException(
+      'Missing required field "_id" for ActivityPageItemUsersItem',
+    );
+  }
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for ActivityPageItemUsersItem',
+    );
+  }
+  if (!map.containsKey('avatarUrl')) {
+    throw FormatException(
+      'Missing required field "avatarUrl" for ActivityPageItemUsersItem',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for ActivityPageItemUsersItem',
+    );
+  }
+  return (
+    id: UserId(expectString(map['_id'], label: 'ActivityPageItemUsersItemId')),
+    accentColor: ActivityPageItemUsersItemAccentColor.fromJson(
+      map['accentColor'],
+    ),
+    avatarUrl: map['avatarUrl'] == null
+        ? null
+        : expectString(
+            map['avatarUrl'],
+            label: 'ActivityPageItemUsersItemAvatarUrl',
+          ),
+    username: expectString(
+      map['username'],
+      label: 'ActivityPageItemUsersItemUsername',
+    ),
+  );
+}
+
+typedef ActivityPageItem = ({
+  ActivityPageItemEntry entry,
+  List<ActivityPageItemUsersItem> users,
+});
+
+Map<String, dynamic> _encodeActivityPageItem(ActivityPageItem value$) {
+  final (entry: entry, users: users) = value$;
+  return <String, dynamic>{
+    'entry': _encodeActivityPageItemEntry(entry),
+    'users': users
+        .map((item) => _encodeActivityPageItemUsersItem(item))
+        .toList(),
+  };
+}
+
+ActivityPageItem _decodeActivityPageItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ActivityPageItem');
+  if (!map.containsKey('entry')) {
+    throw FormatException(
+      'Missing required field "entry" for ActivityPageItem',
+    );
+  }
+  if (!map.containsKey('users')) {
+    throw FormatException(
+      'Missing required field "users" for ActivityPageItem',
+    );
+  }
+  return (
+    entry: _decodeActivityPageItemEntry(map['entry']),
+    users: expectList(
+      map['users'],
+      label: 'ActivityPageItemUsers',
+    ).map((item) => _decodeActivityPageItemUsersItem(item)).toList(),
+  );
+}
+
+enum ActivityArgsKindsItem {
+  drinkLogValue('drinkLog'),
+  socialQuestValue('socialQuest'),
+  partyChallengeValue('partyChallenge'),
+  beerpongPlacementValue('beerpongPlacement');
+
+  const ActivityArgsKindsItem(this.value);
+  final Object? value;
+
+  static ActivityArgsKindsItem fromJson(dynamic raw) {
+    switch (raw) {
+      case 'drinkLog':
+        return ActivityArgsKindsItem.drinkLogValue;
+      case 'socialQuest':
+        return ActivityArgsKindsItem.socialQuestValue;
+      case 'partyChallenge':
+        return ActivityArgsKindsItem.partyChallengeValue;
+      case 'beerpongPlacement':
+        return ActivityArgsKindsItem.beerpongPlacementValue;
+      default:
+        throw FormatException(
+          'Expected one of drinkLog, socialQuest, partyChallenge, beerpongPlacement for ActivityArgsKindsItem',
+        );
+    }
+  }
+}
+
+typedef ActivityArgs = ({
+  Optional<List<ActivityArgsKindsItem>> kinds,
+  Optional<List<UserId>> participantIds,
+  SessionId sessionId,
+});
+
+Map<String, dynamic> _encodeActivityArgs(ActivityArgs value$) {
+  final (kinds: kinds, participantIds: participantIds, sessionId: sessionId) =
+      value$;
+  return <String, dynamic>{
+    if (kinds.isDefined)
+      'kinds': kinds.value.map((item) => item.value).toList(),
+    if (participantIds.isDefined)
+      'participantIds': participantIds.value.map((item) => item.value).toList(),
+    'sessionId': sessionId.value,
+  };
+}
+
+ActivityArgs _decodeActivityArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'ActivityArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for ActivityArgs',
+    );
+  }
+  return (
+    kinds: map.containsKey('kinds')
+        ? Optional.of(
+            expectList(
+              map['kinds'],
+              label: 'ActivityArgsKinds',
+            ).map((item) => ActivityArgsKindsItem.fromJson(item)).toList(),
+          )
+        : const Optional.absent(),
+    participantIds: map.containsKey('participantIds')
+        ? Optional.of(
+            expectList(
+                  map['participantIds'],
+                  label: 'ActivityArgsParticipantIds',
+                )
+                .map(
+                  (item) => UserId(
+                    expectString(item, label: 'ActivityArgsParticipantIdsItem'),
+                  ),
+                )
+                .toList(),
+          )
+        : const Optional.absent(),
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'ActivityArgsSessionId'),
+    ),
+  );
+}
+
+enum StandingsResultEntriesItemUserAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const StandingsResultEntriesItemUserAccentColor(this.value);
+  final Object? value;
+
+  static StandingsResultEntriesItemUserAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return StandingsResultEntriesItemUserAccentColor.amberValue;
+      case 'rose':
+        return StandingsResultEntriesItemUserAccentColor.roseValue;
+      case 'violet':
+        return StandingsResultEntriesItemUserAccentColor.violetValue;
+      case 'sky':
+        return StandingsResultEntriesItemUserAccentColor.skyValue;
+      case 'emerald':
+        return StandingsResultEntriesItemUserAccentColor.emeraldValue;
+      case 'lime':
+        return StandingsResultEntriesItemUserAccentColor.limeValue;
+      case 'orange':
+        return StandingsResultEntriesItemUserAccentColor.orangeValue;
+      case 'fuchsia':
+        return StandingsResultEntriesItemUserAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for StandingsResultEntriesItemUserAccentColor',
+        );
+    }
+  }
+}
+
+typedef StandingsResultEntriesItemUser = ({
+  UserId id,
+  StandingsResultEntriesItemUserAccentColor accentColor,
+  String? avatarUrl,
+  String username,
+});
+
+Map<String, dynamic> _encodeStandingsResultEntriesItemUser(
+  StandingsResultEntriesItemUser value$,
+) {
+  final (
+    id: id,
+    accentColor: accentColor,
+    avatarUrl: avatarUrl,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_id': id.value,
+    'accentColor': accentColor.value,
+    'avatarUrl': avatarUrl,
+    'username': username,
+  };
+}
+
+StandingsResultEntriesItemUser _decodeStandingsResultEntriesItemUser(
+  dynamic raw,
+) {
+  final map = expectMap(raw, label: 'StandingsResultEntriesItemUser');
+  if (!map.containsKey('_id')) {
+    throw FormatException(
+      'Missing required field "_id" for StandingsResultEntriesItemUser',
+    );
+  }
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for StandingsResultEntriesItemUser',
+    );
+  }
+  if (!map.containsKey('avatarUrl')) {
+    throw FormatException(
+      'Missing required field "avatarUrl" for StandingsResultEntriesItemUser',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for StandingsResultEntriesItemUser',
+    );
+  }
+  return (
+    id: UserId(
+      expectString(map['_id'], label: 'StandingsResultEntriesItemUserId'),
+    ),
+    accentColor: StandingsResultEntriesItemUserAccentColor.fromJson(
+      map['accentColor'],
+    ),
+    avatarUrl: map['avatarUrl'] == null
+        ? null
+        : expectString(
+            map['avatarUrl'],
+            label: 'StandingsResultEntriesItemUserAvatarUrl',
+          ),
+    username: expectString(
+      map['username'],
+      label: 'StandingsResultEntriesItemUserUsername',
+    ),
+  );
+}
+
+typedef StandingsResultEntriesItem = ({
+  double alcoholMl,
+  double baseDrinkScoreUnits,
+  double beerpongScoreUnits,
+  double challengeScoreUnits,
+  double classBonusScoreUnits,
+  double completedQuestCount,
+  double drinkCount,
+  double questScoreUnits,
+  double rank,
+  double scoreUnits,
+  DrinkCategory? selectedClass,
+  StandingsResultEntriesItemUser? user,
+  UserId userId,
+  double volumeMl,
+  double wonChallengeCount,
+});
+
+Map<String, dynamic> _encodeStandingsResultEntriesItem(
+  StandingsResultEntriesItem value$,
+) {
+  final (
+    alcoholMl: alcoholMl,
+    baseDrinkScoreUnits: baseDrinkScoreUnits,
+    beerpongScoreUnits: beerpongScoreUnits,
+    challengeScoreUnits: challengeScoreUnits,
+    classBonusScoreUnits: classBonusScoreUnits,
+    completedQuestCount: completedQuestCount,
+    drinkCount: drinkCount,
+    questScoreUnits: questScoreUnits,
+    rank: rank,
+    scoreUnits: scoreUnits,
+    selectedClass: selectedClass,
+    user: user,
+    userId: userId,
+    volumeMl: volumeMl,
+    wonChallengeCount: wonChallengeCount,
+  ) = value$;
+  return <String, dynamic>{
+    'alcoholMl': alcoholMl,
+    'baseDrinkScoreUnits': baseDrinkScoreUnits,
+    'beerpongScoreUnits': beerpongScoreUnits,
+    'challengeScoreUnits': challengeScoreUnits,
+    'classBonusScoreUnits': classBonusScoreUnits,
+    'completedQuestCount': completedQuestCount,
+    'drinkCount': drinkCount,
+    'questScoreUnits': questScoreUnits,
+    'rank': rank,
+    'scoreUnits': scoreUnits,
+    'selectedClass': switch (selectedClass) {
+      null => null,
+      final v$ => _encodeDrinkCategory(v$),
+    },
+    'user': switch (user) {
+      null => null,
+      final v$ => _encodeStandingsResultEntriesItemUser(v$),
+    },
+    'userId': userId.value,
+    'volumeMl': volumeMl,
+    'wonChallengeCount': wonChallengeCount,
+  };
+}
+
+StandingsResultEntriesItem _decodeStandingsResultEntriesItem(dynamic raw) {
+  final map = expectMap(raw, label: 'StandingsResultEntriesItem');
+  if (!map.containsKey('alcoholMl')) {
+    throw FormatException(
+      'Missing required field "alcoholMl" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('baseDrinkScoreUnits')) {
+    throw FormatException(
+      'Missing required field "baseDrinkScoreUnits" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('beerpongScoreUnits')) {
+    throw FormatException(
+      'Missing required field "beerpongScoreUnits" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('challengeScoreUnits')) {
+    throw FormatException(
+      'Missing required field "challengeScoreUnits" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('classBonusScoreUnits')) {
+    throw FormatException(
+      'Missing required field "classBonusScoreUnits" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('completedQuestCount')) {
+    throw FormatException(
+      'Missing required field "completedQuestCount" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('drinkCount')) {
+    throw FormatException(
+      'Missing required field "drinkCount" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('questScoreUnits')) {
+    throw FormatException(
+      'Missing required field "questScoreUnits" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('rank')) {
+    throw FormatException(
+      'Missing required field "rank" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('scoreUnits')) {
+    throw FormatException(
+      'Missing required field "scoreUnits" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('selectedClass')) {
+    throw FormatException(
+      'Missing required field "selectedClass" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('user')) {
+    throw FormatException(
+      'Missing required field "user" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('userId')) {
+    throw FormatException(
+      'Missing required field "userId" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('volumeMl')) {
+    throw FormatException(
+      'Missing required field "volumeMl" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('wonChallengeCount')) {
+    throw FormatException(
+      'Missing required field "wonChallengeCount" for StandingsResultEntriesItem',
+    );
+  }
+  return (
+    alcoholMl: expectDouble(
+      map['alcoholMl'],
+      label: 'StandingsResultEntriesItemAlcoholMl',
+    ),
+    baseDrinkScoreUnits: expectDouble(
+      map['baseDrinkScoreUnits'],
+      label: 'StandingsResultEntriesItemBaseDrinkScoreUnits',
+    ),
+    beerpongScoreUnits: expectDouble(
+      map['beerpongScoreUnits'],
+      label: 'StandingsResultEntriesItemBeerpongScoreUnits',
+    ),
+    challengeScoreUnits: expectDouble(
+      map['challengeScoreUnits'],
+      label: 'StandingsResultEntriesItemChallengeScoreUnits',
+    ),
+    classBonusScoreUnits: expectDouble(
+      map['classBonusScoreUnits'],
+      label: 'StandingsResultEntriesItemClassBonusScoreUnits',
+    ),
+    completedQuestCount: expectDouble(
+      map['completedQuestCount'],
+      label: 'StandingsResultEntriesItemCompletedQuestCount',
+    ),
+    drinkCount: expectDouble(
+      map['drinkCount'],
+      label: 'StandingsResultEntriesItemDrinkCount',
+    ),
+    questScoreUnits: expectDouble(
+      map['questScoreUnits'],
+      label: 'StandingsResultEntriesItemQuestScoreUnits',
+    ),
+    rank: expectDouble(map['rank'], label: 'StandingsResultEntriesItemRank'),
+    scoreUnits: expectDouble(
+      map['scoreUnits'],
+      label: 'StandingsResultEntriesItemScoreUnits',
+    ),
+    selectedClass: map['selectedClass'] == null
+        ? null
+        : _decodeDrinkCategory(map['selectedClass']),
+    user: map['user'] == null
+        ? null
+        : _decodeStandingsResultEntriesItemUser(map['user']),
+    userId: UserId(
+      expectString(map['userId'], label: 'StandingsResultEntriesItemUserId'),
+    ),
+    volumeMl: expectDouble(
+      map['volumeMl'],
+      label: 'StandingsResultEntriesItemVolumeMl',
+    ),
+    wonChallengeCount: expectDouble(
+      map['wonChallengeCount'],
+      label: 'StandingsResultEntriesItemWonChallengeCount',
+    ),
+  );
+}
+
+typedef StandingsResult = ({List<StandingsResultEntriesItem> entries});
+
+Map<String, dynamic> _encodeStandingsResult(StandingsResult value$) {
+  final (entries: entries) = value$;
+  return <String, dynamic>{
+    'entries': entries
+        .map((item) => _encodeStandingsResultEntriesItem(item))
+        .toList(),
+  };
+}
+
+StandingsResult _decodeStandingsResult(dynamic raw) {
+  final map = expectMap(raw, label: 'StandingsResult');
+  if (!map.containsKey('entries')) {
+    throw FormatException(
+      'Missing required field "entries" for StandingsResult',
+    );
+  }
+  return (
+    entries: expectList(
+      map['entries'],
+      label: 'StandingsResultEntries',
+    ).map((item) => _decodeStandingsResultEntriesItem(item)).toList(),
+  );
+}
+
+typedef StandingsArgs = ({SessionId sessionId});
+
+Map<String, dynamic> _encodeStandingsArgs(StandingsArgs value$) {
+  final (sessionId: sessionId) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value};
+}
+
+StandingsArgs _decodeStandingsArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'StandingsArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for StandingsArgs',
+    );
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'StandingsArgsSessionId'),
+    ),
+  );
+}
+
+final ConvexPaginatedQueryReference<ActivityArgs, ActivityPageItem>
+activityPaginatedQueryReference = ConvexPaginatedQueryReference(
+  name: 'party:activity',
+  encode: (args) => _encodeActivityArgs(args),
+  decodeItem: (raw) => _decodeActivityPageItem(raw),
+);
+
+final ConvexQueryReference<StandingsArgs, StandingsResult>
+standingsQueryReference = ConvexQueryReference(
+  name: 'party:standings',
+  encode: (args) => _encodeStandingsArgs(args),
+  decodeArgs: (raw) => _decodeStandingsArgs(raw),
+  decode: (raw) => _decodeStandingsResult(raw),
+  encodeResult: (value) => _encodeStandingsResult(value),
+);

@@ -119,7 +119,6 @@ def test_admin_activation_creates_complete_party_and_base_awards_once() -> None:
         "userId": "member",
         "selectedClass": None,
         "classVersion": 0,
-        "classChangedAt": None,
         "beerpongOptIn": False,
         "scoreUnits": 25_000,
         "drinkCount": 1,

@@ -2,19 +2,20 @@ import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { z } from "zod";
 import { convexToZod } from "convex-helpers/server/zod4";
+import type { Doc, Id } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
 import { LogicalDay } from "../lib/logicalDay";
+import { access } from "../lib/access";
 import { schema } from "../schema";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
-import type { Doc, Id } from "../_generated/dataModel";
-import { listMemberships, requireLeaderboardAccess } from "./access";
-import {
-  beerVolumeMl,
-  inviteCodeLength,
-  inviteCodeCharacters,
-} from "./constants";
+import { listMemberships, loadLeaderboard, requireLeaderboardPermission } from "./access";
+import { beerVolumeMl, inviteCodeLength, inviteCodeCharacters } from "./constants";
 
 const idInput = { id: v.id("leaderboard") };
+
+const leaderboardMemberAccess = access<{ id: Id<"leaderboard"> }>()
+  .use(loadLeaderboard)
+  .use(requireLeaderboardPermission("member"));
 
 export const listCurrent = authQuery
   .input({})
@@ -29,22 +30,18 @@ export const listCurrent = authQuery
   .handler(async (ctx) => {
     const memberships = await ctx.db
       .query("leaderboardMember")
-      .withIndex("by_userId_and_status", (q) =>
-        q.eq("userId", ctx.user._id).eq("status", "joined"),
-      )
+      .withIndex("by_userId_and_status", (q) => q.eq("userId", ctx.user._id).eq("status", "joined"))
       .collect();
+
     const leaderboards = await Promise.all(
-      memberships.map((member) =>
-        ctx.db.get("leaderboard", member.leaderboardId),
-      ),
+      memberships.map((member) => ctx.db.get("leaderboard", member.leaderboardId)),
     );
+
     const active = leaderboards
       .filter((board) => board !== null)
       .filter((board) => board.deletedAt === null)
-      .sort(
-        (a, b) =>
-          a._creationTime - b._creationTime || a._id.localeCompare(b._id),
-      );
+      .sort((a, b) => a._creationTime - b._creationTime || a._id.localeCompare(b._id));
+
     return await Promise.all(
       active.map(async (leaderboard) => ({
         leaderboard,
@@ -64,9 +61,12 @@ export const get = authQuery
       bannedMembers: v.array(publicUserValidator),
     }),
   )
+  .extend(leaderboardMemberAccess.extend)
   .handler(async (ctx, { id }) => {
-    const { leaderboard, isOwner } = await requireLeaderboardAccess(ctx, id);
+    const { leaderboard, isOwner } = ctx;
+
     const memberships = await listMemberships(ctx, id);
+
     const profiles = await Promise.all(
       memberships
         .filter((member) => member.status === "joined" || isOwner)
@@ -75,6 +75,7 @@ export const get = authQuery
           user: await publicUser(ctx, member.userId),
         })),
     );
+
     return {
       leaderboard,
       members: profiles
@@ -96,10 +97,7 @@ export const findByInviteCode = authQuery
         .toUpperCase()
         .length(inviteCodeLength)
         .refine(
-          (code) =>
-            [...code].every((character) =>
-              inviteCodeCharacters.includes(character),
-            ),
+          (code) => code.split("").every((character) => inviteCodeCharacters.includes(character)),
           "Invalid invite code",
         ),
     }),
@@ -120,6 +118,7 @@ export const findByInviteCode = authQuery
       .withIndex("by_inviteCode", (q) => q.eq("inviteCode", inviteCode))
       .unique();
     if (!leaderboard || leaderboard.deletedAt !== null) return null;
+
     return {
       id: leaderboard._id,
       name: leaderboard.name,
@@ -159,30 +158,30 @@ export const standings = authQuery
       ),
     }),
   )
+  .extend(leaderboardMemberAccess.extend)
   .handler(async (ctx, { id, month: selectedMonth }) => {
-    const { leaderboard } = await requireLeaderboardAccess(ctx, id);
+    const { leaderboard } = ctx;
+
     const day = new LogicalDay(leaderboard);
     const currentMonth = day.at(Date.now()).slice(0, 7);
     const month = selectedMonth ?? currentMonth;
-    if (month > currentMonth)
-      throw new ConvexError("Cannot view a future reporting month");
+    if (month > currentMonth) throw new ConvexError("Cannot view a future reporting month");
+
     const firstDay = Temporal.PlainDate.from(`${month}-01`);
     const start = day.boundaries(firstDay.toString()).start;
     const end = day.boundaries(firstDay.add({ months: 1 }).toString()).start;
     const nextMonthAt = day.boundaries(
-      Temporal.PlainDate.from(`${currentMonth}-01`)
-        .add({ months: 1 })
-        .toString(),
+      Temporal.PlainDate.from(`${currentMonth}-01`).add({ months: 1 }).toString(),
     ).start;
-    const memberships = (await listMemberships(ctx, id)).filter(
-      (m) => m.status === "joined",
-    );
+    const memberships = (await listMemberships(ctx, id)).filter((m) => m.status === "joined");
+
     const drinkCache = new Map<Id<"drink">, Promise<Doc<"drink"> | null>>();
     // shortcut: totals read every monthly log, add aggregates when query read limits become a constraint.
     const entries = await Promise.all(
       memberships.map(async (member) => {
         const user = await publicUser(ctx, member.userId);
         if (!user) throw new ConvexError("Leaderboard member not found");
+
         const logs = await ctx.db
           .query("drinkLog")
           .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) =>
@@ -193,20 +192,25 @@ export const standings = authQuery
               .lt("consumedAt", end),
           )
           .collect();
+
         let beersConsumed = 0;
         let alcoholConsumedMl = 0;
+
         for (const log of logs) {
           let drinkPromise = drinkCache.get(log.drinkId);
           if (!drinkPromise) {
             drinkPromise = ctx.db.get("drink", log.drinkId);
             drinkCache.set(log.drinkId, drinkPromise);
           }
+
           const drink = await drinkPromise;
           if (!drink) throw new ConvexError("A logged drink is missing");
-          if (drink.drinkCategory.kind === "beer")
-            beersConsumed += log.volumeMl / beerVolumeMl;
+
+          if (drink.drinkCategory.kind === "beer") beersConsumed += log.volumeMl / beerVolumeMl;
+
           alcoholConsumedMl += (log.volumeMl * drink.alcoholPercentage) / 100;
         }
+
         return {
           user,
           beersConsumed,
@@ -216,21 +220,20 @@ export const standings = authQuery
         };
       }),
     );
+
     const byBeers = [...entries].sort(
-      (a, b) =>
-        b.beersConsumed - a.beersConsumed ||
-        a.user._id.localeCompare(b.user._id),
+      (a, b) => b.beersConsumed - a.beersConsumed || a.user._id.localeCompare(b.user._id),
     );
     const byAlcohol = [...entries].sort(
-      (a, b) =>
-        b.alcoholConsumedMl - a.alcoholConsumedMl ||
-        a.user._id.localeCompare(b.user._id),
+      (a, b) => b.alcoholConsumedMl - a.alcoholConsumedMl || a.user._id.localeCompare(b.user._id),
     );
+
     byBeers.forEach((entry, index) => {
       entry.rankByBeers = index + 1;
     });
     byAlcohol.forEach((entry, index) => {
       entry.rankByAlcohol = index + 1;
     });
+
     return { month, currentMonth, nextMonthAt, entries: byAlcohol };
   });

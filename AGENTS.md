@@ -20,10 +20,18 @@ dart run build_runner build --delete-conflicting-outputs
 
 # Format
 dart format .
+npm run format
 
 # Lint (strict — CI uses --fatal-warnings)
 flutter analyze --fatal-warnings
+npm run check
 ```
+
+JavaScript/TypeScript uses npm-locked Oxlint (including type-aware promise rules)
+and Oxfmt. Keep Oxfmt defaults; `.oxfmtrc.json` only controls exclusions. Run
+`npm run lint:fix` for safe lint fixes. Generated Convex bindings, native platform
+files, lockfiles, and build output are excluded from formatting. In devenv,
+`oxlint`, `oxfmt`, `js-check`, and `js-fix` expose the same local tools as CI.
 
 **CI checks that generated files (`*.g.dart`, `*.freezed.dart`) are committed and up-to-date.** Always run build_runner after changing models or routes and commit the generated output.
 
@@ -33,12 +41,12 @@ flutter analyze --fatal-warnings
 
 Each feature lives in `lib/<feature>/` with up to four layers:
 
-| Layer | Directory | Role |
-|---|---|---|
-| **Model** | `model/` | Immutable data classes via freezed. Entities extend `Entity` (has `userId`, timestamps, soft-delete `deletedAt`). DTOs extend `ValueObject`. |
-| **Controller** | `controller/` | Firestore CRUD. Extend `CrudController<T extends Entity, U extends ValueObject>`. No business logic. |
-| **Service** | `service/` | Business logic. Use RxDart (`BehaviorSubject`, `combineLatest`, `switchMap`) for reactive state. |
-| **Page/Widget** | `page/`, `widget/` | UI. Pages are full screens; widgets are reusable components. |
+| Layer           | Directory          | Role                                                                                                                                         |
+| --------------- | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Model**       | `model/`           | Immutable data classes via freezed. Entities extend `Entity` (has `userId`, timestamps, soft-delete `deletedAt`). DTOs extend `ValueObject`. |
+| **Controller**  | `controller/`      | Firestore CRUD. Extend `CrudController<T extends Entity, U extends ValueObject>`. No business logic.                                         |
+| **Service**     | `service/`         | Business logic. Use RxDart (`BehaviorSubject`, `combineLatest`, `switchMap`) for reactive state.                                             |
+| **Page/Widget** | `page/`, `widget/` | UI. Pages are full screens; widgets are reusable components.                                                                                 |
 
 ### Dependency Injection
 
@@ -51,6 +59,7 @@ go_router with go_router_builder for type-safe routes. Route definitions in `lib
 ### Code Generation
 
 Three generators are used by the project:
+
 - **freezed**: Immutable data classes (`*.freezed.dart`)
 - **json_serializable**: JSON serialization with `explicit_to_json: true` (`*.g.dart`)
 - **go_router_builder**: Type-safe routes (`routes.g.dart`)
@@ -175,6 +184,7 @@ Pages obtain services as final fields via `get<T>()` (not in `build()`). Service
 ### Forms
 
 Use `LoadingForm` for any form with async submission. It provides:
+
 - `buildTextField()`, `buildPasswordField()`, `buildSubmitButton()`, `buildErrorMessage()` — consistent styled inputs
 - `runAction()` — wraps async calls with loading spinner and error handling
 - `validate()` — form validation
@@ -206,6 +216,7 @@ Use `showSuccessNotification()` or `showNotification()` from `lib/common/action/
 ## Lint Rules
 
 Extremely strict analysis_options.yaml with ~120 rules. Notable enforced patterns:
+
 - `always_use_package_imports` (no relative imports)
 - `prefer_single_quotes`
 - `prefer_final_locals` and `prefer_final_in_for_each`

@@ -148,7 +148,7 @@ def activate_party_command(
                 "archivedAt": None,
                 "moduleSettings": {
                     "socialQuestsEnabled": False,
-                    "adminChallengesEnabled": False,
+                    "partyChallengesEnabled": False,
                     "beerpongEnabled": False,
                 },
                 "questSchedule": {
@@ -336,7 +336,6 @@ def select_party_class_command(
             {
                 "selectedClass": selected_class,
                 "classVersion": version,
-                "classChangedAt": firestore.SERVER_TIMESTAMP,
                 "updatedAt": firestore.SERVER_TIMESTAMP,
             },
         )
@@ -401,7 +400,6 @@ def set_party_member_class_command(
                 {
                     "selectedClass": selected_class,
                     "classVersion": version,
-                    "classChangedAt": firestore.SERVER_TIMESTAMP,
                     "updatedAt": firestore.SERVER_TIMESTAMP,
                 },
             )
@@ -625,7 +623,6 @@ def _new_member(user_id: str, score_units: int, drink_count: int) -> Mapping[str
         "userId": user_id,
         "selectedClass": None,
         "classVersion": 0,
-        "classChangedAt": None,
         "beerpongOptIn": False,
         "scoreUnits": score_units,
         "drinkCount": drink_count,

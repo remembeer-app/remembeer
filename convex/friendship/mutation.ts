@@ -1,30 +1,34 @@
-import { ConvexError, v } from "convex/values";
-import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
+import { v } from "convex/values";
+import { authMutation } from "../lib/authenticated";
 import type { Id } from "../_generated/dataModel";
-import { getFriendship } from "./relation";
+import { access } from "../lib/access";
+import {
+  loadFriendship,
+  requireFriendRequestTarget,
+  requireNoIncomingFriendRequest,
+  requireFriendRequest,
+  requireFriendRequestRecipient,
+  requirePendingFriendRequest,
+  requireAcceptedFriendship,
+} from "./access";
 
 const targetInput = { userId: v.id("user") };
 
 export const sendRequest = authMutation
   .input(targetInput)
   .returns(v.null())
+  .extend(
+    access<{ userId: Id<"user"> }>()
+      .use(requireFriendRequestTarget)
+      .use(loadFriendship)
+      .use(requireNoIncomingFriendRequest).extend,
+  )
   .handler(async (ctx, { userId }) => {
-    if (userId === ctx.user._id)
-      throw new ConvexError("Cannot befriend yourself");
-    if (!(await ctx.db.get("user", userId)))
-      throw new ConvexError("User not found");
-    const relation = await getFriendship(ctx, ctx.user._id, userId);
-    if (relation) {
-      if (
-        relation.status === "pending" &&
-        relation.requestedById !== ctx.user._id
-      ) {
-        throw new ConvexError("Accept the incoming friend request instead");
-      }
-      return null;
-    }
+    if (ctx.relation) return null;
+
     const [userAId, userBId] =
       ctx.user._id < userId ? [ctx.user._id, userId] : [userId, ctx.user._id];
+
     await ctx.db.insert("friendship", {
       userAId,
       userBId,
@@ -32,60 +36,74 @@ export const sendRequest = authMutation
       status: "pending",
       updatedAt: Date.now(),
     });
+
     return null;
   });
 
 export const accept = authMutation
   .input(targetInput)
   .returns(v.null())
-  .handler(async (ctx, { userId }) => {
-    const relation = await getFriendship(ctx, ctx.user._id, userId);
-    if (!relation) throw new ConvexError("Friend request not found");
-    if (relation.requestedById === ctx.user._id)
-      throw new ConvexError("Only the recipient can accept a friend request");
+  .extend(
+    access<{ userId: Id<"user"> }>()
+      .use(loadFriendship)
+      .use(requireFriendRequest)
+      .use(requireFriendRequestRecipient).extend,
+  )
+  .handler(async (ctx) => {
+    const { relation } = ctx;
+
     if (relation.status === "accepted") return null;
+
     await ctx.db.patch("friendship", relation._id, {
       status: "accepted",
       updatedAt: Date.now(),
     });
+
     return null;
   });
 
 export const decline = authMutation
   .input(targetInput)
   .returns(v.null())
-  .handler((ctx, { userId }) => deletePending(ctx, userId, false));
+  .extend(
+    access<{ userId: Id<"user"> }>()
+      .use(loadFriendship)
+      .use((ctx) => requirePendingFriendRequest(ctx, "recipient")).extend,
+  )
+  .handler(async (ctx) => {
+    if (!ctx.relation) return null;
+
+    await ctx.db.delete("friendship", ctx.relation._id);
+
+    return null;
+  });
 
 export const cancel = authMutation
   .input(targetInput)
   .returns(v.null())
-  .handler((ctx, { userId }) => deletePending(ctx, userId, true));
+  .extend(
+    access<{ userId: Id<"user"> }>()
+      .use(loadFriendship)
+      .use((ctx) => requirePendingFriendRequest(ctx, "sender")).extend,
+  )
+  .handler(async (ctx) => {
+    if (!ctx.relation) return null;
 
-async function deletePending(
-  ctx: AuthMutationCtx,
-  userId: Id<"user">,
-  isSender: boolean,
-) {
-  const relation = await getFriendship(ctx, ctx.user._id, userId);
-  if (!relation) return null;
-  if (
-    relation.status !== "pending" ||
-    (relation.requestedById === ctx.user._id) !== isSender
-  ) {
-    throw new ConvexError("Cannot change this friend request");
-  }
-  await ctx.db.delete("friendship", relation._id);
-  return null;
-}
+    await ctx.db.delete("friendship", ctx.relation._id);
+
+    return null;
+  });
 
 export const remove = authMutation
   .input(targetInput)
   .returns(v.null())
-  .handler(async (ctx, { userId }) => {
-    const relation = await getFriendship(ctx, ctx.user._id, userId);
-    if (!relation) return null;
-    if (relation.status !== "accepted")
-      throw new ConvexError("Users are not friends");
-    await ctx.db.delete("friendship", relation._id);
+  .extend(
+    access<{ userId: Id<"user"> }>().use(loadFriendship).use(requireAcceptedFriendship).extend,
+  )
+  .handler(async (ctx) => {
+    if (!ctx.relation) return null;
+
+    await ctx.db.delete("friendship", ctx.relation._id);
+
     return null;
   });

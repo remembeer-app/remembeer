@@ -19,7 +19,7 @@ class DrinkLogCreateMutationExecutor {
 
   /// Runs the mutation.
   Future<DrinkLogId> call({
-    required double consumedAt,
+    Optional<double> consumedAt = const Optional.absent(),
     required DrinkId drinkId,
     required CreateArgsLocation? location,
     required SessionId? sessionId,
@@ -37,7 +37,7 @@ class DrinkLogCreateMutationExecutor {
   /// [onSuccess] runs only on success. Errors from that callback are not
   /// suppressed. Use [call] when you need to await the result or handle errors.
   void run({
-    required double consumedAt,
+    Optional<double> consumedAt = const Optional.absent(),
     required DrinkId drinkId,
     required CreateArgsLocation? location,
     required SessionId? sessionId,

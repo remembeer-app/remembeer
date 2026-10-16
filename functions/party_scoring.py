@@ -16,7 +16,7 @@ POINT_ALLOCATION_VERSION = 2
 _AWARD_KINDS = {
     "drinkLog",
     "socialQuest",
-    "adminChallenge",
+    "partyChallenge",
     "beerpongPlacement",
 }
 

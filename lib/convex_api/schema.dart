@@ -3,6 +3,12 @@
 
 import 'runtime.dart';
 
+class ScheduledFunctionsId extends ConvexTableId {
+  const ScheduledFunctionsId(super.value);
+
+  static const String tableName = '_scheduled_functions';
+}
+
 class StorageId extends ConvexTableId {
   const StorageId(super.value);
 
@@ -13,6 +19,24 @@ class BadgeId extends ConvexTableId {
   const BadgeId(super.value);
 
   static const String tableName = 'badge';
+}
+
+class BeerpongMatchId extends ConvexTableId {
+  const BeerpongMatchId(super.value);
+
+  static const String tableName = 'beerpongMatch';
+}
+
+class BeerpongTeamId extends ConvexTableId {
+  const BeerpongTeamId(super.value);
+
+  static const String tableName = 'beerpongTeam';
+}
+
+class BeerpongTournamentId extends ConvexTableId {
+  const BeerpongTournamentId(super.value);
+
+  static const String tableName = 'beerpongTournament';
 }
 
 class DrinkId extends ConvexTableId {
@@ -43,6 +67,18 @@ class LeaderboardMemberId extends ConvexTableId {
   const LeaderboardMemberId(super.value);
 
   static const String tableName = 'leaderboardMember';
+}
+
+class PartyChallengeId extends ConvexTableId {
+  const PartyChallengeId(super.value);
+
+  static const String tableName = 'partyChallenge';
+}
+
+class PartyQuestId extends ConvexTableId {
+  const PartyQuestId(super.value);
+
+  static const String tableName = 'partyQuest';
 }
 
 class SessionId extends ConvexTableId {

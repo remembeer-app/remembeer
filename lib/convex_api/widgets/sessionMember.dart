@@ -412,6 +412,159 @@ class SessionMemberRemoveMutation extends StatelessWidget {
   );
 }
 
+/// Callable typed mutation for sessionMember:setBeerpongOptIn.
+class SessionMemberSetBeerpongOptInMutationExecutor {
+  /// Creates an executor backed by the mutation widget.
+  const SessionMemberSetBeerpongOptInMutationExecutor(this._mutate);
+
+  final Future<void> Function(SetBeerpongOptInArgs) _mutate;
+
+  /// Runs the mutation.
+  Future<void> call({required bool optedIn, required SessionId sessionId}) =>
+      _mutate((optedIn: optedIn, sessionId: sessionId));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required bool optedIn,
+    required SessionId sessionId,
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((optedIn: optedIn, sessionId: sessionId)).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
+}
+
+/// Flutter widget for sessionMember:setBeerpongOptIn.
+class SessionMemberSetBeerpongOptInMutation extends StatelessWidget {
+  /// Creates a typed mutation widget.
+  const SessionMemberSetBeerpongOptInMutation({
+    super.key,
+    required this.builder,
+    this.client,
+    this.optimisticUpdate,
+    this.mode = MutationMode.single,
+  });
+
+  /// Builds the UI with the callable mutation and current request state.
+  final Widget Function(
+    BuildContext,
+    SessionMemberSetBeerpongOptInMutationExecutor,
+    ConvexRequestSnapshot<void>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  /// Optional optimistic update for the mutation.
+  final TypedOptimisticUpdate<SetBeerpongOptInArgs>? optimisticUpdate;
+
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
+  @override
+  Widget build(BuildContext context) =>
+      ConvexMutation<SetBeerpongOptInArgs, void>(
+        mutation: setBeerpongOptInMutationReference,
+        client: client,
+        typedOptimisticUpdate: optimisticUpdate,
+        mode: mode,
+        builder: (context, mutate, snapshot) => builder(
+          context,
+          SessionMemberSetBeerpongOptInMutationExecutor(mutate),
+          snapshot,
+        ),
+      );
+}
+
+/// Callable typed mutation for sessionMember:setClass.
+class SessionMemberSetClassMutationExecutor {
+  /// Creates an executor backed by the mutation widget.
+  const SessionMemberSetClassMutationExecutor(this._mutate);
+
+  final Future<void> Function(SetClassArgs) _mutate;
+
+  /// Runs the mutation.
+  Future<void> call({
+    required DrinkCategory? selectedClass,
+    required SessionId sessionId,
+    required UserId userId,
+  }) => _mutate((
+    selectedClass: selectedClass,
+    sessionId: sessionId,
+    userId: userId,
+  ));
+
+  /// Starts the mutation, observing failures through the widget snapshot.
+  ///
+  /// [onSuccess] runs only on success. Errors from that callback are not
+  /// suppressed. Use [call] when you need to await the result or handle errors.
+  void run({
+    required DrinkCategory? selectedClass,
+    required SessionId sessionId,
+    required UserId userId,
+    void Function(void result)? onSuccess,
+  }) {
+    unawaited(
+      _mutate((
+        selectedClass: selectedClass,
+        sessionId: sessionId,
+        userId: userId,
+      )).then<void>((result) {
+        onSuccess?.call(result);
+      }, onError: (Object error, StackTrace stackTrace) {}),
+    );
+  }
+}
+
+/// Flutter widget for sessionMember:setClass.
+class SessionMemberSetClassMutation extends StatelessWidget {
+  /// Creates a typed mutation widget.
+  const SessionMemberSetClassMutation({
+    super.key,
+    required this.builder,
+    this.client,
+    this.optimisticUpdate,
+    this.mode = MutationMode.single,
+  });
+
+  /// Builds the UI with the callable mutation and current request state.
+  final Widget Function(
+    BuildContext,
+    SessionMemberSetClassMutationExecutor,
+    ConvexRequestSnapshot<void>,
+  )
+  builder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  /// Optional optimistic update for the mutation.
+  final TypedOptimisticUpdate<SetClassArgs>? optimisticUpdate;
+
+  /// Whether overlapping calls are rejected or coalesced to the latest value.
+  final MutationMode mode;
+
+  @override
+  Widget build(BuildContext context) => ConvexMutation<SetClassArgs, void>(
+    mutation: setClassMutationReference,
+    client: client,
+    typedOptimisticUpdate: optimisticUpdate,
+    mode: mode,
+    builder: (context, mutate, snapshot) => builder(
+      context,
+      SessionMemberSetClassMutationExecutor(mutate),
+      snapshot,
+    ),
+  );
+}
+
 /// Callable typed mutation for sessionMember:setRole.
 class SessionMemberSetRoleMutationExecutor {
   /// Creates an executor backed by the mutation widget.

@@ -1,43 +1,40 @@
 import { WithZod } from "fluent-convex/zod";
-import {
-  normalizeUsername,
-  updateUsernameInputValidator,
-} from "../user/schema";
+import { normalizeUsername, updateUsernameInputValidator } from "../user/schema";
 import { convexToZod } from "convex-helpers/server/zod4";
 import { v } from "convex/values";
 import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
 import { requireSessionAccess } from "../session/access";
+import { access } from "../lib/access";
+import type { Id } from "../_generated/dataModel";
 
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
-  .returns(
-    v.array(schema.doc("sessionMember").extend({ username: v.string() })),
+  .returns(v.array(v.object({ member: schema.doc("sessionMember"), username: v.string() })))
+  .extend(
+    access<{ sessionId: Id<"session"> }>().use((ctx, { sessionId }) =>
+      requireSessionAccess(ctx, sessionId, "joined"),
+    ).extend,
   )
   .handler(async (ctx, { sessionId }) => {
-    const { isAdmin } = await requireSessionAccess(ctx, sessionId, "joined");
+    const { isAdmin } = ctx;
+
     const members = await (isAdmin
       ? ctx.db
           .query("sessionMember")
-          .withIndex("by_sessionId_and_userId", (q) =>
-            q.eq("sessionId", sessionId),
-          )
+          .withIndex("by_sessionId_and_userId", (q) => q.eq("sessionId", sessionId))
           .collect()
       : ctx.db
           .query("sessionMember")
           .withIndex("by_sessionId_and_sessionMemberStatus_kind", (q) =>
-            q
-              .eq("sessionId", sessionId)
-              .eq("sessionMemberStatus.kind", "joined"),
+            q.eq("sessionId", sessionId).eq("sessionMemberStatus.kind", "joined"),
           )
           .collect());
 
     return Promise.all(
       members.map(async (member) => ({
-        ...member,
-        username:
-          (await ctx.db.get("user", member.userId))?.username ??
-          "Unavailable user",
+        member,
+        username: (await ctx.db.get("user", member.userId))?.username ?? "Unavailable user",
       })),
     );
   });
@@ -63,9 +60,8 @@ export const listInvitations = authQuery
     const invitations = await Promise.all(
       members.map(async (member) => {
         const session = await ctx.db.get("session", member.sessionId);
-        return session !== null && session.deletedAt === null
-          ? { member, session }
-          : null;
+
+        return session !== null && session.deletedAt === null ? { member, session } : null;
       }),
     );
 
@@ -80,9 +76,12 @@ export const findInvitee = authQuery
     }),
   )
   .returns(v.array(v.object({ _id: v.id("user"), username: v.string() })))
-  .handler(async (ctx, { sessionId, username }) => {
-    await requireSessionAccess(ctx, sessionId, "admin");
-
+  .extend(
+    access<{ sessionId: Id<"session"> }>().use((ctx, { sessionId }) =>
+      requireSessionAccess(ctx, sessionId, "admin"),
+    ).extend,
+  )
+  .handler(async (ctx, { username }) => {
     const users = await ctx.db
       .query("user")
       .withIndex("by_normalizedUsername", (q) =>

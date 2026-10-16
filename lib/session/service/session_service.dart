@@ -1,7 +1,8 @@
 import 'package:remembeer/auth/service/auth_service.dart';
 import 'package:remembeer/common/util/invariant.dart';
+import 'package:remembeer/convex_api/api.dart' as convex;
+import 'package:remembeer/ioc/ioc_container.dart';
 import 'package:remembeer/notification/service/notification_service.dart';
-import 'package:remembeer/party/controller/party_controller.dart';
 import 'package:remembeer/session/controller/session_controller.dart';
 import 'package:remembeer/session/model/session.dart';
 import 'package:remembeer/session/model/session_create.dart';
@@ -16,7 +17,6 @@ class SessionService {
   final UserSettingsController userSettingsController;
   final UserService userService;
   final NotificationService notificationService;
-  final PartyController partyController;
 
   SessionService({
     required this.authService,
@@ -24,7 +24,6 @@ class SessionService {
     required this.userSettingsController,
     required this.userService,
     required this.notificationService,
-    required this.partyController,
   });
 
   String get currentUserId => authService.authenticatedUser.uid;
@@ -64,10 +63,9 @@ class SessionService {
     DateTime? endedAt,
   }) async {
     if (session.isParty && session.endedAt == null && endedAt != null) {
-      await partyController.archiveParty(
-        sessionId: session.id,
-        commandId: partyController.generateCommandId(),
-        endedAt: endedAt,
+      await get<convex.ConvexApi>().session.update(
+        id: convex.SessionId(session.id),
+        endedAt: convex.Optional.of(endedAt.millisecondsSinceEpoch.toDouble()),
       );
       return;
     }
@@ -109,27 +107,6 @@ class SessionService {
     await updateSession(session: session, endedAt: endedAt);
   }
 
-  Future<void> turnSessionIntoParty(Session session) async {
-    invariant(
-      isSessionAdmin(session),
-      'Only a session admin can turn the session into a party.',
-    );
-    invariant(
-      !session.isSoloSession,
-      'Automatically generated solo sessions cannot become parties.',
-    );
-    invariant(
-      session.endedAt == null,
-      'Only ongoing sessions can become parties.',
-    );
-    invariant(!session.isParty, 'The session is already a party.');
-
-    await partyController.activateParty(
-      sessionId: session.id,
-      commandId: partyController.generateCommandId(),
-    );
-  }
-
   bool isSessionOwner(Session session) {
     return session.userId == currentUserId;
   }
@@ -167,11 +144,9 @@ class SessionService {
     final session = await sessionController.streamById(sessionId).first;
 
     if (session.isParty) {
-      await partyController.syncMembership(
-        sessionId: sessionId,
-        commandId: partyController.generateCommandId(),
-        action: 'add',
-        memberId: memberId,
+      await get<convex.ConvexApi>().sessionMember.invite(
+        sessionId: convex.SessionId(sessionId),
+        userId: convex.UserId(memberId),
       );
     } else {
       await sessionController.addMemberAtomic(sessionId, memberId);
@@ -190,11 +165,8 @@ class SessionService {
     );
 
     if (session.isParty) {
-      await partyController.syncMembership(
-        sessionId: session.id,
-        commandId: partyController.generateCommandId(),
-        action: 'leave',
-        memberId: currentUserId,
+      await get<convex.ConvexApi>().sessionMember.leave(
+        sessionId: convex.SessionId(session.id),
       );
     } else {
       await sessionController.removeMemberAndAdminAtomic(

@@ -28,9 +28,9 @@ class ManageAdminsPage extends StatelessWidget {
               builder: (context, setRole, snapshot) {
                 final joined = members
                     .where(
-                      (member) =>
-                          member.userId != session.ownerId &&
-                          member.sessionMemberStatus.isJoined,
+                      (entry) =>
+                          entry.member.userId != session.ownerId &&
+                          entry.member.sessionMemberStatus.isJoined,
                     )
                     .toList();
                 return ListView(
@@ -41,9 +41,9 @@ class ManageAdminsPage extends StatelessWidget {
                       const ListTile(
                         title: Text('No joined members to manage yet.'),
                       ),
-                    for (final member in joined)
+                    for (final (:member, :username) in joined)
                       SwitchListTile(
-                        title: Text(member.username),
+                        title: Text(username),
                         value: member.sessionMemberRole.isAdmin,
                         onChanged: snapshot.isLoading
                             ? null

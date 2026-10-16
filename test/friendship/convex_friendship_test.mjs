@@ -10,12 +10,22 @@ const { outputFiles } = await build({
       export { deleteUserData } from "./convex/user/deletion";`,
     resolveDir: process.cwd(),
   },
-  bundle: true, platform: "node", format: "esm", write: false,
-  plugins: [{ name: "authenticated-context", setup(builder) {
-    builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
-      contents: 'import { createBuilder } from "fluent-convex"; export const authQuery = createBuilder().query(); export const authMutation = createBuilder().mutation();', loader: "ts",
-    }));
-  } }],
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  write: false,
+  plugins: [
+    {
+      name: "authenticated-context",
+      setup(builder) {
+        builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
+          contents:
+            'import { createBuilder } from "fluent-convex"; export const authQuery = createBuilder().query(); export const authMutation = createBuilder().mutation();',
+          loader: "ts",
+        }));
+      },
+    },
+  ],
 });
 const { mutations, queries, userQueries, deleteUserData } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
@@ -24,15 +34,29 @@ const { mutations, queries, userQueries, deleteUserData } = await import(
 function fixture() {
   const tables = {
     user: ["a", "b", "c", "d"].map((_id) => ({
-      _id, username: _id, normalizedUsername: _id, accentColor: "amber", authUserId: `auth-${_id}`,
+      _id,
+      username: _id,
+      normalizedUsername: _id,
+      accentColor: "amber",
+      authUserId: `auth-${_id}`,
       avatarStorageId: _id === "b" ? "avatar-b" : null,
-      timeZone: "Europe/Prague", defaultDrink: null,
+      timeZone: "Europe/Prague",
+      defaultDrink: null,
     })),
-    friendship: [], drinkLog: [], drink: [], badge: [], session: [], sessionMember: [], leaderboard: [], leaderboardMember: [],
+    friendship: [],
+    drinkLog: [],
+    drink: [],
+    badge: [],
+    session: [],
+    sessionMember: [],
+    leaderboard: [],
+    leaderboardMember: [],
   };
   let sequence = 0;
   const db = {
-    async get(table, id) { return structuredClone(tables[table].find((row) => row._id === id) ?? null); },
+    async get(table, id) {
+      return structuredClone(tables[table].find((row) => row._id === id) ?? null);
+    },
     async insert(table, fields) {
       const id = `${table}-${++sequence}`;
       tables[table].push({ _id: id, _creationTime: sequence, ...structuredClone(fields) });
@@ -43,24 +67,45 @@ function fixture() {
       assert.ok(row);
       Object.assign(row, structuredClone(fields));
     },
-    async delete(table, id) { tables[table] = tables[table].filter((row) => row._id !== id); },
+    async delete(table, id) {
+      tables[table] = tables[table].filter((row) => row._id !== id);
+    },
     query(table) {
       let rows = tables[table];
       return {
         withIndex(name, range) {
-          const q = { eq(field, value) { rows = rows.filter((row) => row[field] === value); return q; } };
-          range(q); return this;
+          const q = {
+            eq(field, value) {
+              rows = rows.filter((row) => row[field] === value);
+              return q;
+            },
+          };
+          range(q);
+          return this;
         },
-        async unique() { assert.ok(rows.length <= 1); return rows[0] ?? null; },
-        async collect() { return rows; },
-        async take(count) { return rows.slice(0, count); },
+        async unique() {
+          assert.ok(rows.length <= 1);
+          return rows[0] ?? null;
+        },
+        async collect() {
+          return rows;
+        },
+        async take(count) {
+          return rows.slice(0, count);
+        },
       };
     },
   };
-  const ctx = (id) => ({ db, user: { _id: id }, storage: {
-    async getUrl(id) { return `https://example.com/${id}`; },
-    async delete() {},
-  } });
+  const ctx = (id) => ({
+    db,
+    user: { _id: id },
+    storage: {
+      async getUrl(id) {
+        return `https://example.com/${id}`;
+      },
+      async delete() {},
+    },
+  });
   return { tables, db, ctx };
 }
 
@@ -72,7 +117,10 @@ test("public profiles and username lookup expose only public data and exclude th
   f.tables.user.find((user) => user._id === "b").normalizedUsername = "friend";
   f.tables.user.find((user) => user._id === "a").normalizedUsername = "friend";
   const matches = await userQueries.search(f.ctx("a"), { username: "  Fríend  " });
-  assert.deepEqual(matches.map((user) => user._id), ["b"]);
+  assert.deepEqual(
+    matches.map((user) => user._id),
+    ["b"],
+  );
   assert.deepEqual(Object.keys(matches[0]).sort(), fields);
   assert.deepEqual(await userQueries.search(f.ctx("a"), { username: "missing" }), []);
   await assert.rejects(userQueries.search(f.ctx("a"), { username: "ab" }));
@@ -101,7 +149,10 @@ test("requests use one canonical pair, require explicit acceptance and preserve 
   await mutations.accept(f.ctx("a"), { userId: "b" });
   await mutations.sendRequest(f.ctx("b"), { userId: "a" });
   assert.deepEqual(f.tables.friendship, [accepted]);
-  for (const [actor, other] of [["a", "b"], ["b", "a"]]) {
+  for (const [actor, other] of [
+    ["a", "b"],
+    ["b", "a"],
+  ]) {
     assert.equal(await queries.getStatus(f.ctx(actor), { userId: other }), "friends");
   }
 });
@@ -137,10 +188,18 @@ test("lists include both endpoints, separate pending from accepted and expose on
   await mutations.accept(f.ctx("a"), { userId: "b" });
   await mutations.sendRequest(f.ctx("b"), { userId: "c" });
   await mutations.sendRequest(f.ctx("d"), { userId: "b" });
-  assert.deepEqual(await queries.listCurrent(f.ctx("a"), {}), [{
-    _id: "b", username: "b", accentColor: "amber", avatarUrl: "https://example.com/avatar-b",
-  }]);
-  assert.deepEqual((await queries.listCurrent(f.ctx("b"), {})).map((user) => user._id), ["a"]);
+  assert.deepEqual(await queries.listCurrent(f.ctx("a"), {}), [
+    {
+      _id: "b",
+      username: "b",
+      accentColor: "amber",
+      avatarUrl: "https://example.com/avatar-b",
+    },
+  ]);
+  assert.deepEqual(
+    (await queries.listCurrent(f.ctx("b"), {})).map((user) => user._id),
+    ["a"],
+  );
   assert.deepEqual(await queries.listCurrent(f.ctx("c"), {}), []);
   const requests = await queries.listRequests(f.ctx("b"), {});
   assert.deepEqual(new Set(requests.map((request) => request.user._id)), new Set(["c", "d"]));
@@ -164,3 +223,71 @@ test("account deletion removes pending and accepted relations at either endpoint
   assert.deepEqual(await queries.listCurrent(f.ctx("a"), {}), []);
   await deleteUserData(f.ctx("b"), "auth-b");
 });
+
+for (const registered of [false, true]) {
+  const invoke = (endpoint, ctx, input) =>
+    registered ? endpoint.public()._handler(ctx, input) : endpoint(ctx, input);
+
+  test(`${registered ? "registered" : "direct"} friendship guards keep retries harmless and check each relation once`, async () => {
+    for (const operation of ["accept", "decline", "cancel", "remove"]) {
+      for (const status of ["missing", "pending", "accepted"]) {
+        for (const caller of ["a", "b"]) {
+          const f = fixture();
+          if (status !== "missing")
+            f.tables.friendship.push({
+              _id: "relation",
+              userAId: "a",
+              userBId: "b",
+              requestedById: "a",
+              status,
+              updatedAt: 1,
+            });
+          const before = structuredClone(f.tables.friendship);
+          let reads = 0;
+          let writes = 0;
+          const query = f.db.query.bind(f.db);
+          f.db.query = (table) => {
+            assert.equal(table, "friendship");
+            reads++;
+            return query(table);
+          };
+          // These operations must not depend on the target user still existing.
+          f.db.get = () => assert.fail("Unexpected target-user lookup");
+          for (const method of ["patch", "delete"]) {
+            const write = f.db[method];
+            f.db[method] = (...args) => {
+              writes++;
+              return write(...args);
+            };
+          }
+          const error =
+            operation === "accept"
+              ? status === "missing"
+                ? /Friend request not found/
+                : caller === "a"
+                  ? /Only the recipient/
+                  : null
+              : status === "missing"
+                ? null
+                : operation === "remove"
+                  ? status !== "accepted"
+                    ? /Users are not friends/
+                    : null
+                  : status !== "pending" || (caller === "a") !== (operation === "cancel")
+                    ? /Cannot change/
+                    : null;
+          const call = invoke(mutations[operation], f.ctx(caller), {
+            userId: caller === "a" ? "b" : "a",
+          });
+          if (error) await assert.rejects(call, error);
+          else assert.equal(await call, null);
+          assert.equal(reads, 1);
+          if (error || status === "missing" || (operation === "accept" && status === "accepted")) {
+            assert.equal(writes, 0);
+            assert.deepEqual(f.tables.friendship, before);
+          } else assert.equal(writes, 1);
+        }
+      }
+    }
+  });
+}

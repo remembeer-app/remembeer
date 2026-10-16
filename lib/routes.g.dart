@@ -165,13 +165,6 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
                   path: 'manage',
                   hasOverriddenOnExit: false,
                   factory: $PartyManagementRoute._fromState,
-                  routes: [
-                    GoRouteData.$route(
-                      path: 'quests',
-                      hasOverriddenOnExit: false,
-                      factory: $PartyQuestManagementRoute._fromState,
-                    ),
-                  ],
                 ),
                 GoRouteData.$route(
                   path: 'quests/:questId',
@@ -763,43 +756,6 @@ mixin $PartyManagementRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/drink-logs/parties/${Uri.encodeComponent(_self.sessionId)}/manage',
-    queryParams: {
-      if (_self.tab != PartyTab.activity) 'tab': _$PartyTabEnumMap[_self.tab],
-    },
-  );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $PartyQuestManagementRoute on GoRouteData {
-  static PartyQuestManagementRoute _fromState(GoRouterState state) =>
-      PartyQuestManagementRoute(
-        sessionId: state.pathParameters['sessionId']!,
-        tab:
-            _$convertMapValue(
-              'tab',
-              state.uri.queryParameters,
-              _$PartyTabEnumMap._$fromName,
-            ) ??
-            PartyTab.activity,
-      );
-
-  PartyQuestManagementRoute get _self => this as PartyQuestManagementRoute;
-
-  @override
-  String get location => GoRouteData.$location(
-    '/drink-logs/parties/${Uri.encodeComponent(_self.sessionId)}/manage/quests',
     queryParams: {
       if (_self.tab != PartyTab.activity) 'tab': _$PartyTabEnumMap[_self.tab],
     },

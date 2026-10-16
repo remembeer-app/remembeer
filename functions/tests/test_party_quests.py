@@ -48,7 +48,7 @@ def _party(**overrides: Any) -> dict[str, Any]:
         "status": "active",
         "moduleSettings": {
             "socialQuestsEnabled": True,
-            "adminChallengesEnabled": False,
+            "partyChallengesEnabled": False,
             "beerpongEnabled": False,
         },
         "questSchedule": {
@@ -191,7 +191,7 @@ def test_social_module_toggle_initializes_clears_and_protects_schedule() -> None
     db = Database(store)
     enabled_settings = {
         "socialQuestsEnabled": True,
-        "adminChallengesEnabled": False,
+        "partyChallengesEnabled": False,
         "beerpongEnabled": False,
     }
     set_party_module_settings_command(

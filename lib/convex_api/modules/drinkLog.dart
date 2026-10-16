@@ -13,7 +13,7 @@ class DrinkLogApi {
   final ConvexFunctionCaller _client;
 
   Future<DrinkLogId> create({
-    required double consumedAt,
+    Optional<double> consumedAt = const Optional.absent(),
     required DrinkId drinkId,
     required CreateArgsLocation? location,
     required SessionId? sessionId,
@@ -166,7 +166,7 @@ CreateArgsLocation _decodeCreateArgsLocation(dynamic raw) {
 }
 
 typedef CreateArgs = ({
-  double consumedAt,
+  Optional<double> consumedAt,
   DrinkId drinkId,
   CreateArgsLocation? location,
   SessionId? sessionId,
@@ -182,7 +182,7 @@ Map<String, dynamic> _encodeCreateArgs(CreateArgs value$) {
     volumeMl: volumeMl,
   ) = value$;
   return <String, dynamic>{
-    'consumedAt': consumedAt,
+    if (consumedAt.isDefined) 'consumedAt': consumedAt.value,
     'drinkId': drinkId.value,
     'location': switch (location) {
       null => null,
@@ -198,9 +198,6 @@ Map<String, dynamic> _encodeCreateArgs(CreateArgs value$) {
 
 CreateArgs _decodeCreateArgs(dynamic raw) {
   final map = expectMap(raw, label: 'CreateArgs');
-  if (!map.containsKey('consumedAt')) {
-    throw FormatException('Missing required field "consumedAt" for CreateArgs');
-  }
   if (!map.containsKey('drinkId')) {
     throw FormatException('Missing required field "drinkId" for CreateArgs');
   }
@@ -214,7 +211,11 @@ CreateArgs _decodeCreateArgs(dynamic raw) {
     throw FormatException('Missing required field "volumeMl" for CreateArgs');
   }
   return (
-    consumedAt: expectDouble(map['consumedAt'], label: 'CreateArgsConsumedAt'),
+    consumedAt: map.containsKey('consumedAt')
+        ? Optional.of(
+            expectDouble(map['consumedAt'], label: 'CreateArgsConsumedAt'),
+          )
+        : const Optional.absent(),
     drinkId: DrinkId(expectString(map['drinkId'], label: 'CreateArgsDrinkId')),
     location: map['location'] == null
         ? null

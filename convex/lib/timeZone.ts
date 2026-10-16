@@ -5,8 +5,10 @@ const timeZoneSearchLimit = 20;
 
 export function isValidTimeZone(timeZone: string) {
   if (!/^[A-Za-z]/.test(timeZone)) return false;
+
   try {
     Temporal.Instant.fromEpochMilliseconds(0).toZonedDateTimeISO(timeZone);
+
     return true;
   } catch {
     return false;
@@ -22,9 +24,7 @@ export const searchTimeZones = convex
     if (!normalizedSearch) return [];
 
     return ["UTC", ...Intl.supportedValuesOf("timeZone")]
-      .filter((timeZone) =>
-        timeZone.toLowerCase().replace(/[_/]/g, " ").includes(normalizedSearch),
-      )
+      .filter((timeZone) => timeZone.toLowerCase().replace(/[_/]/g, " ").includes(normalizedSearch))
       .slice(0, timeZoneSearchLimit);
   })
   .public();

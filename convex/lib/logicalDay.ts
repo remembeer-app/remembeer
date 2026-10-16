@@ -2,13 +2,7 @@ export class LogicalDay {
   private readonly timeZone: string;
   private readonly endOfDayBoundary: number;
 
-  constructor({
-    timeZone,
-    endOfDayBoundary,
-  }: {
-    timeZone: string;
-    endOfDayBoundary: number;
-  }) {
+  constructor({ timeZone, endOfDayBoundary }: { timeZone: string; endOfDayBoundary: number }) {
     this.timeZone = timeZone;
     this.endOfDayBoundary = endOfDayBoundary;
   }
@@ -17,9 +11,8 @@ export class LogicalDay {
     const local = Temporal.Instant.fromEpochMilliseconds(timestamp)
       .toZonedDateTimeISO(this.timeZone)
       .toPlainDate();
-    const date = timestamp < this.boundaries(local.toString()).start
-      ? local.subtract({ days: 1 })
-      : local;
+    const date =
+      timestamp < this.boundaries(local.toString()).start ? local.subtract({ days: 1 }) : local;
 
     return date.toString();
   }

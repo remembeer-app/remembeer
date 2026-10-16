@@ -16,11 +16,14 @@ const seedValidator = z
 export function globalDrinkSeeds(data: unknown) {
   const seeds = z.array(seedValidator).min(1).parse(data);
   const keys = new Set<string>();
+
   return seeds.map((seed) => {
     if (keys.has(seed.id)) {
       throw new Error(`Duplicate drink seed key: ${seed.id}`);
     }
+
     keys.add(seed.id);
+
     return {
       seedKey: seed.id,
       name: seed.name,
