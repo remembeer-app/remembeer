@@ -1,7 +1,7 @@
-import { ConvexError, type Infer } from "convex/values";
+import type { Infer } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import type { partyQuestKindValidator } from "./schema";
-import { partyClassBonusPercent, partyScoreUnitsPerPoint } from "./constants";
+import { rankByScore } from "../party/scoring";
 
 export type QuestPlayer = {
   userId: Id<"user">;
@@ -18,42 +18,15 @@ export function memberPair(firstUserId: Id<"user">, secondUserId: Id<"user">) {
     : { firstUserId: secondUserId, secondUserId: firstUserId };
 }
 
-export function drinkScoreUnits(
-  volumeMl: number,
-  alcoholPercentage: number,
-  matchesClass: boolean,
-) {
-  const base = Math.round(
-    (volumeMl * alcoholPercentage * partyScoreUnitsPerPoint) / 100,
-  );
-  const score =
-    base +
-    (matchesClass ? Math.round((base * partyClassBonusPercent) / 100) : 0);
-  if (!Number.isSafeInteger(score) || score < 0)
-    throw new ConvexError("Drink score is outside the supported range");
-  return score;
-}
-
 export function eligiblePairs(
   definition: Infer<typeof partyQuestKindValidator>,
   players: readonly QuestPlayer[],
   previousPairs: ReadonlySet<string>,
   finalistTeamIds: ReadonlySet<string> = new Set(),
 ) {
-  const ordered = [...players].sort(
-    (a, b) =>
-      b.scoreUnits - a.scoreUnits ||
-      a.username.toLowerCase().localeCompare(b.username.toLowerCase()) ||
-      a.username.localeCompare(b.username) ||
-      a.userId.localeCompare(b.userId),
+  const ranks = new Map(
+    rankByScore(players).map((player) => [player.userId, player.rank]),
   );
-  const ranks = new Map<Id<"user">, number>();
-  let rank = 0;
-  ordered.forEach((player, index) => {
-    if (index === 0 || player.scoreUnits !== ordered[index - 1]?.scoreUnits)
-      rank = index + 1;
-    ranks.set(player.userId, rank);
-  });
 
   function matches(a: QuestPlayer, b: QuestPlayer) {
     const aRank = ranks.get(a.userId)!;

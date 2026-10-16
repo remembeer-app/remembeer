@@ -11,7 +11,8 @@ const { outputFiles } = await build({
     export { deleteUserData } from "./convex/user/deletion";
     export * as queries from "./convex/partyQuest/query";
     export { builtInQuests } from "./convex/partyQuest/catalog";
-    export { eligiblePairs, drinkScoreUnits, memberPair } from "./convex/partyQuest/eligibility";`, resolveDir: process.cwd() },
+    export { drinkScoreUnits } from "./convex/party/scoring";
+    export { eligiblePairs, memberPair } from "./convex/partyQuest/eligibility";`, resolveDir: process.cwd() },
   bundle: true, platform: "node", format: "esm", write: false,
   plugins: [{ name: "authenticated-context", setup(builder) {
     builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({

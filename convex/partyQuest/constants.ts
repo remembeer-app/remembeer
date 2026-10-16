@@ -1,5 +1,3 @@
-export const partyScoreUnitsPerPoint = 1000;
-export const partyClassBonusPercent = 10;
 export const questCycleLength = 16;
 export const earlyQuestCount = 5;
 export const regularQuestCount = 10;

@@ -1,6 +1,6 @@
 import type { Infer } from "convex/values";
 import type { partyQuestKindValidator } from "./schema";
-import { partyScoreUnitsPerPoint } from "./constants";
+import { partyScoreUnitsPerPoint } from "../party/constants";
 
 type BuiltInQuest = Infer<typeof partyQuestKindValidator> & {
   title: string;
