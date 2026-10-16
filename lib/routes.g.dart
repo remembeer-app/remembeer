@@ -194,11 +194,6 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               factory: $CreateSessionRoute._fromState,
             ),
             GoRouteData.$route(
-              path: 'sessions/summary',
-              hasOverriddenOnExit: false,
-              factory: $SessionSummaryRoute._fromState,
-            ),
-            GoRouteData.$route(
               path: 'sessions/manage',
               hasOverriddenOnExit: false,
               factory: $SessionManagementRoute._fromState,
@@ -234,11 +229,6 @@ RouteBase get $navbarShellRouteData => StatefulShellRouteData.$route(
               hasOverriddenOnExit: false,
               factory: $ActivitySessionRoute._fromState,
               routes: [
-                GoRouteData.$route(
-                  path: 'photos/:initialIndex',
-                  hasOverriddenOnExit: false,
-                  factory: $SessionPhotoRoute._fromState,
-                ),
                 GoRouteData.$route(
                   path: 'party/ranking',
                   hasOverriddenOnExit: false,
@@ -941,27 +931,6 @@ mixin $CreateSessionRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $SessionSummaryRoute on GoRouteData {
-  static SessionSummaryRoute _fromState(GoRouterState state) =>
-      const SessionSummaryRoute();
-
-  @override
-  String get location => GoRouteData.$location('/drink-logs/sessions/summary');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
 mixin $SessionManagementRoute on GoRouteData {
   static SessionManagementRoute _fromState(GoRouterState state) =>
       const SessionManagementRoute();
@@ -1087,33 +1056,6 @@ mixin $ActivitySessionRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/activity/sessions/${Uri.encodeComponent(_self.sessionId)}',
-  );
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $SessionPhotoRoute on GoRouteData {
-  static SessionPhotoRoute _fromState(GoRouterState state) => SessionPhotoRoute(
-    sessionId: state.pathParameters['sessionId']!,
-    initialIndex: int.parse(state.pathParameters['initialIndex']!),
-  );
-
-  SessionPhotoRoute get _self => this as SessionPhotoRoute;
-
-  @override
-  String get location => GoRouteData.$location(
-    '/activity/sessions/${Uri.encodeComponent(_self.sessionId)}/photos/${Uri.encodeComponent(_self.initialIndex.toString())}',
   );
 
   @override

@@ -6,7 +6,6 @@ import 'package:remembeer/activity/page/activity_page.dart';
 import 'package:remembeer/activity/page/party_events_page.dart';
 import 'package:remembeer/activity/page/party_standings_page.dart';
 import 'package:remembeer/activity/page/session_detail_page.dart';
-import 'package:remembeer/activity/widget/session_photo_viewer.dart';
 import 'package:remembeer/auth/page/change_password_page.dart';
 import 'package:remembeer/auth/page/login_page.dart';
 import 'package:remembeer/auth/page/register_page.dart';
@@ -41,7 +40,6 @@ import 'package:remembeer/session/page/create_session_page.dart';
 import 'package:remembeer/session/page/edit_session_page.dart';
 import 'package:remembeer/session/page/manage_admins_page.dart';
 import 'package:remembeer/session/page/session_management_page.dart';
-import 'package:remembeer/session/page/summary_page.dart';
 import 'package:remembeer/user/page/friends_list_page.dart';
 import 'package:remembeer/user/page/profile_page.dart';
 import 'package:remembeer/user/page/search_user_page.dart';
@@ -157,7 +155,6 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             ),
             TypedGoRoute<LocationPickerRoute>(path: 'location-picker'),
             TypedGoRoute<CreateSessionRoute>(path: 'sessions/new'),
-            TypedGoRoute<SessionSummaryRoute>(path: 'sessions/summary'),
             TypedGoRoute<SessionManagementRoute>(path: 'sessions/manage'),
             TypedGoRoute<EditSessionRoute>(path: 'sessions/:sessionId/edit'),
             TypedGoRoute<ManageSessionAdminsRoute>(
@@ -178,7 +175,6 @@ class RegisterRoute extends GoRouteData with $RegisterRoute {
             TypedGoRoute<ActivitySessionRoute>(
               path: 'sessions/:sessionId',
               routes: [
-                TypedGoRoute<SessionPhotoRoute>(path: 'photos/:initialIndex'),
                 TypedGoRoute<ActivityPartyRankingRoute>(path: 'party/ranking'),
                 TypedGoRoute<ActivityPartyEventsRoute>(path: 'party/events'),
               ],
@@ -511,15 +507,6 @@ class CreateSessionRoute extends GoRouteData with $CreateSessionRoute {
   }
 }
 
-class SessionSummaryRoute extends GoRouteData with $SessionSummaryRoute {
-  const SessionSummaryRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return const SummaryPage();
-  }
-}
-
 class SessionManagementRoute extends GoRouteData with $SessionManagementRoute {
   const SessionManagementRoute();
 
@@ -595,21 +582,6 @@ class ActivityPartyEventsRoute extends GoRouteData
   @override
   Widget build(BuildContext context, GoRouterState state) {
     return PartyEventsPage(sessionId: sessionId);
-  }
-}
-
-class SessionPhotoRoute extends GoRouteData with $SessionPhotoRoute {
-  final String sessionId;
-  final int initialIndex;
-
-  const SessionPhotoRoute({
-    required this.sessionId,
-    required this.initialIndex,
-  });
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) {
-    return SessionPhotoViewer(sessionId: sessionId, initialIndex: initialIndex);
   }
 }
 
