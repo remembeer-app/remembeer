@@ -1,6 +1,7 @@
 import type { RegisteredQuery, RegisteredMutation } from "convex/server";
 import { v } from "convex/values";
 import type { Id } from "../../convex/_generated/dataModel";
+import { questAccess } from "../../convex/partyQuest/access";
 import { access } from "../../convex/lib/access";
 import { authMutation, authQuery } from "../../convex/lib/authenticated";
 import { ongoingPartyAccess, partyAccess } from "../../convex/party/access";
@@ -93,3 +94,21 @@ checkedQuery.handler(async () => 123);
 void publicMutationInput;
 void publicQueryOutput;
 void invalidQueryOutput;
+
+// Quest chains support both endpoint ID names without weakening table types.
+const questById = authQuery
+  .input({ id: v.id("partyQuest") })
+  .returns(v.string())
+  .extend(questAccess("id").extend)
+  .handler(async (ctx) => ctx.quest.title);
+const questByQuestId = authQuery
+  .input({ questId: v.id("partyQuest") })
+  .returns(v.string())
+  .extend(questAccess("questId").extend)
+  .handler(async (ctx) => ctx.quest.title);
+// @ts-expect-error A questId chain must not accept an endpoint using only id.
+authQuery.input({ id: v.id("partyQuest") }).returns(v.string()).extend(questAccess("questId").extend);
+// @ts-expect-error Quest references must retain their table-specific ID type.
+authQuery.input({ id: v.id("drink") }).returns(v.string()).extend(questAccess("id").extend);
+void questById;
+void questByQuestId;

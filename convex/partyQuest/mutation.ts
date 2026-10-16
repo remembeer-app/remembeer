@@ -15,17 +15,16 @@ import {
 } from "./lifecycle";
 import { eligiblePairs, memberPair } from "./eligibility";
 import { loadQuestContext } from "./context";
+import { questAccess, activeQuestPartyAccess } from "./access";
 
 async function requireActiveParty(
   ctx: AuthMutationCtx,
   sessionId: Id<"session">,
   permission: "admin" | "joined",
 ) {
-  const { session } = await requireSessionAccess(ctx, sessionId, permission);
-  if (session.kind !== "party" || session.endedAt !== null)
-    throw new ConvexError("An ongoing party is required");
+  const access = await requireSessionAccess(ctx, sessionId, permission);
 
-  return session;
+  return activeQuestPartyAccess(access).session;
 }
 
 export const setEnabled = authMutation
@@ -123,11 +122,9 @@ export const setSchedule = authMutation
 export const selectPartner = authMutation
   .input({ questId: v.id("partyQuest"), selectedUserId: v.id("user") })
   .returns(v.boolean())
+  .extend(questAccess("questId").use(activeQuestPartyAccess).extend)
   .handler(async (ctx, { questId, selectedUserId }) => {
-    const quest = await ctx.db.get("partyQuest", questId);
-    if (!quest) throw new ConvexError("Quest not found");
-
-    const session = await requireActiveParty(ctx, quest.sessionId, "joined");
+    const { quest, session } = ctx;
     if (!session.modules.socialQuestsEnabled)
       throw new ConvexError("Social quests are disabled");
 
@@ -177,7 +174,7 @@ export const selectPartner = authMutation
     );
     if (matched) {
       const { players, previousPairs, finalistTeamIds } =
-        await loadQuestContext(ctx, quest.sessionId, now);
+        await loadQuestContext(ctx, session, now);
       if (
         !eligiblePairs(quest, players, previousPairs, finalistTeamIds).some(
           (candidate) =>

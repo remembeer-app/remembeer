@@ -8,12 +8,15 @@ import { memberPair, type QuestPlayer } from "./eligibility";
 
 export async function loadQuestContext(
   ctx: QueryCtx,
-  sessionId: Id<"session">,
+  sessionOrId: Doc<"session"> | Id<"session">,
   now: number,
 ) {
+  const sessionId = typeof sessionOrId === "string" ? sessionOrId : sessionOrId._id;
   const { entries, quests } = await loadPartyScores(ctx, sessionId, now);
 
-  const session = await ctx.db.get("session", sessionId);
+  const session = typeof sessionOrId === "string"
+    ? await ctx.db.get("session", sessionOrId)
+    : sessionOrId;
 
   const { teamByUserId, finalistTeamIds } = await loadBeerpongQuestContext(
     ctx,

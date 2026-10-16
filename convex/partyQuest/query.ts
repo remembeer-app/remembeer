@@ -1,9 +1,10 @@
-import { ConvexError, v } from "convex/values";
+import { v } from "convex/values";
 import type { Doc } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
 import { requireSessionAccess } from "../session/access";
 import { schema } from "../schema";
 import { loadQuestContext } from "./context";
+import { questAccess } from "./access";
 import { eligiblePairs } from "./eligibility";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
 
@@ -31,18 +32,8 @@ function visibleQuest(
 export const get = authQuery
   .input({ id: v.id("partyQuest") })
   .returns(schema.doc("partyQuest"))
-  .handler(async (ctx, { id }) => {
-    const quest = await ctx.db.get("partyQuest", id);
-    if (!quest) throw new ConvexError("Quest not found");
-
-    const { session } = await requireSessionAccess(
-      ctx,
-      quest.sessionId,
-      "joined",
-    );
-
-    return visibleQuest(quest, session, ctx.user._id);
-  });
+  .extend(questAccess("id").extend)
+  .handler(async (ctx) => visibleQuest(ctx.quest, ctx.session, ctx.user._id));
 
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
@@ -65,15 +56,9 @@ export const listForSession = authQuery
 export const partners = authQuery
   .input({ questId: v.id("partyQuest") })
   .returns(v.array(publicUserValidator))
-  .handler(async (ctx, { questId }) => {
-    const quest = await ctx.db.get("partyQuest", questId);
-    if (!quest) throw new ConvexError("Quest not found");
-
-    const { session } = await requireSessionAccess(
-      ctx,
-      quest.sessionId,
-      "joined",
-    );
+  .extend(questAccess("questId").extend)
+  .handler(async (ctx) => {
+    const { quest, session } = ctx;
 
     const now = Date.now();
     if (
@@ -96,7 +81,7 @@ export const partners = authQuery
 
     const { players, previousPairs, finalistTeamIds } = await loadQuestContext(
       ctx,
-      quest.sessionId,
+      session,
       now,
     );
 

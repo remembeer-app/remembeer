@@ -699,3 +699,46 @@ test("partner query reflects beerpong rosters and disables selection for inactiv
   f.tables.session[0].endedAt = Date.now();
   assert.deepEqual(await partners(), []);
 });
+
+for (const registered of [false, true]) {
+  const invoke = (endpoint, ctx, input) => registered
+    ? endpoint.public()._handler(ctx, input)
+    : endpoint(ctx, input);
+
+  test(`${registered ? "registered" : "direct"} quest access reuses the session for partner eligibility and confirmation`, async () => {
+    const f = fixture();
+    await f.enable(0.99999);
+    const quest = f.tables.partyQuest.at(-1);
+    const assertReads = () => {
+      assert.equal(f.reads.filter(read => read === `partyQuest:${quest._id}`).length, 1);
+      assert.equal(f.reads.filter(read => read === "session:party").length, 1);
+    };
+
+    f.reads.length = 0;
+    assert.equal((await invoke(q.get, f.ctx("a"), { id: quest._id }))._id, quest._id);
+    assertReads();
+
+    f.reads.length = 0;
+    assert.deepEqual((await invoke(q.partners, f.ctx("a"), {
+      questId: quest._id,
+    })).map(user => user._id), ["b", "c"]);
+    assertReads();
+
+    for (const [actor, partner, matched] of [["a", "b", false], ["b", "a", true]]) {
+      f.reads.length = 0;
+      assert.equal(await invoke(m.selectPartner, f.ctx(actor), {
+        questId: quest._id, selectedUserId: partner,
+      }), matched);
+      assertReads();
+    }
+
+    f.tables.session[0].endedAt = Date.now();
+    const before = structuredClone(f.tables);
+    assert.equal((await invoke(q.get, f.ctx("a"), { id: quest._id })).status, "cancelled");
+    assert.deepEqual(await invoke(q.partners, f.ctx("c"), { questId: quest._id }), []);
+    await assert.rejects(invoke(m.selectPartner, f.ctx("c"), {
+      questId: quest._id, selectedUserId: "a",
+    }), /ongoing/);
+    assert.deepEqual(f.tables, before);
+  });
+}

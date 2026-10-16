@@ -198,7 +198,7 @@ export async function issueQuest(
   const used = new Set(cycle.map(identity));
   const beerpongContext =
     party.modules.beerpongEnabled && cycleCount >= earlyQuestCount
-      ? await loadQuestContext(ctx, party._id, now)
+      ? await loadQuestContext(ctx, party, now)
       : null;
 
   const candidates = builtInQuests.filter(

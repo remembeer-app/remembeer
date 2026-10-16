@@ -71,6 +71,7 @@ import type * as partyChallenge_query from "../partyChallenge/query.js";
 import type * as partyChallenge_scheduled from "../partyChallenge/scheduled.js";
 import type * as partyChallenge_withChallengeAccess from "../partyChallenge/withChallengeAccess.js";
 import type * as partyQuest from "../partyQuest.js";
+import type * as partyQuest_access from "../partyQuest/access.js";
 import type * as partyQuest_catalog from "../partyQuest/catalog.js";
 import type * as partyQuest_constants from "../partyQuest/constants.js";
 import type * as partyQuest_context from "../partyQuest/context.js";
@@ -167,6 +168,7 @@ declare const fullApi: ApiFromModules<{
   "partyChallenge/scheduled": typeof partyChallenge_scheduled;
   "partyChallenge/withChallengeAccess": typeof partyChallenge_withChallengeAccess;
   partyQuest: typeof partyQuest;
+  "partyQuest/access": typeof partyQuest_access;
   "partyQuest/catalog": typeof partyQuest_catalog;
   "partyQuest/constants": typeof partyQuest_constants;
   "partyQuest/context": typeof partyQuest_context;
