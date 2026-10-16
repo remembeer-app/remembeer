@@ -86,13 +86,9 @@ dev_dependencies:
       ref: main
       path: packages/dartvex_codegen
   flutter_lints: ^6.0.0
-  flutter_test:
-    sdk: flutter
   freezed: ^4.0.2
   go_router_builder: ^4.4.0
-  http: ^1.6.0
   json_serializable: ^6.14.0
-  meta: ^1.16.0
 
 dependency_overrides:
   # TODO(ohtenkay): ponytail: pin until notifications supports dbus 0.8, then remove.

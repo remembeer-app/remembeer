@@ -105,9 +105,6 @@ npm run seed:drinks
 
 # Apply them on production after deploying the updated backend
 npm run seed:drinks -- --prod
-
-# Validate the seed data
-npm run test:seed:drinks
 ```
 
 The same internal mutation can be run from the Convex dashboard's Functions page

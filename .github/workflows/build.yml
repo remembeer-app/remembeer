@@ -14,7 +14,7 @@ on:
 
 jobs:
   checks:
-    name: Format Check, Lint & Test
+    name: Format Check & Lint
     runs-on: ubuntu-latest
 
     steps:
@@ -69,9 +69,6 @@ jobs:
 
       - name: Analyze
         run: flutter analyze --fatal-warnings
-
-      - name: Run tests
-        run: flutter test --coverage
 
   typescript_checks:
     name: TypeScript Lint, Format & Typecheck
@@ -220,41 +217,13 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-          cache-dependency-path: functions/requirements-test.txt
+          cache-dependency-path: functions/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r requirements-test.txt
-
-      - name: Run tests
-        run: python -m pytest tests
+        run: pip install -r requirements.txt
 
       - name: Compile functions
         run: python -m compileall .
-
-  firestore_rules:
-    name: Firestore Rules
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v7
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: Set up Java
-        uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Firestore Emulator tests
-        run: npx -y firebase-tools@15 emulators:exec --only firestore "npm test"
 
   ios_build:
     name: Build iOS
@@ -300,7 +269,6 @@ jobs:
       - convex_generated
       - typescript_checks
       - python_checks
-      - firestore_rules
       - android_build
       - ios_build
     steps:

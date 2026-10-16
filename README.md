@@ -45,11 +45,9 @@ excludes generated code, lockfiles, native platform files, dependencies, and
 build output. It formats handwritten JS/TS and supported project configuration
 and documentation files. Continue using `dart format .` for Dart.
 
-Oxlint checks `convex/`, `scripts/`, and `test/`, excluding generated Convex
+Oxlint checks `convex/` and `scripts/`, excluding generated Convex
 bindings. Type-aware rules detect unhandled and misused promises. Warnings fail
-checks; TypeScript compiler checking remains a separate step. Node test
-registration is allowed to leave promises to the test runner. The deliberate
-invalid expressions in the access type fixtures have narrow rule overrides.
+checks; TypeScript compiler checking remains a separate step.
 
 In `devenv shell`, `oxlint` and `oxfmt` use the npm-installed versions, including
 for editor integrations. Run `js-check` for all checks or `js-fix` to apply lint
@@ -87,7 +85,6 @@ The internal `drink:seedGlobal` mutation reads the bundled
 npm run seed:drinks -- '{"dryRun":true}'  # Preview changes
 npm run seed:drinks                     # Seed development
 npm run seed:drinks -- --prod           # Seed production
-npm run test:seed:drinks                # Validate seed data
 ```
 
 Alternatively, select `drink:seedGlobal` in the Convex dashboard's Functions

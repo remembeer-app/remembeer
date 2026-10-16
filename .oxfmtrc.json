@@ -6,7 +6,6 @@
     "android/**",
     "ios/**",
     "build/**",
-    "coverage/**",
     "node_modules/**",
     ".dart_tool/**",
     ".devenv/**",

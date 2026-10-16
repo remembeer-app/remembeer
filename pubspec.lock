@@ -57,14 +57,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.13.1"
-  boolean_selector:
-    dependency: transitive
-    description:
-      name: boolean_selector
-      sha256: "8aab1771e1243a5063b8b0ff68042d67334e3feab9e95b9490f9a6ebf73b42ea"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.2"
   build:
     dependency: transitive
     description:
@@ -381,14 +373,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
-  fake_async:
-    dependency: transitive
-    description:
-      name: fake_async
-      sha256: "5368f224a74523e8d2e7399ea1638b37aecfca824a3cc4dfdf77bf1fa905ac44"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.3.3"
   ffi:
     dependency: transitive
     description:
@@ -647,11 +631,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.0"
-  flutter_test:
-    dependency: "direct dev"
-    description: flutter
-    source: sdk
-    version: "0.0.0"
   flutter_timezone:
     dependency: "direct main"
     description:
@@ -858,7 +837,7 @@ packages:
     source: hosted
     version: "2.2.0"
   http:
-    dependency: "direct dev"
+    dependency: transitive
     description:
       name: http
       sha256: "87721a4a50b19c7f1d49001e51409bddc46303966ce89a65af4f4e6004896412"
@@ -1041,30 +1020,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.10.1"
-  leak_tracker:
-    dependency: transitive
-    description:
-      name: leak_tracker
-      sha256: "33e2e26bdd85a0112ec15400c8cbffea70d0f9c3407491f672a2fad47915e2de"
-      url: "https://pub.dev"
-    source: hosted
-    version: "11.0.2"
-  leak_tracker_flutter_testing:
-    dependency: transitive
-    description:
-      name: leak_tracker_flutter_testing
-      sha256: "1dbc140bb5a23c75ea9c4811222756104fbcd1a27173f0c34ca01e16bea473c1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.10"
-  leak_tracker_testing:
-    dependency: transitive
-    description:
-      name: leak_tracker_testing
-      sha256: "8d5a2d49f4a66b49744b23b018848400d23e54caf9463f4eb20df3eb8acb2eb1"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.2"
   lints:
     dependency: transitive
     description:
@@ -1081,14 +1036,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
-  matcher:
-    dependency: transitive
-    description:
-      name: matcher
-      sha256: "31bd099b47c10cd1aeb55146a2d46ce0277630ecef3f7dae54ad7873f36696cd"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.12.20"
   material_color_utilities:
     dependency: transitive
     description:
@@ -1106,7 +1053,7 @@ packages:
     source: hosted
     version: "1.7.0"
   meta:
-    dependency: "direct dev"
+    dependency: transitive
     description:
       name: meta
       sha256: "307249ce4ff29d58a18e97f6345f539382eb9c9c29ecda628900f31de0443dd9"
@@ -1494,14 +1441,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.2"
-  test_api:
-    dependency: transitive
-    description:
-      name: test_api
-      sha256: "2a122cbe059f8b610d3a5415f42e255b6c17b1f21eee1d960f31080237fb4f11"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.12"
   timezone:
     dependency: transitive
     description:
@@ -1638,14 +1577,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.4.3"
-  vm_service:
-    dependency: transitive
-    description:
-      name: vm_service
-      sha256: "5f37239c4851efcef929cea7824e76df7f2f0970aef85d66bbc430afa40e72f0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "15.3.0"
   watcher:
     dependency: transitive
     description:
