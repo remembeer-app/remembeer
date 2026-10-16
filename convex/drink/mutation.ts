@@ -7,6 +7,11 @@ import { schema } from "../schema";
 import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
 import { loadDrink, requireDrinkOwner, requireUndeletedDrink } from "./access";
 
+const editableDrinkAccess = access<{ id: Id<"drink"> }>()
+  .use(loadDrink)
+  .use(requireDrinkOwner)
+  .use(requireUndeletedDrink);
+
 export const create = authMutation
   .extend(WithZod)
   .input(createDrinkInputValidator)
@@ -24,13 +29,7 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateDrinkInputValidator)
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"drink"> }>()
-      .use(loadDrink)
-      .use(requireDrinkOwner)
-      .use(requireUndeletedDrink)
-      .extend,
-  )
+  .extend(editableDrinkAccess.extend)
   .handler(async (ctx, { id, name, drinkCategory, alcoholPercentage }) => {
     const { drink } = ctx;
 
@@ -49,13 +48,7 @@ export const softDelete = authMutation
     id: v.id("drink"),
   })
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"drink"> }>()
-      .use(loadDrink)
-      .use(requireDrinkOwner)
-      .use(requireUndeletedDrink)
-      .extend,
-  )
+  .extend(editableDrinkAccess.extend)
   .handler(async (ctx, { id }) => {
     const now = Date.now();
     await ctx.db.patch("drink", id, {

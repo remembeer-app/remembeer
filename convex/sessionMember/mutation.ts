@@ -27,6 +27,21 @@ import {
 const sessionInput = { sessionId: v.id("session") };
 const targetInput = { ...sessionInput, userId: v.id("user") };
 
+const callerMembershipAccess = access<{ sessionId: Id<"session"> }>()
+  .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "membership"))
+  .use(requireCallerNotOwner)
+  .use(requireCallerMember);
+
+const targetModerationAccess = access<{
+  sessionId: Id<"session">;
+  userId: Id<"user">;
+}>()
+  .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+  .use(requireTargetNotOwner("moderate"))
+  .use(loadTargetMember)
+  .use(requireTargetMember)
+  .use(requireCanModerateTarget);
+
 export const invite = authMutation
   .input(targetInput)
   .returns(v.null())
@@ -72,43 +87,19 @@ export const invite = authMutation
 export const accept = authMutation
   .input(sessionInput)
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) =>
-        requireSessionAccess(ctx, sessionId, "membership"),
-      )
-      .use(requireCallerNotOwner)
-      .use(requireCallerMember)
-      .extend,
-  )
+  .extend(callerMembershipAccess.extend)
   .handler((ctx) => respond(ctx, "joined"));
 
 export const decline = authMutation
   .input(sessionInput)
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) =>
-        requireSessionAccess(ctx, sessionId, "membership"),
-      )
-      .use(requireCallerNotOwner)
-      .use(requireCallerMember)
-      .extend,
-  )
+  .extend(callerMembershipAccess.extend)
   .handler((ctx) => respond(ctx, "declined"));
 
 export const leave = authMutation
   .input(sessionInput)
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) =>
-        requireSessionAccess(ctx, sessionId, "membership"),
-      )
-      .use(requireCallerNotOwner)
-      .use(requireCallerMember)
-      .extend,
-  )
+  .extend(callerMembershipAccess.extend)
   .handler((ctx) => respond(ctx, "left"));
 
 async function respond(
@@ -135,43 +126,19 @@ async function respond(
 export const remove = authMutation
   .input(targetInput)
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session">; userId: Id<"user"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireTargetNotOwner("moderate"))
-      .use(loadTargetMember)
-      .use(requireTargetMember)
-      .use(requireCanModerateTarget)
-      .extend,
-  )
+  .extend(targetModerationAccess.extend)
   .handler((ctx) => moderate(ctx, "left"));
 
 export const ban = authMutation
   .input(targetInput)
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session">; userId: Id<"user"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireTargetNotOwner("moderate"))
-      .use(loadTargetMember)
-      .use(requireTargetMember)
-      .use(requireCanModerateTarget)
-      .extend,
-  )
+  .extend(targetModerationAccess.extend)
   .handler((ctx) => moderate(ctx, "banned"));
 
 export const unban = authMutation
   .input(targetInput)
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session">; userId: Id<"user"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireTargetNotOwner("moderate"))
-      .use(loadTargetMember)
-      .use(requireTargetMember)
-      .use(requireCanModerateTarget)
-      .extend,
-  )
+  .extend(targetModerationAccess.extend)
   .handler((ctx) => moderate(ctx, "unban"));
 
 async function moderate(

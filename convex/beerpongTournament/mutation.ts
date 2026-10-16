@@ -29,6 +29,13 @@ const placementPoints = z
   .min(minPlacementPointsUnits)
   .max(maxPlacementPointsUnits);
 
+const tournamentAdminAccess = access<{ id: Id<"beerpongTournament"> }>()
+  .use(loadTournament)
+  .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+  .use(requireParty)
+  .use(requireOngoingParty)
+  .use(requireBeerpongEnabled);
+
 export const create = authMutation
   .extend(WithZod)
   .input(
@@ -73,15 +80,7 @@ export const create = authMutation
 export const draw = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"beerpongTournament"> }>()
-      .use(loadTournament)
-      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-      .use(requireParty)
-      .use(requireOngoingParty)
-      .use(requireBeerpongEnabled)
-      .extend,
-  )
+  .extend(tournamentAdminAccess.extend)
   .handler(async (ctx, { id }) => {
     const { tournament } = ctx;
     if (tournament.status !== "enrollment")
@@ -133,15 +132,7 @@ export const draw = authMutation
 export const start = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"beerpongTournament"> }>()
-      .use(loadTournament)
-      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-      .use(requireParty)
-      .use(requireOngoingParty)
-      .use(requireBeerpongEnabled)
-      .extend,
-  )
+  .extend(tournamentAdminAccess.extend)
   .handler(async (ctx, { id }) => {
     const { tournament } = ctx;
     if (tournament.status !== "setup")
@@ -211,15 +202,7 @@ export const start = authMutation
 export const finalize = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"beerpongTournament"> }>()
-      .use(loadTournament)
-      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-      .use(requireParty)
-      .use(requireOngoingParty)
-      .use(requireBeerpongEnabled)
-      .extend,
-  )
+  .extend(tournamentAdminAccess.extend)
   .handler(async (ctx, { id }) => {
     const { tournament } = ctx;
     if (tournament.status === "completed") return null;

@@ -15,6 +15,9 @@ import {
   defaultPartyQuestDurationMinutes,
 } from "./constants";
 
+const sessionAdminAccess = access<{ id: Id<"session"> }>()
+  .use((ctx, { id }) => requireSessionAccess(ctx, id, "admin"));
+
 export const create = authMutation
   .extend(WithZod)
   .input(createSessionInputValidator)
@@ -48,11 +51,7 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateSessionInputValidator)
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"session"> }>()
-      .use((ctx, { id }) => requireSessionAccess(ctx, id, "admin"))
-      .extend,
-  )
+  .extend(sessionAdminAccess.extend)
   .handler(async (ctx, { id, ...input }) => {
     const { session } = ctx;
 
@@ -107,11 +106,7 @@ export const softDelete = authMutation
 export const promoteToParty = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"session"> }>()
-      .use((ctx, { id }) => requireSessionAccess(ctx, id, "admin"))
-      .extend,
-  )
+  .extend(sessionAdminAccess.extend)
   .handler(async (ctx, { id }) => {
     const { session } = ctx;
     if (session.kind === "party") return null;

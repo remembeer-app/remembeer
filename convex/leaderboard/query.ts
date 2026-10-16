@@ -13,6 +13,10 @@ import { beerVolumeMl, inviteCodeLength, inviteCodeCharacters } from "./constant
 
 const idInput = { id: v.id("leaderboard") };
 
+const leaderboardMemberAccess = access<{ id: Id<"leaderboard"> }>()
+  .use(loadLeaderboard)
+  .use(requireLeaderboardPermission("member"));
+
 export const listCurrent = authQuery
   .input({})
   .returns(
@@ -64,12 +68,7 @@ export const get = authQuery
       bannedMembers: v.array(publicUserValidator),
     }),
   )
-  .extend(
-    access<{ id: Id<"leaderboard"> }>()
-      .use(loadLeaderboard)
-      .use(requireLeaderboardPermission("member"))
-      .extend,
-  )
+  .extend(leaderboardMemberAccess.extend)
   .handler(async (ctx, { id }) => {
     const { leaderboard, isOwner } = ctx;
 
@@ -169,12 +168,7 @@ export const standings = authQuery
       ),
     }),
   )
-  .extend(
-    access<{ id: Id<"leaderboard"> }>()
-      .use(loadLeaderboard)
-      .use(requireLeaderboardPermission("member"))
-      .extend,
-  )
+  .extend(leaderboardMemberAccess.extend)
   .handler(async (ctx, { id, month: selectedMonth }) => {
     const { leaderboard } = ctx;
 

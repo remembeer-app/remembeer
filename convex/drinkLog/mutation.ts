@@ -17,6 +17,16 @@ import {
   updateDrinkLogInputValidator,
 } from "./schema";
 
+const editableDrinkLogAccess = access<{
+  id: Id<"drinkLog">;
+  consumedAt?: number | undefined;
+  drinkId?: Id<"drink"> | undefined;
+  sessionId?: Id<"session"> | null | undefined;
+}>()
+  .use(loadDrinkLog)
+  .use(requireDrinkLogOwner)
+  .use(requireUndeletedDrinkLog);
+
 export const create = authMutation
   .extend(WithZod)
   .input(createDrinkLogInputValidator)
@@ -49,15 +59,7 @@ export const update = authMutation
   .input(updateDrinkLogInputValidator)
   .returns(v.null())
   .extend(
-    access<{
-      id: Id<"drinkLog">;
-      consumedAt?: number | undefined;
-      drinkId?: Id<"drink"> | undefined;
-      sessionId?: Id<"session"> | null | undefined;
-    }>()
-      .use(loadDrinkLog)
-      .use(requireDrinkLogOwner)
-      .use(requireUndeletedDrinkLog)
+    editableDrinkLogAccess
       .use(requireValidConsumedTime)
       .use(requireUsableDrink)
       .use(requireJoinedDrinkLogSession)
@@ -83,13 +85,7 @@ export const update = authMutation
 export const softDelete = authMutation
   .input({ id: v.id("drinkLog") })
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"drinkLog"> }>()
-      .use(loadDrinkLog)
-      .use(requireDrinkLogOwner)
-      .use(requireUndeletedDrinkLog)
-      .extend,
-  )
+  .extend(editableDrinkLogAccess.extend)
   .handler(async (ctx, { id }) => {
     const now = Date.now();
     await ctx.db.patch("drinkLog", id, {

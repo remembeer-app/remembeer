@@ -13,6 +13,15 @@ import { maxTeamNameLength } from "./constants";
 
 const memberInput = { id: v.id("beerpongTeam"), userId: v.id("user") };
 
+const editableTeamAccess = access<{ id: Id<"beerpongTeam"> }>()
+    .use(loadTeam)
+    .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
+    .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+    .use(requireParty)
+    .use(requireOngoingParty)
+    .use(requireBeerpongEnabled)
+    .use(requireEditableTeamStatus);
+
 export const rename = authMutation
     .extend(WithZod)
     .input(z.object({
@@ -20,17 +29,7 @@ export const rename = authMutation
         name: z.string().trim().min(1).max(maxTeamNameLength),
     }))
     .returns(v.null())
-    .extend(
-        access<{ id: Id<"beerpongTeam"> }>()
-            .use(loadTeam)
-            .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
-            .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-            .use(requireParty)
-            .use(requireOngoingParty)
-            .use(requireBeerpongEnabled)
-            .use(requireEditableTeamStatus)
-            .extend,
-    )
+    .extend(editableTeamAccess.extend)
     .handler(async (ctx, { id, name }) => {
         const { team } = ctx;
 
@@ -44,17 +43,7 @@ export const rename = authMutation
 export const addMember = authMutation
     .input(memberInput)
     .returns(v.null())
-    .extend(
-        access<{ id: Id<"beerpongTeam"> }>()
-            .use(loadTeam)
-            .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
-            .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-            .use(requireParty)
-            .use(requireOngoingParty)
-            .use(requireBeerpongEnabled)
-            .use(requireEditableTeamStatus)
-            .extend,
-    )
+    .extend(editableTeamAccess.extend)
     .handler(async (ctx, { id, userId }) => {
         const { team, tournament } = ctx;
 
@@ -87,17 +76,7 @@ export const addMember = authMutation
 export const removeMember = authMutation
     .input(memberInput)
     .returns(v.null())
-    .extend(
-        access<{ id: Id<"beerpongTeam"> }>()
-            .use(loadTeam)
-            .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
-            .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-            .use(requireParty)
-            .use(requireOngoingParty)
-            .use(requireBeerpongEnabled)
-            .use(requireEditableTeamStatus)
-            .extend,
-    )
+    .extend(editableTeamAccess.extend)
     .handler(async (ctx, { id, userId }) => {
         const { team } = ctx;
         if (!team.memberUserIds.includes(userId)) return null;
@@ -115,17 +94,7 @@ export const removeMember = authMutation
 export const moveMember = authMutation
     .input({ ...memberInput, targetTeamId: v.id("beerpongTeam") })
     .returns(v.null())
-    .extend(
-        access<{ id: Id<"beerpongTeam"> }>()
-            .use(loadTeam)
-            .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
-            .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-            .use(requireParty)
-            .use(requireOngoingParty)
-            .use(requireBeerpongEnabled)
-            .use(requireEditableTeamStatus)
-            .extend,
-    )
+    .extend(editableTeamAccess.extend)
     .handler(async (ctx, { id, userId, targetTeamId }) => {
         const { team, tournament } = ctx;
 

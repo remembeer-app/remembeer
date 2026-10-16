@@ -35,16 +35,21 @@ const fields = z.object({
 });
 const idInput = { id: v.id("partyChallenge") };
 
+const ongoingPartyAdminAccess = access<{ sessionId: Id<"session"> }>()
+  .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+  .use(requireParty)
+  .use(requireOngoingParty);
+
+const challengeAdminAccess = access<{ id: Id<"partyChallenge"> }>()
+  .use(loadChallenge)
+  .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
+  .use(requireParty)
+  .use(requireOngoingParty);
+
 export const setEnabled = authMutation
   .input({ sessionId: v.id("session"), enabled: v.boolean() })
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireParty)
-      .use(requireOngoingParty)
-      .extend,
-  )
+  .extend(ongoingPartyAdminAccess.extend)
   .handler(async (ctx, { sessionId, enabled }) => {
     const { session } = ctx;
 
@@ -63,14 +68,7 @@ export const create = authMutation
   .extend(WithZod)
   .input(fields.extend({ sessionId: convexToZod(v.id("session")) }))
   .returns(v.id("partyChallenge"))
-  .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireParty)
-      .use(requireOngoingParty)
-      .use(requireChallengesEnabled)
-      .extend,
-  )
+  .extend(ongoingPartyAdminAccess.use(requireChallengesEnabled).extend)
   .handler(async (ctx, { sessionId, durationMinutes, ...input }) => {
     const now = Date.now();
     const active = await activeChallenges(ctx, sessionId);
@@ -104,14 +102,7 @@ export const update = authMutation
   .extend(WithZod)
   .input(fields.partial().extend({ id: convexToZod(v.id("partyChallenge")) }))
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"partyChallenge"> }>()
-      .use(loadChallenge)
-      .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
-      .use(requireParty)
-      .use(requireOngoingParty)
-      .extend,
-  )
+  .extend(challengeAdminAccess.extend)
   .handler(async (ctx, { id, durationMinutes, ...input }) => {
     const { challenge } = ctx;
 
@@ -146,14 +137,7 @@ export const update = authMutation
 export const addWinner = authMutation
   .input({ ...idInput, userId: v.id("user") })
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"partyChallenge"> }>()
-      .use(loadChallenge)
-      .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
-      .use(requireParty)
-      .use(requireOngoingParty)
-      .extend,
-  )
+  .extend(challengeAdminAccess.extend)
   .handler(async (ctx, { id, userId }) => {
     const { challenge } = ctx;
 
@@ -181,14 +165,7 @@ export const addWinner = authMutation
 export const removeWinner = authMutation
   .input({ ...idInput, userId: v.id("user") })
   .returns(v.null())
-  .extend(
-    access<{ id: Id<"partyChallenge"> }>()
-      .use(loadChallenge)
-      .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
-      .use(requireParty)
-      .use(requireOngoingParty)
-      .extend,
-  )
+  .extend(challengeAdminAccess.extend)
   .handler(async (ctx, { id, userId }) => {
     const { challenge } = ctx;
 
@@ -204,14 +181,7 @@ function close(status: "completed" | "cancelled") {
   return authMutation
     .input(idInput)
     .returns(v.null())
-    .extend(
-      access<{ id: Id<"partyChallenge"> }>()
-        .use(loadChallenge)
-        .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
-        .use(requireParty)
-        .use(requireOngoingParty)
-        .extend,
-    )
+    .extend(challengeAdminAccess.extend)
     .handler(async (ctx, { id }) => {
       const { challenge } = ctx;
       if (challenge.status === status) return null;

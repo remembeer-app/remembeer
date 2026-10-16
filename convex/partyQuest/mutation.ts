@@ -22,15 +22,14 @@ import {
   requireSocialQuestsEnabled,
 } from "./access";
 
+const questPartyAdminAccess = access<{ sessionId: Id<"session"> }>()
+  .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+  .use(requireOngoingQuestParty);
+
 export const setEnabled = authMutation
   .input({ sessionId: v.id("session"), enabled: v.boolean() })
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireOngoingQuestParty)
-      .extend,
-  )
+  .extend(questPartyAdminAccess.extend)
   .handler(async (ctx, { sessionId, enabled }) => {
     const { session } = ctx;
 
@@ -53,13 +52,7 @@ export const setEnabled = authMutation
 export const startNext = authMutation
   .input({ sessionId: v.id("session") })
   .returns(v.id("partyQuest"))
-  .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireOngoingQuestParty)
-      .use(requireSocialQuestsEnabled)
-      .extend,
-  )
+  .extend(questPartyAdminAccess.use(requireSocialQuestsEnabled).extend)
   .handler(async (ctx) => {
     const { session } = ctx;
 
@@ -74,12 +67,7 @@ export const setSchedule = authMutation
     defaultDurationMinutes: v.number(),
   })
   .returns(v.null())
-  .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireOngoingQuestParty)
-      .extend,
-  )
+  .extend(questPartyAdminAccess.extend)
   .handler(async (ctx, { sessionId, ...settings }) => {
     const { session } = ctx;
     validateSchedule(settings);
