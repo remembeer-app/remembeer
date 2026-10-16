@@ -51,7 +51,7 @@ checks belong in Convex.
 
 GetIt registrations live in `lib/ioc/ioc_container.dart`; access them with
 `get<T>()`. The container registers the Convex client/runtime, Better Auth
-provider, typed API, `ConvexAuthService`, location, drink logging, app icons, and
+provider, typed API, `ConvexAuthService`, location, app icons, and
 avatar services. `main.dart` loads `.env.client` and initializes the app icon
 service and quick-add channel. Client environment values are `CONVEX_URL` and
 `CONVEX_SITE_URL`; do not put backend secrets in this bundled file.
@@ -124,7 +124,7 @@ Adding a phase means: a new SVG, a new enum value in `AppIconPhase`, a new alias
 
 ### Quick Add Home Screen Widget
 
-A one-tap "+1" widget that logs the user's default drink. Both platforms end up calling `quickAddPressed` on the `quick_add_action` method channel, which `lib/main.dart` handles with `DrinkLogService.addDefaultDrinkLog()`; there is no widget-specific Dart code.
+A one-tap "+1" widget that logs the user's default drink. Both platforms end up calling `quickAddPressed` on the `quick_add_action` method channel, which `lib/main.dart` handles with the shared `addDefaultDrinkLog()` action; there is no widget-specific Dart code.
 
 - **Android**: `QuickAddWidgetProvider.kt` (layout `res/layout/quick_add_widget_layout.xml`, colors in `res/values/colors.xml`) launches `MainActivity` with the `QUICK_ADD_ACTION` intent, which invokes the channel method.
 - **iOS**: the `QuickAddWidgetExtension` target (`ios/QuickAddWidget/`, WidgetKit, `systemSmall` only) opens `remembeer://quick-add`. The `remembeer` URL scheme is registered in `Runner/Info.plist`; `AppDelegate.swift` registers itself as a Flutter scene life cycle delegate, matches the URL on both cold start (`scene:willConnectToSession:options:`) and warm start (`scene:openURLContexts:`), and invokes the channel method once the `FlutterViewController` has rendered its first frame (earlier messages would be dropped by the engine). The extension's bundle id is `cz.remembeer.com.QuickAddWidget`; its version comes from `Flutter/Generated.xcconfig`, and release builds expect a manual provisioning profile named `Remembeer Quick Add Widget App Store` (see `ios/ExportOptions.plist`).
