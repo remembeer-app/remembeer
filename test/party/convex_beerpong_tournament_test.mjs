@@ -73,7 +73,12 @@ function enroll(f, userId) {
 const runDraw = (f, id, actor = "owner") => draw._handler(f.ctx(actor), { id });
 const runStart = (f, id, actor = "owner") => start._handler(f.ctx(actor), { id });
 const runFinalize = (f, id, actor = "owner") => finalize._handler(f.ctx(actor), { id });
-const readActivity = (f, args = {}) => activity(f.ctx("owner"), { sessionId: "party", ...args });
+const readActivity = async (f, args = {}) => {
+  const result = await activity(f.ctx("owner"), {
+    sessionId: "party", paginationOpts: { numItems: 25, cursor: null }, ...args,
+  });
+  return { ...result, entries: result.page.map(item => item.entry) };
+};
 const readTournament = (f, id, actor = "owner") => getTournament._handler(f.ctx(actor), { id });
 const listTournaments = (f, sessionId = "party", actor = "owner") => listForSession._handler(f.ctx(actor), { sessionId });
 
@@ -876,8 +881,8 @@ test("beerpong history supports filters and stable pagination; awards survive me
   assert.equal((await readActivity(f, { kinds: ["drinkLog"] })).entries.length, 0);
   const paged = []; let cursor;
   do {
-    const page = await readActivity(f, { pageSize: 1, ...(cursor ? { cursor } : {}) });
-    paged.push(...page.entries); cursor = page.nextCursor;
+    const page = await readActivity(f, { paginationOpts: { numItems: 1, cursor: cursor ?? null } });
+    paged.push(...page.entries); cursor = page.continueCursor;
   } while (cursor);
   assert.deepEqual(paged, all);
   f.member("a").sessionMemberStatus.kind = "left";

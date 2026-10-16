@@ -324,31 +324,98 @@ void main() {
   );
 
   testWidgets(
-    'activity pagination uses server cursors and filters restart at the first page',
+    'activity scrolling accumulates pages and filter changes reset pagination',
     (tester) async {
       final client = _Client();
+      final firstItems = List.generate(40, _activityItem);
       client.responses['party:activity'] = {
-        ..._activity,
-        'hasMore': true,
-        'nextCursor': {'id': 'last', 'occurredAt': 1000},
+        'page': firstItems,
+        'isDone': false,
       };
       await mount(
         tester,
         client,
         const Scaffold(body: PartyActivity(sessionId: 'party')),
       );
-      await tester.tap(find.text('Next'));
+      final query = client.paginatedQueries.single;
+      expect(query.pageSize, 25);
+      expect(query.loadMoreCount, 0);
+      expect(find.text('Owner logged Drink 0'), findsOneWidget);
+      expect(find.text('Next'), findsNothing);
+      await tester.drag(find.byType(ListView), const Offset(0, -3000));
       await tester.pumpAndSettle();
-      expect(client.requests.last.args['cursor'], {
-        'id': 'last',
-        'occurredAt': 1000.0,
-      });
-      expect(find.text('Page 2'), findsOneWidget);
+      expect(query.loadMoreCount, greaterThan(0));
+      query.emit(
+        ConvexPaginatedResult(
+          results: firstItems,
+          status: ConvexPaginationStatus.loadingMore,
+          isDone: false,
+        ),
+      );
+      await tester.pump();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      query.emit(
+        ConvexPaginatedResult(
+          results: [
+            ...firstItems,
+            ...List.generate(20, (index) => _activityItem(index + 40)),
+          ],
+          status: ConvexPaginationStatus.exhausted,
+          isDone: true,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final loaded = query.loadMoreCount;
+      await tester.drag(find.byType(ListView), const Offset(0, -4000));
+      await tester.pumpAndSettle();
+      expect(find.text('Owner logged Drink 59'), findsOneWidget);
+      expect(query.loadMoreCount, loaded);
+      await tester.drag(find.byType(ListView), const Offset(0, 7000));
+      await tester.pumpAndSettle();
+      expect(find.text('Owner logged Drink 0'), findsOneWidget);
+      client.responses['party:activity'] = _activity;
       await tester.tap(find.widgetWithText(FilterChip, 'Quests'));
       await tester.pumpAndSettle();
-      expect(client.requests.last.args.containsKey('cursor'), isFalse);
+      expect(query.isCanceled, isTrue);
       expect(client.requests.last.args['kinds'], ['socialQuest']);
-      expect(find.text('Page 1'), findsOneWidget);
+      expect(find.text('No matching party activity.'), findsOneWidget);
+      await tester.tap(find.widgetWithText(FilterChip, 'Owner'));
+      await tester.pumpAndSettle();
+      expect(client.requests.last.args['participantIds'], ['owner']);
+      expect(client.paginatedQueries, hasLength(3));
+    },
+  );
+
+  testWidgets(
+    'activity fills short viewports and retains rows on later errors',
+    (tester) async {
+      final client = _Client();
+      final items = [_activityItem(0)];
+      client.responses['party:activity'] = {'page': items, 'isDone': false};
+      await mount(
+        tester,
+        client,
+        const Scaffold(body: PartyActivity(sessionId: 'party')),
+      );
+      final query = client.paginatedQueries.single;
+      expect(query.loadMoreCount, greaterThan(0));
+      query.emit(
+        ConvexPaginatedResult(
+          results: items,
+          status: ConvexPaginationStatus.error,
+          isDone: false,
+          error: StateError('backend failed'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('Owner logged Drink 0'), findsOneWidget);
+      expect(find.text('Could not load party activity.'), findsOneWidget);
+      client.responses['party:activity'] = _activity;
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+      expect(query.isCanceled, isTrue);
+      expect(client.paginatedQueries, hasLength(2));
+      expect(find.text('No matching party activity.'), findsOneWidget);
     },
   );
 
@@ -708,11 +775,33 @@ const _detail = <String, dynamic>{
   'matches': [_match],
   'placements': <Object?>[],
 };
-const _activity = <String, dynamic>{
-  'entries': <Object?>[],
-  'users': <Object?>[],
-  'hasMore': false,
-  'nextCursor': null,
+const _activity = <String, dynamic>{'page': <Object?>[], 'isDone': true};
+
+Map<String, dynamic> _activityItem(int index) => {
+  'entry': {
+    'kind': 'drinkLog',
+    'id': 'activity-$index',
+    'occurredAt': 2000 - index,
+    'participantIds': ['owner'],
+    'drinkLogId': 'log-$index',
+    'userId': 'owner',
+    'drinkId': 'beer',
+    'drinkName': 'Drink $index',
+    'drinkCategory': {'kind': 'beer'},
+    'volumeMl': 500,
+    'alcoholMl': 25,
+    'baseDrinkScoreUnits': 25000,
+    'classBonusScoreUnits': 2500,
+    'scoreUnits': 27500,
+  },
+  'users': [
+    {
+      '_id': 'owner',
+      'username': 'Owner',
+      'accentColor': 'amber',
+      'avatarUrl': null,
+    },
+  ],
 };
 
 class _Client implements ConvexRuntimeClient {
@@ -745,12 +834,39 @@ class _Client implements ConvexRuntimeClient {
   final requests = <({String name, Map<String, dynamic> args})>[];
   final _events = <String, StreamController<ConvexRuntimeQueryEvent>>{};
   final failNames = <String>{};
+  final paginatedQueries = <FakeConvexPaginatedQuery>[];
+
+  @override
+  ConvexRuntimePaginatedQuery paginatedQuery(
+    String name,
+    Map<String, dynamic> args, {
+    int pageSize = 20,
+  }) {
+    requests.add((name: name, args: args));
+    final query = FakeConvexPaginatedQuery(name: name, pageSize: pageSize);
+    final response = responses[name] as Map<String, dynamic>;
+    query.emit(
+      ConvexPaginatedResult(
+        results: response['page'] as List<dynamic>,
+        status: response['isDone'] == true
+            ? ConvexPaginationStatus.exhausted
+            : ConvexPaginationStatus.canLoadMore,
+        isDone: response['isDone'] == true,
+      ),
+    );
+    paginatedQueries.add(query);
+    return query;
+  }
+
   var last = (name: '', args: <String, dynamic>{});
 
   void emit(String name) =>
       _events[name]?.add(ConvexRuntimeQuerySuccess(responses[name]));
   @override
   Future<void> dispose() async {
+    for (final query in paginatedQueries) {
+      query.cancel();
+    }
     for (final stream in _events.values) {
       await stream.close();
     }

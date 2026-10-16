@@ -12,66 +12,28 @@ class PartyApi {
 
   final ConvexFunctionCaller _client;
 
-  Future<ActivityResult> activity({
-    Optional<ActivityArgsCursor> cursor = const Optional.absent(),
+  TypedConvexPaginatedQuery<ActivityPageItem> activity({
     Optional<List<ActivityArgsKindsItem>> kinds = const Optional.absent(),
-    Optional<double> pageSize = const Optional.absent(),
     Optional<List<UserId>> participantIds = const Optional.absent(),
     required SessionId sessionId,
-  }) async {
-    final raw$ = await _client.query(
-      'party:activity',
-      _encodeActivityArgs((
-        cursor: cursor,
-        kinds: kinds,
-        pageSize: pageSize,
-        participantIds: participantIds,
-        sessionId: sessionId,
-      )),
-    );
-    return _decodeActivityResult(raw$);
-  }
-
-  TypedConvexSubscription<ActivityResult> activitySubscribe({
-    Optional<ActivityArgsCursor> cursor = const Optional.absent(),
-    Optional<List<ActivityArgsKindsItem>> kinds = const Optional.absent(),
-    Optional<double> pageSize = const Optional.absent(),
-    Optional<List<UserId>> participantIds = const Optional.absent(),
-    required SessionId sessionId,
+    int pageSize = 20,
   }) {
-    final subscription$ = _client.subscribe(
-      'party:activity',
-      _encodeActivityArgs((
-        cursor: cursor,
-        kinds: kinds,
-        pageSize: pageSize,
-        participantIds: participantIds,
-        sessionId: sessionId,
-      )),
+    return TypedConvexPaginatedQuery<ActivityPageItem>(
+      _client.paginatedQuery('party:activity', <String, dynamic>{
+        if (kinds.isDefined)
+          'kinds': kinds.value.map((item) => item.value).toList(),
+        if (participantIds.isDefined)
+          'participantIds': participantIds.value
+              .map((item) => item.value)
+              .toList(),
+        'sessionId': sessionId.value,
+      }, pageSize: pageSize),
+      (dynamic raw) => _decodeActivityPageItem(raw),
     );
-    final typedStream$ = subscription$.stream.map((event) {
-      switch (event) {
-        case QuerySuccess(:final value):
-          return TypedQuerySuccess<ActivityResult>(
-            _decodeActivityResult(value),
-          );
-        case QueryLoading(:final hasPendingWrites):
-          return TypedQueryLoading<ActivityResult>(
-            hasPendingWrites: hasPendingWrites,
-          );
-        case QueryError(:final message, :final data, :final logLines):
-          return TypedQueryError<ActivityResult>(
-            message,
-            data: data,
-            logLines: logLines,
-          );
-      }
-    });
-    return TypedConvexSubscription<ActivityResult>(subscription$, typedStream$);
   }
 
-  ConvexQueryReference<ActivityArgs, ActivityResult> get activityQuery =>
-      activityQueryReference;
+  ConvexPaginatedQueryReference<ActivityArgs, ActivityPageItem>
+  get activityPaginatedQuery => activityPaginatedQueryReference;
 
   Future<StandingsResult> standings({required SessionId sessionId}) async {
     final raw$ = await _client.query(
@@ -155,8 +117,8 @@ DrinkCategory _decodeDrinkCategory(dynamic raw) {
   }
 }
 
-sealed class ActivityResultEntriesItem {
-  const ActivityResultEntriesItem();
+sealed class ActivityPageItemEntry {
+  const ActivityPageItemEntry();
   String get id;
   double get occurredAt;
   List<UserId> get participantIds;
@@ -167,7 +129,7 @@ sealed class ActivityResultEntriesItem {
   bool get isSocialQuest => this is SocialQuest;
 }
 
-final class BeerpongPlacement extends ActivityResultEntriesItem {
+final class BeerpongPlacement extends ActivityPageItemEntry {
   const BeerpongPlacement({
     required this.id,
     required this.occurredAt,
@@ -202,7 +164,7 @@ final class BeerpongPlacement extends ActivityResultEntriesItem {
   final UserId userId;
 }
 
-final class PartyChallenge extends ActivityResultEntriesItem {
+final class PartyChallenge extends ActivityPageItemEntry {
   const PartyChallenge({
     required this.challengeId,
     required this.challengeTitle,
@@ -228,7 +190,7 @@ final class PartyChallenge extends ActivityResultEntriesItem {
   final UserId userId;
 }
 
-final class DrinkLog extends ActivityResultEntriesItem {
+final class DrinkLog extends ActivityPageItemEntry {
   const DrinkLog({
     required this.alcoholMl,
     required this.baseDrinkScoreUnits,
@@ -272,7 +234,7 @@ final class DrinkLog extends ActivityResultEntriesItem {
   final double volumeMl;
 }
 
-final class SocialQuest extends ActivityResultEntriesItem {
+final class SocialQuest extends ActivityPageItemEntry {
   const SocialQuest({
     required this.firstUserId,
     required this.id,
@@ -301,9 +263,7 @@ final class SocialQuest extends ActivityResultEntriesItem {
   final UserId secondUserId;
 }
 
-Map<String, dynamic> _encodeActivityResultEntriesItem(
-  ActivityResultEntriesItem value,
-) {
+Map<String, dynamic> _encodeActivityPageItemEntry(ActivityPageItemEntry value) {
   switch (value) {
     case BeerpongPlacement(
       id: final id,
@@ -404,16 +364,16 @@ Map<String, dynamic> _encodeActivityResultEntriesItem(
   }
 }
 
-ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
-  final map = expectMap(raw, label: 'ActivityResultEntriesItem');
+ActivityPageItemEntry _decodeActivityPageItemEntry(dynamic raw) {
+  final map = expectMap(raw, label: 'ActivityPageItemEntry');
   if (!map.containsKey('kind')) {
     throw FormatException(
-      'Missing discriminator "kind" for ActivityResultEntriesItem',
+      'Missing discriminator "kind" for ActivityPageItemEntry',
     );
   }
   final discriminator = expectString(
     map['kind'],
-    label: 'ActivityResultEntriesItemKind',
+    label: 'ActivityPageItemEntryKind',
   );
   switch (discriminator) {
     case 'beerpongPlacement':
@@ -468,21 +428,21 @@ ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
         );
       }
       return BeerpongPlacement(
-        id: expectString(map['id'], label: 'ActivityResultEntriesItemId'),
+        id: expectString(map['id'], label: 'ActivityPageItemEntryId'),
         occurredAt: expectDouble(
           map['occurredAt'],
-          label: 'ActivityResultEntriesItemOccurredAt',
+          label: 'ActivityPageItemEntryOccurredAt',
         ),
         participantIds:
             expectList(
                   map['participantIds'],
-                  label: 'ActivityResultEntriesItemParticipantIds',
+                  label: 'ActivityPageItemEntryParticipantIds',
                 )
                 .map(
                   (item) => UserId(
                     expectString(
                       item,
-                      label: 'ActivityResultEntriesItemParticipantIdsItem',
+                      label: 'ActivityPageItemEntryParticipantIdsItem',
                     ),
                   ),
                 )
@@ -493,7 +453,7 @@ ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
         ),
         scoreUnits: expectDouble(
           map['scoreUnits'],
-          label: 'ActivityResultEntriesItemScoreUnits',
+          label: 'ActivityPageItemEntryScoreUnits',
         ),
         teamId: BeerpongTeamId(
           expectString(map['teamId'], label: 'BeerpongPlacementTeamId'),
@@ -558,28 +518,28 @@ ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
           map['challengeTitle'],
           label: 'PartyChallengeChallengeTitle',
         ),
-        id: expectString(map['id'], label: 'ActivityResultEntriesItemId'),
+        id: expectString(map['id'], label: 'ActivityPageItemEntryId'),
         occurredAt: expectDouble(
           map['occurredAt'],
-          label: 'ActivityResultEntriesItemOccurredAt',
+          label: 'ActivityPageItemEntryOccurredAt',
         ),
         participantIds:
             expectList(
                   map['participantIds'],
-                  label: 'ActivityResultEntriesItemParticipantIds',
+                  label: 'ActivityPageItemEntryParticipantIds',
                 )
                 .map(
                   (item) => UserId(
                     expectString(
                       item,
-                      label: 'ActivityResultEntriesItemParticipantIdsItem',
+                      label: 'ActivityPageItemEntryParticipantIdsItem',
                     ),
                   ),
                 )
                 .toList(),
         scoreUnits: expectDouble(
           map['scoreUnits'],
-          label: 'ActivityResultEntriesItemScoreUnits',
+          label: 'ActivityPageItemEntryScoreUnits',
         ),
         userId: UserId(
           expectString(map['userId'], label: 'PartyChallengeUserId'),
@@ -661,28 +621,28 @@ ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
           expectString(map['drinkLogId'], label: 'DrinkLogDrinkLogId'),
         ),
         drinkName: expectString(map['drinkName'], label: 'DrinkLogDrinkName'),
-        id: expectString(map['id'], label: 'ActivityResultEntriesItemId'),
+        id: expectString(map['id'], label: 'ActivityPageItemEntryId'),
         occurredAt: expectDouble(
           map['occurredAt'],
-          label: 'ActivityResultEntriesItemOccurredAt',
+          label: 'ActivityPageItemEntryOccurredAt',
         ),
         participantIds:
             expectList(
                   map['participantIds'],
-                  label: 'ActivityResultEntriesItemParticipantIds',
+                  label: 'ActivityPageItemEntryParticipantIds',
                 )
                 .map(
                   (item) => UserId(
                     expectString(
                       item,
-                      label: 'ActivityResultEntriesItemParticipantIdsItem',
+                      label: 'ActivityPageItemEntryParticipantIdsItem',
                     ),
                   ),
                 )
                 .toList(),
         scoreUnits: expectDouble(
           map['scoreUnits'],
-          label: 'ActivityResultEntriesItemScoreUnits',
+          label: 'ActivityPageItemEntryScoreUnits',
         ),
         userId: UserId(expectString(map['userId'], label: 'DrinkLogUserId')),
         volumeMl: expectDouble(map['volumeMl'], label: 'DrinkLogVolumeMl'),
@@ -730,21 +690,21 @@ ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
         firstUserId: UserId(
           expectString(map['firstUserId'], label: 'SocialQuestFirstUserId'),
         ),
-        id: expectString(map['id'], label: 'ActivityResultEntriesItemId'),
+        id: expectString(map['id'], label: 'ActivityPageItemEntryId'),
         occurredAt: expectDouble(
           map['occurredAt'],
-          label: 'ActivityResultEntriesItemOccurredAt',
+          label: 'ActivityPageItemEntryOccurredAt',
         ),
         participantIds:
             expectList(
                   map['participantIds'],
-                  label: 'ActivityResultEntriesItemParticipantIds',
+                  label: 'ActivityPageItemEntryParticipantIds',
                 )
                 .map(
                   (item) => UserId(
                     expectString(
                       item,
-                      label: 'ActivityResultEntriesItemParticipantIdsItem',
+                      label: 'ActivityPageItemEntryParticipantIdsItem',
                     ),
                   ),
                 )
@@ -758,7 +718,7 @@ ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
         ),
         scoreUnits: expectDouble(
           map['scoreUnits'],
-          label: 'ActivityResultEntriesItemScoreUnits',
+          label: 'ActivityPageItemEntryScoreUnits',
         ),
         secondUserId: UserId(
           expectString(map['secondUserId'], label: 'SocialQuestSecondUserId'),
@@ -766,42 +726,12 @@ ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
       );
     default:
       throw FormatException(
-        'Unknown ActivityResultEntriesItem discriminator: $discriminator',
+        'Unknown ActivityPageItemEntry discriminator: $discriminator',
       );
   }
 }
 
-typedef ActivityResultNextCursor = ({String id, double occurredAt});
-
-Map<String, dynamic> _encodeActivityResultNextCursor(
-  ActivityResultNextCursor value$,
-) {
-  final (id: id, occurredAt: occurredAt) = value$;
-  return <String, dynamic>{'id': id, 'occurredAt': occurredAt};
-}
-
-ActivityResultNextCursor _decodeActivityResultNextCursor(dynamic raw) {
-  final map = expectMap(raw, label: 'ActivityResultNextCursor');
-  if (!map.containsKey('id')) {
-    throw FormatException(
-      'Missing required field "id" for ActivityResultNextCursor',
-    );
-  }
-  if (!map.containsKey('occurredAt')) {
-    throw FormatException(
-      'Missing required field "occurredAt" for ActivityResultNextCursor',
-    );
-  }
-  return (
-    id: expectString(map['id'], label: 'ActivityResultNextCursorId'),
-    occurredAt: expectDouble(
-      map['occurredAt'],
-      label: 'ActivityResultNextCursorOccurredAt',
-    ),
-  );
-}
-
-enum ActivityResultUsersItemAccentColor {
+enum ActivityPageItemUsersItemAccentColor {
   amberValue('amber'),
   roseValue('rose'),
   violetValue('violet'),
@@ -811,44 +741,44 @@ enum ActivityResultUsersItemAccentColor {
   orangeValue('orange'),
   fuchsiaValue('fuchsia');
 
-  const ActivityResultUsersItemAccentColor(this.value);
+  const ActivityPageItemUsersItemAccentColor(this.value);
   final Object? value;
 
-  static ActivityResultUsersItemAccentColor fromJson(dynamic raw) {
+  static ActivityPageItemUsersItemAccentColor fromJson(dynamic raw) {
     switch (raw) {
       case 'amber':
-        return ActivityResultUsersItemAccentColor.amberValue;
+        return ActivityPageItemUsersItemAccentColor.amberValue;
       case 'rose':
-        return ActivityResultUsersItemAccentColor.roseValue;
+        return ActivityPageItemUsersItemAccentColor.roseValue;
       case 'violet':
-        return ActivityResultUsersItemAccentColor.violetValue;
+        return ActivityPageItemUsersItemAccentColor.violetValue;
       case 'sky':
-        return ActivityResultUsersItemAccentColor.skyValue;
+        return ActivityPageItemUsersItemAccentColor.skyValue;
       case 'emerald':
-        return ActivityResultUsersItemAccentColor.emeraldValue;
+        return ActivityPageItemUsersItemAccentColor.emeraldValue;
       case 'lime':
-        return ActivityResultUsersItemAccentColor.limeValue;
+        return ActivityPageItemUsersItemAccentColor.limeValue;
       case 'orange':
-        return ActivityResultUsersItemAccentColor.orangeValue;
+        return ActivityPageItemUsersItemAccentColor.orangeValue;
       case 'fuchsia':
-        return ActivityResultUsersItemAccentColor.fuchsiaValue;
+        return ActivityPageItemUsersItemAccentColor.fuchsiaValue;
       default:
         throw FormatException(
-          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for ActivityResultUsersItemAccentColor',
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for ActivityPageItemUsersItemAccentColor',
         );
     }
   }
 }
 
-typedef ActivityResultUsersItem = ({
+typedef ActivityPageItemUsersItem = ({
   UserId id,
-  ActivityResultUsersItemAccentColor accentColor,
+  ActivityPageItemUsersItemAccentColor accentColor,
   String? avatarUrl,
   String username,
 });
 
-Map<String, dynamic> _encodeActivityResultUsersItem(
-  ActivityResultUsersItem value$,
+Map<String, dynamic> _encodeActivityPageItemUsersItem(
+  ActivityPageItemUsersItem value$,
 ) {
   final (
     id: id,
@@ -864,132 +794,79 @@ Map<String, dynamic> _encodeActivityResultUsersItem(
   };
 }
 
-ActivityResultUsersItem _decodeActivityResultUsersItem(dynamic raw) {
-  final map = expectMap(raw, label: 'ActivityResultUsersItem');
+ActivityPageItemUsersItem _decodeActivityPageItemUsersItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ActivityPageItemUsersItem');
   if (!map.containsKey('_id')) {
     throw FormatException(
-      'Missing required field "_id" for ActivityResultUsersItem',
+      'Missing required field "_id" for ActivityPageItemUsersItem',
     );
   }
   if (!map.containsKey('accentColor')) {
     throw FormatException(
-      'Missing required field "accentColor" for ActivityResultUsersItem',
+      'Missing required field "accentColor" for ActivityPageItemUsersItem',
     );
   }
   if (!map.containsKey('avatarUrl')) {
     throw FormatException(
-      'Missing required field "avatarUrl" for ActivityResultUsersItem',
+      'Missing required field "avatarUrl" for ActivityPageItemUsersItem',
     );
   }
   if (!map.containsKey('username')) {
     throw FormatException(
-      'Missing required field "username" for ActivityResultUsersItem',
+      'Missing required field "username" for ActivityPageItemUsersItem',
     );
   }
   return (
-    id: UserId(expectString(map['_id'], label: 'ActivityResultUsersItemId')),
-    accentColor: ActivityResultUsersItemAccentColor.fromJson(
+    id: UserId(expectString(map['_id'], label: 'ActivityPageItemUsersItemId')),
+    accentColor: ActivityPageItemUsersItemAccentColor.fromJson(
       map['accentColor'],
     ),
     avatarUrl: map['avatarUrl'] == null
         ? null
         : expectString(
             map['avatarUrl'],
-            label: 'ActivityResultUsersItemAvatarUrl',
+            label: 'ActivityPageItemUsersItemAvatarUrl',
           ),
     username: expectString(
       map['username'],
-      label: 'ActivityResultUsersItemUsername',
+      label: 'ActivityPageItemUsersItemUsername',
     ),
   );
 }
 
-typedef ActivityResult = ({
-  List<ActivityResultEntriesItem> entries,
-  bool hasMore,
-  ActivityResultNextCursor? nextCursor,
-  List<ActivityResultUsersItem> users,
+typedef ActivityPageItem = ({
+  ActivityPageItemEntry entry,
+  List<ActivityPageItemUsersItem> users,
 });
 
-Map<String, dynamic> _encodeActivityResult(ActivityResult value$) {
-  final (
-    entries: entries,
-    hasMore: hasMore,
-    nextCursor: nextCursor,
-    users: users,
-  ) = value$;
+Map<String, dynamic> _encodeActivityPageItem(ActivityPageItem value$) {
+  final (entry: entry, users: users) = value$;
   return <String, dynamic>{
-    'entries': entries
-        .map((item) => _encodeActivityResultEntriesItem(item))
+    'entry': _encodeActivityPageItemEntry(entry),
+    'users': users
+        .map((item) => _encodeActivityPageItemUsersItem(item))
         .toList(),
-    'hasMore': hasMore,
-    'nextCursor': switch (nextCursor) {
-      null => null,
-      final v$ => _encodeActivityResultNextCursor(v$),
-    },
-    'users': users.map((item) => _encodeActivityResultUsersItem(item)).toList(),
   };
 }
 
-ActivityResult _decodeActivityResult(dynamic raw) {
-  final map = expectMap(raw, label: 'ActivityResult');
-  if (!map.containsKey('entries')) {
+ActivityPageItem _decodeActivityPageItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ActivityPageItem');
+  if (!map.containsKey('entry')) {
     throw FormatException(
-      'Missing required field "entries" for ActivityResult',
-    );
-  }
-  if (!map.containsKey('hasMore')) {
-    throw FormatException(
-      'Missing required field "hasMore" for ActivityResult',
-    );
-  }
-  if (!map.containsKey('nextCursor')) {
-    throw FormatException(
-      'Missing required field "nextCursor" for ActivityResult',
+      'Missing required field "entry" for ActivityPageItem',
     );
   }
   if (!map.containsKey('users')) {
-    throw FormatException('Missing required field "users" for ActivityResult');
-  }
-  return (
-    entries: expectList(
-      map['entries'],
-      label: 'ActivityResultEntries',
-    ).map((item) => _decodeActivityResultEntriesItem(item)).toList(),
-    hasMore: expectBool(map['hasMore'], label: 'ActivityResultHasMore'),
-    nextCursor: map['nextCursor'] == null
-        ? null
-        : _decodeActivityResultNextCursor(map['nextCursor']),
-    users: expectList(
-      map['users'],
-      label: 'ActivityResultUsers',
-    ).map((item) => _decodeActivityResultUsersItem(item)).toList(),
-  );
-}
-
-typedef ActivityArgsCursor = ({String id, double occurredAt});
-
-Map<String, dynamic> _encodeActivityArgsCursor(ActivityArgsCursor value$) {
-  final (id: id, occurredAt: occurredAt) = value$;
-  return <String, dynamic>{'id': id, 'occurredAt': occurredAt};
-}
-
-ActivityArgsCursor _decodeActivityArgsCursor(dynamic raw) {
-  final map = expectMap(raw, label: 'ActivityArgsCursor');
-  if (!map.containsKey('id')) {
-    throw FormatException('Missing required field "id" for ActivityArgsCursor');
-  }
-  if (!map.containsKey('occurredAt')) {
     throw FormatException(
-      'Missing required field "occurredAt" for ActivityArgsCursor',
+      'Missing required field "users" for ActivityPageItem',
     );
   }
   return (
-    id: expectString(map['id'], label: 'ActivityArgsCursorId'),
-    occurredAt: expectDouble(
-      map['occurredAt'],
-      label: 'ActivityArgsCursorOccurredAt',
-    ),
+    entry: _decodeActivityPageItemEntry(map['entry']),
+    users: expectList(
+      map['users'],
+      label: 'ActivityPageItemUsers',
+    ).map((item) => _decodeActivityPageItemUsersItem(item)).toList(),
   );
 }
 
@@ -1021,26 +898,17 @@ enum ActivityArgsKindsItem {
 }
 
 typedef ActivityArgs = ({
-  Optional<ActivityArgsCursor> cursor,
   Optional<List<ActivityArgsKindsItem>> kinds,
-  Optional<double> pageSize,
   Optional<List<UserId>> participantIds,
   SessionId sessionId,
 });
 
 Map<String, dynamic> _encodeActivityArgs(ActivityArgs value$) {
-  final (
-    cursor: cursor,
-    kinds: kinds,
-    pageSize: pageSize,
-    participantIds: participantIds,
-    sessionId: sessionId,
-  ) = value$;
+  final (kinds: kinds, participantIds: participantIds, sessionId: sessionId) =
+      value$;
   return <String, dynamic>{
-    if (cursor.isDefined) 'cursor': _encodeActivityArgsCursor(cursor.value),
     if (kinds.isDefined)
       'kinds': kinds.value.map((item) => item.value).toList(),
-    if (pageSize.isDefined) 'pageSize': pageSize.value,
     if (participantIds.isDefined)
       'participantIds': participantIds.value.map((item) => item.value).toList(),
     'sessionId': sessionId.value,
@@ -1055,20 +923,12 @@ ActivityArgs _decodeActivityArgs(dynamic raw) {
     );
   }
   return (
-    cursor: map.containsKey('cursor')
-        ? Optional.of(_decodeActivityArgsCursor(map['cursor']))
-        : const Optional.absent(),
     kinds: map.containsKey('kinds')
         ? Optional.of(
             expectList(
               map['kinds'],
               label: 'ActivityArgsKinds',
             ).map((item) => ActivityArgsKindsItem.fromJson(item)).toList(),
-          )
-        : const Optional.absent(),
-    pageSize: map.containsKey('pageSize')
-        ? Optional.of(
-            expectDouble(map['pageSize'], label: 'ActivityArgsPageSize'),
           )
         : const Optional.absent(),
     participantIds: map.containsKey('participantIds')
@@ -1443,13 +1303,11 @@ StandingsArgs _decodeStandingsArgs(dynamic raw) {
   );
 }
 
-final ConvexQueryReference<ActivityArgs, ActivityResult>
-activityQueryReference = ConvexQueryReference(
+final ConvexPaginatedQueryReference<ActivityArgs, ActivityPageItem>
+activityPaginatedQueryReference = ConvexPaginatedQueryReference(
   name: 'party:activity',
   encode: (args) => _encodeActivityArgs(args),
-  decodeArgs: (raw) => _decodeActivityArgs(raw),
-  decode: (raw) => _decodeActivityResult(raw),
-  encodeResult: (value) => _encodeActivityResult(value),
+  decodeItem: (raw) => _decodeActivityPageItem(raw),
 );
 
 final ConvexQueryReference<StandingsArgs, StandingsResult>

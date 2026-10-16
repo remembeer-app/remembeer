@@ -3,6 +3,8 @@ import 'package:remembeer/convex_api/types.dart';
 const partyScoreUnitsPerPoint = 1000;
 const defaultPartyChallengePoints = 25;
 const defaultPartyQuestDurationMinutes = 15;
+const partyActivityPageSize = 25;
+const partyActivityScrollThreshold = 300.0;
 const minBeerpongTeamCount = 2;
 const defaultBeerpongFirstPlacePoints = 100;
 const defaultBeerpongSecondPlacePoints = 50;

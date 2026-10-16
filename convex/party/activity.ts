@@ -1,4 +1,5 @@
 import { ConvexError, v, type Infer } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import type { Doc, Id } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
 import { requireSessionAccess } from "../session/access";
@@ -6,10 +7,7 @@ import { publicUser, publicUserValidator } from "../user/publicProfile";
 import { drinkCategoryValidator } from "../drink/schema";
 import { drinkScoreBreakdown } from "./scoring";
 import { loadBeerpongAwards } from "../beerpongTournament/scoring";
-import {
-  partyActivityDefaultPageSize,
-  partyActivityMaxPageSize,
-} from "./constants";
+import { partyActivityMaxPageSize } from "./constants";
 
 const cursorValidator = v.object({ occurredAt: v.number(), id: v.string() });
 const kindValidator = v.union(
@@ -79,34 +77,41 @@ function compare(
   );
 }
 
-// A live projection of source rows; restart pagination after changing filters or timestamps.
+// A live projection of source rows. Cursors use the same descending ordering.
+// Filter changes start a new pagination subscription.
+// TODO(ohtenkay): Replace this projection with an activity table containing
+// stable event keys, session IDs, timestamps, kinds, participants, and source
+// references. Maintain those rows transactionally when source events are
+// created, edited, removed, or awarded. Index the feed by session and ordering
+// fields, with indexed access paths for its kind and participant filters.
+// Paginate that table natively, then hydrate source details and public profiles
+// only for the returned page, preserving live names and score calculations.
 export const activity = authQuery
   .input({
     sessionId: v.id("session"),
     kinds: v.optional(v.array(kindValidator)),
     participantIds: v.optional(v.array(v.id("user"))),
-    cursor: v.optional(cursorValidator),
-    pageSize: v.optional(v.number()),
+    paginationOpts: paginationOptsValidator,
   })
   .returns(
     v.object({
-      entries: v.array(entryValidator),
-      users: v.array(publicUserValidator),
-      nextCursor: v.nullable(cursorValidator),
-      hasMore: v.boolean(),
+      page: v.array(
+        v.object({
+          entry: entryValidator,
+          users: v.array(publicUserValidator),
+        }),
+      ),
+      continueCursor: v.string(),
+      isDone: v.boolean(),
+      splitCursor: v.optional(v.string()),
+      pageStatus: v.optional(v.literal("SplitRecommended")),
     }),
   )
   .handler(
-    async (
-      ctx,
-      {
-        sessionId,
-        kinds,
-        participantIds,
-        cursor,
-        pageSize = partyActivityDefaultPageSize,
-      },
-    ) => {
+    async (ctx, { sessionId, kinds, participantIds, paginationOpts }) => {
+      const pageSize = paginationOpts.numItems;
+      const cursor = decodeCursor(paginationOpts.cursor);
+      const endCursor = decodeCursor(paginationOpts.endCursor ?? null);
       const { session } = await requireSessionAccess(ctx, sessionId, "joined");
       if (session.kind !== "party")
         throw new ConvexError("A party is required");
@@ -119,31 +124,36 @@ export const activity = authQuery
           `Page size must be an integer from 1 to ${partyActivityMaxPageSize}`,
         );
       const now = Date.now();
-      const [members, logs, quests, challenges, beerpongAwards] = await Promise.all([
-        ctx.db
-          .query("sessionMember")
-          .withIndex("by_sessionId_and_userId", (q) =>
-            q.eq("sessionId", sessionId),
-          )
-          .collect(),
-        ctx.db
-          .query("drinkLog")
-          .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
-          .collect(),
-        ctx.db
-          .query("partyQuest")
-          .withIndex("by_sessionId_and_startsAt", (q) =>
-            q.eq("sessionId", sessionId),
-          )
-          .collect(),
-        ctx.db
-          .query("partyChallenge")
-          .withIndex("by_sessionId_and_startsAt", (q) =>
-            q.eq("sessionId", sessionId),
-          )
-          .collect(),
-        loadBeerpongAwards(ctx, sessionId),
-      ]);
+      // TODO(ohtenkay): Eliminate these full-session reads and the in-memory
+      // merge/sort once the activity index exists. Every page subscription,
+      // including split pages and reactive reruns, currently repeats this work;
+      // the smaller response does not reduce the source data read or processed.
+      const [members, logs, quests, challenges, beerpongAwards] =
+        await Promise.all([
+          ctx.db
+            .query("sessionMember")
+            .withIndex("by_sessionId_and_userId", (q) =>
+              q.eq("sessionId", sessionId),
+            )
+            .collect(),
+          ctx.db
+            .query("drinkLog")
+            .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
+            .collect(),
+          ctx.db
+            .query("partyQuest")
+            .withIndex("by_sessionId_and_startsAt", (q) =>
+              q.eq("sessionId", sessionId),
+            )
+            .collect(),
+          ctx.db
+            .query("partyChallenge")
+            .withIndex("by_sessionId_and_startsAt", (q) =>
+              q.eq("sessionId", sessionId),
+            )
+            .collect(),
+          loadBeerpongAwards(ctx, sessionId),
+        ]);
       const classes = new Map(
         members.map((member) => [
           member.userId,
@@ -230,7 +240,12 @@ export const activity = authQuery
         entries.push({
           ...award,
           kind: "beerpongPlacement",
-          id: JSON.stringify(["beerpongPlacement", award.tournamentId, award.teamId, award.userId]),
+          id: JSON.stringify([
+            "beerpongPlacement",
+            award.tournamentId,
+            award.teamId,
+            award.userId,
+          ]),
         });
       }
       const filtered = entries
@@ -242,20 +257,80 @@ export const activity = authQuery
             (!cursor || compare(entry, cursor) > 0),
         )
         .sort(compare);
-      const page = filtered.slice(0, pageSize);
-      const hasMore = filtered.length > pageSize;
+      const bounded = paginationOpts.endCursor !== undefined;
+      const page = bounded
+        ? filtered.filter(
+            (entry) => !endCursor || compare(entry, endCursor) <= 0,
+          )
+        : filtered.slice(0, pageSize);
+      const hasMore = bounded
+        ? endCursor !== null &&
+          filtered.some((entry) => compare(entry, endCursor) > 0)
+        : filtered.length > pageSize;
       const last = page[page.length - 1];
       const users = await Promise.all(
         [...new Set(page.flatMap((entry) => entry.participantIds))].map((id) =>
           publicUser(ctx, id),
         ),
       );
+      const profiles = new Map(
+        users.filter((user) => user !== null).map((user) => [user._id, user]),
+      );
       return {
-        entries: page,
-        users: users.filter((user) => user !== null),
-        hasMore,
-        nextCursor:
-          hasMore && last ? { occurredAt: last.occurredAt, id: last.id } : null,
+        page: page.map((entry) => ({
+          entry,
+          users: entry.participantIds.flatMap((id) => {
+            const user = profiles.get(id);
+            return user ? [user] : [];
+          }),
+        })),
+        isDone: !hasMore,
+        continueCursor: bounded
+          ? (paginationOpts.endCursor ?? "")
+          : hasMore && last
+            ? encodeCursor(last)
+            : "",
+        // Unlike a native DB paginate call, a projection has no server-side
+        // page journal. Splitting pins both ranges before subsequent live
+        // updates can move the boundary between loaded pages. An empty string
+        // marks the unbounded tail, so backdated activity remains visible too.
+        // TODO(ohtenkay): Return native paginate() cursor/split metadata after
+        // indexing activity, and remove this eager splitting, compare(), and
+        // the custom JSON cursor encoder/decoder. Keep Dartvex cursors opaque.
+        ...(page.length
+          ? {
+              splitCursor: encodeCursor(
+                page[Math.floor((page.length - 1) / 2)]!,
+              ),
+              ...(!bounded ? { pageStatus: "SplitRecommended" as const } : {}),
+            }
+          : {}),
       };
     },
   );
+
+function decodeCursor(
+  raw: string | null,
+): Infer<typeof cursorValidator> | null {
+  if (raw === null || raw === "") return null;
+  try {
+    const value: unknown = JSON.parse(raw);
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      "occurredAt" in value &&
+      typeof value.occurredAt === "number" &&
+      Number.isFinite(value.occurredAt) &&
+      "id" in value &&
+      typeof value.id === "string"
+    )
+      return { occurredAt: value.occurredAt, id: value.id };
+  } catch {
+    // Invalid client cursors are reported as an application error below.
+  }
+  throw new ConvexError("Invalid activity cursor");
+}
+
+function encodeCursor(value: Infer<typeof cursorValidator>): string {
+  return JSON.stringify({ occurredAt: value.occurredAt, id: value.id });
+}

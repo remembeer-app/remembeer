@@ -120,18 +120,21 @@ test("winner changes and point/title edits update standings, quest ranks, activi
   assert.equal((await row()).scoreUnits, 20000);
   const context = await f.run((ctx) => loadQuestContext(ctx, "party", f.now), {});
   assert.equal(context.players.find(p => p.userId === "a").scoreUnits, 20000);
-  const page = await f.run(activity, { sessionId: "party", kinds: ["partyChallenge"], pageSize: 1 });
-  assert.equal(page.entries[0].challengeTitle, "New title");
-  assert.equal(page.entries[0].scoreUnits, 20000);
-  assert.equal(page.hasMore, true);
-  const next = await f.run(activity, { sessionId: "party", cursor: page.nextCursor, pageSize: 1 });
-  assert.equal(next.entries.length, 1); assert.notEqual(next.entries[0].id, page.entries[0].id);
-  assert.equal((await f.run(activity, { sessionId: "party", participantIds: ["a"] })).entries.length, 1);
-  assert.equal((await f.run(activity, { sessionId: "party", kinds: ["drinkLog"] })).entries.length, 0);
+  const readActivity = (args = {}) => f.run(activity, {
+    sessionId: "party", paginationOpts: { numItems: 25, cursor: null }, ...args,
+  });
+  const page = await readActivity({ kinds: ["partyChallenge"], paginationOpts: { numItems: 1, cursor: null } });
+  assert.equal(page.page[0].entry.challengeTitle, "New title");
+  assert.equal(page.page[0].entry.scoreUnits, 20000);
+  assert.equal(page.isDone, false);
+  const next = await readActivity({ paginationOpts: { numItems: 1, cursor: page.continueCursor } });
+  assert.equal(next.page.length, 1); assert.notEqual(next.page[0].entry.id, page.page[0].entry.id);
+  assert.equal((await readActivity({ participantIds: ["a"] })).page.length, 1);
+  assert.equal((await readActivity({ kinds: ["drinkLog"] })).page.length, 0);
   await f.run(m.removeWinner, { id, userId: "a" });
   await f.run(m.removeWinner, { id, userId: "a" });
   assert.equal((await row()).scoreUnits, 0);
-  assert.equal((await f.run(activity, { sessionId: "party", participantIds: ["a"] })).entries.length, 0);
+  assert.equal((await readActivity({ participantIds: ["a"] })).page.length, 0);
   await f.run(m.addWinner, { id, userId: "a" });
   assert.equal((await row()).scoreUnits, 20000);
   f.member("a").sessionMemberStatus.kind = "left";

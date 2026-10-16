@@ -1,6 +1,8 @@
+import 'package:dartvex_flutter/dartvex_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/party.dart' as activity;
 import 'package:remembeer/convex_api/widgets/party.dart';
@@ -16,14 +18,27 @@ class PartyActivity extends StatefulWidget {
 }
 
 class _PartyActivityState extends State<PartyActivity> {
-  final _cursors = <activity.ActivityArgsCursor>[];
+  var _generation = 0;
   final _kinds = <activity.ActivityArgsKindsItem>{};
   final _participants = <UserId>{};
 
-  void _filter(VoidCallback change) => setState(() {
-    change();
-    _cursors.clear();
-  });
+  void _filter(VoidCallback change) => setState(change);
+
+  void _restart() => setState(() => _generation++);
+
+  void _loadIfNeeded(
+    ScrollMetrics metrics,
+    PaginationStatus status,
+    VoidCallback loadMore,
+  ) {
+    if (metrics.axis == Axis.vertical &&
+        metrics.extentAfter < partyActivityScrollThreshold &&
+        status == PaginationStatus.idle) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) loadMore();
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) => Column(
@@ -31,6 +46,11 @@ class _PartyActivityState extends State<PartyActivity> {
       Wrap(
         spacing: 8,
         children: [
+          IconButton(
+            tooltip: 'Refresh activity',
+            onPressed: _restart,
+            icon: const Icon(Icons.refresh),
+          ),
           for (final kind in activity.ActivityArgsKindsItem.values)
             FilterChip(
               label: Text(switch (kind) {
@@ -73,91 +93,116 @@ class _PartyActivityState extends State<PartyActivity> {
       ),
       const Gap(12),
       Expanded(
-        child: PartyActivityQuery(
+        child: PartyActivityQuery.snapshot(
+          key: ValueKey(_generation),
           sessionId: SessionId(widget.sessionId),
-          cursor: _cursors.isEmpty
-              ? const Optional.absent()
-              : Optional.of(_cursors.last),
+          pageSize: partyActivityPageSize,
           kinds: Optional.of(_kinds.toList()),
           participantIds: Optional.of(_participants.toList()),
-          builder: (context, result) => Column(
-            children: [
-              Expanded(
-                child: result.entries.isEmpty
-                    ? const Center(child: Text('No matching party activity.'))
-                    : ListView(
-                        children: [
-                          for (final entry in result.entries)
-                            Card(
-                              child: ListTile(
-                                title: Text(_title(entry, result)),
-                                subtitle: Text(
-                                  DateFormat.yMMMd().add_Hm().format(
-                                    DateTime.fromMillisecondsSinceEpoch(
-                                      entry.occurredAt.toInt(),
-                                    ),
-                                  ),
-                                ),
-                                trailing: Text(
-                                  '+${formatPartyScore(entry.scoreUnits.toInt())}',
-                                ),
-                                onTap: switch (entry) {
-                                  activity.SocialQuest(:final questId) =>
-                                    () => PartyQuestRoute(
-                                      sessionId: widget.sessionId,
-                                      questId: questId.value,
-                                    ).push<void>(context),
-                                  activity.PartyChallenge(:final challengeId) =>
-                                    () => PartyChallengeRoute(
-                                      sessionId: widget.sessionId,
-                                      challengeId: challengeId.value,
-                                    ).push<void>(context),
-                                  activity.BeerpongPlacement(
-                                    :final tournamentId,
-                                  ) =>
-                                    () => PartyTournamentRoute(
-                                      sessionId: widget.sessionId,
-                                      tournamentId: tournamentId.value,
-                                    ).push<void>(context),
-                                  activity.DrinkLog() => null,
-                                },
+          snapshotBuilder: (context, snapshot, loadMore) {
+            if (snapshot.status == PaginationStatus.loading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.items.isEmpty) {
+              return snapshot.error == null
+                  ? const Center(child: Text('No matching party activity.'))
+                  : _error();
+            }
+            return NotificationListener<ScrollMetricsNotification>(
+              onNotification: (notification) {
+                _loadIfNeeded(notification.metrics, snapshot.status, loadMore);
+                return false;
+              },
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  _loadIfNeeded(
+                    notification.metrics,
+                    snapshot.status,
+                    loadMore,
+                  );
+                  return false;
+                },
+                child: RefreshIndicator(
+                  onRefresh: () async => _restart(),
+                  child: ListView.builder(
+                    key: ValueKey((
+                      widget.sessionId,
+                      _kinds.map((kind) => kind.value).join(','),
+                      _participants.map((id) => id.value).join(','),
+                    )),
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount:
+                        snapshot.items.length + (snapshot.isDone ? 0 : 1),
+                    itemBuilder: (context, index) {
+                      if (index == snapshot.items.length) {
+                        if (snapshot.error != null) return _error();
+                        if (snapshot.status == PaginationStatus.idle) {
+                          return const Gap(16);
+                        }
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                      final item = snapshot.items[index];
+                      final entry = item.entry;
+                      return Card(
+                        key: ValueKey(entry.id),
+                        child: ListTile(
+                          title: Text(_title(item)),
+                          subtitle: Text(
+                            DateFormat.yMMMd().add_Hm().format(
+                              DateTime.fromMillisecondsSinceEpoch(
+                                entry.occurredAt.toInt(),
                               ),
                             ),
-                        ],
-                      ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: _cursors.isEmpty
-                        ? null
-                        : () => setState(_cursors.removeLast),
-                    child: const Text('Previous'),
+                          ),
+                          trailing: Text(
+                            '+${formatPartyScore(entry.scoreUnits.toInt())}',
+                          ),
+                          onTap: switch (entry) {
+                            activity.SocialQuest(:final questId) =>
+                              () => PartyQuestRoute(
+                                sessionId: widget.sessionId,
+                                questId: questId.value,
+                              ).push<void>(context),
+                            activity.PartyChallenge(:final challengeId) =>
+                              () => PartyChallengeRoute(
+                                sessionId: widget.sessionId,
+                                challengeId: challengeId.value,
+                              ).push<void>(context),
+                            activity.BeerpongPlacement(:final tournamentId) =>
+                              () => PartyTournamentRoute(
+                                sessionId: widget.sessionId,
+                                tournamentId: tournamentId.value,
+                              ).push<void>(context),
+                            activity.DrinkLog() => null,
+                          },
+                        ),
+                      );
+                    },
                   ),
-                  Text('Page ${_cursors.length + 1}'),
-                  TextButton(
-                    onPressed: !result.hasMore || result.nextCursor == null
-                        ? null
-                        : () =>
-                              setState(() => _cursors.add(result.nextCursor!)),
-                    child: const Text('Next'),
-                  ),
-                ],
+                ),
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     ],
   );
 
-  String _title(
-    activity.ActivityResultEntriesItem entry,
-    activity.ActivityResult result,
-  ) {
+  Widget _error() => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const ErrorMessageBox(message: 'Could not load party activity.'),
+      TextButton(onPressed: _restart, child: const Text('Retry')),
+    ],
+  );
+
+  String _title(activity.ActivityPageItem item) {
+    final entry = item.entry;
     String name(UserId id) =>
-        result.users.where((user) => user.id == id).firstOrNull?.username ??
+        item.users.where((user) => user.id == id).firstOrNull?.username ??
         'Unavailable user';
     return switch (entry) {
       activity.DrinkLog(:final userId, :final drinkName) =>

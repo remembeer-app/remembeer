@@ -18,7 +18,14 @@ function setup() {
   const f = fixture(standings);
   f.activity = async (args = {}, actor = "owner") => {
     const original = Date.now; Date.now = () => f.now;
-    try { return await activity(f.ctx(actor), { sessionId: "party", ...args }); }
+    try {
+      const result = await activity(f.ctx(actor), {
+        sessionId: "party", paginationOpts: { numItems: 25, cursor: null }, ...args,
+      });
+      // Flatten page-local profiles for existing scoring/privacy assertions.
+      return { ...result, entries: result.page.map(item => item.entry),
+        users: [...new Map(result.page.flatMap(item => item.users).map(user => [user._id, user])).values()] };
+    }
     finally { Date.now = original; }
   };
   return f;
@@ -26,7 +33,7 @@ function setup() {
 
 test("access requires owner or joined membership of a non-deleted party; archives remain readable", async () => {
   const f = setup();
-  assert.deepEqual(await f.activity(), { entries: [], users: [], nextCursor: null, hasMore: false });
+  assert.deepEqual(await f.activity(), { page: [], entries: [], users: [], continueCursor: "", isDone: true });
   for (const actor of ["invited", "left", "banned", "other"])
     await assert.rejects(f.activity({}, actor), /permission/);
   await f.activity({}, "a");
@@ -41,13 +48,13 @@ test("access requires owner or joined membership of a non-deleted party; archive
   await assert.rejects(f.activity(), /not found/);
 });
 
-test("page size defaults to 25 and only accepts integers 1–100", async () => {
+test("page size accepts only integers 1–100", async () => {
   const f = setup();
   for (let i = 0; i < 101; i++) f.log("a");
   assert.equal((await f.activity()).entries.length, 25);
   for (const pageSize of [0, -1, 101, 1.5, NaN, Infinity])
-    await assert.rejects(f.activity({ pageSize }), /integer/);
-  assert.equal((await f.activity({ pageSize: 100 })).entries.length, 100);
+    await assert.rejects(f.activity({ paginationOpts: { numItems: pageSize, cursor: null } }), /integer/);
+  assert.equal((await f.activity({ paginationOpts: { numItems: 100, cursor: null } })).entries.length, 100);
 });
 
 test("timestamp ties paginate by descending stable ID without duplicates and cursors survive deletion", async () => {
@@ -56,12 +63,12 @@ test("timestamp ties paginate by descending stable ID without duplicates and cur
   f.quest("expired", [{ firstUserId: "a", secondUserId: "b", completedAt: f.now }]);
   const all = (await f.activity()).entries;
   const ids = [];
-  let cursor;
+  let cursor = null;
   do {
-    const page = await f.activity({ pageSize: 2, ...(cursor ? { cursor } : {}) });
+    const page = await f.activity({ paginationOpts: { numItems: 2, cursor } });
     ids.push(...page.entries.map(e => e.id));
-    assert.equal(page.hasMore, page.nextCursor !== null);
-    cursor = page.nextCursor;
+    assert.equal(page.isDone, page.continueCursor === "");
+    cursor = page.continueCursor;
   } while (cursor);
   assert.deepEqual(ids, all.map(e => e.id));
   assert.equal(new Set(ids).size, ids.length);
@@ -69,9 +76,9 @@ test("timestamp ties paginate by descending stable ID without duplicates and cur
     const a = all[i - 1], b = all[i];
     assert.ok(a.occurredAt > b.occurredAt || (a.occurredAt === b.occurredAt && a.id > b.id));
   }
-  const first = await f.activity({ kinds: ["drinkLog"], pageSize: 1 });
+  const first = await f.activity({ kinds: ["drinkLog"], paginationOpts: { numItems: 1, cursor: null } });
   f.tables.drinkLog = f.tables.drinkLog.filter(l => l._id !== first.entries[0].drinkLogId);
-  assert.ok((await f.activity({ cursor: first.nextCursor })).entries.every(e => e.id !== first.entries[0].id));
+  assert.ok((await f.activity({ paginationOpts: { numItems: 25, cursor: first.continueCursor } })).entries.every(e => e.id !== first.entries[0].id));
 });
 
 test("kind OR and participant OR filters combine with AND before pagination; empty arrays are unrestricted", async () => {
@@ -82,9 +89,9 @@ test("kind OR and participant OR filters combine with AND before pagination; emp
   assert.equal((await f.activity({ kinds: ["drinkLog", "socialQuest"], participantIds: ["b"] })).entries.length, 2);
   assert.equal((await f.activity({ kinds: ["socialQuest"], participantIds: ["a"] })).entries.length, 1);
   assert.deepEqual((await f.activity({ participantIds: ["other"] })).entries, []);
-  const page = await f.activity({ kinds: ["drinkLog"], participantIds: ["a"], pageSize: 1 });
+  const page = await f.activity({ kinds: ["drinkLog"], participantIds: ["a"], paginationOpts: { numItems: 1, cursor: null } });
   assert.equal(page.entries[0].userId, "a");
-  assert.equal(page.hasMore, false);
+  assert.equal(page.isDone, true);
 });
 
 test("drinks share standings scores, retain former member classes and omit private fields; reads are cached", async () => {
@@ -164,4 +171,53 @@ test("missing memberships/profiles and account deletion preserve surviving quest
   page = await f.activity();
   assert.equal(page.entries.length, 2);
   assert.deepEqual(page.entries.find(e => e.kind === "socialQuest").participantIds, ["a", "b"]);
+});
+
+
+test("split ranges stay adjacent during inserts, deletion and timestamp edits", async () => {
+  const f = setup();
+  for (let i = 0; i < 6; i++) f.log("a", 500, "beer", { consumedAt: f.now - i * 10 });
+  const initial = await f.activity({ paginationOpts: { numItems: 3, cursor: null } });
+  assert.equal(initial.pageStatus, "SplitRecommended");
+  assert.ok(initial.splitCursor);
+  const ranges = [
+    { numItems: 3, cursor: null, endCursor: initial.splitCursor },
+    { numItems: 3, cursor: initial.splitCursor, endCursor: initial.continueCursor },
+    { numItems: 3, cursor: initial.continueCursor, endCursor: "" },
+  ];
+  const assertRanges = async () => {
+    const pages = await Promise.all(ranges.map(paginationOpts => f.activity({ paginationOpts })));
+    assert.ok(pages.every(page => page.pageStatus === undefined));
+    assert.equal(pages[0].continueCursor, ranges[0].endCursor);
+    assert.equal(pages[1].continueCursor, ranges[1].endCursor);
+    const actual = pages.flatMap(page => page.entries);
+    const all = (await f.activity()).entries;
+    assert.deepEqual(actual, all);
+    assert.equal(new Set(actual.map(entry => entry.id)).size, actual.length);
+    assert.equal(pages.at(-1).isDone, true);
+  };
+  await assertRanges();
+  f.log("b", 500, "beer", { consumedAt: f.now });
+  f.log("b", 500, "beer", { consumedAt: f.now - 1000 });
+  await assertRanges();
+  f.tables.drinkLog[1].deletedAt = f.now;
+  f.tables.drinkLog[4].consumedAt = f.now;
+  await assertRanges();
+});
+
+test("activity rejects malformed cursors and supports a growing exhausted tail", async () => {
+  const f = setup();
+  for (const cursor of ["no-json", "null", "{}", '{"occurredAt":"now","id":"x"}'])
+    await assert.rejects(f.activity({ paginationOpts: { numItems: 25, cursor } }), /Invalid activity cursor/);
+  f.log("a");
+  const first = await f.activity();
+  assert.equal(first.continueCursor, "");
+  assert.equal(first.isDone, true);
+  const tail = { numItems: 25, cursor: first.splitCursor, endCursor: "" };
+  assert.equal((await f.activity({ paginationOpts: tail })).entries.length, 0);
+  f.log("b", 500, "beer", { consumedAt: f.now - 1 });
+  const changed = await f.activity({ paginationOpts: tail });
+  assert.equal(changed.entries.length, 1);
+  assert.equal(changed.isDone, true);
+  assert.equal(changed.continueCursor, "");
 });
