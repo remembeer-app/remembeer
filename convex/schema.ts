@@ -1,5 +1,8 @@
 import { defineSchema } from "convex/server";
 import { badgeTable } from "./badge/schema";
+import { beerpongMatchTable } from "./beerpongMatch/schema";
+import { beerpongTeamTable } from "./beerpongTeam/schema";
+import { beerpongTournamentTable } from "./beerpongTournament/schema";
 import { drinkTable } from "./drink/schema";
 import { drinkLogTable } from "./drinkLog/schema";
 import { friendshipTable } from "./friendship/schema";
@@ -22,6 +25,9 @@ export const schema = defineSchema({
   sessionMember: sessionMemberTable,
   partyQuest: partyQuestTable,
   partyChallenge: partyChallengeTable,
+  beerpongTournament: beerpongTournamentTable,
+  beerpongTeam: beerpongTeamTable,
+  beerpongMatch: beerpongMatchTable,
   friendship: friendshipTable,
 });
 
