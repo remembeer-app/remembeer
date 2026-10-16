@@ -3,7 +3,7 @@ import test from "node:test";
 import { build } from "esbuild";
 
 const { outputFiles } = await build({
-  stdin: { contents: 'export { listForDay } from "./convex/drinkLog/query"; export { update } from "./convex/drinkLog/mutation"; export { deleteUserData } from "./convex/user/deletion";', resolveDir: process.cwd() },
+  stdin: { contents: 'export { listForDay } from "./convex/drinkLog/query"; export { update, softDelete } from "./convex/drinkLog/mutation"; export { deleteUserData } from "./convex/user/deletion";', resolveDir: process.cwd() },
   bundle: true, platform: "node", format: "esm", write: false,
   plugins: [{ name: "authenticated-context", setup(builder) {
     builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
@@ -11,7 +11,7 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { listForDay, update, deleteUserData } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
+const { listForDay, update, softDelete, deleteUserData } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
 
 test("daily reads use live catalogue data and keep missing or deleted drinks visible", async () => {
   const start = Date.parse("2026-01-01T05:00Z");
@@ -208,3 +208,79 @@ test("day sessions enforce access, overlap, deduplication and preserve linked ou
     assert.deepEqual(day.sessions.map((row) => row._id), ["inside"]);
   }
 });
+
+function drinkLogAccessFixture() {
+  const drinkLog = {
+    _id: "log", _creationTime: 1, userId: "owner", drinkId: "beer",
+    sessionId: "session", consumedAt: 1, volumeMl: 500,
+    location: { latitude: 50, longitude: 14, accuracy: null },
+    updatedAt: 1, deletedAt: null,
+  };
+  const reads = [];
+  const writes = [];
+  const ctx = {
+    user: { _id: "owner" },
+    db: {
+      async get(table, id) {
+        reads.push({ table, id });
+        assert.equal(table, "drinkLog");
+        return id === drinkLog._id ? structuredClone(drinkLog) : null;
+      },
+      async patch(table, id, fields) {
+        writes.push({ table, id, fields });
+        Object.assign(drinkLog, fields);
+      },
+    },
+  };
+  return { drinkLog, reads, writes, ctx };
+}
+
+for (const registered of [false, true]) {
+  const invoke = (endpoint, ctx, input) => registered
+    ? endpoint.public()._handler(ctx, input)
+    : endpoint(ctx, input);
+  const mode = registered ? "registered" : "direct";
+
+  test(`${mode} drink-log access loads once and preserves partial updates and soft deletion`, async () => {
+    const f = drinkLogAccessFixture();
+    const before = structuredClone(f.drinkLog);
+    assert.equal(await invoke(update, f.ctx, { id: "log", volumeMl: 250 }), null);
+    assert.deepEqual(f.reads, [{ table: "drinkLog", id: "log" }]);
+    assert.equal(f.drinkLog.volumeMl, 250);
+    for (const field of ["drinkId", "sessionId", "consumedAt", "location", "deletedAt"]) {
+      assert.deepEqual(f.drinkLog[field], before[field]);
+    }
+
+    assert.equal(await invoke(softDelete, f.ctx, { id: "log" }), null);
+    assert.equal(f.reads.length, 2);
+    assert.equal(typeof f.drinkLog.deletedAt, "number");
+    assert.equal(f.drinkLog.deletedAt, f.drinkLog.updatedAt);
+  });
+
+  test(`${mode} drink-log access rejects missing, foreign and deleted logs before writes`, async () => {
+    for (const endpoint of [update, softDelete]) {
+      for (const state of ["missing", "foreign", "deleted", "foreign_deleted"]) {
+        const f = drinkLogAccessFixture();
+        if (state.startsWith("foreign")) f.drinkLog.userId = "other";
+        if (state.endsWith("deleted")) f.drinkLog.deletedAt = 2;
+        const before = structuredClone(f.drinkLog);
+        const error = state === "missing" ? /Drink log not found/
+          : state === "deleted" ? /Drink log has been deleted/ : /permission/;
+
+        await assert.rejects(invoke(endpoint, f.ctx, {
+          id: state === "missing" ? "missing" : "log",
+        }), error);
+        assert.equal(f.reads.length, 1);
+        assert.deepEqual(f.writes, []);
+        assert.deepEqual(f.drinkLog, before);
+      }
+    }
+  });
+
+  test(`${mode} drink-log updates validate input before loading the log`, async () => {
+    const f = drinkLogAccessFixture();
+    await assert.rejects(invoke(update, f.ctx, { id: "log", volumeMl: 0 }));
+    assert.deepEqual(f.reads, []);
+    assert.deepEqual(f.writes, []);
+  });
+}

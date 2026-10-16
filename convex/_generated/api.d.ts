@@ -34,6 +34,7 @@ import type * as drink_query from "../drink/query.js";
 import type * as drink_seed from "../drink/seed.js";
 import type * as drink_seedData from "../drink/seedData.js";
 import type * as drinkLog from "../drinkLog.js";
+import type * as drinkLog_access from "../drinkLog/access.js";
 import type * as drinkLog_mutation from "../drinkLog/mutation.js";
 import type * as drinkLog_query from "../drinkLog/query.js";
 import type * as friendship from "../friendship.js";
@@ -126,6 +127,7 @@ declare const fullApi: ApiFromModules<{
   "drink/seed": typeof drink_seed;
   "drink/seedData": typeof drink_seedData;
   drinkLog: typeof drinkLog;
+  "drinkLog/access": typeof drinkLog_access;
   "drinkLog/mutation": typeof drinkLog_mutation;
   "drinkLog/query": typeof drinkLog_query;
   friendship: typeof friendship;

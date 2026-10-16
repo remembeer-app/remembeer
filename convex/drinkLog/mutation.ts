@@ -2,6 +2,12 @@ import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
 import { schema } from "../schema";
+import { access } from "../lib/access";
+import {
+  loadDrinkLog,
+  requireDrinkLogOwner,
+  requireUndeletedDrinkLog,
+} from "./access";
 import { requireSessionAccess } from "../session/access";
 import type { Id } from "../_generated/dataModel";
 import {
@@ -33,8 +39,15 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateDrinkLogInputValidator)
   .returns(v.null())
+  .extend(
+    access<{ id: Id<"drinkLog"> }>()
+      .use(loadDrinkLog)
+      .use(requireDrinkLogOwner)
+      .use(requireUndeletedDrinkLog)
+      .extend,
+  )
   .handler(async (ctx, { id, ...input }) => {
-    const drinkLog = await getDrinkLog(ctx, { id });
+    const { drinkLog } = ctx;
 
     const now = Date.now();
     const consumedAt = input.consumedAt ?? drinkLog.consumedAt;
@@ -62,9 +75,14 @@ export const update = authMutation
 export const softDelete = authMutation
   .input({ id: v.id("drinkLog") })
   .returns(v.null())
+  .extend(
+    access<{ id: Id<"drinkLog"> }>()
+      .use(loadDrinkLog)
+      .use(requireDrinkLogOwner)
+      .use(requireUndeletedDrinkLog)
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
-    await getDrinkLog(ctx, { id });
-
     const now = Date.now();
     await ctx.db.patch("drinkLog", id, {
       updatedAt: now,
@@ -73,28 +91,6 @@ export const softDelete = authMutation
 
     return null;
   });
-
-async function getDrinkLog(
-  ctx: AuthMutationCtx,
-  { id }: { id: Id<"drinkLog"> },
-) {
-  const drinkLog = await ctx.db.get("drinkLog", id);
-  if (!drinkLog) {
-    throw new ConvexError("Drink log not found");
-  }
-
-  if (drinkLog.userId !== ctx.user._id) {
-    throw new ConvexError(
-      "You do not have permission to access this drink log",
-    );
-  }
-
-  if (drinkLog.deletedAt !== null) {
-    throw new ConvexError("Drink log has been deleted");
-  }
-
-  return drinkLog;
-}
 
 async function checkReferences(
   ctx: AuthMutationCtx,
