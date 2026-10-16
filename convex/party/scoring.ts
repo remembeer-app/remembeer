@@ -17,6 +17,26 @@ export function drinkScoreUnits(
   return score;
 }
 
+// Shared by standings and activity so rounding and class bonuses agree.
+export function drinkScoreBreakdown(
+  volumeMl: number,
+  alcoholPercentage: number,
+  matchesClass: boolean,
+) {
+  const baseDrinkScoreUnits = drinkScoreUnits(
+    volumeMl,
+    alcoholPercentage,
+    false,
+  );
+  const scoreUnits = drinkScoreUnits(volumeMl, alcoholPercentage, matchesClass);
+  return {
+    baseDrinkScoreUnits,
+    classBonusScoreUnits: scoreUnits - baseDrinkScoreUnits,
+    scoreUnits,
+    alcoholMl: (volumeMl * alcoholPercentage) / 100,
+  };
+}
+
 // Competition ranks: equal scores share a rank, and the next rank skips places.
 export function rankByScore<
   T extends { userId: string; username: string; scoreUnits: number },

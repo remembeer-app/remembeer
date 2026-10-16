@@ -1,7 +1,7 @@
 import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
-import { drinkScoreUnits } from "./scoring";
+import { drinkScoreBreakdown } from "./scoring";
 
 export async function loadPartyScores(
   ctx: QueryCtx,
@@ -63,17 +63,16 @@ export async function loadPartyScores(
       drink = referencedDrink;
       drinks.set(log.drinkId, drink);
     }
-    const base = drinkScoreUnits(log.volumeMl, drink.alcoholPercentage, false);
-    const total = drinkScoreUnits(
+    const score = drinkScoreBreakdown(
       log.volumeMl,
       drink.alcoholPercentage,
       entry.member.selectedClass?.kind === drink.drinkCategory.kind,
     );
     entry.drinkCount++;
     entry.volumeMl += log.volumeMl;
-    entry.alcoholMl += (log.volumeMl * drink.alcoholPercentage) / 100;
-    entry.baseDrinkScoreUnits += base;
-    entry.classBonusScoreUnits += total - base;
+    entry.alcoholMl += score.alcoholMl;
+    entry.baseDrinkScoreUnits += score.baseDrinkScoreUnits;
+    entry.classBonusScoreUnits += score.classBonusScoreUnits;
   }
   for (const entry of entries) {
     entry.scoreUnits =

@@ -36,6 +36,7 @@ import type * as lib_builder from "../lib/builder.js";
 import type * as lib_logicalDay from "../lib/logicalDay.js";
 import type * as lib_timeZone from "../lib/timeZone.js";
 import type * as party from "../party.js";
+import type * as party_activity from "../party/activity.js";
 import type * as party_constants from "../party/constants.js";
 import type * as party_query from "../party/query.js";
 import type * as party_scores from "../party/scores.js";
@@ -101,6 +102,7 @@ declare const fullApi: ApiFromModules<{
   "lib/logicalDay": typeof lib_logicalDay;
   "lib/timeZone": typeof lib_timeZone;
   party: typeof party;
+  "party/activity": typeof party_activity;
   "party/constants": typeof party_constants;
   "party/query": typeof party_query;
   "party/scores": typeof party_scores;
