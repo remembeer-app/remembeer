@@ -3,7 +3,7 @@ import { WithZod } from "fluent-convex/zod";
 import { authMutation } from "../lib/authenticated";
 import { schema } from "../schema";
 import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
-import { getCustomDrinkHandler } from "./query";
+import { withCustomDrinkAccess } from "./withCustomDrinkAccess";
 
 export const create = authMutation
   .extend(WithZod)
@@ -22,8 +22,9 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateDrinkInputValidator)
   .returns(v.null())
+  .extend(withCustomDrinkAccess())
   .handler(async (ctx, { id, name, drinkCategory, alcoholPercentage }) => {
-    const drink = await getCustomDrinkHandler(ctx, { id });
+    const { drink } = ctx;
 
     await ctx.db.patch("drink", id, {
       name: name ?? drink.name,
@@ -40,9 +41,8 @@ export const softDelete = authMutation
     id: v.id("drink"),
   })
   .returns(v.null())
+  .extend(withCustomDrinkAccess())
   .handler(async (ctx, { id }) => {
-    await getCustomDrinkHandler(ctx, { id });
-
     const now = Date.now();
     await ctx.db.patch("drink", id, {
       deletedAt: now,
