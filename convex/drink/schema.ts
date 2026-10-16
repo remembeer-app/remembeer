@@ -4,11 +4,21 @@ import { convexToZod } from "convex-helpers/server/zod4";
 import { z } from "zod";
 
 export const drinkCategoryValidator = v.union(
-  v.object({ kind: v.literal("beer") }),
-  v.object({ kind: v.literal("cider") }),
-  v.object({ kind: v.literal("cocktail") }),
-  v.object({ kind: v.literal("spirit") }),
-  v.object({ kind: v.literal("wine") }),
+  v.object({
+    kind: v.literal("beer"),
+  }),
+  v.object({
+    kind: v.literal("cider"),
+  }),
+  v.object({
+    kind: v.literal("cocktail"),
+  }),
+  v.object({
+    kind: v.literal("spirit"),
+  }),
+  v.object({
+    kind: v.literal("wine"),
+  }),
 );
 
 export const drinkTable = defineTable({

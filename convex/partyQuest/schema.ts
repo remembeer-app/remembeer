@@ -8,7 +8,11 @@ export const partyQuestKindValidator = v.union(
     kind: v.literal("toastWithClass"),
     drinkCategory: drinkCategoryValidator,
   }),
-  ...pairQuestKinds.map((kind) => v.object({ kind: v.literal(kind) })),
+  ...pairQuestKinds.map((kind) =>
+    v.object({
+      kind: v.literal(kind),
+    }),
+  ),
 );
 
 const memberPairValidator = v.object({

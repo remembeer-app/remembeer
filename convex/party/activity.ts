@@ -11,7 +11,10 @@ import { drinkScoreBreakdown } from "./scoring";
 import { loadBeerpongAwards } from "../beerpongTournament/scoring";
 import { partyActivityMaxPageSize } from "./constants";
 
-const cursorValidator = v.object({ occurredAt: v.number(), id: v.string() });
+const cursorValidator = v.object({
+  occurredAt: v.number(),
+  id: v.string(),
+});
 const kindValidator = v.union(
   v.literal("drinkLog"),
   v.literal("socialQuest"),

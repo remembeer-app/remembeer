@@ -89,7 +89,12 @@ export const current = authQuery
 
 export const currentDayConsumption = authQuery
   .input({ refreshAt: v.optional(v.number()) })
-  .returns(v.object({ alcoholConsumedMl: v.number(), nextRefreshAt: v.number() }))
+  .returns(
+    v.object({
+      alcoholConsumedMl: v.number(),
+      nextRefreshAt: v.number(),
+    }),
+  )
   .handler(async (ctx) => {
     const day = new LogicalDay(ctx.user);
     const now = Date.now();
