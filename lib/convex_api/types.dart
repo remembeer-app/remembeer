@@ -147,6 +147,50 @@ typedef LeaderboardMemberDocument = ({
   double creationTime,
 });
 
+enum PartyChallengeDocumentStatus {
+  activeValue('active'),
+  completedValue('completed'),
+  expiredValue('expired'),
+  cancelledValue('cancelled');
+
+  const PartyChallengeDocumentStatus(this.value);
+  final Object? value;
+
+  static PartyChallengeDocumentStatus fromJson(dynamic raw) {
+    switch (raw) {
+      case 'active':
+        return PartyChallengeDocumentStatus.activeValue;
+      case 'completed':
+        return PartyChallengeDocumentStatus.completedValue;
+      case 'expired':
+        return PartyChallengeDocumentStatus.expiredValue;
+      case 'cancelled':
+        return PartyChallengeDocumentStatus.cancelledValue;
+      default:
+        throw FormatException(
+          'Expected one of active, completed, expired, cancelled for PartyChallengeDocumentStatus',
+        );
+    }
+  }
+}
+
+typedef PartyChallengeDocumentWinnersItem = ({UserId userId, double awardedAt});
+
+typedef PartyChallengeDocument = ({
+  SessionId sessionId,
+  String title,
+  String instructions,
+  double pointsUnits,
+  double startsAt,
+  double endsAt,
+  PartyChallengeDocumentStatus status,
+  UserId createdByUserId,
+  double updatedAt,
+  List<PartyChallengeDocumentWinnersItem> winners,
+  PartyChallengeId id,
+  double creationTime,
+});
+
 enum PartyQuestDocumentStatus {
   activeValue('active'),
   expiredValue('expired'),

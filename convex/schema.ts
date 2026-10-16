@@ -6,6 +6,7 @@ import { friendshipTable } from "./friendship/schema";
 import { sessionTable } from "./session/schema";
 import { sessionMemberTable } from "./sessionMember/schema";
 import { partyQuestTable } from "./partyQuest/schema";
+import { partyChallengeTable } from "./partyChallenge/schema";
 import { leaderboardTable } from "./leaderboard/schema";
 import { leaderboardMemberTable } from "./leaderboardMember/schema";
 import { userTable } from "./user/schema";
@@ -20,6 +21,7 @@ export const schema = defineSchema({
   session: sessionTable,
   sessionMember: sessionMemberTable,
   partyQuest: partyQuestTable,
+  partyChallenge: partyChallengeTable,
   friendship: friendshipTable,
 });
 

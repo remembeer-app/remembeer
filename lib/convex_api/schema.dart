@@ -51,6 +51,12 @@ class LeaderboardMemberId extends ConvexTableId {
   static const String tableName = 'leaderboardMember';
 }
 
+class PartyChallengeId extends ConvexTableId {
+  const PartyChallengeId(super.value);
+
+  static const String tableName = 'partyChallenge';
+}
+
 class PartyQuestId extends ConvexTableId {
   const PartyQuestId(super.value);
 
