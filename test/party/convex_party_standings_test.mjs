@@ -51,7 +51,7 @@ function fixture() {
   const ctx = userId => ({ db, user: { _id: userId }, storage: { async getUrl(id) { return `https://example.com/${id}`; } } });
   const read = async (actor = "owner", at = now) => {
     const original = Date.now; Date.now = () => at;
-    try { return await standings(ctx(actor), { sessionId: "party", refreshAt: at }); }
+    try { return await standings(ctx(actor), { sessionId: "party" }); }
     finally { Date.now = original; }
   };
   const log = (userId, volumeMl = 500, drinkId = "beer", extra = {}) => tables.drinkLog.push({
@@ -96,7 +96,6 @@ test("drink totals and point breakdowns include unclassed members and count logs
   assert.equal(entry(result, "owner").drinkCount, 0);
   assert.equal(entry(result, "owner").rank, 3);
   assert.equal(entry(result, "b").rank, 3);
-  assert.equal(result.nextRefreshAt, null);
   assert.equal(f.reads.filter(r => r === "drink:beer").length, 1);
   assert.equal(f.reads.filter(r => r === "drink:wine").length, 1);
 });
@@ -113,10 +112,8 @@ test("only live, due logs attached to this party and joined members affect total
   f.log("b", 500, "missing", { deletedAt: f.now, consumedAt: f.now + 1 });
   const result = await f.read();
   assert.equal(entry(result, "a").drinkCount, 1);
-  assert.equal(result.nextRefreshAt, f.now + 1);
   const refreshed = await f.read("a", f.now + 1);
   assert.equal(entry(refreshed, "a").drinkCount, 2);
-  assert.equal(refreshed.nextRefreshAt, f.now + 10);
 });
 
 test("edits, deletion, moving logs and catalogue/class changes recalculate scores", async () => {

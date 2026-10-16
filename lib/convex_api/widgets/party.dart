@@ -19,7 +19,6 @@ class PartyStandingsQuery extends StatelessWidget {
     this.client,
     this.waitingBuilder,
     this.errorBuilder,
-    this.refreshAt = const Optional.absent(),
     required this.sessionId,
   }) : snapshotBuilder = null;
 
@@ -28,7 +27,6 @@ class PartyStandingsQuery extends StatelessWidget {
     super.key,
     required this.snapshotBuilder,
     this.client,
-    this.refreshAt = const Optional.absent(),
     required this.sessionId,
   }) : builder = null,
        waitingBuilder = null,
@@ -50,7 +48,6 @@ class PartyStandingsQuery extends StatelessWidget {
   /// Optional runtime client override.
   final ConvexRuntimeClient? client;
 
-  final Optional<double> refreshAt;
   final SessionId sessionId;
 
   @override
@@ -59,14 +56,14 @@ class PartyStandingsQuery extends StatelessWidget {
     if (buildSnapshot != null) {
       return ConvexTypedQuery<StandingsArgs, StandingsResult>.snapshot(
         query: standingsQueryReference,
-        args: (refreshAt: refreshAt, sessionId: sessionId),
+        args: (sessionId: sessionId),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
     return ConvexTypedQuery<StandingsArgs, StandingsResult>(
       query: standingsQueryReference,
-      args: (refreshAt: refreshAt, sessionId: sessionId),
+      args: (sessionId: sessionId),
       client: client,
       builder: builder!,
       waitingBuilder: waitingBuilder,

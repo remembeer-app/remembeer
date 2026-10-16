@@ -12,24 +12,20 @@ class PartyApi {
 
   final ConvexFunctionCaller _client;
 
-  Future<StandingsResult> standings({
-    Optional<double> refreshAt = const Optional.absent(),
-    required SessionId sessionId,
-  }) async {
+  Future<StandingsResult> standings({required SessionId sessionId}) async {
     final raw$ = await _client.query(
       'party:standings',
-      _encodeStandingsArgs((refreshAt: refreshAt, sessionId: sessionId)),
+      _encodeStandingsArgs((sessionId: sessionId)),
     );
     return _decodeStandingsResult(raw$);
   }
 
   TypedConvexSubscription<StandingsResult> standingsSubscribe({
-    Optional<double> refreshAt = const Optional.absent(),
     required SessionId sessionId,
   }) {
     final subscription$ = _client.subscribe(
       'party:standings',
-      _encodeStandingsArgs((refreshAt: refreshAt, sessionId: sessionId)),
+      _encodeStandingsArgs((sessionId: sessionId)),
     );
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
@@ -367,18 +363,14 @@ StandingsResultEntriesItem _decodeStandingsResultEntriesItem(dynamic raw) {
   );
 }
 
-typedef StandingsResult = ({
-  List<StandingsResultEntriesItem> entries,
-  double? nextRefreshAt,
-});
+typedef StandingsResult = ({List<StandingsResultEntriesItem> entries});
 
 Map<String, dynamic> _encodeStandingsResult(StandingsResult value$) {
-  final (entries: entries, nextRefreshAt: nextRefreshAt) = value$;
+  final (entries: entries) = value$;
   return <String, dynamic>{
     'entries': entries
         .map((item) => _encodeStandingsResultEntriesItem(item))
         .toList(),
-    'nextRefreshAt': nextRefreshAt,
   };
 }
 
@@ -389,33 +381,19 @@ StandingsResult _decodeStandingsResult(dynamic raw) {
       'Missing required field "entries" for StandingsResult',
     );
   }
-  if (!map.containsKey('nextRefreshAt')) {
-    throw FormatException(
-      'Missing required field "nextRefreshAt" for StandingsResult',
-    );
-  }
   return (
     entries: expectList(
       map['entries'],
       label: 'StandingsResultEntries',
     ).map((item) => _decodeStandingsResultEntriesItem(item)).toList(),
-    nextRefreshAt: map['nextRefreshAt'] == null
-        ? null
-        : expectDouble(
-            map['nextRefreshAt'],
-            label: 'StandingsResultNextRefreshAt',
-          ),
   );
 }
 
-typedef StandingsArgs = ({Optional<double> refreshAt, SessionId sessionId});
+typedef StandingsArgs = ({SessionId sessionId});
 
 Map<String, dynamic> _encodeStandingsArgs(StandingsArgs value$) {
-  final (refreshAt: refreshAt, sessionId: sessionId) = value$;
-  return <String, dynamic>{
-    if (refreshAt.isDefined) 'refreshAt': refreshAt.value,
-    'sessionId': sessionId.value,
-  };
+  final (sessionId: sessionId) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value};
 }
 
 StandingsArgs _decodeStandingsArgs(dynamic raw) {
@@ -426,11 +404,6 @@ StandingsArgs _decodeStandingsArgs(dynamic raw) {
     );
   }
   return (
-    refreshAt: map.containsKey('refreshAt')
-        ? Optional.of(
-            expectDouble(map['refreshAt'], label: 'StandingsArgsRefreshAt'),
-          )
-        : const Optional.absent(),
     sessionId: SessionId(
       expectString(map['sessionId'], label: 'StandingsArgsSessionId'),
     ),

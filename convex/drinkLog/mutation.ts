@@ -14,12 +14,14 @@ export const create = authMutation
   .input(createDrinkLogInputValidator)
   .returns(schema.id("drinkLog"))
   .handler(async (ctx, input) => {
+    const now = Date.now();
+    requireConsumedTime(input.consumedAt, now);
     await checkReferences(ctx, input);
 
     return await ctx.db.insert("drinkLog", {
       ...input,
       userId: ctx.user._id,
-      updatedAt: Date.now(),
+      updatedAt: now,
       deletedAt: null,
     });
   });
@@ -30,6 +32,9 @@ export const update = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, ...input }) => {
     const drinkLog = await getDrinkLog(ctx, { id });
+    const now = Date.now();
+    const consumedAt = input.consumedAt ?? drinkLog.consumedAt;
+    requireConsumedTime(consumedAt, now);
     await checkReferences(ctx, {
       sessionId: input.sessionId,
       drinkId: input.drinkId === drinkLog.drinkId ? undefined : input.drinkId,
@@ -39,11 +44,11 @@ export const update = authMutation
       sessionId:
         input.sessionId === undefined ? drinkLog.sessionId : input.sessionId,
       drinkId: input.drinkId ?? drinkLog.drinkId,
-      consumedAt: input.consumedAt ?? drinkLog.consumedAt,
+      consumedAt,
       volumeMl: input.volumeMl ?? drinkLog.volumeMl,
       location:
         input.location === undefined ? drinkLog.location : input.location,
-      updatedAt: Date.now(),
+      updatedAt: now,
     });
 
     return null;
@@ -104,4 +109,9 @@ async function checkReferences(
   if (sessionId !== undefined && sessionId !== null) {
     await requireSessionAccess(ctx, sessionId, "joined");
   }
+}
+
+function requireConsumedTime(consumedAt: number, now: number) {
+  if (consumedAt > now)
+    throw new ConvexError("Consumed time cannot be in the future");
 }

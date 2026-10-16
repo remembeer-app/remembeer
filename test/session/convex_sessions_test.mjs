@@ -410,3 +410,31 @@ test("day queries skip old owned and joined history before collecting or loading
   assert.ok(f.collected.every((query) => query.count <= 1));
   assert.deepEqual(f.sessionGets, ["owned-0"]);
 });
+
+test("drink creates and updates reject future instants, including unchanged legacy timestamps", async () => {
+  const f = fixture();
+  f.tables.drink.push({ _id: "beer", ownerId: null, deletedAt: null });
+  const now = 1000000;
+  const originalNow = Date.now;
+  Date.now = () => now;
+  try {
+    const input = { sessionId: null, drinkId: "beer", consumedAt: now, volumeMl: 500, location: null };
+    await assert.rejects(logs.create(f.owner, { ...input, consumedAt: now + 1 }), /cannot be in the future/);
+    assert.equal(f.tables.drinkLog.length, 0);
+    const id = await logs.create(f.owner, input);
+    assert.equal(f.tables.drinkLog[0].consumedAt, now);
+    const before = structuredClone(f.tables.drinkLog);
+    await assert.rejects(logs.update(f.owner, { id, consumedAt: now + 1, volumeMl: 250 }), /cannot be in the future/);
+    assert.deepEqual(f.tables.drinkLog, before);
+    await logs.update(f.owner, { id, consumedAt: now - 1 });
+    await logs.update(f.owner, { id, volumeMl: 250 });
+    assert.equal(f.tables.drinkLog[0].consumedAt, now - 1);
+    await logs.update(f.owner, { id, consumedAt: now });
+    f.tables.drinkLog[0].consumedAt = now + 1;
+    await assert.rejects(logs.update(f.owner, { id, volumeMl: 100 }), /cannot be in the future/);
+    await logs.update(f.owner, { id, consumedAt: now - 1 });
+    assert.equal(f.tables.drinkLog[0].consumedAt, now - 1);
+    const pastId = await logs.create(f.owner, { ...input, consumedAt: now - 86400000 });
+    assert.equal(f.tables.drinkLog.find(log => log._id === pastId).consumedAt, now - 86400000);
+  } finally { Date.now = originalNow; }
+});

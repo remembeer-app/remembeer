@@ -53,17 +53,9 @@ export async function loadPartyScores(
     .query("drinkLog")
     .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
     .collect();
-  let nextRefreshAt: number | null = null;
   for (const log of logs) {
     const entry = byId.get(log.userId);
-    if (!entry || log.deletedAt !== null) continue;
-    if (log.consumedAt > now) {
-      nextRefreshAt =
-        nextRefreshAt === null
-          ? log.consumedAt
-          : Math.min(nextRefreshAt, log.consumedAt);
-      continue;
-    }
+    if (!entry || log.deletedAt !== null || log.consumedAt > now) continue;
     let drink = drinks.get(log.drinkId);
     if (!drink) {
       const referencedDrink = await ctx.db.get("drink", log.drinkId);
@@ -98,5 +90,5 @@ export async function loadPartyScores(
     )
       throw new ConvexError("Party score is outside the supported range");
   }
-  return { entries, quests, nextRefreshAt };
+  return { entries, quests };
 }

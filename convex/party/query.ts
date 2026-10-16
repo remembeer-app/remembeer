@@ -10,8 +10,7 @@ import { rankByScore } from "./scoring";
 // the current class/catalogue and recorded quest results, also for ended parties.
 // Points are integer units (1000 per point); drinkCount counts live log rows.
 export const standings = authQuery
-  // Change refreshAt at nextRefreshAt: wall-clock time alone does not refresh subscriptions.
-  .input({ sessionId: v.id("session"), refreshAt: v.optional(v.number()) })
+  .input({ sessionId: v.id("session") })
   .returns(
     v.object({
       entries: v.array(
@@ -30,18 +29,13 @@ export const standings = authQuery
           alcoholMl: v.number(),
         }),
       ),
-      nextRefreshAt: v.nullable(v.number()),
     }),
   )
   .handler(async (ctx, { sessionId }) => {
     const { session } = await requireSessionAccess(ctx, sessionId, "joined");
     if (session.kind !== "party") throw new ConvexError("A party is required");
     const now = Date.now();
-    const { entries, nextRefreshAt } = await loadPartyScores(
-      ctx,
-      sessionId,
-      now,
-    );
+    const { entries } = await loadPartyScores(ctx, sessionId, now);
     const ranked = rankByScore(
       entries.map((entry) => ({
         ...entry,
@@ -65,6 +59,5 @@ export const standings = authQuery
             : null,
         })),
       ),
-      nextRefreshAt,
     };
   });
