@@ -44,8 +44,13 @@ export const get = authQuery
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
   .returns(v.array(schema.doc("partyQuest")))
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
+      .extend,
+  )
   .handler(async (ctx, { sessionId }) => {
-    const { session } = await requireSessionAccess(ctx, sessionId, "joined");
+    const { session } = ctx;
 
     const quests = await ctx.db
       .query("partyQuest")

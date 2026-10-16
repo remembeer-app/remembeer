@@ -3,7 +3,7 @@ import test from "node:test";
 import { build } from "esbuild";
 
 const { outputFiles } = await build({
-  stdin: { contents: 'export { listForDay } from "./convex/drinkLog/query"; export { update, softDelete } from "./convex/drinkLog/mutation"; export { deleteUserData } from "./convex/user/deletion";', resolveDir: process.cwd() },
+  stdin: { contents: 'export { listForDay } from "./convex/drinkLog/query"; export { create, update, softDelete } from "./convex/drinkLog/mutation"; export { deleteUserData } from "./convex/user/deletion";', resolveDir: process.cwd() },
   bundle: true, platform: "node", format: "esm", write: false,
   plugins: [{ name: "authenticated-context", setup(builder) {
     builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
@@ -11,7 +11,7 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { listForDay, update, softDelete, deleteUserData } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
+const { listForDay, create, update, softDelete, deleteUserData } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
 
 test("daily reads use live catalogue data and keep missing or deleted drinks visible", async () => {
   const start = Date.parse("2026-01-01T05:00Z");
@@ -282,5 +282,59 @@ for (const registered of [false, true]) {
     await assert.rejects(invoke(update, f.ctx, { id: "log", volumeMl: 0 }));
     assert.deepEqual(f.reads, []);
     assert.deepEqual(f.writes, []);
+  });
+}
+
+for (const registered of [false, true]) {
+  const invoke = (endpoint, ctx, input) => registered
+    ? endpoint.public()._handler(ctx, input) : endpoint(ctx, input);
+
+  test(`${registered ? "registered" : "direct"} drink-log references preserve permissions, lookup counts and validation order`, async () => {
+    for (const endpoint of [create, update]) {
+      for (const state of ["global", "own", "foreign", "deleted", "missing", "future", "invited", "joined", "clear"]) {
+        const f = drinkLogAccessFixture();
+        const getLog = f.ctx.db.get;
+        f.ctx.db.get = async (table, id) => {
+          if (table === "drinkLog") return getLog(table, id);
+          f.reads.push({ table, id });
+          if (table === "drink") return state === "missing" ? null : {
+            ownerId: state === "foreign" ? "other" : state === "own" ? "owner" : null,
+            deletedAt: state === "deleted" ? 1 : null,
+          };
+          assert.equal(table, "session");
+          return { ownerId: "other", deletedAt: null };
+        };
+        f.ctx.db.query = (table) => {
+          assert.equal(table, "sessionMember");
+          f.reads.push({ table });
+          return { withIndex() { return this; }, async unique() {
+            return { sessionMemberStatus: { kind: state === "joined" ? "joined" : "invited" }, sessionMemberRole: { kind: "member" } };
+          } };
+        };
+        f.ctx.db.insert = async (table, fields) => { f.writes.push({ table, fields }); return "new-log"; };
+        const input = {
+          ...(endpoint === update ? { id: "log" } : {}),
+          drinkId: "new-beer", sessionId: ["invited", "joined"].includes(state) ? "session" : null,
+          consumedAt: state === "future" ? Date.now() + 60_000 : 1,
+          volumeMl: 250, location: null,
+        };
+        const error = { foreign: /permission to use this drink/, deleted: /Drink not found/, missing: /Drink not found/, future: /Consumed time/, invited: /permission to access this session/ }[state];
+        if (error) {
+          await assert.rejects(invoke(endpoint, f.ctx, input), error);
+          assert.deepEqual(f.writes, []);
+        } else {
+          await invoke(endpoint, f.ctx, input);
+          assert.equal(f.writes.length, 1);
+        }
+        assert.equal(f.reads.filter((r) => r.table === "drink").length, state === "future" ? 0 : 1);
+        assert.equal(f.reads.filter((r) => r.table === "session").length, ["invited", "joined"].includes(state) ? 1 : 0);
+        assert.equal(f.reads.filter((r) => r.table === "sessionMember").length, ["invited", "joined"].includes(state) ? 1 : 0);
+      }
+    }
+    const f = drinkLogAccessFixture();
+    // The unchanged drink is deliberately unavailable; clearing the session needs no lookup.
+    await invoke(update, f.ctx, { id: "log", drinkId: "beer", sessionId: null });
+    assert.deepEqual(f.reads, [{ table: "drinkLog", id: "log" }]);
+    assert.equal(f.drinkLog.sessionId, null);
   });
 }

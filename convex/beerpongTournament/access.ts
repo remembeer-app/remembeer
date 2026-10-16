@@ -23,3 +23,12 @@ export function requireBeerpongEnabled(ctx: {
 
   return {};
 }
+
+export function requireOngoingBeerpongParty(ctx: { session: Doc<"session"> }) {
+  const { session } = ctx;
+  if (session.kind !== "party" || session.endedAt !== null) {
+    throw new ConvexError("An ongoing party is required");
+  }
+
+  return { session };
+}

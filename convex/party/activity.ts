@@ -2,6 +2,8 @@ import { ConvexError, v, type Infer } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import type { Doc, Id } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
+import { access } from "../lib/access";
+import { requireParty } from "./access";
 import { requireSessionAccess } from "../session/access";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
 import { drinkCategoryValidator } from "../drink/schema";
@@ -107,14 +109,17 @@ export const activity = authQuery
       pageStatus: v.optional(v.literal("SplitRecommended")),
     }),
   )
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
+      .use(requireParty)
+      .extend,
+  )
   .handler(
     async (ctx, { sessionId, kinds, participantIds, paginationOpts }) => {
       const pageSize = paginationOpts.numItems;
       const cursor = decodeCursor(paginationOpts.cursor);
       const endCursor = decodeCursor(paginationOpts.endCursor ?? null);
-      const { session } = await requireSessionAccess(ctx, sessionId, "joined");
-      if (session.kind !== "party")
-        throw new ConvexError("A party is required");
 
       if (
         !Number.isInteger(pageSize) ||

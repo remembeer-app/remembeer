@@ -7,7 +7,11 @@ import { authMutation } from "../lib/authenticated";
 import { access } from "../lib/access";
 import { requireSessionAccess } from "../session/access";
 import { requireParty, requireOngoingParty } from "../party/access";
-import { loadTournament, requireBeerpongEnabled } from "./access";
+import {
+  loadTournament,
+  requireBeerpongEnabled,
+  requireOngoingBeerpongParty,
+} from "./access";
 import { createBracket } from "./bracket";
 import { loadTournamentAwards } from "./scoring";
 import {
@@ -238,10 +242,14 @@ export const finalize = authMutation
 export const setEnabled = authMutation
   .input({ sessionId: v.id("session"), enabled: v.boolean() })
   .returns(v.null())
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+      .use(requireOngoingBeerpongParty)
+      .extend,
+  )
   .handler(async (ctx, { sessionId, enabled }) => {
-    const { session } = await requireSessionAccess(ctx, sessionId, "admin");
-    if (session.kind !== "party" || session.endedAt !== null)
-      throw new ConvexError("An ongoing party is required");
+    const { session } = ctx;
 
     await ctx.db.patch("session", sessionId, {
       modules: { ...session.modules, beerpongEnabled: enabled },

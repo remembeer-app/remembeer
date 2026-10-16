@@ -1,5 +1,8 @@
-import { ConvexError, v } from "convex/values";
+import { v } from "convex/values";
 import { authQuery } from "../lib/authenticated";
+import { access } from "../lib/access";
+import type { Id } from "../_generated/dataModel";
+import { requireParty } from "./access";
 import { requireSessionAccess } from "../session/access";
 import { publicUserValidator } from "../user/publicProfile";
 import { drinkCategoryValidator } from "../drink/schema";
@@ -34,10 +37,13 @@ export const standings = authQuery
       ),
     }),
   )
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
+      .use(requireParty)
+      .extend,
+  )
   .handler(async (ctx, { sessionId }) => {
-    const { session } = await requireSessionAccess(ctx, sessionId, "joined");
-    if (session.kind !== "party") throw new ConvexError("A party is required");
-
     const now = Date.now();
     const { entries } = await loadPartyScores(ctx, sessionId, now);
 

@@ -38,6 +38,7 @@ import type * as drinkLog_access from "../drinkLog/access.js";
 import type * as drinkLog_mutation from "../drinkLog/mutation.js";
 import type * as drinkLog_query from "../drinkLog/query.js";
 import type * as friendship from "../friendship.js";
+import type * as friendship_access from "../friendship/access.js";
 import type * as friendship_mutation from "../friendship/mutation.js";
 import type * as friendship_query from "../friendship/query.js";
 import type * as friendship_relation from "../friendship/relation.js";
@@ -132,6 +133,7 @@ declare const fullApi: ApiFromModules<{
   "drinkLog/mutation": typeof drinkLog_mutation;
   "drinkLog/query": typeof drinkLog_query;
   friendship: typeof friendship;
+  "friendship/access": typeof friendship_access;
   "friendship/mutation": typeof friendship_mutation;
   "friendship/query": typeof friendship_query;
   "friendship/relation": typeof friendship_relation;

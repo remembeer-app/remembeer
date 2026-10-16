@@ -1,14 +1,16 @@
-import { ConvexError, v } from "convex/values";
+import { v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
-import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
+import { authMutation } from "../lib/authenticated";
 import { schema } from "../schema";
 import { access } from "../lib/access";
 import {
   loadDrinkLog,
   requireDrinkLogOwner,
   requireUndeletedDrinkLog,
+  requireValidConsumedTime,
+  requireUsableDrink,
+  requireJoinedDrinkLogSession,
 } from "./access";
-import { requireSessionAccess } from "../session/access";
 import type { Id } from "../_generated/dataModel";
 import {
   createDrinkLogInputValidator,
@@ -19,12 +21,19 @@ export const create = authMutation
   .extend(WithZod)
   .input(createDrinkLogInputValidator)
   .returns(schema.id("drinkLog"))
+  .extend(
+    access<{
+      consumedAt?: number | undefined;
+      drinkId: Id<"drink">;
+      sessionId: Id<"session"> | null;
+    }>()
+      .use(requireValidConsumedTime)
+      .use(requireUsableDrink)
+      .use(requireJoinedDrinkLogSession)
+      .extend,
+  )
   .handler(async (ctx, input) => {
-    const now = Date.now();
-    const consumedAt = input.consumedAt ?? now;
-
-    requireConsumedTime(consumedAt, now);
-    await checkReferences(ctx, input);
+    const { now, consumedAt } = ctx;
 
     return await ctx.db.insert("drinkLog", {
       ...input,
@@ -40,23 +49,22 @@ export const update = authMutation
   .input(updateDrinkLogInputValidator)
   .returns(v.null())
   .extend(
-    access<{ id: Id<"drinkLog"> }>()
+    access<{
+      id: Id<"drinkLog">;
+      consumedAt?: number | undefined;
+      drinkId?: Id<"drink"> | undefined;
+      sessionId?: Id<"session"> | null | undefined;
+    }>()
       .use(loadDrinkLog)
       .use(requireDrinkLogOwner)
       .use(requireUndeletedDrinkLog)
+      .use(requireValidConsumedTime)
+      .use(requireUsableDrink)
+      .use(requireJoinedDrinkLogSession)
       .extend,
   )
   .handler(async (ctx, { id, ...input }) => {
-    const { drinkLog } = ctx;
-
-    const now = Date.now();
-    const consumedAt = input.consumedAt ?? drinkLog.consumedAt;
-
-    requireConsumedTime(consumedAt, now);
-    await checkReferences(ctx, {
-      sessionId: input.sessionId,
-      drinkId: input.drinkId === drinkLog.drinkId ? undefined : input.drinkId,
-    });
+    const { drinkLog, now, consumedAt } = ctx;
 
     await ctx.db.patch("drinkLog", id, {
       sessionId:
@@ -91,34 +99,3 @@ export const softDelete = authMutation
 
     return null;
   });
-
-async function checkReferences(
-  ctx: AuthMutationCtx,
-  {
-    sessionId,
-    drinkId,
-  }: {
-    sessionId?: Id<"session"> | null | undefined;
-    drinkId?: Id<"drink"> | undefined;
-  },
-) {
-  if (drinkId !== undefined) {
-    const drink = await ctx.db.get("drink", drinkId);
-    if (!drink || drink.deletedAt !== null) {
-      throw new ConvexError("Drink not found");
-    }
-
-    if (drink.ownerId !== null && drink.ownerId !== ctx.user._id) {
-      throw new ConvexError("You do not have permission to use this drink");
-    }
-  }
-
-  if (sessionId !== undefined && sessionId !== null) {
-    await requireSessionAccess(ctx, sessionId, "joined");
-  }
-}
-
-function requireConsumedTime(consumedAt: number, now: number) {
-  if (consumedAt > now)
-    throw new ConvexError("Consumed time cannot be in the future");
-}

@@ -164,3 +164,45 @@ test("account deletion removes pending and accepted relations at either endpoint
   assert.deepEqual(await queries.listCurrent(f.ctx("a"), {}), []);
   await deleteUserData(f.ctx("b"), "auth-b");
 });
+
+for (const registered of [false, true]) {
+  const invoke = (endpoint, ctx, input) => registered
+    ? endpoint.public()._handler(ctx, input) : endpoint(ctx, input);
+
+  test(`${registered ? "registered" : "direct"} friendship guards keep retries harmless and check each relation once`, async () => {
+    for (const operation of ["accept", "decline", "cancel", "remove"]) {
+      for (const status of ["missing", "pending", "accepted"]) {
+        for (const caller of ["a", "b"]) {
+          const f = fixture();
+          if (status !== "missing") f.tables.friendship.push({
+            _id: "relation", userAId: "a", userBId: "b", requestedById: "a", status, updatedAt: 1,
+          });
+          const before = structuredClone(f.tables.friendship);
+          let reads = 0;
+          let writes = 0;
+          const query = f.db.query;
+          f.db.query = (table) => { assert.equal(table, "friendship"); reads++; return query(table); };
+          // These operations must not depend on the target user still existing.
+          f.db.get = () => assert.fail("Unexpected target-user lookup");
+          for (const method of ["patch", "delete"]) {
+            const write = f.db[method];
+            f.db[method] = (...args) => { writes++; return write(...args); };
+          }
+          const error = operation === "accept"
+            ? status === "missing" ? /Friend request not found/ : caller === "a" ? /Only the recipient/ : null
+            : status === "missing" ? null
+            : operation === "remove" ? status !== "accepted" ? /Users are not friends/ : null
+            : status !== "pending" || (caller === "a") !== (operation === "cancel") ? /Cannot change/ : null;
+          const call = invoke(mutations[operation], f.ctx(caller), { userId: caller === "a" ? "b" : "a" });
+          if (error) await assert.rejects(call, error);
+          else assert.equal(await call, null);
+          assert.equal(reads, 1);
+          if (error || status === "missing" || (operation === "accept" && status === "accepted")) {
+            assert.equal(writes, 0);
+            assert.deepEqual(f.tables.friendship, before);
+          } else assert.equal(writes, 1);
+        }
+      }
+    }
+  });
+}

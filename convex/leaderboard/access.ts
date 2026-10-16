@@ -27,13 +27,6 @@ export function listMemberships(
     .collect();
 }
 
-export type LeaderboardAccess = {
-  leaderboard: Doc<"leaderboard">;
-  // Owners are authorized directly, without loading their membership.
-  member: Doc<"leaderboardMember"> | null;
-  isOwner: boolean;
-};
-
 export async function loadLeaderboard(
   ctx: AuthQueryCtx,
   { id }: { id: Id<"leaderboard"> },
@@ -67,4 +60,23 @@ export function requireLeaderboardPermission(permission: "member" | "owner") {
 
     return { member, isOwner };
   };
+}
+
+export function requireCallerNotOwner(ctx: { isOwner: boolean }) {
+  if (ctx.isOwner) {
+    throw new ConvexError("The owner cannot leave their own leaderboard");
+  }
+
+  return {};
+}
+
+export function requireTargetNotOwner(
+  ctx: { leaderboard: Doc<"leaderboard"> },
+  { userId }: { userId: Id<"user"> },
+) {
+  if (userId === ctx.leaderboard.ownerId) {
+    throw new ConvexError("The owner cannot remove or ban themselves");
+  }
+
+  return {};
 }

@@ -266,6 +266,16 @@ for (const registered of [false, true]) {
     await assert.rejects(invoke(m.leave, f.ctx("a"), { id }), /owner cannot leave/);
     assert.equal(f.reads.get("leaderboardMember:query"), undefined);
 
+    const protectedOwner = structuredClone(f.tables);
+    for (const endpoint of [m.remove, m.ban, m.unban]) {
+      f.reads.clear();
+      await assert.rejects(invoke(endpoint, f.ctx("a"), { id, userId: "a" }), /owner cannot remove or ban/);
+      assert.equal(f.reads.get(`leaderboard:${id}`), 1);
+      assert.equal(f.reads.get("leaderboardMember:query"), undefined);
+      assert.equal(f.reads.get("user:a"), undefined);
+      assert.deepEqual(f.tables, protectedOwner);
+    }
+
     await invoke(m.update, f.ctx("a"), { id, name: " Updated board " });
     assert.equal(f.tables.leaderboard[0].name, "Updated board");
     assert.equal(f.reads.get("leaderboardMember:query"), undefined);
