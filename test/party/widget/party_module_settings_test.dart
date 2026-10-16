@@ -16,7 +16,7 @@ void main() {
       ),
     );
 
-    final challenges = tester.getTopLeft(find.text('Admin challenges'));
+    final challenges = tester.getTopLeft(find.text('Party challenges'));
     final quests = tester.getTopLeft(find.text('Social quests'));
     expect(challenges.dy, lessThan(quests.dy));
     expect(find.text('5-180 minutes; no greater than maximum'), findsOneWidget);

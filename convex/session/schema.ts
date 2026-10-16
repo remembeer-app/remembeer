@@ -25,7 +25,7 @@ export const partyValidator = v.object({
   activatedByUserId: v.id("user"),
   modules: v.object({
     socialQuestsEnabled: v.boolean(),
-    adminChallengesEnabled: v.boolean(),
+    partyChallengesEnabled: v.boolean(),
     beerpongEnabled: v.boolean(),
   }),
   questSchedule: v.object({

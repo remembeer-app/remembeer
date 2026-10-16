@@ -179,7 +179,7 @@ extension PartyEventKindActivityLabel on PartyEventKind {
   String get activityLabel => switch (this) {
     PartyEventKind.drinkLog => 'Drinks',
     PartyEventKind.socialQuest => 'Quests',
-    PartyEventKind.adminChallenge => 'Challenges',
+    PartyEventKind.partyChallenge => 'Challenges',
     PartyEventKind.beerpongPlacement => 'Placements',
     PartyEventKind.reversal => 'Reversals',
   };

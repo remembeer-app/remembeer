@@ -54,7 +54,7 @@ def _party(**overrides: Any) -> dict[str, Any]:
         "status": "active",
         "moduleSettings": {
             "socialQuestsEnabled": False,
-            "adminChallengesEnabled": False,
+            "partyChallengesEnabled": False,
             "beerpongEnabled": True,
         },
         "activeTournamentId": None,
@@ -713,7 +713,7 @@ def test_module_cannot_be_disabled_while_tournament_is_current() -> None:
                 "disable",
                 moduleSettings={
                     "socialQuestsEnabled": False,
-                    "adminChallengesEnabled": False,
+                    "partyChallengesEnabled": False,
                     "beerpongEnabled": False,
                 },
             ),

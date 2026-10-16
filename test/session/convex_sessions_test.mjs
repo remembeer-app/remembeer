@@ -21,7 +21,7 @@ const { sessions, sessionQueries, members, memberQueries, logs, deleteUserData }
   await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
 
 function fixture() {
-  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], leaderboard: [], leaderboardMember: [], drinkLog: [], drink: [], badge: [], friendship: [], partyQuest: [] };
+  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], leaderboard: [], leaderboardMember: [], drinkLog: [], drink: [], badge: [], friendship: [], partyChallenge: [], partyQuest: [] };
   let sequence = 0;
   const collected = [];
   const sessionGets = [];
@@ -108,7 +108,7 @@ test("shared session CRUD and promotion enforce roles, ranges and union kinds", 
   assert.ok(Number.isFinite(party.activatedAt));
   assert.deepEqual(party.modules, {
     socialQuestsEnabled: false,
-    adminChallengesEnabled: false,
+    partyChallengesEnabled: false,
     beerpongEnabled: false,
   });
   assert.deepEqual(party.questSchedule, {

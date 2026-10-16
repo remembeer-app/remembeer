@@ -20,6 +20,8 @@ void main() {
       expect(entry.baseDrinkScoreUnits, 25000);
       expect(entry.classBonusScoreUnits, 2500);
       expect(entry.questScoreUnits, 25000);
+      expect(entry.challengeScoreUnits, 0);
+      expect(entry.wonChallengeCount, 0);
       expect(entry.completedQuestCount, 1);
       expect(entry.drinkCount, 1);
       expect(entry.volumeMl, 500);
@@ -69,6 +71,8 @@ const _entry = <String, dynamic>{
   'baseDrinkScoreUnits': 25000,
   'classBonusScoreUnits': 2500,
   'questScoreUnits': 25000,
+  'challengeScoreUnits': 0,
+  'wonChallengeCount': 0,
   'completedQuestCount': 1,
   'drinkCount': 1,
   'volumeMl': 500,

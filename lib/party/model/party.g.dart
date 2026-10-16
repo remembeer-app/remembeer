@@ -9,7 +9,7 @@ part of 'party.dart';
 _PartyModuleSettings _$PartyModuleSettingsFromJson(Map<String, dynamic> json) =>
     _PartyModuleSettings(
       socialQuestsEnabled: json['socialQuestsEnabled'] as bool? ?? false,
-      adminChallengesEnabled: json['adminChallengesEnabled'] as bool? ?? false,
+      partyChallengesEnabled: json['partyChallengesEnabled'] as bool? ?? false,
       beerpongEnabled: json['beerpongEnabled'] as bool? ?? false,
     );
 
@@ -17,7 +17,7 @@ Map<String, dynamic> _$PartyModuleSettingsToJson(
   _PartyModuleSettings instance,
 ) => <String, dynamic>{
   'socialQuestsEnabled': instance.socialQuestsEnabled,
-  'adminChallengesEnabled': instance.adminChallengesEnabled,
+  'partyChallengesEnabled': instance.partyChallengesEnabled,
   'beerpongEnabled': instance.beerpongEnabled,
 };
 

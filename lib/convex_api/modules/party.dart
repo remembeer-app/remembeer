@@ -161,8 +161,35 @@ sealed class ActivityResultEntriesItem {
   double get occurredAt;
   List<UserId> get participantIds;
   double get scoreUnits;
+  bool get isPartyChallenge => this is PartyChallenge;
   bool get isDrinkLog => this is DrinkLog;
   bool get isSocialQuest => this is SocialQuest;
+}
+
+final class PartyChallenge extends ActivityResultEntriesItem {
+  const PartyChallenge({
+    required this.challengeId,
+    required this.challengeTitle,
+    required this.id,
+    required this.occurredAt,
+    required this.participantIds,
+    required this.scoreUnits,
+    required this.userId,
+  });
+
+  final PartyChallengeId challengeId;
+
+  final String challengeTitle;
+
+  final String id;
+
+  final double occurredAt;
+
+  final List<UserId> participantIds;
+
+  final double scoreUnits;
+
+  final UserId userId;
 }
 
 final class DrinkLog extends ActivityResultEntriesItem {
@@ -242,6 +269,25 @@ Map<String, dynamic> _encodeActivityResultEntriesItem(
   ActivityResultEntriesItem value,
 ) {
   switch (value) {
+    case PartyChallenge(
+      challengeId: final challengeId,
+      challengeTitle: final challengeTitle,
+      id: final id,
+      occurredAt: final occurredAt,
+      participantIds: final participantIds,
+      scoreUnits: final scoreUnits,
+      userId: final userId,
+    ):
+      return <String, dynamic>{
+        'kind': 'partyChallenge',
+        'challengeId': challengeId.value,
+        'challengeTitle': challengeTitle,
+        'id': id,
+        'occurredAt': occurredAt,
+        'participantIds': participantIds.map((item) => item.value).toList(),
+        'scoreUnits': scoreUnits,
+        'userId': userId.value,
+      };
     case DrinkLog(
       alcoholMl: final alcoholMl,
       baseDrinkScoreUnits: final baseDrinkScoreUnits,
@@ -309,6 +355,75 @@ ActivityResultEntriesItem _decodeActivityResultEntriesItem(dynamic raw) {
     label: 'ActivityResultEntriesItemKind',
   );
   switch (discriminator) {
+    case 'partyChallenge':
+      if (!map.containsKey('challengeId')) {
+        throw FormatException(
+          'Missing required field "challengeId" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('challengeTitle')) {
+        throw FormatException(
+          'Missing required field "challengeTitle" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('id')) {
+        throw FormatException('Missing required field "id" for PartyChallenge');
+      }
+      if (!map.containsKey('occurredAt')) {
+        throw FormatException(
+          'Missing required field "occurredAt" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('participantIds')) {
+        throw FormatException(
+          'Missing required field "participantIds" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('scoreUnits')) {
+        throw FormatException(
+          'Missing required field "scoreUnits" for PartyChallenge',
+        );
+      }
+      if (!map.containsKey('userId')) {
+        throw FormatException(
+          'Missing required field "userId" for PartyChallenge',
+        );
+      }
+      return PartyChallenge(
+        challengeId: PartyChallengeId(
+          expectString(map['challengeId'], label: 'PartyChallengeChallengeId'),
+        ),
+        challengeTitle: expectString(
+          map['challengeTitle'],
+          label: 'PartyChallengeChallengeTitle',
+        ),
+        id: expectString(map['id'], label: 'ActivityResultEntriesItemId'),
+        occurredAt: expectDouble(
+          map['occurredAt'],
+          label: 'ActivityResultEntriesItemOccurredAt',
+        ),
+        participantIds:
+            expectList(
+                  map['participantIds'],
+                  label: 'ActivityResultEntriesItemParticipantIds',
+                )
+                .map(
+                  (item) => UserId(
+                    expectString(
+                      item,
+                      label: 'ActivityResultEntriesItemParticipantIdsItem',
+                    ),
+                  ),
+                )
+                .toList(),
+        scoreUnits: expectDouble(
+          map['scoreUnits'],
+          label: 'ActivityResultEntriesItemScoreUnits',
+        ),
+        userId: UserId(
+          expectString(map['userId'], label: 'PartyChallengeUserId'),
+        ),
+      );
     case 'drinkLog':
       if (!map.containsKey('alcoholMl')) {
         throw FormatException(
@@ -719,7 +834,8 @@ ActivityArgsCursor _decodeActivityArgsCursor(dynamic raw) {
 
 enum ActivityArgsKindsItem {
   drinkLogValue('drinkLog'),
-  socialQuestValue('socialQuest');
+  socialQuestValue('socialQuest'),
+  partyChallengeValue('partyChallenge');
 
   const ActivityArgsKindsItem(this.value);
   final Object? value;
@@ -730,9 +846,11 @@ enum ActivityArgsKindsItem {
         return ActivityArgsKindsItem.drinkLogValue;
       case 'socialQuest':
         return ActivityArgsKindsItem.socialQuestValue;
+      case 'partyChallenge':
+        return ActivityArgsKindsItem.partyChallengeValue;
       default:
         throw FormatException(
-          'Expected one of drinkLog, socialQuest for ActivityArgsKindsItem',
+          'Expected one of drinkLog, socialQuest, partyChallenge for ActivityArgsKindsItem',
         );
     }
   }
@@ -919,6 +1037,7 @@ StandingsResultEntriesItemUser _decodeStandingsResultEntriesItemUser(
 typedef StandingsResultEntriesItem = ({
   double alcoholMl,
   double baseDrinkScoreUnits,
+  double challengeScoreUnits,
   double classBonusScoreUnits,
   double completedQuestCount,
   double drinkCount,
@@ -929,6 +1048,7 @@ typedef StandingsResultEntriesItem = ({
   StandingsResultEntriesItemUser? user,
   UserId userId,
   double volumeMl,
+  double wonChallengeCount,
 });
 
 Map<String, dynamic> _encodeStandingsResultEntriesItem(
@@ -937,6 +1057,7 @@ Map<String, dynamic> _encodeStandingsResultEntriesItem(
   final (
     alcoholMl: alcoholMl,
     baseDrinkScoreUnits: baseDrinkScoreUnits,
+    challengeScoreUnits: challengeScoreUnits,
     classBonusScoreUnits: classBonusScoreUnits,
     completedQuestCount: completedQuestCount,
     drinkCount: drinkCount,
@@ -947,10 +1068,12 @@ Map<String, dynamic> _encodeStandingsResultEntriesItem(
     user: user,
     userId: userId,
     volumeMl: volumeMl,
+    wonChallengeCount: wonChallengeCount,
   ) = value$;
   return <String, dynamic>{
     'alcoholMl': alcoholMl,
     'baseDrinkScoreUnits': baseDrinkScoreUnits,
+    'challengeScoreUnits': challengeScoreUnits,
     'classBonusScoreUnits': classBonusScoreUnits,
     'completedQuestCount': completedQuestCount,
     'drinkCount': drinkCount,
@@ -967,6 +1090,7 @@ Map<String, dynamic> _encodeStandingsResultEntriesItem(
     },
     'userId': userId.value,
     'volumeMl': volumeMl,
+    'wonChallengeCount': wonChallengeCount,
   };
 }
 
@@ -980,6 +1104,11 @@ StandingsResultEntriesItem _decodeStandingsResultEntriesItem(dynamic raw) {
   if (!map.containsKey('baseDrinkScoreUnits')) {
     throw FormatException(
       'Missing required field "baseDrinkScoreUnits" for StandingsResultEntriesItem',
+    );
+  }
+  if (!map.containsKey('challengeScoreUnits')) {
+    throw FormatException(
+      'Missing required field "challengeScoreUnits" for StandingsResultEntriesItem',
     );
   }
   if (!map.containsKey('classBonusScoreUnits')) {
@@ -1032,6 +1161,11 @@ StandingsResultEntriesItem _decodeStandingsResultEntriesItem(dynamic raw) {
       'Missing required field "volumeMl" for StandingsResultEntriesItem',
     );
   }
+  if (!map.containsKey('wonChallengeCount')) {
+    throw FormatException(
+      'Missing required field "wonChallengeCount" for StandingsResultEntriesItem',
+    );
+  }
   return (
     alcoholMl: expectDouble(
       map['alcoholMl'],
@@ -1040,6 +1174,10 @@ StandingsResultEntriesItem _decodeStandingsResultEntriesItem(dynamic raw) {
     baseDrinkScoreUnits: expectDouble(
       map['baseDrinkScoreUnits'],
       label: 'StandingsResultEntriesItemBaseDrinkScoreUnits',
+    ),
+    challengeScoreUnits: expectDouble(
+      map['challengeScoreUnits'],
+      label: 'StandingsResultEntriesItemChallengeScoreUnits',
     ),
     classBonusScoreUnits: expectDouble(
       map['classBonusScoreUnits'],
@@ -1074,6 +1212,10 @@ StandingsResultEntriesItem _decodeStandingsResultEntriesItem(dynamic raw) {
     volumeMl: expectDouble(
       map['volumeMl'],
       label: 'StandingsResultEntriesItemVolumeMl',
+    ),
+    wonChallengeCount: expectDouble(
+      map['wonChallengeCount'],
+      label: 'StandingsResultEntriesItemWonChallengeCount',
     ),
   );
 }

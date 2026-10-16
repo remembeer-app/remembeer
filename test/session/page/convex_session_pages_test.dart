@@ -121,7 +121,7 @@ void main() {
         'activatedByUserId': 'owner',
         'modules': {
           'socialQuestsEnabled': false,
-          'adminChallengesEnabled': false,
+          'partyChallengesEnabled': false,
           'beerpongEnabled': false,
         },
         'questSchedule': {

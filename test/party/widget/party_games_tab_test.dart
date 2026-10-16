@@ -39,7 +39,7 @@ void main() {
 
     expect(find.text('Quest slot'), findsOneWidget);
     expect(find.text('Beerpong slot'), findsOneWidget);
-    expect(find.text('Admin challenges'), findsNothing);
+    expect(find.text('Party challenges'), findsNothing);
   });
 
   testWidgets('highlights missing class and puts the selector last', (
@@ -48,7 +48,7 @@ void main() {
     final state = _state(
       settings: const PartyModuleSettings(
         socialQuestsEnabled: true,
-        adminChallengesEnabled: true,
+        partyChallengesEnabled: true,
         beerpongEnabled: true,
       ),
     );
@@ -76,7 +76,7 @@ void main() {
     );
     expect(
       tester.getTopLeft(find.text('Quest slot')).dy,
-      lessThan(tester.getTopLeft(find.text('Admin challenges')).dy),
+      lessThan(tester.getTopLeft(find.text('Party challenges')).dy),
     );
 
     await tester.tap(find.text('Pick your class'));
@@ -84,7 +84,7 @@ void main() {
 
     expect(find.byType(PartyClassSelector), findsOneWidget);
     expect(
-      tester.getTopLeft(find.text('Admin challenges')).dy,
+      tester.getTopLeft(find.text('Party challenges')).dy,
       lessThan(tester.getTopLeft(find.text('Beerpong slot')).dy),
     );
     expect(
@@ -139,7 +139,7 @@ void main() {
     );
     final state = _state(
       settings: const PartyModuleSettings(
-        adminChallengesEnabled: true,
+        partyChallengesEnabled: true,
         beerpongEnabled: true,
       ),
       activeChallengeId: active.id,
@@ -161,7 +161,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Admin challenges'), findsOneWidget);
+    expect(find.text('Party challenges'), findsOneWidget);
     expect(find.text('Challenge active'), findsOneWidget);
     await tester.drag(find.byType(ListView), const Offset(0, -600));
     await tester.pump();

@@ -41,7 +41,7 @@ test("drink totals and point breakdowns include unclassed members and count logs
   assert.deepEqual(entry(result, "a"), {
     userId: "a", user: { _id: "a", username: "a", accentColor: "amber", avatarUrl: null }, selectedClass: { kind: "beer" },
     rank: 1, scoreUnits: 42500, baseDrinkScoreUnits: 40000, classBonusScoreUnits: 2500,
-    questScoreUnits: 0, completedQuestCount: 0, drinkCount: 2, volumeMl: 625, alcoholMl: 40,
+    questScoreUnits: 0, challengeScoreUnits: 0, wonChallengeCount: 0, completedQuestCount: 0, drinkCount: 2, volumeMl: 625, alcoholMl: 40,
   });
   assert.equal(entry(result, "unclassed").scoreUnits, 25000);
   assert.equal(entry(result, "unclassed").classBonusScoreUnits, 0);

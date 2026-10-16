@@ -13,7 +13,7 @@ export function fixture(standings) {
     })),
     drink: [{ _id: "beer", name: "Beer", drinkCategory: { kind: "beer" }, alcoholPercentage: 5, deletedAt: null },
       { _id: "wine", name: "Wine", drinkCategory: { kind: "wine" }, alcoholPercentage: 12, deletedAt: null }],
-    drinkLog: [], partyQuest: [],
+    drinkLog: [], partyChallenge: [], partyQuest: [],
   };
   const reads = [];
   const db = {

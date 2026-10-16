@@ -59,7 +59,7 @@ class PartyLiveBanner extends StatelessWidget {
     final questId = settings.socialQuestsEnabled
         ? state.party.activeQuestId
         : null;
-    final challengeId = settings.adminChallengesEnabled
+    final challengeId = settings.partyChallengesEnabled
         ? state.party.activeChallengeId
         : null;
     if (questId == null && challengeId == null) {
@@ -113,7 +113,7 @@ class PartyLiveBanner extends StatelessWidget {
               }
               return _LiveItem(
                 icon: Icons.bolt,
-                kind: 'Admin challenge',
+                kind: 'Party challenge',
                 title: challenge.title,
                 endsAt: challenge.endsAt,
                 now: now,

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PartyModuleSettings {
 
- bool get socialQuestsEnabled; bool get adminChallengesEnabled; bool get beerpongEnabled;
+ bool get socialQuestsEnabled; bool get partyChallengesEnabled; bool get beerpongEnabled;
 /// Create a copy of PartyModuleSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $PartyModuleSettingsCopyWith<PartyModuleSettings> get copyWith => _$PartyModuleS
 @override
 bool operator ==(Object other) {
   final _this = this as PartyModuleSettings;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PartyModuleSettings&&(identical(other.socialQuestsEnabled, _this.socialQuestsEnabled) || other.socialQuestsEnabled == _this.socialQuestsEnabled)&&(identical(other.adminChallengesEnabled, _this.adminChallengesEnabled) || other.adminChallengesEnabled == _this.adminChallengesEnabled)&&(identical(other.beerpongEnabled, _this.beerpongEnabled) || other.beerpongEnabled == _this.beerpongEnabled));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PartyModuleSettings&&(identical(other.socialQuestsEnabled, _this.socialQuestsEnabled) || other.socialQuestsEnabled == _this.socialQuestsEnabled)&&(identical(other.partyChallengesEnabled, _this.partyChallengesEnabled) || other.partyChallengesEnabled == _this.partyChallengesEnabled)&&(identical(other.beerpongEnabled, _this.beerpongEnabled) || other.beerpongEnabled == _this.beerpongEnabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PartyModuleSettings;
-  return Object.hash(runtimeType,_this.socialQuestsEnabled,_this.adminChallengesEnabled,_this.beerpongEnabled);
+  return Object.hash(runtimeType,_this.socialQuestsEnabled,_this.partyChallengesEnabled,_this.beerpongEnabled);
 }
 
 @override
 String toString() {
   final _this = this as PartyModuleSettings;
-  return 'PartyModuleSettings(socialQuestsEnabled: ${_this.socialQuestsEnabled}, adminChallengesEnabled: ${_this.adminChallengesEnabled}, beerpongEnabled: ${_this.beerpongEnabled})';
+  return 'PartyModuleSettings(socialQuestsEnabled: ${_this.socialQuestsEnabled}, partyChallengesEnabled: ${_this.partyChallengesEnabled}, beerpongEnabled: ${_this.beerpongEnabled})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $PartyModuleSettingsCopyWith<$Res>  {
   factory $PartyModuleSettingsCopyWith(PartyModuleSettings value, $Res Function(PartyModuleSettings) _then) = _$PartyModuleSettingsCopyWithImpl;
 @useResult
 $Res call({
- bool socialQuestsEnabled, bool adminChallengesEnabled, bool beerpongEnabled
+ bool socialQuestsEnabled, bool partyChallengesEnabled, bool beerpongEnabled
 });
 
 
@@ -71,10 +71,10 @@ class _$PartyModuleSettingsCopyWithImpl<$Res>
 
 /// Create a copy of PartyModuleSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? socialQuestsEnabled = null,Object? adminChallengesEnabled = null,Object? beerpongEnabled = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? socialQuestsEnabled = null,Object? partyChallengesEnabled = null,Object? beerpongEnabled = null,}) {
   return _then(PartyModuleSettings(
 socialQuestsEnabled: null == socialQuestsEnabled ? _self.socialQuestsEnabled : socialQuestsEnabled // ignore: cast_nullable_to_non_nullable
-as bool,adminChallengesEnabled: null == adminChallengesEnabled ? _self.adminChallengesEnabled : adminChallengesEnabled // ignore: cast_nullable_to_non_nullable
+as bool,partyChallengesEnabled: null == partyChallengesEnabled ? _self.partyChallengesEnabled : partyChallengesEnabled // ignore: cast_nullable_to_non_nullable
 as bool,beerpongEnabled: null == beerpongEnabled ? _self.beerpongEnabled : beerpongEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
@@ -161,10 +161,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool socialQuestsEnabled,  bool adminChallengesEnabled,  bool beerpongEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( bool socialQuestsEnabled,  bool partyChallengesEnabled,  bool beerpongEnabled)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PartyModuleSettings() when $default != null:
-return $default(_that.socialQuestsEnabled,_that.adminChallengesEnabled,_that.beerpongEnabled);case _:
+return $default(_that.socialQuestsEnabled,_that.partyChallengesEnabled,_that.beerpongEnabled);case _:
   return orElse();
 
 }
@@ -182,10 +182,10 @@ return $default(_that.socialQuestsEnabled,_that.adminChallengesEnabled,_that.bee
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool socialQuestsEnabled,  bool adminChallengesEnabled,  bool beerpongEnabled)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( bool socialQuestsEnabled,  bool partyChallengesEnabled,  bool beerpongEnabled)  $default,) {final _that = this;
 switch (_that) {
 case _PartyModuleSettings():
-return $default(_that.socialQuestsEnabled,_that.adminChallengesEnabled,_that.beerpongEnabled);case _:
+return $default(_that.socialQuestsEnabled,_that.partyChallengesEnabled,_that.beerpongEnabled);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -202,10 +202,10 @@ return $default(_that.socialQuestsEnabled,_that.adminChallengesEnabled,_that.bee
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool socialQuestsEnabled,  bool adminChallengesEnabled,  bool beerpongEnabled)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( bool socialQuestsEnabled,  bool partyChallengesEnabled,  bool beerpongEnabled)?  $default,) {final _that = this;
 switch (_that) {
 case _PartyModuleSettings() when $default != null:
-return $default(_that.socialQuestsEnabled,_that.adminChallengesEnabled,_that.beerpongEnabled);case _:
+return $default(_that.socialQuestsEnabled,_that.partyChallengesEnabled,_that.beerpongEnabled);case _:
   return null;
 
 }
@@ -217,11 +217,11 @@ return $default(_that.socialQuestsEnabled,_that.adminChallengesEnabled,_that.bee
 @JsonSerializable()
 
 class _PartyModuleSettings implements PartyModuleSettings {
-  const _PartyModuleSettings({this.socialQuestsEnabled = false, this.adminChallengesEnabled = false, this.beerpongEnabled = false});
+  const _PartyModuleSettings({this.socialQuestsEnabled = false, this.partyChallengesEnabled = false, this.beerpongEnabled = false});
   factory _PartyModuleSettings.fromJson(Map<String, dynamic> json) => _$PartyModuleSettingsFromJson(json);
 
 @override@JsonKey() final  bool socialQuestsEnabled;
-@override@JsonKey() final  bool adminChallengesEnabled;
+@override@JsonKey() final  bool partyChallengesEnabled;
 @override@JsonKey() final  bool beerpongEnabled;
 
 /// Create a copy of PartyModuleSettings
@@ -237,18 +237,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PartyModuleSettings&&(identical(other.socialQuestsEnabled, socialQuestsEnabled) || other.socialQuestsEnabled == socialQuestsEnabled)&&(identical(other.adminChallengesEnabled, adminChallengesEnabled) || other.adminChallengesEnabled == adminChallengesEnabled)&&(identical(other.beerpongEnabled, beerpongEnabled) || other.beerpongEnabled == beerpongEnabled));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PartyModuleSettings&&(identical(other.socialQuestsEnabled, socialQuestsEnabled) || other.socialQuestsEnabled == socialQuestsEnabled)&&(identical(other.partyChallengesEnabled, partyChallengesEnabled) || other.partyChallengesEnabled == partyChallengesEnabled)&&(identical(other.beerpongEnabled, beerpongEnabled) || other.beerpongEnabled == beerpongEnabled));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,socialQuestsEnabled,adminChallengesEnabled,beerpongEnabled);
+    return Object.hash(runtimeType,socialQuestsEnabled,partyChallengesEnabled,beerpongEnabled);
 }
 
 @override
 String toString() {
-    return 'PartyModuleSettings(socialQuestsEnabled: $socialQuestsEnabled, adminChallengesEnabled: $adminChallengesEnabled, beerpongEnabled: $beerpongEnabled)';
+    return 'PartyModuleSettings(socialQuestsEnabled: $socialQuestsEnabled, partyChallengesEnabled: $partyChallengesEnabled, beerpongEnabled: $beerpongEnabled)';
 }
 
 
@@ -259,7 +259,7 @@ abstract mixin class _$PartyModuleSettingsCopyWith<$Res> implements $PartyModule
   factory _$PartyModuleSettingsCopyWith(_PartyModuleSettings value, $Res Function(_PartyModuleSettings) _then) = __$PartyModuleSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- bool socialQuestsEnabled, bool adminChallengesEnabled, bool beerpongEnabled
+ bool socialQuestsEnabled, bool partyChallengesEnabled, bool beerpongEnabled
 });
 
 
@@ -276,10 +276,10 @@ class __$PartyModuleSettingsCopyWithImpl<$Res>
 
 /// Create a copy of PartyModuleSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? socialQuestsEnabled = null,Object? adminChallengesEnabled = null,Object? beerpongEnabled = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? socialQuestsEnabled = null,Object? partyChallengesEnabled = null,Object? beerpongEnabled = null,}) {
   return _then(_PartyModuleSettings(
 socialQuestsEnabled: null == socialQuestsEnabled ? _self.socialQuestsEnabled : socialQuestsEnabled // ignore: cast_nullable_to_non_nullable
-as bool,adminChallengesEnabled: null == adminChallengesEnabled ? _self.adminChallengesEnabled : adminChallengesEnabled // ignore: cast_nullable_to_non_nullable
+as bool,partyChallengesEnabled: null == partyChallengesEnabled ? _self.partyChallengesEnabled : partyChallengesEnabled // ignore: cast_nullable_to_non_nullable
 as bool,beerpongEnabled: null == beerpongEnabled ? _self.beerpongEnabled : beerpongEnabled // ignore: cast_nullable_to_non_nullable
 as bool,
   ));

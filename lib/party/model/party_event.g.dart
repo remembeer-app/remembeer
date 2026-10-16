@@ -52,7 +52,7 @@ Map<String, dynamic> _$PartyEventToJson(
 const _$PartyEventKindEnumMap = {
   PartyEventKind.drinkLog: 'drinkLog',
   PartyEventKind.socialQuest: 'socialQuest',
-  PartyEventKind.adminChallenge: 'adminChallenge',
+  PartyEventKind.partyChallenge: 'partyChallenge',
   PartyEventKind.beerpongPlacement: 'beerpongPlacement',
   PartyEventKind.reversal: 'reversal',
 };

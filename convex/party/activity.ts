@@ -11,13 +11,25 @@ import {
 } from "./constants";
 
 const cursorValidator = v.object({ occurredAt: v.number(), id: v.string() });
-const kindValidator = v.union(v.literal("drinkLog"), v.literal("socialQuest"));
+const kindValidator = v.union(
+  v.literal("drinkLog"),
+  v.literal("socialQuest"),
+  v.literal("partyChallenge"),
+);
 const common = {
   id: v.string(),
   occurredAt: v.number(),
   participantIds: v.array(v.id("user")),
 };
 const entryValidator = v.union(
+  v.object({
+    ...common,
+    kind: v.literal("partyChallenge"),
+    challengeId: v.id("partyChallenge"),
+    challengeTitle: v.string(),
+    userId: v.id("user"),
+    scoreUnits: v.number(),
+  }),
   v.object({
     ...common,
     kind: v.literal("drinkLog"),
@@ -94,7 +106,7 @@ export const activity = authQuery
           `Page size must be an integer from 1 to ${partyActivityMaxPageSize}`,
         );
       const now = Date.now();
-      const [members, logs, quests] = await Promise.all([
+      const [members, logs, quests, challenges] = await Promise.all([
         ctx.db
           .query("sessionMember")
           .withIndex("by_sessionId_and_userId", (q) =>
@@ -107,6 +119,12 @@ export const activity = authQuery
           .collect(),
         ctx.db
           .query("partyQuest")
+          .withIndex("by_sessionId_and_startsAt", (q) =>
+            q.eq("sessionId", sessionId),
+          )
+          .collect(),
+        ctx.db
+          .query("partyChallenge")
           .withIndex("by_sessionId_and_startsAt", (q) =>
             q.eq("sessionId", sessionId),
           )
@@ -173,6 +191,24 @@ export const activity = authQuery
             questId: quest._id,
             questTitle: quest.title,
             scoreUnits: quest.pointsUnits,
+          });
+        }
+      }
+      for (const challenge of challenges) {
+        for (const winner of challenge.winners) {
+          entries.push({
+            kind: "partyChallenge",
+            id: JSON.stringify([
+              "partyChallenge",
+              challenge._id,
+              winner.userId,
+            ]),
+            occurredAt: winner.awardedAt,
+            participantIds: [winner.userId],
+            challengeId: challenge._id,
+            challengeTitle: challenge.title,
+            userId: winner.userId,
+            scoreUnits: challenge.pointsUnits,
           });
         }
       }

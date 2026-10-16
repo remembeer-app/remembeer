@@ -13,7 +13,7 @@ enum PartyStatus { active, archived }
 abstract class PartyModuleSettings with _$PartyModuleSettings {
   const factory PartyModuleSettings({
     @Default(false) bool socialQuestsEnabled,
-    @Default(false) bool adminChallengesEnabled,
+    @Default(false) bool partyChallengesEnabled,
     @Default(false) bool beerpongEnabled,
   }) = _PartyModuleSettings;
 

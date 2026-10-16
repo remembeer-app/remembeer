@@ -154,7 +154,7 @@ class PartyEventCard extends StatelessWidget {
       '$names logged ${_payloadString(event, 'drinkName', 'a drink')}',
     PartyEventKind.socialQuest =>
       '$names completed ${_payloadString(event, 'title', 'a social quest')}',
-    PartyEventKind.adminChallenge =>
+    PartyEventKind.partyChallenge =>
       '$names won ${_payloadString(event, 'title', 'a challenge')}',
     PartyEventKind.beerpongPlacement =>
       '$names earned ${_placement(event)} in beerpong',
@@ -201,7 +201,7 @@ class PartyEventCard extends StatelessWidget {
   IconData _icon(PartyEventKind kind) => switch (kind) {
     PartyEventKind.drinkLog => Icons.local_bar,
     PartyEventKind.socialQuest => Icons.groups,
-    PartyEventKind.adminChallenge => Icons.flag,
+    PartyEventKind.partyChallenge => Icons.flag,
     PartyEventKind.beerpongPlacement => Icons.emoji_events,
     PartyEventKind.reversal => Icons.undo,
   };

@@ -1,4 +1,4 @@
-"""Transactional admin challenge commands.
+"""Transactional party challenge commands.
 
 Handlers are intentionally undecorated for P21 to export. Notifications are
 dispatched only after authoritative state commits and are therefore best-effort.
@@ -44,24 +44,24 @@ def set_party_module_settings(request: Any) -> Mapping[str, Any]:
     return set_party_module_settings_command(request, firestore.client())
 
 
-def create_admin_challenge(request: Any) -> Mapping[str, Any]:
-    return create_admin_challenge_command(request, firestore.client())
+def create_party_challenge(request: Any) -> Mapping[str, Any]:
+    return create_party_challenge_command(request, firestore.client())
 
 
-def award_admin_challenge_winner(request: Any) -> Mapping[str, Any]:
-    return award_admin_challenge_winner_command(request, firestore.client())
+def award_party_challenge_winner(request: Any) -> Mapping[str, Any]:
+    return award_party_challenge_winner_command(request, firestore.client())
 
 
-def complete_admin_challenge(request: Any) -> Mapping[str, Any]:
-    return complete_admin_challenge_command(request, firestore.client())
+def complete_party_challenge(request: Any) -> Mapping[str, Any]:
+    return complete_party_challenge_command(request, firestore.client())
 
 
-def cancel_admin_challenge(request: Any) -> Mapping[str, Any]:
-    return cancel_admin_challenge_command(request, firestore.client())
+def cancel_party_challenge(request: Any) -> Mapping[str, Any]:
+    return cancel_party_challenge_command(request, firestore.client())
 
 
-def reverse_admin_challenge_winner(request: Any) -> Mapping[str, Any]:
-    return reverse_admin_challenge_winner_command(request, firestore.client())
+def reverse_party_challenge_winner(request: Any) -> Mapping[str, Any]:
+    return reverse_party_challenge_winner_command(request, firestore.client())
 
 
 def set_party_module_settings_command(
@@ -75,7 +75,7 @@ def set_party_module_settings_command(
     settings_data = require_object(data.get("moduleSettings"), "moduleSettings")
     settings = {
         "socialQuestsEnabled": require_bool(settings_data, "socialQuestsEnabled"),
-        "adminChallengesEnabled": require_bool(settings_data, "adminChallengesEnabled"),
+        "partyChallengesEnabled": require_bool(settings_data, "partyChallengesEnabled"),
         "beerpongEnabled": require_bool(settings_data, "beerpongEnabled"),
     }
 
@@ -84,7 +84,7 @@ def set_party_module_settings_command(
             transaction, db, session_id, actor_user_id, require_admin=True
         )
         if (
-            not settings["adminChallengesEnabled"]
+            not settings["partyChallengesEnabled"]
             and context.party.get("activeChallengeId") is not None
         ):
             raise callable_error(
@@ -159,7 +159,7 @@ def set_party_module_settings_command(
     )
 
 
-def create_admin_challenge_command(
+def create_party_challenge_command(
     request: Any,
     db: Any,
     *,
@@ -243,7 +243,7 @@ def create_admin_challenge_command(
         db,
         session_id,
         command_id,
-        "create_admin_challenge",
+        "create_party_challenge",
         actor_user_id,
         operation,
         transaction_runner,
@@ -264,7 +264,7 @@ def create_admin_challenge_command(
     return result
 
 
-def award_admin_challenge_winner_command(
+def award_party_challenge_winner_command(
     request: Any,
     db: Any,
     *,
@@ -325,7 +325,7 @@ def award_admin_challenge_winner_command(
             transaction,
             db.collection("parties").document(session_id),
             event_id=event_id,
-            kind="adminChallenge",
+            kind="partyChallenge",
             recipient_user_id=winner_user_id,
             participant_ids=[winner_user_id],
             points_units=points_units,
@@ -358,7 +358,7 @@ def award_admin_challenge_winner_command(
         db,
         session_id,
         command_id,
-        "award_admin_challenge_winner",
+        "award_party_challenge_winner",
         actor_user_id,
         operation,
         transaction_runner,
@@ -379,7 +379,7 @@ def award_admin_challenge_winner_command(
     return result
 
 
-def complete_admin_challenge_command(
+def complete_party_challenge_command(
     request: Any,
     db: Any,
     *,
@@ -390,13 +390,13 @@ def complete_admin_challenge_command(
         request,
         db,
         status="completed",
-        command_name="complete_admin_challenge",
+        command_name="complete_party_challenge",
         now_provider=now_provider,
         transaction_runner=transaction_runner,
     )
 
 
-def cancel_admin_challenge_command(
+def cancel_party_challenge_command(
     request: Any,
     db: Any,
     *,
@@ -407,13 +407,13 @@ def cancel_admin_challenge_command(
         request,
         db,
         status="cancelled",
-        command_name="cancel_admin_challenge",
+        command_name="cancel_party_challenge",
         now_provider=now_provider,
         transaction_runner=transaction_runner,
     )
 
 
-def reverse_admin_challenge_winner_command(
+def reverse_party_challenge_winner_command(
     request: Any,
     db: Any,
     *,
@@ -453,7 +453,7 @@ def reverse_admin_challenge_winner_command(
             award_event_id=award_event_id,
             occurred_at=now,
             actor_user_id=actor_user_id,
-            reason="adminChallengeWinnerCorrection",
+            reason="partyChallengeWinnerCorrection",
         )
         if not reversal.created:
             raise callable_error(
@@ -472,7 +472,7 @@ def reverse_admin_challenge_winner_command(
         db,
         session_id,
         command_id,
-        "reverse_admin_challenge_winner",
+        "reverse_party_challenge_winner",
         actor_user_id,
         operation,
         transaction_runner,
@@ -595,11 +595,11 @@ def _require_challenges_enabled(party: Mapping[str, Any]) -> None:
     settings = party.get("moduleSettings")
     if (
         not isinstance(settings, Mapping)
-        or settings.get("adminChallengesEnabled") is not True
+        or settings.get("partyChallengesEnabled") is not True
     ):
         raise callable_error(
             https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
-            "Admin challenges are disabled.",
+            "Party challenges are disabled.",
         )
 
 

@@ -91,14 +91,14 @@ class _PartyModuleSettingsPanelState extends State<PartyModuleSettingsPanel> {
             children: [
               SwitchListTile(
                 secondary: const Icon(Icons.flag_outlined),
-                title: const Text('Admin challenges'),
+                title: const Text('Party challenges'),
                 subtitle: const Text('Timed challenges with chosen winners'),
-                value: _settings.adminChallengesEnabled,
+                value: _settings.partyChallengesEnabled,
                 onChanged: _savingSettings
                     ? null
                     : (value) => setState(
                         () => _settings = _settings.copyWith(
-                          adminChallengesEnabled: value,
+                          partyChallengesEnabled: value,
                         ),
                       ),
               ),

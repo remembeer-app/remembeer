@@ -29,7 +29,7 @@ function fixture() {
   const tables = {
     user: ["owner", "admin", "a", "b", "c", "invitee", "other"].map(_id => ({ _id, username: _id, accentColor: "amber", authUserId: `auth-${_id}` })),
     session: [{ _id: "party", kind: "party", ownerId: "owner", deletedAt: null, endedAt: null,
-      modules: { socialQuestsEnabled: false, adminChallengesEnabled: false, beerpongEnabled: false },
+      modules: { socialQuestsEnabled: false, partyChallengesEnabled: false, beerpongEnabled: false },
       questSchedule: { minIntervalMinutes: 15, maxIntervalMinutes: 45, defaultDurationMinutes: 15, nextQuestAt: null, scheduledFunctionId: null } }],
     sessionMember: ["owner", "admin", "a", "b", "c", "invitee"].map(userId => ({
       _id: `member-${userId}`, sessionId: "party", userId, kind: "partyMember",
@@ -38,7 +38,7 @@ function fixture() {
       selectedClass: ["a", "b", "c"].includes(userId) ? { kind: "beer" } : null,
       beerpongOptIn: false,
     })),
-    partyQuest: [], drinkLog: [], drink: [], friendship: [], leaderboard: [], leaderboardMember: [], badge: [],
+    partyChallenge: [], partyQuest: [], drinkLog: [], drink: [], friendship: [], leaderboard: [], leaderboardMember: [], badge: [],
   };
   const reads = [];
   const clock = questScheduler();

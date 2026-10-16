@@ -1,3 +1,4 @@
+import { stopChallenges } from "../partyChallenge/lifecycle";
 import { stopQuests } from "../partyQuest/lifecycle";
 import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
@@ -65,7 +66,11 @@ export const update = authMutation
       updatedAt: Date.now(),
     });
 
-    if (endedAt !== null) await stopQuests(ctx, session, Date.now());
+    if (endedAt !== null) {
+      const now = Date.now();
+      await stopQuests(ctx, session, now);
+      await stopChallenges(ctx, session, now);
+    }
 
     if (endedAt !== session.endedAt) {
       await syncSessionIndex(ctx, { ...session, endedAt });
@@ -82,6 +87,7 @@ export const softDelete = authMutation
     const now = Date.now();
 
     await stopQuests(ctx, session, now);
+    await stopChallenges(ctx, session, now);
     await ctx.db.patch("session", id, { deletedAt: now, updatedAt: now });
     await syncSessionIndex(ctx, { ...session, deletedAt: now });
 
@@ -104,7 +110,7 @@ export const promoteToParty = authMutation
       activatedByUserId: ctx.user._id,
       modules: {
         socialQuestsEnabled: false,
-        adminChallengesEnabled: false,
+        partyChallengesEnabled: false,
         beerpongEnabled: false,
       },
       questSchedule: {

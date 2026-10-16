@@ -22,7 +22,7 @@ void main() {
           state: _state(
             settings: const PartyModuleSettings(
               socialQuestsEnabled: true,
-              adminChallengesEnabled: true,
+              partyChallengesEnabled: true,
             ),
           ),
           backgroundColor: Colors.black,
@@ -48,7 +48,7 @@ void main() {
           state: _state(
             settings: const PartyModuleSettings(
               socialQuestsEnabled: true,
-              adminChallengesEnabled: true,
+              partyChallengesEnabled: true,
             ),
             activeQuestId: quest.id,
             activeChallengeId: challenge.id,
@@ -66,7 +66,7 @@ void main() {
     expect(find.text('SOCIAL QUEST'), findsOneWidget);
     expect(find.text('Toast time'), findsOneWidget);
     expect(find.text('12:00 left'), findsOneWidget);
-    expect(find.text('ADMIN CHALLENGE'), findsOneWidget);
+    expect(find.text('PARTY CHALLENGE'), findsOneWidget);
     expect(find.text('Chug contest'), findsOneWidget);
     expect(find.text('1h 30m left'), findsOneWidget);
   });
@@ -90,7 +90,7 @@ void main() {
           state: _state(
             settings: const PartyModuleSettings(
               socialQuestsEnabled: true,
-              adminChallengesEnabled: true,
+              partyChallengesEnabled: true,
             ),
             activeQuestId: expiredQuest.id,
             activeChallengeId: completedChallenge.id,
@@ -106,7 +106,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('SOCIAL QUEST'), findsNothing);
-    expect(find.text('ADMIN CHALLENGE'), findsNothing);
+    expect(find.text('PARTY CHALLENGE'), findsNothing);
 
     final disabledQuest = _quest(id: 'quest-2', now: now);
     await tester.pumpWidget(

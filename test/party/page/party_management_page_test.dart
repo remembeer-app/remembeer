@@ -42,14 +42,14 @@ void main() {
         _state(
           settings: const PartyModuleSettings(
             socialQuestsEnabled: true,
-            adminChallengesEnabled: true,
+            partyChallengesEnabled: true,
           ),
         ),
       ),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Admin challenges'), findsOneWidget);
+    expect(find.text('Party challenges'), findsOneWidget);
     expect(find.text('Start challenge'), findsWidgets);
     expect(find.text('Game modules'), findsNothing);
     await tester.scrollUntilVisible(

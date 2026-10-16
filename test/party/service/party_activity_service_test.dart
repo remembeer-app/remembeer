@@ -192,12 +192,12 @@ void main() {
   test('keeps challenge winner awards separate', () {
     final first = _event(
       'challenge-a',
-      kind: PartyEventKind.adminChallenge,
+      kind: PartyEventKind.partyChallenge,
       sourceId: 'challenge-1',
     );
     final second = _event(
       'challenge-b',
-      kind: PartyEventKind.adminChallenge,
+      kind: PartyEventKind.partyChallenge,
       sourceId: 'challenge-1',
       recipientId: 'b',
     );
@@ -230,7 +230,7 @@ PartyEvent _event(
   pointsUnits: points,
   sourceCollection: switch (kind) {
     PartyEventKind.socialQuest => PartyEventSourceCollection.quests,
-    PartyEventKind.adminChallenge => PartyEventSourceCollection.challenges,
+    PartyEventKind.partyChallenge => PartyEventSourceCollection.challenges,
     PartyEventKind.beerpongPlacement => PartyEventSourceCollection.tournaments,
     _ => PartyEventSourceCollection.drinkLogs,
   },

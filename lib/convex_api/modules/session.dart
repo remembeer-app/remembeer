@@ -199,12 +199,12 @@ CreateArgs _decodeCreateArgs(dynamic raw) {
 Map<String, dynamic> _encodePartyModules(PartyModules value$) {
   final (
     socialQuestsEnabled: socialQuestsEnabled,
-    adminChallengesEnabled: adminChallengesEnabled,
+    partyChallengesEnabled: partyChallengesEnabled,
     beerpongEnabled: beerpongEnabled,
   ) = value$;
   return <String, dynamic>{
     'socialQuestsEnabled': socialQuestsEnabled,
-    'adminChallengesEnabled': adminChallengesEnabled,
+    'partyChallengesEnabled': partyChallengesEnabled,
     'beerpongEnabled': beerpongEnabled,
   };
 }
@@ -216,9 +216,9 @@ PartyModules _decodePartyModules(dynamic raw) {
       'Missing required field "socialQuestsEnabled" for PartyModules',
     );
   }
-  if (!map.containsKey('adminChallengesEnabled')) {
+  if (!map.containsKey('partyChallengesEnabled')) {
     throw FormatException(
-      'Missing required field "adminChallengesEnabled" for PartyModules',
+      'Missing required field "partyChallengesEnabled" for PartyModules',
     );
   }
   if (!map.containsKey('beerpongEnabled')) {
@@ -231,9 +231,9 @@ PartyModules _decodePartyModules(dynamic raw) {
       map['socialQuestsEnabled'],
       label: 'PartyModulesSocialQuestsEnabled',
     ),
-    adminChallengesEnabled: expectBool(
-      map['adminChallengesEnabled'],
-      label: 'PartyModulesAdminChallengesEnabled',
+    partyChallengesEnabled: expectBool(
+      map['partyChallengesEnabled'],
+      label: 'PartyModulesPartyChallengesEnabled',
     ),
     beerpongEnabled: expectBool(
       map['beerpongEnabled'],

@@ -59,6 +59,40 @@ void main() {
     expect(api.activityQuery.encode(decodedArgs), caller.args);
   });
 
+  test('activity decodes challenge awards and encodes their filter', () async {
+    final caller = _Caller()
+      ..response = {
+        'entries': [
+          {
+            'kind': 'partyChallenge',
+            'id': 'award',
+            'occurredAt': 1500.0,
+            'participantIds': ['a'],
+            'challengeId': 'challenge',
+            'challengeTitle': 'Dance',
+            'userId': 'a',
+            'scoreUnits': 10000.0,
+          },
+        ],
+        'users': <dynamic>[],
+        'hasMore': false,
+        'nextCursor': null,
+      };
+    final api = ConvexApi(caller).party;
+    final result = await api.activity(
+      sessionId: const SessionId('party'),
+      kinds: const Optional.of([
+        party.ActivityArgsKindsItem.partyChallengeValue,
+      ]),
+    );
+    final award = result.entries.single as party.PartyChallenge;
+    expect(award.challengeId, const PartyChallengeId('challenge'));
+    expect(award.userId, const UserId('a'));
+    expect(award.scoreUnits, 10000);
+    expect(caller.args?['kinds'], ['partyChallenge']);
+    expect(api.activityQuery.encodeResult(result), caller.response);
+  });
+
   test(
     'activity omits absent options and decodes an exhausted empty page',
     () async {

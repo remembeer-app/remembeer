@@ -78,7 +78,7 @@ class PartyChallengeService {
     required int durationMinutes,
   }) async {
     await gameController.invokeCommand(
-      commandName: 'create_admin_challenge',
+      commandName: 'create_party_challenge',
       sessionId: sessionId,
       commandId: partyController.generateCommandId(),
       data: {
@@ -96,24 +96,24 @@ class PartyChallengeService {
     String challengeId,
     String winnerUserId,
   ) => _challengeCommand(
-    'award_admin_challenge_winner',
+    'award_party_challenge_winner',
     sessionId,
     challengeId,
     data: {'winnerUserId': winnerUserId},
   );
 
   Future<void> completeChallenge(String sessionId, String challengeId) =>
-      _challengeCommand('complete_admin_challenge', sessionId, challengeId);
+      _challengeCommand('complete_party_challenge', sessionId, challengeId);
 
   Future<void> cancelChallenge(String sessionId, String challengeId) =>
-      _challengeCommand('cancel_admin_challenge', sessionId, challengeId);
+      _challengeCommand('cancel_party_challenge', sessionId, challengeId);
 
   Future<void> reverseWinner(
     String sessionId,
     String challengeId,
     String winnerUserId,
   ) => _challengeCommand(
-    'reverse_admin_challenge_winner',
+    'reverse_party_challenge_winner',
     sessionId,
     challengeId,
     data: {'winnerUserId': winnerUserId},
@@ -137,7 +137,7 @@ class PartyChallengeService {
 Set<String> _reversedWinnerIds(List<PartyEvent> events) {
   final awardsById = {
     for (final event in events)
-      if (event.kind == PartyEventKind.adminChallenge) event.id: event,
+      if (event.kind == PartyEventKind.partyChallenge) event.id: event,
   };
   return Set.unmodifiable(
     events

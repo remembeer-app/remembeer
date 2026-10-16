@@ -27,6 +27,8 @@ export async function loadPartyScores(
         baseDrinkScoreUnits: 0,
         classBonusScoreUnits: 0,
         questScoreUnits: 0,
+        challengeScoreUnits: 0,
+        wonChallengeCount: 0,
         completedQuestCount: 0,
         scoreUnits: 0,
       })),
@@ -46,6 +48,18 @@ export async function loadPartyScores(
         entry.questScoreUnits += quest.pointsUnits;
         entry.completedQuestCount++;
       }
+    }
+  }
+  const challenges = await ctx.db
+    .query("partyChallenge")
+    .withIndex("by_sessionId_and_startsAt", (q) => q.eq("sessionId", sessionId))
+    .collect();
+  for (const challenge of challenges) {
+    for (const winner of challenge.winners) {
+      const entry = byId.get(winner.userId);
+      if (!entry) continue;
+      entry.challengeScoreUnits += challenge.pointsUnits;
+      entry.wonChallengeCount++;
     }
   }
   const drinks = new Map<Id<"drink">, Doc<"drink">>();
@@ -78,12 +92,14 @@ export async function loadPartyScores(
     entry.scoreUnits =
       entry.baseDrinkScoreUnits +
       entry.classBonusScoreUnits +
-      entry.questScoreUnits;
+      entry.questScoreUnits +
+      entry.challengeScoreUnits;
     if (
       ![
         entry.baseDrinkScoreUnits,
         entry.classBonusScoreUnits,
         entry.questScoreUnits,
+        entry.challengeScoreUnits,
         entry.scoreUnits,
       ].every(Number.isSafeInteger)
     )

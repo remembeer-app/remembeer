@@ -69,7 +69,7 @@ class _PartyGamesTabState extends State<PartyGamesTab> {
   @override
   Widget build(BuildContext context) {
     final settings = state.party.moduleSettings;
-    if (settings.adminChallengesEnabled) {
+    if (settings.partyChallengesEnabled) {
       return AsyncBuilder<List<PartyChallenge>>(
         stream: _challengeService.challengesStream(state.session.id),
         builder: (context, challenges) =>
@@ -98,7 +98,7 @@ class _PartyGamesTabState extends State<PartyGamesTab> {
               members: members,
               service: _questService,
             ),
-      if (settings.adminChallengesEnabled)
+      if (settings.partyChallengesEnabled)
         _buildActiveChallenge(context, challenges),
       if (settings.beerpongEnabled)
         widget.beerpongSectionBuilder?.call(context, state, members) ??
@@ -119,7 +119,7 @@ class _PartyGamesTabState extends State<PartyGamesTab> {
         .toList();
     final disabledCount = [
       settings.socialQuestsEnabled,
-      settings.adminChallengesEnabled,
+      settings.partyChallengesEnabled,
       settings.beerpongEnabled,
     ].where((enabled) => !enabled).length;
 
@@ -228,7 +228,7 @@ class _PartyGamesTabState extends State<PartyGamesTab> {
           children: [
             Expanded(
               child: Text(
-                'Admin challenges',
+                'Party challenges',
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             ),

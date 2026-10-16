@@ -148,7 +148,7 @@ def activate_party_command(
                 "archivedAt": None,
                 "moduleSettings": {
                     "socialQuestsEnabled": False,
-                    "adminChallengesEnabled": False,
+                    "partyChallengesEnabled": False,
                     "beerpongEnabled": False,
                 },
                 "questSchedule": {

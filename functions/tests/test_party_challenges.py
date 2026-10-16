@@ -6,11 +6,11 @@ import pytest
 from firebase_functions import https_fn
 
 from party_challenges import (
-    award_admin_challenge_winner_command,
-    cancel_admin_challenge_command,
-    complete_admin_challenge_command,
-    create_admin_challenge_command,
-    reverse_admin_challenge_winner_command,
+    award_party_challenge_winner_command,
+    cancel_party_challenge_command,
+    complete_party_challenge_command,
+    create_party_challenge_command,
+    reverse_party_challenge_winner_command,
     set_party_module_settings_command,
 )
 from tests.fakes import Database, Transaction
@@ -59,7 +59,7 @@ def _party(**overrides: Any) -> dict[str, Any]:
         "status": "active",
         "moduleSettings": {
             "socialQuestsEnabled": False,
-            "adminChallengesEnabled": True,
+            "partyChallengesEnabled": True,
             "beerpongEnabled": False,
         },
         "activeChallengeId": None,
@@ -133,7 +133,7 @@ def test_settings_are_admin_only_atomic_and_idempotent() -> None:
     db = Database(_base_store())
     settings = {
         "socialQuestsEnabled": True,
-        "adminChallengesEnabled": True,
+        "partyChallengesEnabled": True,
         "beerpongEnabled": True,
     }
     request = _request("settings-a", moduleSettings=settings)
@@ -168,7 +168,7 @@ def test_settings_cannot_disable_an_active_challenge() -> None:
         "settings-a",
         moduleSettings={
             "socialQuestsEnabled": False,
-            "adminChallengesEnabled": False,
+            "partyChallengesEnabled": False,
             "beerpongEnabled": False,
         },
     )
@@ -182,7 +182,7 @@ def test_settings_cannot_disable_an_active_challenge() -> None:
 
     assert error.value.code == https_fn.FunctionsErrorCode.FAILED_PRECONDITION
     assert (
-        db.store["parties/party-a"]["moduleSettings"]["adminChallengesEnabled"] is True
+        db.store["parties/party-a"]["moduleSettings"]["partyChallengesEnabled"] is True
     )
 
 
@@ -192,14 +192,14 @@ def test_create_sets_deadline_active_pointer_notifies_once_and_is_idempotent() -
     notifications = Notifications()
     request = _create_request()
 
-    result = create_admin_challenge_command(
+    result = create_party_challenge_command(
         request,
         db,
         now_provider=lambda: NOW,
         notification_dispatcher=notifications,
         transaction_runner=_runner(transaction),
     )
-    retry = create_admin_challenge_command(
+    retry = create_party_challenge_command(
         request,
         db,
         now_provider=lambda: pytest.fail("retry evaluated command"),
@@ -239,7 +239,7 @@ def test_create_sets_deadline_active_pointer_notifies_once_and_is_idempotent() -
     [
         (
             lambda store: store["parties/party-a"]["moduleSettings"].update(
-                adminChallengesEnabled=False
+                partyChallengesEnabled=False
             ),
             {},
             https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
@@ -291,7 +291,7 @@ def test_create_rejects_disabled_archived_active_and_invalid_content(
     db = Database(store)
 
     with pytest.raises(https_fn.HttpsError) as error:
-        create_admin_challenge_command(
+        create_party_challenge_command(
             _create_request(**request_change),
             db,
             now_provider=lambda: NOW,
@@ -307,7 +307,7 @@ def test_multiple_distinct_winners_receive_equal_points_once() -> None:
     db = Database(_base_store(active_challenge=True))
     notifications = Notifications()
 
-    first = award_admin_challenge_winner_command(
+    first = award_party_challenge_winner_command(
         _request("winner-a", winnerUserId="member-a"),
         db,
         now_provider=lambda: NOW,
@@ -316,14 +316,14 @@ def test_multiple_distinct_winners_receive_equal_points_once() -> None:
     )
     second_request = _request("winner-b", winnerUserId="member-b")
     transaction = Transaction(db.store)
-    second = award_admin_challenge_winner_command(
+    second = award_party_challenge_winner_command(
         second_request,
         db,
         now_provider=lambda: NOW,
         notification_dispatcher=notifications,
         transaction_runner=_runner(transaction),
     )
-    retry = award_admin_challenge_winner_command(
+    retry = award_party_challenge_winner_command(
         second_request,
         db,
         now_provider=lambda: pytest.fail("retry evaluated command"),
@@ -342,7 +342,7 @@ def test_multiple_distinct_winners_receive_equal_points_once() -> None:
         event = db.store[
             f"parties/party-a/events/challenge:challenge-a:winner:{user_id}"
         ]
-        assert event["kind"] == "adminChallenge"
+        assert event["kind"] == "partyChallenge"
         assert event["sourceCollection"] == "challenges"
         assert event["pointsUnits"] == 50_000
     assert len(notifications.calls) == 2
@@ -379,7 +379,7 @@ def test_multiple_distinct_winners_receive_equal_points_once() -> None:
         ),
         (
             lambda store: store["parties/party-a"]["moduleSettings"].update(
-                adminChallengesEnabled=False
+                partyChallengesEnabled=False
             ),
             "member-a",
             https_fn.FunctionsErrorCode.FAILED_PRECONDITION,
@@ -401,7 +401,7 @@ def test_award_rejects_inactive_member_expiry_status_disabled_and_archive(
     db = Database(store)
 
     with pytest.raises(https_fn.HttpsError) as error:
-        award_admin_challenge_winner_command(
+        award_party_challenge_winner_command(
             _request("winner-a", winnerUserId=winner),
             db,
             now_provider=lambda: NOW,
@@ -415,7 +415,7 @@ def test_award_rejects_inactive_member_expiry_status_disabled_and_archive(
 def test_competing_duplicate_winner_is_rejected_without_second_award() -> None:
     db = Database(_base_store(active_challenge=True))
     request = _request("winner-a", winnerUserId="member-a")
-    award_admin_challenge_winner_command(
+    award_party_challenge_winner_command(
         request,
         db,
         now_provider=lambda: NOW,
@@ -424,7 +424,7 @@ def test_competing_duplicate_winner_is_rejected_without_second_award() -> None:
     )
 
     with pytest.raises(https_fn.HttpsError) as error:
-        award_admin_challenge_winner_command(
+        award_party_challenge_winner_command(
             _request("winner-competing", winnerUserId="member-a"),
             db,
             now_provider=lambda: NOW,
@@ -439,8 +439,8 @@ def test_competing_duplicate_winner_is_rejected_without_second_award() -> None:
 @pytest.mark.parametrize(
     ("command", "status"),
     [
-        (complete_admin_challenge_command, "completed"),
-        (cancel_admin_challenge_command, "cancelled"),
+        (complete_party_challenge_command, "completed"),
+        (cancel_party_challenge_command, "cancelled"),
     ],
 )
 def test_complete_and_cancel_clear_pointer_and_are_idempotent(
@@ -475,7 +475,7 @@ def test_complete_rejects_expired_challenge_without_closing_it() -> None:
     db = Database(store)
 
     with pytest.raises(https_fn.HttpsError) as error:
-        complete_admin_challenge_command(
+        complete_party_challenge_command(
             _request("complete-a"),
             db,
             now_provider=lambda: NOW,
@@ -488,14 +488,14 @@ def test_complete_rejects_expired_challenge_without_closing_it() -> None:
 
 def test_completed_winner_correction_creates_one_reversal_and_keeps_history() -> None:
     db = Database(_base_store(active_challenge=True))
-    award_admin_challenge_winner_command(
+    award_party_challenge_winner_command(
         _request("winner-a", winnerUserId="member-a"),
         db,
         now_provider=lambda: NOW,
         notification_dispatcher=Notifications(),
         transaction_runner=_runner(Transaction(db.store)),
     )
-    complete_admin_challenge_command(
+    complete_party_challenge_command(
         _request("complete-a"),
         db,
         now_provider=lambda: NOW,
@@ -504,13 +504,13 @@ def test_completed_winner_correction_creates_one_reversal_and_keeps_history() ->
     request = _request("reverse-a", winnerUserId="member-a")
     transaction = Transaction(db.store)
 
-    result = reverse_admin_challenge_winner_command(
+    result = reverse_party_challenge_winner_command(
         request,
         db,
         now_provider=lambda: NOW,
         transaction_runner=_runner(transaction),
     )
-    retry = reverse_admin_challenge_winner_command(
+    retry = reverse_party_challenge_winner_command(
         request,
         db,
         now_provider=lambda: pytest.fail("retry evaluated command"),
@@ -541,14 +541,14 @@ def test_completed_winner_correction_creates_one_reversal_and_keeps_history() ->
 
 def test_competing_reversal_and_expired_reversal_are_rejected() -> None:
     db = Database(_base_store(active_challenge=True))
-    award_admin_challenge_winner_command(
+    award_party_challenge_winner_command(
         _request("winner-a", winnerUserId="member-a"),
         db,
         now_provider=lambda: NOW,
         notification_dispatcher=Notifications(),
         transaction_runner=_runner(Transaction(db.store)),
     )
-    reverse_admin_challenge_winner_command(
+    reverse_party_challenge_winner_command(
         _request("reverse-a", winnerUserId="member-a"),
         db,
         now_provider=lambda: NOW,
@@ -556,7 +556,7 @@ def test_competing_reversal_and_expired_reversal_are_rejected() -> None:
     )
 
     with pytest.raises(https_fn.HttpsError) as duplicate_error:
-        reverse_admin_challenge_winner_command(
+        reverse_party_challenge_winner_command(
             _request("reverse-competing", winnerUserId="member-a"),
             db,
             now_provider=lambda: NOW,
@@ -567,7 +567,7 @@ def test_competing_reversal_and_expired_reversal_are_rejected() -> None:
     for status in ("cancelled", "expired"):
         db.store["parties/party-a/challenges/challenge-a"]["status"] = status
         with pytest.raises(https_fn.HttpsError) as status_error:
-            reverse_admin_challenge_winner_command(
+            reverse_party_challenge_winner_command(
                 _request(f"reverse-{status}", winnerUserId="member-a"),
                 db,
                 now_provider=lambda: NOW,
@@ -581,31 +581,31 @@ def test_competing_reversal_and_expired_reversal_are_rejected() -> None:
 def test_all_mutations_require_session_admin() -> None:
     commands = [
         (
-            create_admin_challenge_command,
+            create_party_challenge_command,
             _create_request("create-member"),
             {"notification_dispatcher": Notifications()},
             _base_store(),
         ),
         (
-            award_admin_challenge_winner_command,
+            award_party_challenge_winner_command,
             _request("award-member", winnerUserId="member-b"),
             {"notification_dispatcher": Notifications()},
             _base_store(active_challenge=True),
         ),
         (
-            complete_admin_challenge_command,
+            complete_party_challenge_command,
             _request("complete-member"),
             {},
             _base_store(active_challenge=True),
         ),
         (
-            cancel_admin_challenge_command,
+            cancel_party_challenge_command,
             _request("cancel-member"),
             {},
             _base_store(active_challenge=True),
         ),
         (
-            reverse_admin_challenge_winner_command,
+            reverse_party_challenge_winner_command,
             _request("reverse-member", winnerUserId="member-a"),
             {},
             _base_store(active_challenge=True),

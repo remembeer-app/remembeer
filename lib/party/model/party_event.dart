@@ -9,7 +9,7 @@ part 'party_event.g.dart';
 enum PartyEventKind {
   drinkLog,
   socialQuest,
-  adminChallenge,
+  partyChallenge,
   beerpongPlacement,
   reversal,
 }

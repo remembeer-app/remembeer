@@ -836,7 +836,7 @@ final class FinalistTeam extends PartyQuestDocument {
 
 typedef PartyModules = ({
   bool socialQuestsEnabled,
-  bool adminChallengesEnabled,
+  bool partyChallengesEnabled,
   bool beerpongEnabled,
 });
 

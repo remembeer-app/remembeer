@@ -91,7 +91,7 @@ class PartyManagementPage extends StatelessWidget {
     List<UserModel> users,
   ) => ListView(
     children: [
-      if (state.party.moduleSettings.adminChallengesEnabled) ...[
+      if (state.party.moduleSettings.partyChallengesEnabled) ...[
         _ChallengeManagementSection(
           sessionId: sessionId,
           state: state,
@@ -209,7 +209,7 @@ class _ChallengeManagementSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Admin challenges',
+            'Party challenges',
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const Gap(4),
