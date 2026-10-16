@@ -1,8 +1,11 @@
 import { v } from "convex/values";
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
+import { access } from "../lib/access";
 import { schema } from "../schema";
-import { requireParty, challengeAccess } from "./access";
+import { requireSessionAccess } from "../session/access";
+import { partyAccess } from "../party/access";
+import { loadChallenge } from "./access";
 
 function visibleChallenge(
   challenge: Doc<"partyChallenge">,
@@ -24,14 +27,26 @@ function visibleChallenge(
 export const get = authQuery
   .input({ id: v.id("partyChallenge") })
   .returns(schema.doc("partyChallenge"))
-  .extend(challengeAccess().extend)
+  .extend(
+    access<{ id: Id<"partyChallenge"> }>()
+      .use(loadChallenge)
+      .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "joined"))
+      .use(partyAccess)
+      .extend,
+  )
   .handler(async (ctx) => visibleChallenge(ctx.challenge, ctx.session));
 
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
   .returns(v.array(schema.doc("partyChallenge")))
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
+      .use(partyAccess)
+      .extend,
+  )
   .handler(async (ctx, { sessionId }) => {
-    const session = await requireParty(ctx, sessionId, "joined");
+    const { session } = ctx;
 
     const challenges = await ctx.db
       .query("partyChallenge")

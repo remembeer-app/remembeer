@@ -1,11 +1,9 @@
 import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
-import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
 import type { Id } from "../_generated/dataModel";
-import {
-  createLeaderboardInputValidator,
-  updateLeaderboardInputValidator,
-} from "./schema";
+import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
+import { access } from "../lib/access";
+import { createLeaderboardInputValidator, updateLeaderboardInputValidator } from "./schema";
 import {
   leaderboardTimeZone,
   leaderboardEndOfDayBoundary,
@@ -16,8 +14,9 @@ import {
 import {
   getMembership,
   listMemberships,
-  leaderboardAccess,
   type LeaderboardAccess,
+  loadLeaderboard,
+  leaderboardPermission,
 } from "./access";
 
 const idInput = { id: v.id("leaderboard") };
@@ -70,7 +69,12 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateLeaderboardInputValidator)
   .returns(v.null())
-  .extend(leaderboardAccess("owner").extend)
+  .extend(
+    access<{ id: Id<"leaderboard"> }>()
+      .use(loadLeaderboard)
+      .use(leaderboardPermission("owner"))
+      .extend,
+  )
   .handler(async (ctx, { id, ...input }) => {
     const { leaderboard } = ctx;
 
@@ -86,7 +90,12 @@ export const update = authMutation
 export const softDelete = authMutation
   .input(idInput)
   .returns(v.null())
-  .extend(leaderboardAccess("owner").extend)
+  .extend(
+    access<{ id: Id<"leaderboard"> }>()
+      .use(loadLeaderboard)
+      .use(leaderboardPermission("owner"))
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const now = Date.now();
     await ctx.db.patch("leaderboard", id, { deletedAt: now, updatedAt: now });
@@ -133,7 +142,12 @@ export const join = authMutation
 export const leave = authMutation
   .input(idInput)
   .returns(v.null())
-  .extend(leaderboardAccess("member").extend)
+  .extend(
+    access<{ id: Id<"leaderboard"> }>()
+      .use(loadLeaderboard)
+      .use(leaderboardPermission("member"))
+      .extend,
+  )
   .handler(async (ctx) => {
     const { isOwner, member } = ctx;
     if (isOwner)
@@ -147,19 +161,34 @@ export const leave = authMutation
 export const remove = authMutation
   .input(memberInput)
   .returns(v.null())
-  .extend(leaderboardAccess("owner").extend)
+  .extend(
+    access<{ id: Id<"leaderboard"> }>()
+      .use(loadLeaderboard)
+      .use(leaderboardPermission("owner"))
+      .extend,
+  )
   .handler((ctx, input) => changeMember(ctx, input, "remove"));
 
 export const ban = authMutation
   .input(memberInput)
   .returns(v.null())
-  .extend(leaderboardAccess("owner").extend)
+  .extend(
+    access<{ id: Id<"leaderboard"> }>()
+      .use(loadLeaderboard)
+      .use(leaderboardPermission("owner"))
+      .extend,
+  )
   .handler((ctx, input) => changeMember(ctx, input, "ban"));
 
 export const unban = authMutation
   .input(memberInput)
   .returns(v.null())
-  .extend(leaderboardAccess("owner").extend)
+  .extend(
+    access<{ id: Id<"leaderboard"> }>()
+      .use(loadLeaderboard)
+      .use(leaderboardPermission("owner"))
+      .extend,
+  )
   .handler((ctx, input) => changeMember(ctx, input, "unban"));
 
 async function changeMember(

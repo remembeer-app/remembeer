@@ -2,9 +2,12 @@ import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { convexToZod } from "convex-helpers/server/zod4";
 import { z } from "zod";
+import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
-import { getMembership } from "../session/access";
-import { requireParty, editableChallengeAccess } from "./access";
+import { access } from "../lib/access";
+import { getMembership, requireSessionAccess } from "../session/access";
+import { partyAccess, ongoingPartyAccess } from "../party/access";
+import { loadChallenge } from "./access";
 import { activeChallenges, scheduleExpiry, stopChallenges } from "./lifecycle";
 import {
   maxChallengeTitleLength,
@@ -35,8 +38,15 @@ const idInput = { id: v.id("partyChallenge") };
 export const setEnabled = authMutation
   .input({ sessionId: v.id("session"), enabled: v.boolean() })
   .returns(v.null())
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .extend,
+  )
   .handler(async (ctx, { sessionId, enabled }) => {
-    const session = await requireParty(ctx, sessionId, "admin");
+    const { session } = ctx;
 
     const now = Date.now();
     if (!enabled) await stopChallenges(ctx, session, now);
@@ -53,8 +63,15 @@ export const create = authMutation
   .extend(WithZod)
   .input(fields.extend({ sessionId: convexToZod(v.id("session")) }))
   .returns(v.id("partyChallenge"))
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .extend,
+  )
   .handler(async (ctx, { sessionId, durationMinutes, ...input }) => {
-    const session = await requireParty(ctx, sessionId, "admin");
+    const { session } = ctx;
     if (!session.modules.partyChallengesEnabled)
       throw new ConvexError("Challenges are disabled");
 
@@ -90,7 +107,14 @@ export const update = authMutation
   .extend(WithZod)
   .input(fields.partial().extend({ id: convexToZod(v.id("partyChallenge")) }))
   .returns(v.null())
-  .extend(editableChallengeAccess().extend)
+  .extend(
+    access<{ id: Id<"partyChallenge"> }>()
+      .use(loadChallenge)
+      .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .extend,
+  )
   .handler(async (ctx, { id, durationMinutes, ...input }) => {
     const { challenge } = ctx;
 
@@ -125,7 +149,14 @@ export const update = authMutation
 export const addWinner = authMutation
   .input({ ...idInput, userId: v.id("user") })
   .returns(v.null())
-  .extend(editableChallengeAccess().extend)
+  .extend(
+    access<{ id: Id<"partyChallenge"> }>()
+      .use(loadChallenge)
+      .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .extend,
+  )
   .handler(async (ctx, { id, userId }) => {
     const { challenge } = ctx;
 
@@ -153,7 +184,14 @@ export const addWinner = authMutation
 export const removeWinner = authMutation
   .input({ ...idInput, userId: v.id("user") })
   .returns(v.null())
-  .extend(editableChallengeAccess().extend)
+  .extend(
+    access<{ id: Id<"partyChallenge"> }>()
+      .use(loadChallenge)
+      .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .extend,
+  )
   .handler(async (ctx, { id, userId }) => {
     const { challenge } = ctx;
 
@@ -169,7 +207,14 @@ function close(status: "completed" | "cancelled") {
   return authMutation
     .input(idInput)
     .returns(v.null())
-    .extend(editableChallengeAccess().extend)
+    .extend(
+      access<{ id: Id<"partyChallenge"> }>()
+        .use(loadChallenge)
+        .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
+        .use(partyAccess)
+        .use(ongoingPartyAccess)
+        .extend,
+    )
     .handler(async (ctx, { id }) => {
       const { challenge } = ctx;
       if (challenge.status === status) return null;

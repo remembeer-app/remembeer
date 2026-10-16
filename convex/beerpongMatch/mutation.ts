@@ -1,13 +1,27 @@
 import { ConvexError, v } from "convex/values";
+import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
-import { editableMatchAccess } from "./access";
+import { access } from "../lib/access";
+import { loadTournament, beerpongEnabledAccess } from "../beerpongTournament/access";
+import { requireSessionAccess } from "../session/access";
+import { partyAccess, ongoingPartyAccess } from "../party/access";
+import { loadMatch } from "./access";
 import { downstreamMatches, matchResolver } from "./resolution";
 
 function resultMutation(correcting: boolean) {
   return authMutation
     .input({ id: v.id("beerpongMatch"), winnerTeamId: v.id("beerpongTeam") })
     .returns(v.null())
-    .extend(editableMatchAccess().extend)
+    .extend(
+      access<{ id: Id<"beerpongMatch"> }>()
+        .use(loadMatch)
+        .use((ctx) => loadTournament(ctx, { id: ctx.match.tournamentId }))
+        .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+        .use(partyAccess)
+        .use(ongoingPartyAccess)
+        .use(beerpongEnabledAccess)
+        .extend,
+    )
     .handler(async (ctx, { id, winnerTeamId }) => {
       const { match, tournament } = ctx;
       if (tournament.status !== "active")

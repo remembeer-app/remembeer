@@ -2,9 +2,13 @@ import { ConvexError, v } from "convex/values";
 import { convexToZod } from "convex-helpers/server/zod4";
 import { WithZod } from "fluent-convex/zod";
 import { z } from "zod";
+import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
-import { getMembership } from "../session/access";
-import { editableTeamAccess } from "./access";
+import { access } from "../lib/access";
+import { getMembership, requireSessionAccess } from "../session/access";
+import { loadTournament, beerpongEnabledAccess } from "../beerpongTournament/access";
+import { partyAccess, ongoingPartyAccess } from "../party/access";
+import { loadTeam, editableTeamStatusAccess } from "./access";
 import { maxTeamNameLength } from "./constants";
 
 const memberInput = { id: v.id("beerpongTeam"), userId: v.id("user") };
@@ -16,7 +20,17 @@ export const rename = authMutation
     name: z.string().trim().min(1).max(maxTeamNameLength),
   }))
   .returns(v.null())
-  .extend(editableTeamAccess().extend)
+  .extend(
+    access<{ id: Id<"beerpongTeam"> }>()
+      .use(loadTeam)
+      .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
+      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .use(beerpongEnabledAccess)
+      .use(editableTeamStatusAccess)
+      .extend,
+  )
   .handler(async (ctx, { id, name }) => {
     const { team } = ctx;
 
@@ -30,7 +44,17 @@ export const rename = authMutation
 export const addMember = authMutation
   .input(memberInput)
   .returns(v.null())
-  .extend(editableTeamAccess().extend)
+  .extend(
+    access<{ id: Id<"beerpongTeam"> }>()
+      .use(loadTeam)
+      .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
+      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .use(beerpongEnabledAccess)
+      .use(editableTeamStatusAccess)
+      .extend,
+  )
   .handler(async (ctx, { id, userId }) => {
     const { team, tournament } = ctx;
 
@@ -63,7 +87,17 @@ export const addMember = authMutation
 export const removeMember = authMutation
   .input(memberInput)
   .returns(v.null())
-  .extend(editableTeamAccess().extend)
+  .extend(
+    access<{ id: Id<"beerpongTeam"> }>()
+      .use(loadTeam)
+      .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
+      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .use(beerpongEnabledAccess)
+      .use(editableTeamStatusAccess)
+      .extend,
+  )
   .handler(async (ctx, { id, userId }) => {
     const { team } = ctx;
     if (!team.memberUserIds.includes(userId)) return null;
@@ -81,7 +115,17 @@ export const removeMember = authMutation
 export const moveMember = authMutation
   .input({ ...memberInput, targetTeamId: v.id("beerpongTeam") })
   .returns(v.null())
-  .extend(editableTeamAccess().extend)
+  .extend(
+    access<{ id: Id<"beerpongTeam"> }>()
+      .use(loadTeam)
+      .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
+      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .use(beerpongEnabledAccess)
+      .use(editableTeamStatusAccess)
+      .extend,
+  )
   .handler(async (ctx, { id, userId, targetTeamId }) => {
     const { team, tournament } = ctx;
 

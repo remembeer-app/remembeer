@@ -1,14 +1,23 @@
 import { v } from "convex/values";
+import type { Id } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
+import { access } from "../lib/access";
 import { schema } from "../schema";
 import { matchResolver } from "../beerpongMatch/resolution";
-import { tournamentAccess, beerpongPartyAccess } from "./access";
+import { requireSessionAccess } from "../session/access";
+import { partyAccess } from "../party/access";
+import { loadTournament } from "./access";
 import { tournamentPlacements } from "./scoring";
 
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
   .returns(v.array(schema.doc("beerpongTournament")))
-  .extend(beerpongPartyAccess().extend)
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
+      .use(partyAccess)
+      .extend,
+  )
   .handler(async (ctx, { sessionId }) => {
     return await ctx.db.query("beerpongTournament")
       .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
@@ -34,7 +43,13 @@ export const get = authQuery
     // Placements are final only after finalization, and include every team.
     placements: v.array(v.object({ teamId: v.id("beerpongTeam"), placement: v.number() })),
   }))
-  .extend(tournamentAccess().extend)
+  .extend(
+    access<{ id: Id<"beerpongTournament"> }>()
+      .use(loadTournament)
+      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "joined"))
+      .use(partyAccess)
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const { tournament } = ctx;
 

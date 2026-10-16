@@ -1,12 +1,13 @@
 import { v } from "convex/values";
-import type { Doc } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
+import { access } from "../lib/access";
 import { requireSessionAccess } from "../session/access";
 import { schema } from "../schema";
-import { loadQuestContext } from "./context";
-import { questAccess } from "./access";
-import { eligiblePairs } from "./eligibility";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
+import { loadQuestContext } from "./context";
+import { loadQuest } from "./access";
+import { eligiblePairs } from "./eligibility";
 
 function visibleQuest(
   quest: Doc<"partyQuest">,
@@ -32,7 +33,12 @@ function visibleQuest(
 export const get = authQuery
   .input({ id: v.id("partyQuest") })
   .returns(schema.doc("partyQuest"))
-  .extend(questAccess("id").extend)
+  .extend(
+    access<{ id: Id<"partyQuest"> }>()
+      .use(loadQuest)
+      .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"))
+      .extend,
+  )
   .handler(async (ctx) => visibleQuest(ctx.quest, ctx.session, ctx.user._id));
 
 export const listForSession = authQuery
@@ -56,7 +62,12 @@ export const listForSession = authQuery
 export const partners = authQuery
   .input({ questId: v.id("partyQuest") })
   .returns(v.array(publicUserValidator))
-  .extend(questAccess("questId").extend)
+  .extend(
+    access<{ questId: Id<"partyQuest"> }>()
+      .use((ctx, { questId }) => loadQuest(ctx, { id: questId }))
+      .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"))
+      .extend,
+  )
   .handler(async (ctx) => {
     const { quest, session } = ctx;
 

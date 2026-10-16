@@ -1,6 +1,7 @@
 import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
-import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
+import { authMutation } from "../lib/authenticated";
+import { access } from "../lib/access";
 import { getMembership, requireSessionAccess } from "../session/access";
 import {
   activeQuests,
@@ -15,23 +16,19 @@ import {
 } from "./lifecycle";
 import { eligiblePairs, memberPair } from "./eligibility";
 import { loadQuestContext } from "./context";
-import { questAccess, activeQuestPartyAccess } from "./access";
-
-async function requireActiveParty(
-  ctx: AuthMutationCtx,
-  sessionId: Id<"session">,
-  permission: "admin" | "joined",
-) {
-  const access = await requireSessionAccess(ctx, sessionId, permission);
-
-  return activeQuestPartyAccess(access).session;
-}
+import { activeQuestPartyAccess, loadQuest } from "./access";
 
 export const setEnabled = authMutation
   .input({ sessionId: v.id("session"), enabled: v.boolean() })
   .returns(v.null())
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+      .use(activeQuestPartyAccess)
+      .extend,
+  )
   .handler(async (ctx, { sessionId, enabled }) => {
-    const session = await requireActiveParty(ctx, sessionId, "admin");
+    const { session } = ctx;
 
     const now = Date.now();
     if (!enabled) {
@@ -39,8 +36,6 @@ export const setEnabled = authMutation
 
       return null;
     }
-
-    if (session.kind !== "party") throw new ConvexError("Party required");
 
     await ctx.db.patch("session", sessionId, {
       modules: { ...session.modules, socialQuestsEnabled: true },
@@ -54,9 +49,15 @@ export const setEnabled = authMutation
 export const startNext = authMutation
   .input({ sessionId: v.id("session") })
   .returns(v.id("partyQuest"))
-  .handler(async (ctx, { sessionId }) => {
-    const session = await requireActiveParty(ctx, sessionId, "admin");
-    if (session.kind !== "party" || !session.modules.socialQuestsEnabled)
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+      .use(activeQuestPartyAccess)
+      .extend,
+  )
+  .handler(async (ctx) => {
+    const { session } = ctx;
+    if (!session.modules.socialQuestsEnabled)
       throw new ConvexError("Social quests are disabled");
 
     return await issueQuest(ctx, session, Date.now());
@@ -70,10 +71,14 @@ export const setSchedule = authMutation
     defaultDurationMinutes: v.number(),
   })
   .returns(v.null())
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+      .use(activeQuestPartyAccess)
+      .extend,
+  )
   .handler(async (ctx, { sessionId, ...settings }) => {
-    const session = await requireActiveParty(ctx, sessionId, "admin");
-    if (session.kind !== "party") throw new ConvexError("Party required");
-
+    const { session } = ctx;
     validateSchedule(settings);
 
     const now = Date.now();
@@ -122,7 +127,13 @@ export const setSchedule = authMutation
 export const selectPartner = authMutation
   .input({ questId: v.id("partyQuest"), selectedUserId: v.id("user") })
   .returns(v.boolean())
-  .extend(questAccess("questId").use(activeQuestPartyAccess).extend)
+  .extend(
+    access<{ questId: Id<"partyQuest"> }>()
+      .use((ctx, { questId }) => loadQuest(ctx, { id: questId }))
+      .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"))
+      .use(activeQuestPartyAccess)
+      .extend,
+  )
   .handler(async (ctx, { questId, selectedUserId }) => {
     const { quest, session } = ctx;
     if (!session.modules.socialQuestsEnabled)

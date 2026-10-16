@@ -2,12 +2,12 @@ import { ConvexError, v } from "convex/values";
 import { convexToZod } from "convex-helpers/server/zod4";
 import { WithZod } from "fluent-convex/zod";
 import { z } from "zod";
+import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
+import { access } from "../lib/access";
 import { requireSessionAccess } from "../session/access";
-import {
-  editableTournamentAccess,
-  editableBeerpongPartyAccess,
-} from "./access";
+import { partyAccess, ongoingPartyAccess } from "../party/access";
+import { loadTournament, beerpongEnabledAccess } from "./access";
 import { createBracket } from "./bracket";
 import { loadTournamentAwards } from "./scoring";
 import {
@@ -39,7 +39,14 @@ export const create = authMutation
     }),
   )
   .returns(v.id("beerpongTournament"))
-  .extend(editableBeerpongPartyAccess().extend)
+  .extend(
+    access<{ sessionId: Id<"session"> }>()
+      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .use(beerpongEnabledAccess)
+      .extend,
+  )
   .handler(async (ctx, { sessionId, ...input }) => {
     if (
       input.firstPlacePointsUnits < input.secondPlacePointsUnits ||
@@ -62,7 +69,15 @@ export const create = authMutation
 export const draw = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
-  .extend(editableTournamentAccess().extend)
+  .extend(
+    access<{ id: Id<"beerpongTournament"> }>()
+      .use(loadTournament)
+      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .use(beerpongEnabledAccess)
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const { tournament } = ctx;
     if (tournament.status !== "enrollment")
@@ -114,7 +129,15 @@ export const draw = authMutation
 export const start = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
-  .extend(editableTournamentAccess().extend)
+  .extend(
+    access<{ id: Id<"beerpongTournament"> }>()
+      .use(loadTournament)
+      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .use(beerpongEnabledAccess)
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const { tournament } = ctx;
     if (tournament.status !== "setup")
@@ -184,7 +207,15 @@ export const start = authMutation
 export const finalize = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
-  .extend(editableTournamentAccess().extend)
+  .extend(
+    access<{ id: Id<"beerpongTournament"> }>()
+      .use(loadTournament)
+      .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+      .use(partyAccess)
+      .use(ongoingPartyAccess)
+      .use(beerpongEnabledAccess)
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const { tournament } = ctx;
     if (tournament.status === "completed") return null;

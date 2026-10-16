@@ -1,7 +1,6 @@
 import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { AuthQueryCtx } from "../lib/authenticated";
-import { access } from "../lib/access";
 
 export function getMembership(
   ctx: AuthQueryCtx,
@@ -35,30 +34,37 @@ export type LeaderboardAccess = {
   isOwner: boolean;
 };
 
-export function leaderboardAccess(permission: "member" | "owner") {
-  return access<{ id: Id<"leaderboard"> }>()
-    .use(async (ctx, input) => {
-      const leaderboard = await ctx.db.get("leaderboard", input.id);
-      if (!leaderboard || leaderboard.deletedAt !== null) {
-        throw new ConvexError("Leaderboard not found");
-      }
+export async function loadLeaderboard(
+  ctx: AuthQueryCtx,
+  { id }: { id: Id<"leaderboard"> },
+) {
+  const leaderboard = await ctx.db.get("leaderboard", id);
+  if (!leaderboard || leaderboard.deletedAt !== null) {
+    throw new ConvexError("Leaderboard not found");
+  }
 
-      const isOwner = leaderboard.ownerId === ctx.user._id;
-      if (permission === "owner" && !isOwner) {
-        throw new ConvexError(
-          "You do not have permission to access this leaderboard",
-        );
-      }
+  return { leaderboard };
+}
 
-      const member = isOwner
-        ? null
-        : await getMembership(ctx, input.id, ctx.user._id);
-      if (!isOwner && member?.status !== "joined") {
-        throw new ConvexError(
-          "You do not have permission to access this leaderboard",
-        );
-      }
+export function leaderboardPermission(permission: "member" | "owner") {
+  return async (ctx: AuthQueryCtx & { leaderboard: Doc<"leaderboard"> }) => {
+    const { leaderboard } = ctx;
+    const isOwner = leaderboard.ownerId === ctx.user._id;
+    if (permission === "owner" && !isOwner) {
+      throw new ConvexError(
+        "You do not have permission to access this leaderboard",
+      );
+    }
 
-      return { leaderboard, member, isOwner };
-    });
+    const member = isOwner
+      ? null
+      : await getMembership(ctx, leaderboard._id, ctx.user._id);
+    if (!isOwner && member?.status !== "joined") {
+      throw new ConvexError(
+        "You do not have permission to access this leaderboard",
+      );
+    }
+
+    return { member, isOwner };
+  };
 }

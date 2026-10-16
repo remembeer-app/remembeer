@@ -2,17 +2,14 @@ import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { z } from "zod";
 import { convexToZod } from "convex-helpers/server/zod4";
+import type { Doc, Id } from "../_generated/dataModel";
 import { authQuery } from "../lib/authenticated";
 import { LogicalDay } from "../lib/logicalDay";
+import { access } from "../lib/access";
 import { schema } from "../schema";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
-import type { Doc, Id } from "../_generated/dataModel";
-import { listMemberships, leaderboardAccess } from "./access";
-import {
-  beerVolumeMl,
-  inviteCodeLength,
-  inviteCodeCharacters,
-} from "./constants";
+import { listMemberships, loadLeaderboard, leaderboardPermission } from "./access";
+import { beerVolumeMl, inviteCodeLength, inviteCodeCharacters } from "./constants";
 
 const idInput = { id: v.id("leaderboard") };
 
@@ -67,7 +64,12 @@ export const get = authQuery
       bannedMembers: v.array(publicUserValidator),
     }),
   )
-  .extend(leaderboardAccess("member").extend)
+  .extend(
+    access<{ id: Id<"leaderboard"> }>()
+      .use(loadLeaderboard)
+      .use(leaderboardPermission("member"))
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const { leaderboard, isOwner } = ctx;
 
@@ -167,7 +169,12 @@ export const standings = authQuery
       ),
     }),
   )
-  .extend(leaderboardAccess("member").extend)
+  .extend(
+    access<{ id: Id<"leaderboard"> }>()
+      .use(loadLeaderboard)
+      .use(leaderboardPermission("member"))
+      .extend,
+  )
   .handler(async (ctx, { id, month: selectedMonth }) => {
     const { leaderboard } = ctx;
 

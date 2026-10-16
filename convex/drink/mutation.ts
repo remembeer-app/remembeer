@@ -1,9 +1,11 @@
 import { v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
+import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
+import { access } from "../lib/access";
 import { schema } from "../schema";
 import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
-import { customDrinkAccess } from "./access";
+import { loadDrink, drinkOwnerAccess, undeletedDrinkAccess } from "./access";
 
 export const create = authMutation
   .extend(WithZod)
@@ -22,7 +24,13 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateDrinkInputValidator)
   .returns(v.null())
-  .extend(customDrinkAccess().extend)
+  .extend(
+    access<{ id: Id<"drink"> }>()
+      .use(loadDrink)
+      .use(drinkOwnerAccess)
+      .use(undeletedDrinkAccess)
+      .extend,
+  )
   .handler(async (ctx, { id, name, drinkCategory, alcoholPercentage }) => {
     const { drink } = ctx;
 
@@ -41,7 +49,13 @@ export const softDelete = authMutation
     id: v.id("drink"),
   })
   .returns(v.null())
-  .extend(customDrinkAccess().extend)
+  .extend(
+    access<{ id: Id<"drink"> }>()
+      .use(loadDrink)
+      .use(drinkOwnerAccess)
+      .use(undeletedDrinkAccess)
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const now = Date.now();
     await ctx.db.patch("drink", id, {

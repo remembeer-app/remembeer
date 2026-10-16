@@ -1,25 +1,18 @@
-import { customDrinkAccess } from "../../convex/drink/access";
-import { sessionAccess } from "../../convex/session/access";
-import { leaderboardAccess } from "../../convex/leaderboard/access";
-import { editableTournamentAccess } from "../../convex/beerpongTournament/access";
-import { editableTeamAccess } from "../../convex/beerpongTeam/access";
-import { editableMatchAccess } from "../../convex/beerpongMatch/access";
-import { editableChallengeAccess } from "../../convex/partyChallenge/access";
+import { loadDrink, drinkOwnerAccess, undeletedDrinkAccess } from "../../convex/drink/access";
+import { loadQuest } from "../../convex/partyQuest/access";
+import { requireSessionAccess } from "../../convex/session/access";
+import { loadTournament, beerpongEnabledAccess } from "../../convex/beerpongTournament/access";
 import type { RegisteredQuery, RegisteredMutation } from "convex/server";
 import { v } from "convex/values";
 import type { Id } from "../../convex/_generated/dataModel";
-import { questAccess } from "../../convex/partyQuest/access";
 import { access } from "../../convex/lib/access";
 import { authMutation, authQuery } from "../../convex/lib/authenticated";
 import { ongoingPartyAccess, partyAccess } from "../../convex/party/access";
 
 const drinkAccess = access<{ id: Id<"drink"> }>()
-  .use(async (ctx, input) => {
-    const drink = await ctx.db.get("drink", input.id);
-    if (!drink) throw new Error("Missing drink");
-
-    return { drink };
-  })
+  .use(loadDrink)
+  .use(drinkOwnerAccess)
+  .use(undeletedDrinkAccess)
   .use((ctx) => ({ ownerId: ctx.drink.ownerId }));
 
 const query = authQuery
@@ -102,33 +95,28 @@ void publicMutationInput;
 void publicQueryOutput;
 void invalidQueryOutput;
 
-// Quest chains support both endpoint ID names without weakening table types.
-const questById = authQuery
-  .input({ id: v.id("partyQuest") })
-  .returns(v.string())
-  .extend(questAccess("id").extend)
-  .handler(async (ctx) => ctx.quest.title);
-const questByQuestId = authQuery
-  .input({ questId: v.id("partyQuest") })
-  .returns(v.string())
-  .extend(questAccess("questId").extend)
-  .handler(async (ctx) => ctx.quest.title);
+// Loaders preserve table-specific IDs, including explicit input adapters.
+const questById = access<{ id: Id<"partyQuest"> }>()
+  .use(loadQuest)
+  .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"));
+const questByQuestId = access<{ questId: Id<"partyQuest"> }>()
+  .use((ctx, { questId }) => loadQuest(ctx, { id: questId }))
+  .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"));
 // @ts-expect-error A questId chain must not accept an endpoint using only id.
-authQuery.input({ id: v.id("partyQuest") }).returns(v.string()).extend(questAccess("questId").extend);
+authQuery.input({ id: v.id("partyQuest") }).returns(v.string()).extend(questByQuestId.extend);
 // @ts-expect-error Quest references must retain their table-specific ID type.
-authQuery.input({ id: v.id("drink") }).returns(v.string()).extend(questAccess("id").extend);
-void questById;
-void questByQuestId;
+authQuery.input({ id: v.id("drink") }).returns(v.string()).extend(questById.extend);
+// @ts-expect-error A loader must not accept the wrong input ID type.
+access<{ id: Id<"drink"> }>().use(loadQuest);
 
-// Feature factories all return chains that can be extended before registration.
-customDrinkAccess().use((ctx) => ({ drinkName: ctx.drink.name }));
-sessionAccess("admin").use((ctx) => ({ sessionName: ctx.session.name }));
-leaderboardAccess("owner").use((ctx) => ({ boardName: ctx.leaderboard.name }));
-editableTeamAccess().use((ctx) => ({ teamName: ctx.team.name }));
-editableMatchAccess().use((ctx) => ({ matchRound: ctx.match.round }));
-editableChallengeAccess().use((ctx) => ({ challengeTitle: ctx.challenge.title }));
-editableTournamentAccess().use((ctx) => {
-  const partyKind: "party" = ctx.session.kind;
+access<{ id: Id<"beerpongTournament"> }>()
+  .use(loadTournament)
+  .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+  .use(partyAccess)
+  .use(ongoingPartyAccess)
+  .use(beerpongEnabledAccess)
+  .use((ctx) => {
+    const partyKind: "party" = ctx.session.kind;
 
-  return { partyKind, tournamentName: ctx.tournament.name };
-});
+    return { partyKind, tournamentName: ctx.tournament.name };
+  });

@@ -1,15 +1,14 @@
-import { stopChallenges } from "../partyChallenge/lifecycle";
-import { stopQuests } from "../partyQuest/lifecycle";
 import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
+import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
-import {
-  createSessionInputValidator,
-  updateSessionInputValidator,
-} from "./schema";
+import { access } from "../lib/access";
+import { stopChallenges } from "../partyChallenge/lifecycle";
+import { stopQuests } from "../partyQuest/lifecycle";
 import { syncSessionIndex } from "../sessionMember/sessionIndex";
-import { sessionAccess } from "./access";
 import { defaultPartyMemberFields } from "../sessionMember/constants";
+import { createSessionInputValidator, updateSessionInputValidator } from "./schema";
+import { requireSessionAccess } from "./access";
 import {
   defaultPartyQuestMinIntervalMinutes,
   defaultPartyQuestMaxIntervalMinutes,
@@ -49,7 +48,11 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateSessionInputValidator)
   .returns(v.null())
-  .extend(sessionAccess("admin").extend)
+  .extend(
+    access<{ id: Id<"session"> }>()
+      .use((ctx, { id }) => requireSessionAccess(ctx, id, "admin"))
+      .extend,
+  )
   .handler(async (ctx, { id, ...input }) => {
     const { session } = ctx;
 
@@ -83,7 +86,11 @@ export const update = authMutation
 export const softDelete = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
-  .extend(sessionAccess("owner").extend)
+  .extend(
+    access<{ id: Id<"session"> }>()
+      .use((ctx, { id }) => requireSessionAccess(ctx, id, "owner"))
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const { session } = ctx;
 
@@ -100,7 +107,11 @@ export const softDelete = authMutation
 export const promoteToParty = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
-  .extend(sessionAccess("admin").extend)
+  .extend(
+    access<{ id: Id<"session"> }>()
+      .use((ctx, { id }) => requireSessionAccess(ctx, id, "admin"))
+      .extend,
+  )
   .handler(async (ctx, { id }) => {
     const { session } = ctx;
     if (session.kind === "party") return null;

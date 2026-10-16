@@ -1,13 +1,18 @@
 import { v } from "convex/values";
-import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
-import { schema } from "../schema";
 import type { Id } from "../_generated/dataModel";
-import { getMembership, sessionAccess } from "./access";
+import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
+import { access } from "../lib/access";
+import { schema } from "../schema";
+import { getMembership, requireSessionAccess } from "./access";
 
 export const get = authQuery
   .input({ id: v.id("session") })
   .returns(schema.doc("session"))
-  .extend(sessionAccess("read").extend)
+  .extend(
+    access<{ id: Id<"session"> }>()
+      .use((ctx, { id }) => requireSessionAccess(ctx, id, "read"))
+      .extend,
+  )
   .handler(async (ctx) => ctx.session);
 
 export const listCurrent = authQuery
