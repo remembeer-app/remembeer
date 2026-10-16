@@ -5,7 +5,7 @@ import { fixture } from "../support/party_fixture.mjs";
 
 const { outputFiles } = await build({
   stdin: {
-    contents: 'export { create, draw, start } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam";',
+    contents: 'export { create, draw, start } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam"; export * as results from "./convex/beerpongMatch";',
     resolveDir: process.cwd(),
   },
   bundle: true, platform: "node", format: "esm", write: false,
@@ -16,7 +16,7 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { create, draw, start, teams } = await import(
+const { create, draw, start, teams, results } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`,
 );
 
@@ -527,4 +527,185 @@ test("start isolates tournaments and ignores opt-in changes after the draw", asy
   assert.equal(f.tables.beerpongTournament.find(row => row._id === other).status, "setup");
   await runStart(f, other);
   assert.equal(f.tables.beerpongMatch.filter(match => match.tournamentId === other).length, 1);
+});
+
+async function matchSetup(teamCount = 4, thirdPlaceEnabled = true) {
+  const f = setup();
+  const tournamentId = await f.run({ teamCount, thirdPlaceEnabled });
+  for (let index = 0; index < teamCount; index++) enroll(f, `p${index}`);
+  await runDraw(f, tournamentId);
+  await runStart(f, tournamentId);
+  const runResult = (action, id, winnerTeamId, actor = "owner") =>
+    results[action]._handler(f.ctx(actor), { id, winnerTeamId });
+  return { ...f, tournamentId, runResult };
+}
+
+function matchOpponents(f, match) {
+  const resolve = slot => {
+    if (slot.kind === "team") return slot.teamId;
+    if (slot.kind === "bye") return null;
+    const source = f.tables.beerpongMatch.find(row => row._id === slot.matchId);
+    if (!source.winnerTeamId) return undefined;
+    if (slot.kind === "winner") return source.winnerTeamId;
+    return matchOpponents(f, source).find(id => id !== source.winnerTeamId);
+  };
+  return [resolve(match.slotA), resolve(match.slotB)];
+}
+
+async function playAll(f) {
+  for (const match of f.tables.beerpongMatch) {
+    if (match.winnerTeamId !== null) continue;
+    const [a, b] = matchOpponents(f, match);
+    assert.ok(a && b);
+    await f.runResult("recordResult", match._id, a, "b");
+  }
+}
+
+test("recording results plays through every bracket size, resolving winners, losers and byes", async () => {
+  for (let count = 2; count <= 16; count++) {
+    for (const thirdPlace of [false, true]) {
+      const f = await matchSetup(count, thirdPlace);
+      const before = Date.now();
+      await playAll(f);
+      for (const match of f.tables.beerpongMatch) {
+        const opponents = matchOpponents(f, match);
+        assert.ok(opponents.includes(match.winnerTeamId));
+        assert.ok(match.completedAt !== null);
+        assert.ok(match.updatedAt >= match.completedAt);
+      }
+      const final = f.tables.beerpongMatch.filter(match => match.kind === "main").at(-1);
+      assert.ok(final.completedAt >= before);
+      const bronze = f.tables.beerpongMatch.find(match => match.kind === "thirdPlace");
+      if (bronze) {
+        assert.ok(!matchOpponents(f, final).includes(bronze.winnerTeamId));
+        assert.notEqual(bronze.winnerTeamId, final.winnerTeamId);
+      }
+      assert.equal(f.tables.beerpongTournament[0].status, "active");
+      assert.equal(f.tables.beerpongTournament[0].completedAt, null);
+    }
+  }
+});
+
+test("results require resolved opponents, a valid winner, and the appropriate record/correct operation", async () => {
+  const f = await matchSetup();
+  const first = f.tables.beerpongMatch[0];
+  const other = f.tables.beerpongMatch[1];
+  const final = f.tables.beerpongMatch.find(match => match.round === 2 && match.kind === "main");
+  const [a, b] = matchOpponents(f, first);
+  await assert.rejects(f.runResult("recordResult", final._id, a), /Both opponents/);
+  await assert.rejects(f.runResult("correctResult", first._id, a), /no result/);
+  for (const winner of [other.slotA.teamId, "missing-team"])
+    await assert.rejects(f.runResult("recordResult", first._id, winner), /match opponents/);
+  await f.runResult("recordResult", first._id, b);
+  const saved = structuredClone(f.tables);
+  await assert.rejects(f.runResult("recordResult", first._id, b), /already has a result/);
+  await assert.rejects(f.runResult("recordResult", first._id, a), /already has a result/);
+  await assert.rejects(f.runResult("recordResult", final._id, b), /Both opponents/);
+  assert.deepEqual(f.tables, saved);
+  await f.runResult("correctResult", first._id, a);
+  assert.equal(first.winnerTeamId, a);
+  assert.ok(first.completedAt !== null);
+});
+
+test("correcting early results clears all dependent results including bronze, preserving unrelated matches", async () => {
+  const f = await matchSetup(8);
+  await playAll(f);
+  const source = f.tables.beerpongMatch[0];
+  const semifinal = f.tables.beerpongMatch.find(match => match.slotA.matchId === source._id);
+  const final = f.tables.beerpongMatch.find(match => match.kind === "main" && match.round === 3);
+  const bronze = f.tables.beerpongMatch.find(match => match.kind === "thirdPlace");
+  const affected = new Set([source._id, semifinal._id, final._id, bronze._id]);
+  const unrelated = structuredClone(f.tables.beerpongMatch.filter(match => !affected.has(match._id)));
+  const previous = source.winnerTeamId;
+  const replacement = matchOpponents(f, source).find(id => id !== previous);
+  await f.runResult("correctResult", source._id, replacement, "b");
+  assert.equal(source.winnerTeamId, replacement);
+  for (const match of [semifinal, final, bronze]) {
+    assert.equal(match.winnerTeamId, null);
+    assert.equal(match.completedAt, null);
+    assert.equal(match.updatedAt, source.updatedAt);
+  }
+  assert.deepEqual(f.tables.beerpongMatch.filter(match => !affected.has(match._id)), unrelated);
+  assert.equal(f.tables.beerpongTournament[0].updatedAt, source.updatedAt);
+  await assert.rejects(f.runResult("recordResult", final._id, replacement), /Both opponents/);
+  await assert.rejects(f.runResult("recordResult", bronze._id, replacement), /Both opponents/);
+  await playAll(f);
+  assert.ok(final.winnerTeamId);
+  assert.ok(bronze.winnerTeamId);
+});
+
+test("same-winner correction preserves results and correcting finals leaves other matches intact", async () => {
+  const f = await matchSetup(); await playAll(f);
+  const first = f.tables.beerpongMatch[0];
+  const saved = structuredClone(f.tables);
+  await f.runResult("correctResult", first._id, first.winnerTeamId);
+  assert.deepEqual(f.tables, saved);
+  for (const kind of ["main", "thirdPlace"]) {
+    const match = f.tables.beerpongMatch.find(row => row.round === 2 && row.kind === kind);
+    const unrelated = structuredClone(f.tables.beerpongMatch.filter(row => row._id !== match._id));
+    const replacement = matchOpponents(f, match).find(id => id !== match.winnerTeamId);
+    await f.runResult("correctResult", match._id, replacement);
+    assert.equal(match.winnerTeamId, replacement);
+    assert.deepEqual(f.tables.beerpongMatch.filter(row => row._id !== match._id), unrelated);
+  }
+});
+
+test("bye results cannot be manually recorded or corrected", async () => {
+  const f = await matchSetup(5);
+  for (const match of f.tables.beerpongMatch.filter(match => match.slotA.kind === "bye" || match.slotB.kind === "bye")) {
+    const saved = structuredClone(f.tables);
+    for (const action of ["recordResult", "correctResult"])
+      await assert.rejects(f.runResult(action, match._id, match.winnerTeamId), /advance automatically/);
+    assert.deepEqual(f.tables, saved);
+  }
+});
+
+test("result writes enforce admins, active tournaments, ongoing parties and tournament ownership", async () => {
+  const f = await matchSetup();
+  const match = f.tables.beerpongMatch[0];
+  const winner = match.slotA.teamId;
+  await f.runResult("recordResult", match._id, winner);
+  for (const actor of ["a", "other", "invited", "left", "banned"]) {
+    if (["invited", "left", "banned"].includes(actor)) f.member(actor).sessionMemberRole.kind = "admin";
+    for (const action of ["recordResult", "correctResult"])
+      await assert.rejects(f.runResult(action, match._id, winner, actor), /permission/);
+  }
+  for (const status of ["enrollment", "setup", "completed", "cancelled"]) {
+    f.tables.beerpongTournament[0].status = status;
+    const saved = structuredClone(f.tables);
+    for (const action of ["recordResult", "correctResult"])
+      await assert.rejects(f.runResult(action, match._id, winner), /active tournament/);
+    assert.deepEqual(f.tables, saved);
+  }
+  f.tables.beerpongTournament[0].status = "active";
+  for (const [field, value, error] of [
+    ["endedAt", 1, /read-only/], ["deletedAt", 1, /not found/],
+    ["modules", { beerpongEnabled: false }, /disabled/], ["kind", "session", /party/],
+  ]) {
+    const party = f.tables.session[0]; const original = party[field];
+    party[field] = value;
+    for (const action of ["recordResult", "correctResult"])
+      await assert.rejects(f.runResult(action, match._id, winner), error);
+    party[field] = original;
+  }
+  await assert.rejects(f.runResult("recordResult", "missing", winner), /Match not found/);
+  f.tables.session.push({ ...f.tables.session[0], _id: "private", ownerId: "other" });
+  f.tables.beerpongTournament[0].sessionId = "private";
+  await assert.rejects(f.runResult("correctResult", match._id, winner), /permission/);
+  f.tables.beerpongTournament = [];
+  await assert.rejects(f.runResult("correctResult", match._id, winner), /Tournament not found/);
+});
+
+test("results reject missing, cyclic, and foreign bracket source references without writes", async () => {
+  for (const source of ["missing", "self", "foreign"]) {
+    const f = await matchSetup();
+    const final = f.tables.beerpongMatch.find(match => match.round === 2 && match.kind === "main");
+    const winner = f.tables.beerpongTeam[0]._id;
+    if (source === "foreign")
+      f.tables.beerpongMatch.push({ ...f.tables.beerpongMatch[0], _id: "foreign", tournamentId: "another" });
+    final.slotA = { kind: "winner", matchId: source === "self" ? final._id : source };
+    const saved = structuredClone(f.tables);
+    await assert.rejects(f.runResult("recordResult", final._id, winner), source === "self" ? /cycle/ : /source match not found/);
+    assert.deepEqual(f.tables, saved);
+  }
 });
