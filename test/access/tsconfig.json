@@ -1,0 +1,4 @@
+{
+  "extends": "../../convex/tsconfig.json",
+  "include": ["./access_types.ts"]
+}

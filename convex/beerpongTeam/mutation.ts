@@ -4,7 +4,7 @@ import { WithZod } from "fluent-convex/zod";
 import { z } from "zod";
 import { authMutation } from "../lib/authenticated";
 import { getMembership } from "../session/access";
-import { requireEditableTeam } from "./access";
+import { withEditableTeamAccess } from "./withEditableTeamAccess";
 import { maxTeamNameLength } from "./constants";
 
 const memberInput = { id: v.id("beerpongTeam"), userId: v.id("user") };
@@ -16,8 +16,9 @@ export const rename = authMutation
     name: z.string().trim().min(1).max(maxTeamNameLength),
   }))
   .returns(v.null())
+  .extend(withEditableTeamAccess())
   .handler(async (ctx, { id, name }) => {
-    const { team } = await requireEditableTeam(ctx, id);
+    const { team } = ctx;
 
     const now = Date.now();
     await ctx.db.patch("beerpongTeam", id, { name, updatedAt: now });
@@ -29,8 +30,9 @@ export const rename = authMutation
 export const addMember = authMutation
   .input(memberInput)
   .returns(v.null())
+  .extend(withEditableTeamAccess())
   .handler(async (ctx, { id, userId }) => {
-    const { team, tournament } = await requireEditableTeam(ctx, id);
+    const { team, tournament } = ctx;
 
     const member = await getMembership(ctx, tournament.sessionId, userId);
     if (
@@ -61,8 +63,9 @@ export const addMember = authMutation
 export const removeMember = authMutation
   .input(memberInput)
   .returns(v.null())
+  .extend(withEditableTeamAccess())
   .handler(async (ctx, { id, userId }) => {
-    const { team } = await requireEditableTeam(ctx, id);
+    const { team } = ctx;
     if (!team.memberUserIds.includes(userId)) return null;
 
     const now = Date.now();
@@ -78,8 +81,9 @@ export const removeMember = authMutation
 export const moveMember = authMutation
   .input({ ...memberInput, targetTeamId: v.id("beerpongTeam") })
   .returns(v.null())
+  .extend(withEditableTeamAccess())
   .handler(async (ctx, { id, userId, targetTeamId }) => {
-    const { team, tournament } = await requireEditableTeam(ctx, id);
+    const { team, tournament } = ctx;
 
     const target = await ctx.db.get("beerpongTeam", targetTeamId);
     if (!target) throw new ConvexError("Target team not found");
