@@ -2,8 +2,11 @@ import { ConvexError } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { access } from "../lib/access";
 import { partyAccess, ongoingPartyAccess } from "../party/access";
-import { requireSessionAccess } from "../session/access";
-import { beerpongEnabledAccess } from "../beerpongTournament/access";
+import {
+  loadTournament,
+  tournamentSessionAccess,
+  beerpongEnabledAccess,
+} from "../beerpongTournament/access";
 
 export function withEditableTeamAccess() {
   return access<{ id: Id<"beerpongTeam"> }>()
@@ -15,15 +18,8 @@ export function withEditableTeamAccess() {
 
       return { team };
     })
-    .use(async (ctx) => {
-      const tournament = await ctx.db.get("beerpongTournament", ctx.team.tournamentId);
-      if (!tournament) {
-        throw new ConvexError("Tournament not found");
-      }
-
-      return { tournament };
-    })
-    .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+    .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
+    .use(tournamentSessionAccess("admin"))
     .use(partyAccess)
     .use(ongoingPartyAccess)
     .use(beerpongEnabledAccess)

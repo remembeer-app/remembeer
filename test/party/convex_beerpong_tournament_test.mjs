@@ -1071,3 +1071,48 @@ test("beerpong module toggles require an ongoing party admin and preserve other 
   f.tables.session[0].deletedAt = 1;
   await assert.rejects(setEnabled._handler(f.ctx("owner"), input), /not found/);
 });
+
+test("tournament and team access chains load each related entity once", async () => {
+  const f = await teamSetup();
+  const tournamentKey = `beerpongTournament:${f.tournamentId}`;
+  const sessionKey = "session:party";
+  const count = key => f.reads.filter(read => read === key).length;
+
+  f.reads.length = 0;
+  await readTournament(f, f.tournamentId, "a");
+  assert.equal(count(tournamentKey), 1);
+  assert.equal(count(sessionKey), 1);
+
+  f.reads.length = 0;
+  await f.runTeam("rename", { id: f.first._id, name: "Renamed" }, "b");
+  assert.equal(count(`beerpongTeam:${f.first._id}`), 1);
+  assert.equal(count(tournamentKey), 1);
+  assert.equal(count(sessionKey), 1);
+
+  f.reads.length = 0;
+  // Access succeeds, then the handler rejects drawing a tournament in setup.
+  const before = structuredClone(f.tables);
+  await assert.rejects(runDraw(f, f.tournamentId), /enrollment/);
+  assert.equal(count(tournamentKey), 1);
+  assert.equal(count(sessionKey), 1);
+  assert.deepEqual(f.tables, before);
+});
+
+test("recording and correcting results load the match, tournament, and session once", async () => {
+  const f = await matchSetup();
+  const match = f.tables.beerpongMatch.find(row => row.kind === "main" && row.round === 1);
+  const [first, second] = matchOpponents(f, match);
+
+  for (const [action, winner] of [["recordResult", first], ["correctResult", second]]) {
+    f.reads.length = 0;
+    await f.runResult(action, match._id, winner, "b");
+    for (const key of [
+      `beerpongMatch:${match._id}`,
+      `beerpongTournament:${f.tournamentId}`,
+      "session:party",
+    ]) {
+      assert.equal(f.reads.filter(read => read === key).length, 1, key);
+    }
+    assert.equal(match.winnerTeamId, winner);
+  }
+});

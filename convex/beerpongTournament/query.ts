@@ -1,16 +1,16 @@
-import { ConvexError, v } from "convex/values";
+import { v } from "convex/values";
 import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
 import { matchResolver } from "../beerpongMatch/resolution";
-import { requirePartyMember } from "./access";
+import { withTournamentAccess } from "./withTournamentAccess";
+import { withBeerpongPartyAccess } from "./withBeerpongPartyAccess";
 import { tournamentPlacements } from "./scoring";
 
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
   .returns(v.array(schema.doc("beerpongTournament")))
+  .extend(withBeerpongPartyAccess("joined"))
   .handler(async (ctx, { sessionId }) => {
-    await requirePartyMember(ctx, sessionId);
-
     return await ctx.db.query("beerpongTournament")
       .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
       .order("desc")
@@ -35,11 +35,9 @@ export const get = authQuery
     // Placements are final only after finalization, and include every team.
     placements: v.array(v.object({ teamId: v.id("beerpongTeam"), placement: v.number() })),
   }))
+  .extend(withTournamentAccess("joined"))
   .handler(async (ctx, { id }) => {
-    const tournament = await ctx.db.get("beerpongTournament", id);
-    if (!tournament) throw new ConvexError("Tournament not found");
-
-    await requirePartyMember(ctx, tournament.sessionId);
+    const { tournament } = ctx;
 
     const [teams, matches] = await Promise.all([
       ctx.db.query("beerpongTeam")

@@ -1,20 +1,15 @@
 import { ConvexError, v } from "convex/values";
 import { authMutation } from "../lib/authenticated";
-import { requireEnabledPartyAdmin } from "../beerpongTournament/access";
+import { withMatchAccess } from "./withMatchAccess";
 import { downstreamMatches, matchResolver } from "./resolution";
 
 function resultMutation(correcting: boolean) {
   return authMutation
     .input({ id: v.id("beerpongMatch"), winnerTeamId: v.id("beerpongTeam") })
     .returns(v.null())
+    .extend(withMatchAccess())
     .handler(async (ctx, { id, winnerTeamId }) => {
-      const match = await ctx.db.get("beerpongMatch", id);
-      if (!match) throw new ConvexError("Match not found");
-
-      const tournament = await ctx.db.get("beerpongTournament", match.tournamentId);
-      if (!tournament) throw new ConvexError("Tournament not found");
-
-      await requireEnabledPartyAdmin(ctx, tournament.sessionId);
+      const { match, tournament } = ctx;
       if (tournament.status !== "active")
         throw new ConvexError("Results can only be changed in an active tournament");
 

@@ -3,7 +3,8 @@ import { convexToZod } from "convex-helpers/server/zod4";
 import { WithZod } from "fluent-convex/zod";
 import { z } from "zod";
 import { authMutation } from "../lib/authenticated";
-import { requireEnabledPartyAdmin } from "./access";
+import { withTournamentAccess } from "./withTournamentAccess";
+import { withBeerpongPartyAccess } from "./withBeerpongPartyAccess";
 import { requireSessionAccess } from "../session/access";
 import { createBracket } from "./bracket";
 import { loadTournamentAwards } from "./scoring";
@@ -36,8 +37,8 @@ export const create = authMutation
     }),
   )
   .returns(v.id("beerpongTournament"))
+  .extend(withBeerpongPartyAccess("admin"))
   .handler(async (ctx, { sessionId, ...input }) => {
-    await requireEnabledPartyAdmin(ctx, sessionId);
     if (
       input.firstPlacePointsUnits < input.secondPlacePointsUnits ||
       input.secondPlacePointsUnits < input.thirdPlacePointsUnits
@@ -59,11 +60,9 @@ export const create = authMutation
 export const draw = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
+  .extend(withTournamentAccess("admin"))
   .handler(async (ctx, { id }) => {
-    const tournament = await ctx.db.get("beerpongTournament", id);
-    if (!tournament) throw new ConvexError("Tournament not found");
-
-    await requireEnabledPartyAdmin(ctx, tournament.sessionId);
+    const { tournament } = ctx;
     if (tournament.status !== "enrollment")
       throw new ConvexError("Only an enrollment tournament can be drawn");
 
@@ -113,11 +112,9 @@ export const draw = authMutation
 export const start = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
+  .extend(withTournamentAccess("admin"))
   .handler(async (ctx, { id }) => {
-    const tournament = await ctx.db.get("beerpongTournament", id);
-    if (!tournament) throw new ConvexError("Tournament not found");
-
-    await requireEnabledPartyAdmin(ctx, tournament.sessionId);
+    const { tournament } = ctx;
     if (tournament.status !== "setup")
       throw new ConvexError("Only a setup tournament can be started");
 
@@ -185,11 +182,9 @@ export const start = authMutation
 export const finalize = authMutation
   .input({ id: v.id("beerpongTournament") })
   .returns(v.null())
+  .extend(withTournamentAccess("admin"))
   .handler(async (ctx, { id }) => {
-    const tournament = await ctx.db.get("beerpongTournament", id);
-    if (!tournament) throw new ConvexError("Tournament not found");
-
-    await requireEnabledPartyAdmin(ctx, tournament.sessionId);
+    const { tournament } = ctx;
     if (tournament.status === "completed") return null;
 
     if (tournament.status !== "active")

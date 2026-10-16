@@ -2,27 +2,22 @@ import { ConvexError } from "convex/values";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { AuthQueryCtx } from "../lib/authenticated";
 import { requireSessionAccess } from "../session/access";
-import { partyAccess, ongoingPartyAccess } from "../party/access";
 
-export async function requirePartyMember(
+export async function loadTournament(
   ctx: AuthQueryCtx,
-  sessionId: Id<"session">,
+  { id }: { id: Id<"beerpongTournament"> },
 ) {
-  const { session } = await requireSessionAccess(ctx, sessionId, "joined");
+  const tournament = await ctx.db.get("beerpongTournament", id);
+  if (!tournament) {
+    throw new ConvexError("Tournament not found");
+  }
 
-  return partyAccess({ session }).session;
+  return { tournament };
 }
 
-export async function requireEnabledPartyAdmin(
-  ctx: AuthQueryCtx,
-  sessionId: Id<"session">,
-) {
-  const { session } = await requireSessionAccess(ctx, sessionId, "admin");
-  const party = partyAccess({ session });
-  ongoingPartyAccess(party);
-  beerpongEnabledAccess(party);
-
-  return party.session;
+export function tournamentSessionAccess(permission: "joined" | "admin") {
+  return (ctx: AuthQueryCtx & { tournament: Doc<"beerpongTournament"> }) =>
+    requireSessionAccess(ctx, ctx.tournament.sessionId, permission);
 }
 
 export function beerpongEnabledAccess(ctx: {

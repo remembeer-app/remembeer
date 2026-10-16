@@ -15,6 +15,7 @@ import type * as badge_query from "../badge/query.js";
 import type * as beerpongMatch from "../beerpongMatch.js";
 import type * as beerpongMatch_mutation from "../beerpongMatch/mutation.js";
 import type * as beerpongMatch_resolution from "../beerpongMatch/resolution.js";
+import type * as beerpongMatch_withMatchAccess from "../beerpongMatch/withMatchAccess.js";
 import type * as beerpongTeam from "../beerpongTeam.js";
 import type * as beerpongTeam_constants from "../beerpongTeam/constants.js";
 import type * as beerpongTeam_mutation from "../beerpongTeam/mutation.js";
@@ -26,6 +27,8 @@ import type * as beerpongTournament_constants from "../beerpongTournament/consta
 import type * as beerpongTournament_mutation from "../beerpongTournament/mutation.js";
 import type * as beerpongTournament_query from "../beerpongTournament/query.js";
 import type * as beerpongTournament_scoring from "../beerpongTournament/scoring.js";
+import type * as beerpongTournament_withBeerpongPartyAccess from "../beerpongTournament/withBeerpongPartyAccess.js";
+import type * as beerpongTournament_withTournamentAccess from "../beerpongTournament/withTournamentAccess.js";
 import type * as drink from "../drink.js";
 import type * as drink_mutation from "../drink/mutation.js";
 import type * as drink_query from "../drink/query.js";
@@ -108,6 +111,7 @@ declare const fullApi: ApiFromModules<{
   beerpongMatch: typeof beerpongMatch;
   "beerpongMatch/mutation": typeof beerpongMatch_mutation;
   "beerpongMatch/resolution": typeof beerpongMatch_resolution;
+  "beerpongMatch/withMatchAccess": typeof beerpongMatch_withMatchAccess;
   beerpongTeam: typeof beerpongTeam;
   "beerpongTeam/constants": typeof beerpongTeam_constants;
   "beerpongTeam/mutation": typeof beerpongTeam_mutation;
@@ -119,6 +123,8 @@ declare const fullApi: ApiFromModules<{
   "beerpongTournament/mutation": typeof beerpongTournament_mutation;
   "beerpongTournament/query": typeof beerpongTournament_query;
   "beerpongTournament/scoring": typeof beerpongTournament_scoring;
+  "beerpongTournament/withBeerpongPartyAccess": typeof beerpongTournament_withBeerpongPartyAccess;
+  "beerpongTournament/withTournamentAccess": typeof beerpongTournament_withTournamentAccess;
   drink: typeof drink;
   "drink/mutation": typeof drink_mutation;
   "drink/query": typeof drink_query;
