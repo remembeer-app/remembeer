@@ -175,7 +175,7 @@ export const setClass = authMutation
   )
   .returns(v.null())
   .handler(async (ctx, { sessionId, userId, selectedClass }) => {
-    const { session } = await requireSessionAccess(
+    const { session, isAdmin } = await requireSessionAccess(
       ctx,
       sessionId,
       userId === ctx.user._id ? "joined" : "admin",
@@ -193,6 +193,8 @@ export const setClass = authMutation
         "Only joined party members can have classes assigned",
       );
     if (member.selectedClass?.kind === selectedClass?.kind) return null;
+    if (member.selectedClass !== null && !isAdmin)
+      throw new ConvexError("Only admins can change a selected class");
 
     const now = Date.now();
     await ctx.db.patch("sessionMember", member._id, {

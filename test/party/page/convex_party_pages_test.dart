@@ -63,6 +63,12 @@ void main() {
     'games choose the Convex user class and toggle their beerpong opt-in',
     (tester) async {
       final client = _Client();
+      client.responses['sessionMember:listForSession'] = [
+        {
+          'member': {..._member('owner'), 'selectedClass': null},
+          'username': 'Owner',
+        },
+      ];
       await mount(
         tester,
         client,
@@ -78,6 +84,19 @@ void main() {
         'userId': 'owner',
         'selectedClass': {'kind': 'wine'},
       });
+      client.responses['sessionMember:listForSession'] = [
+        {
+          'member': {
+            ..._member('owner'),
+            'selectedClass': {'kind': 'wine'},
+          },
+          'username': 'Owner',
+        },
+      ];
+      client.emit('sessionMember:listForSession');
+      await tester.pumpAndSettle();
+      expect(find.text('Choose your Party class'), findsNothing);
+      expect(find.text('Choose class'), findsNothing);
       await tester.ensureVisible(
         find.widgetWithText(SwitchListTile, 'Join beerpong draws'),
       );

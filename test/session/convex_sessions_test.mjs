@@ -209,6 +209,14 @@ test("members choose their own class while admins manage joined member classes",
   await sessions.promoteToParty(f.owner, { id });
   await members.setClass(f.ctx("member"), input);
   assert.deepEqual(f.member(id, "member").selectedClass, { kind: "beer" });
+  const firstChoice = structuredClone(f.member(id, "member"));
+  for (const selectedClass of [{ kind: "wine" }, null]) {
+    await assert.rejects(
+      members.setClass(f.ctx("member"), { ...input, selectedClass }),
+      /Only admins can change a selected class/,
+    );
+    assert.deepEqual(f.member(id, "member"), firstChoice);
+  }
   await assert.rejects(members.setClass(f.ctx("other"), input), /permission/);
   await assert.rejects(members.setClass(f.ctx("member"), { ...input, userId: "admin" }), /permission/);
   await members.setClass(f.owner, input);

@@ -33,7 +33,9 @@ class PartyGames extends StatelessWidget {
             targetSessionId: party.id.value,
           ).push<void>(context),
         ),
-      if (party.endedAt == null && member != null)
+      if (party.endedAt == null &&
+          member != null &&
+          member!.selectedClass == null)
         SessionMemberSetClassMutation(
           builder: (context, setClass, state) => Column(
             children: [
