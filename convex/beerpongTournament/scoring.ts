@@ -4,7 +4,7 @@ import type { QueryCtx } from "../_generated/server";
 import { matchResolver } from "../beerpongMatch/resolution";
 import { minTeamCount, maxTeamCount } from "./constants";
 
-export function tournamentAwards(
+export function tournamentPlacements(
   tournament: Doc<"beerpongTournament">,
   teams: Doc<"beerpongTeam">[],
   matches: Doc<"beerpongMatch">[],
@@ -65,7 +65,15 @@ export function tournamentAwards(
   }
   if (placements.size !== teams.length || teams.some((team) => !placements.has(team._id)))
     throw new ConvexError("Tournament placements are incomplete");
+  return placements;
+}
 
+export function tournamentAwards(
+  tournament: Doc<"beerpongTournament">,
+  teams: Doc<"beerpongTeam">[],
+  matches: Doc<"beerpongMatch">[],
+) {
+  const placements = tournamentPlacements(tournament, teams, matches);
   return teams.flatMap((team) => {
     const placement = placements.get(team._id)!;
     const points = placement === 1 ? tournament.firstPlacePointsUnits

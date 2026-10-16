@@ -3,6 +3,15 @@ import type { Id } from "../_generated/dataModel";
 import type { AuthQueryCtx } from "../lib/authenticated";
 import { requireSessionAccess } from "../session/access";
 
+export async function requirePartyMember(
+  ctx: AuthQueryCtx,
+  sessionId: Id<"session">,
+) {
+  const { session } = await requireSessionAccess(ctx, sessionId, "joined");
+  if (session.kind !== "party") throw new ConvexError("A party is required");
+  return session;
+}
+
 export async function requireEnabledPartyAdmin(
   ctx: AuthQueryCtx,
   sessionId: Id<"session">,

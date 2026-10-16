@@ -5,7 +5,7 @@ import { fixture } from "../support/party_fixture.mjs";
 
 const { outputFiles } = await build({
   stdin: {
-    contents: 'export { create, draw, start, finalize } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam"; export * as results from "./convex/beerpongMatch"; export { standings } from "./convex/party/query"; export { activity } from "./convex/party/activity"; export { loadQuestContext } from "./convex/partyQuest/context";',
+    contents: 'export { create, draw, start, finalize, get as getTournament, listForSession } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam"; export * as results from "./convex/beerpongMatch"; export { standings } from "./convex/party/query"; export { activity } from "./convex/party/activity"; export { loadQuestContext } from "./convex/partyQuest/context";',
     resolveDir: process.cwd(),
   },
   bundle: true, platform: "node", format: "esm", write: false,
@@ -16,7 +16,7 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { create, draw, start, finalize, teams, results, standings, activity, loadQuestContext } = await import(
+const { create, draw, start, finalize, getTournament, listForSession, teams, results, standings, activity, loadQuestContext } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`,
 );
 
@@ -36,6 +36,18 @@ function setup() {
     const row = f.tables[table].find(row => row._id === id);
     assert.ok(row);
     Object.assign(row, structuredClone(fields));
+  };
+  const originalQuery = f.ctx("owner").db.query;
+  f.ctx("owner").db.query = table => {
+    const query = originalQuery(table);
+    const collect = query.collect;
+    let direction = "asc";
+    query.order = value => { direction = value; return query; };
+    query.collect = async () => {
+      const rows = await collect();
+      return direction === "desc" ? rows.reverse() : rows;
+    };
+    return query;
   };
   const input = {
     sessionId: "party", name: "  Friday cup  ", teamCount: 4,
@@ -61,6 +73,8 @@ const runDraw = (f, id, actor = "owner") => draw._handler(f.ctx(actor), { id });
 const runStart = (f, id, actor = "owner") => start._handler(f.ctx(actor), { id });
 const runFinalize = (f, id, actor = "owner") => finalize._handler(f.ctx(actor), { id });
 const readActivity = (f, args = {}) => activity(f.ctx("owner"), { sessionId: "party", ...args });
+const readTournament = (f, id, actor = "owner") => getTournament._handler(f.ctx(actor), { id });
+const listTournaments = (f, sessionId = "party", actor = "owner") => listForSession._handler(f.ctx(actor), { sessionId });
 
 test("owner and joined admins create enrollment tournaments without drawing teams", async () => {
   const f = setup();
@@ -887,4 +901,131 @@ test("completed tournaments accumulate points while unfinished, cancelled and fo
   assert.equal((await f.read()).entries.reduce((sum, entry) => sum + entry.beerpongScoreUnits, 0), 120000);
   f.tables.beerpongTournament[1].sessionId = "foreign";
   assert.deepEqual((await readActivity(f)).entries, initial);
+});
+
+test("tournament list is newest first, includes every lifecycle state, and is scoped to its party", async () => {
+  const f = setup();
+  assert.deepEqual(await listTournaments(f), []);
+  const ids = [];
+  for (const status of ["completed", "cancelled", "active", "setup", "enrollment"]) {
+    const id = await f.run({ name: status }); ids.push(id);
+    f.tables.beerpongTournament.at(-1).status = status;
+  }
+  f.tables.beerpongTournament.push({ ...f.tables.beerpongTournament[0], _id: "foreign", sessionId: "other" });
+  const saved = structuredClone(f.tables);
+  const rows = await listTournaments(f, "party", "a");
+  assert.deepEqual(rows.map(row => row._id), ids.toReversed());
+  assert.deepEqual(f.tables, saved);
+});
+
+test("tournament detail exposes enrollment and setup teams without inventing matches or placements", async () => {
+  const f = setup(); const id = await f.run({ teamCount: 2 });
+  assert.deepEqual(await readTournament(f, id, "a"), {
+    tournament: f.tables.beerpongTournament[0], teams: [], matches: [], placements: [],
+  });
+  enroll(f, "p0"); enroll(f, "p1"); await runDraw(f, id);
+  const detail = await readTournament(f, id);
+  assert.equal(detail.tournament.status, "setup");
+  assert.deepEqual(detail.teams, f.tables.beerpongTeam);
+  assert.deepEqual(detail.matches, []);
+  assert.deepEqual(detail.placements, []);
+});
+
+test("detail resolves pending winners and losers, playable matches, and corrections without writing source rows", async () => {
+  const f = await matchSetup();
+  const [first, second] = f.tables.beerpongMatch;
+  const saved = structuredClone(f.tables);
+  let detail = await readTournament(f, f.tournamentId, "a");
+  assert.deepEqual(detail.matches.map(match => match.status), ["ready", "ready", "pending", "pending"]);
+  assert.deepEqual(f.tables, saved);
+  const final = f.tables.beerpongMatch.find(match => match.kind === "main" && match.round === 2);
+  const bronze = f.tables.beerpongMatch.find(match => match.kind === "thirdPlace");
+  await f.runResult("recordResult", first._id, first.slotA.teamId);
+  detail = await readTournament(f, f.tournamentId);
+  assert.equal(detail.matches.find(match => match._id === first._id).status, "completed");
+  const projectedFinal = detail.matches.find(match => match._id === final._id);
+  assert.equal(projectedFinal.teamAId, first.winnerTeamId);
+  assert.equal(projectedFinal.teamBId, null);
+  assert.equal(projectedFinal.status, "pending");
+  assert.equal(detail.matches.find(match => match._id === bronze._id).teamAId, first.slotB.teamId);
+  await f.runResult("recordResult", second._id, second.slotA.teamId);
+  detail = await readTournament(f, f.tournamentId);
+  assert.equal(detail.matches.find(match => match._id === final._id).status, "ready");
+  assert.equal(detail.matches.find(match => match._id === bronze._id).status, "ready");
+  await playAll(f);
+  detail = await readTournament(f, f.tournamentId);
+  assert.ok(detail.matches.every(match => match.status === "completed"));
+  assert.deepEqual(detail.placements, []);
+  await f.runResult("correctResult", first._id, first.slotB.teamId);
+  detail = await readTournament(f, f.tournamentId);
+  assert.equal(detail.matches.find(match => match._id === final._id).teamAId, first.slotB.teamId);
+  assert.equal(detail.matches.find(match => match._id === final._id).status, "ready");
+  assert.equal(detail.matches.find(match => match._id === bronze._id).teamAId, first.slotA.teamId);
+  assert.ok(detail.matches.filter(match => match.round === 2).every(match => match.winnerTeamId === null));
+  assert.equal(JSON.stringify(detail).includes('"teamAId":null'), false);
+});
+
+test("detail reports automatic byes and every final placement, including fourth and shared lower places", async () => {
+  for (let count = 2; count <= 16; count++) {
+    for (const thirdPlace of [false, true]) {
+      const f = await matchSetup(count, thirdPlace);
+      let detail = await readTournament(f, f.tournamentId);
+      const bracketSize = 2 ** Math.ceil(Math.log2(count));
+      assert.equal(detail.matches.filter(match => match.status === "bye").length, bracketSize - count);
+      for (const match of detail.matches.filter(match => match.status === "bye")) {
+        assert.ok(match.teamAId === null || match.teamBId === null);
+        assert.equal(match.winnerTeamId, match.teamAId ?? match.teamBId);
+      }
+      await playAll(f); await runFinalize(f, f.tournamentId);
+      detail = await readTournament(f, f.tournamentId);
+      assert.equal(detail.placements.length, count);
+      assert.equal(new Set(detail.placements.map(placement => placement.teamId)).size, count);
+      assert.deepEqual(detail.placements.map(row => row.placement),
+        detail.placements.map(row => row.placement).toSorted((a, b) => a - b));
+      const awards = (await readActivity(f)).entries;
+      for (const award of awards)
+        assert.equal(detail.placements.find(row => row.teamId === award.teamId).placement, award.placement);
+      if (thirdPlace && count >= 4)
+        assert.equal(detail.placements.filter(row => row.placement === 4).length, 1);
+      if (count > 4)
+        assert.ok(detail.placements.some(row => row.placement >= 5));
+    }
+  }
+});
+
+test("tournament reads enforce party membership and deletion but remain available for disabled modules and ended parties", async () => {
+  const f = await matchSetup(); await playAll(f); await runFinalize(f, f.tournamentId);
+  for (const actor of ["invited", "left", "banned", "other"]) {
+    await assert.rejects(readTournament(f, f.tournamentId, actor), /permission/);
+    await assert.rejects(listTournaments(f, "party", actor), /permission/);
+  }
+  await assert.rejects(readTournament(f, "missing"), /Tournament not found/);
+  await assert.rejects(listTournaments(f, "missing"), /Session not found/);
+  f.tables.sessionMember = f.tables.sessionMember.filter(member => member.userId !== "owner");
+  const expected = await readTournament(f, f.tournamentId);
+  f.tables.session[0].endedAt = Date.now();
+  f.tables.session[0].modules.beerpongEnabled = false;
+  assert.deepEqual(await readTournament(f, f.tournamentId, "a"), expected);
+  assert.equal((await listTournaments(f, "party", "a")).length, 1);
+  assert.deepEqual(await readTournament(f, f.tournamentId), expected);
+  f.tables.session[0].kind = "session";
+  await assert.rejects(readTournament(f, f.tournamentId), /party/);
+  await assert.rejects(listTournaments(f), /party/);
+  f.tables.session[0].kind = "party";
+  f.tables.session[0].deletedAt = Date.now();
+  await assert.rejects(readTournament(f, f.tournamentId), /not found/);
+  await assert.rejects(listTournaments(f), /not found/);
+});
+
+test("detail never includes teams or matches from another tournament, and rejects cross-party access", async () => {
+  const f = await matchSetup();
+  const id = await f.run(); await runDraw(f, id); await runStart(f, id);
+  const detail = await readTournament(f, id);
+  assert.ok(detail.teams.every(team => team.tournamentId === id));
+  assert.ok(detail.matches.every(match => match.tournamentId === id));
+  f.tables.session.push({ ...f.tables.session[0], _id: "private", ownerId: "other" });
+  f.tables.beerpongTournament[1].sessionId = "private";
+  await assert.rejects(readTournament(f, id, "a"), /permission/);
+  await assert.rejects(listTournaments(f, "private", "a"), /permission/);
+  assert.equal((await listTournaments(f)).length, 1);
 });

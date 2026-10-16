@@ -312,3 +312,137 @@ class BeerpongTournamentStartMutation extends StatelessWidget {
     ),
   );
 }
+
+/// Flutter widget for beerpongTournament:get.
+class BeerpongTournamentGetTypeQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const BeerpongTournamentGetTypeQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+    required this.id,
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const BeerpongTournamentGetTypeQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    required this.id,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, GetTypeResult)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(BuildContext, ConvexQuerySnapshot<GetTypeResult>)?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final BeerpongTournamentId id;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<GetTypeArgs, GetTypeResult>.snapshot(
+        query: getValueQueryReference,
+        args: (id: id),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<GetTypeArgs, GetTypeResult>(
+      query: getValueQueryReference,
+      args: (id: id),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}
+
+/// Flutter widget for beerpongTournament:listForSession.
+class BeerpongTournamentListForSessionQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const BeerpongTournamentListForSessionQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+    required this.sessionId,
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const BeerpongTournamentListForSessionQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    required this.sessionId,
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, List<BeerpongTournamentDocument>)?
+  builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(
+    BuildContext,
+    ConvexQuerySnapshot<List<BeerpongTournamentDocument>>,
+  )?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final SessionId sessionId;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<
+        ListForSessionArgs,
+        List<BeerpongTournamentDocument>
+      >.snapshot(
+        query: listForSessionQueryReference,
+        args: (sessionId: sessionId),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<
+      ListForSessionArgs,
+      List<BeerpongTournamentDocument>
+    >(
+      query: listForSessionQueryReference,
+      args: (sessionId: sessionId),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}
