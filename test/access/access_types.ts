@@ -120,3 +120,107 @@ access<{ id: Id<"beerpongTournament"> }>()
 
     return { partyKind, tournamentName: ctx.tournament.name };
   });
+
+// Object spreads replace fields; a replacement must not become an intersection.
+const replacedValue = access<Record<never, never>>()
+  .use(() => ({ value: 123, retained: true }))
+  .use(() => ({ value: "replacement" }))
+  .use((ctx) => {
+    const value: string = ctx.value;
+    const retained: boolean = ctx.retained;
+    // @ts-expect-error The earlier numeric value has been replaced.
+    const oldValue: number = ctx.value;
+    // @ts-expect-error A valid replacement must not be inferred as never.
+    const impossible: never = ctx.value;
+
+    return { value, retained, oldValue, impossible };
+  });
+
+authQuery
+  .input({})
+  .returns(v.string())
+  .extend(replacedValue.extend)
+  .handler(async (ctx) => {
+    // @ts-expect-error Replaced field types must also reach the final handler.
+    const oldValue: number = ctx.value;
+
+    return `${ctx.value}:${oldValue}`;
+  });
+
+// Steps cannot replace built-in authentication or Convex capabilities.
+// @ts-expect-error Database context is reserved.
+access<Record<never, never>>().use(() => ({ db: {} }));
+// @ts-expect-error Even a type-compatible replacement of user is forbidden.
+access<Record<never, never>>().use((ctx) => ({ user: ctx.user }));
+// @ts-expect-error Auth user context is reserved.
+access<Record<never, never>>().use((ctx) => ({ authUser: ctx.authUser }));
+// @ts-expect-error Mutation capabilities are reserved even in a read-only step.
+access<Record<never, never>>().use(() => ({ scheduler: {} }));
+// @ts-expect-error Optional built-in replacements must also be rejected.
+access<Record<never, never>>().use((): { db?: object } => ({}));
+// @ts-expect-error Async steps must obey the same reserved-key constraint.
+access<Record<never, never>>().use(async () => ({ runMutation: () => null }));
+
+// Fields added by earlier builder middleware must follow replacement semantics.
+const withLabel = authQuery.use(async (ctx, next) => next({ ...ctx, label: 123 }));
+withLabel
+  .input({})
+  .returns(v.string())
+  .extend(access<Record<never, never>>().use(() => ({ label: "replacement" })).extend)
+  .handler(async (ctx) => {
+    const label: string = ctx.label;
+    // @ts-expect-error The access chain replaced the earlier middleware's label.
+    const oldLabel: number = ctx.label;
+
+    return `${label}:${oldLabel}`;
+  });
+
+// An optional replacement can be absent, leaving the previous value in place.
+access<Record<never, never>>()
+  .use(() => ({ value: 123 }))
+  .use((): { value?: string } => ({}))
+  .use((ctx) => {
+    const value: number | string = ctx.value;
+    // @ts-expect-error An absent optional replacement retains the number.
+    const onlyString: string | undefined = ctx.value;
+
+    return { value, onlyString };
+  });
+
+// Explicit undefined is a real replacement, unlike an absent optional field.
+access<Record<never, never>>()
+  .use(() => ({ value: 123 }))
+  .use((): { value?: string | undefined } => ({ value: undefined }))
+  .use((ctx) => {
+    const value: number | string | undefined = ctx.value;
+    // @ts-expect-error A present undefined value must remain in the inferred type.
+    const defined: number | string = ctx.value;
+
+    return { value, defined };
+  });
+
+// A step's union branches must not leave the previous field type on both sides.
+access<Record<never, never>>()
+  .use(() => ({ value: 123 }))
+  .use((): { value: string; kind: "replaced" } | { kind: "retained" } => ({ kind: "retained" }))
+  .use((ctx) => {
+    if (ctx.kind === "replaced") {
+      const value: string = ctx.value;
+      // @ts-expect-error The replacement branch contains a string.
+      const oldValue: number = ctx.value;
+
+      return { value, oldValue };
+    }
+
+    const retained: number = ctx.value;
+
+    return { retained };
+  });
+
+// Reserved fields cannot be hidden in just one branch or in a dictionary.
+// @ts-expect-error Every return branch must respect the reserved context keys.
+access<Record<never, never>>().use((): { safe: true } | { db: object } => ({ safe: true }));
+// @ts-expect-error Arbitrary dictionary keys could overwrite the base context.
+access<Record<never, never>>().use((): Record<string, unknown> => ({}));
+// @ts-expect-error Existing context objects must not be returned as access additions.
+access<Record<never, never>>().use((ctx) => ctx);

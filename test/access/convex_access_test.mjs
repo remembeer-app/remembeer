@@ -41,6 +41,23 @@ const { outputFiles } = await build({
           return ctx.resource.ownerId + ":" + ctx.authorized;
         });
 
+      const replacements = access()
+        .use(() => ({ value: 123, retained: true }))
+        .use((ctx, input) => input.mode === "replace"
+          ? { value: "replacement" }
+          : input.mode === "undefined" ? { value: undefined } : {})
+        .use((ctx) => ({ observedType: typeof ctx.value, label: "new label" }));
+
+      export const replacementEndpoint = authenticated
+        .use(async (ctx, next) => next({ ...ctx, label: 123 }))
+        .input({ mode: v.union(v.literal("replace"), v.literal("absent"), v.literal("undefined")) })
+        .returns(v.object({ value: v.string(), observedType: v.string(), retained: v.boolean(), label: v.string() }))
+        .extend(replacements.extend)
+        .handler(async (ctx) => ({
+          value: String(ctx.value), observedType: ctx.observedType,
+          retained: ctx.retained, label: ctx.label,
+        }));
+
       // Extending a chain leaves the original available for less strict calls.
       export const strictEndpoint = authenticated
         .input({ id: v.string() })
@@ -52,7 +69,7 @@ const { outputFiles } = await build({
   },
   bundle: true, platform: "node", format: "esm", write: false,
 });
-const { endpoint, strictEndpoint } = await import(
+const { endpoint, strictEndpoint, replacementEndpoint } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
 );
 
@@ -112,6 +129,21 @@ for (const registered of [false, true]) {
     assert.deepEqual(results, ["alice:true", "bob:true"]);
     assert.equal(alice.reads.length, 1);
     assert.equal(bob.reads.length, 1);
+  });
+
+  test(`${mode} replacements agree between later steps and handlers, including optional fields`, async () => {
+    for (const [replacementMode, value, observedType] of [
+      ["replace", "replacement", "string"],
+      ["absent", "123", "number"],
+      ["undefined", "undefined", "undefined"],
+    ]) {
+      const f = fixture();
+      assert.deepEqual(await invoke(replacementEndpoint, f.ctx, { mode: replacementMode }), {
+        value, observedType, retained: true, label: "new label",
+      });
+      assert.equal("value" in f.ctx, false);
+      assert.equal("label" in f.ctx, false);
+    }
   });
 
   test(`${mode} extending a chain adds guards without changing the original`, async () => {
