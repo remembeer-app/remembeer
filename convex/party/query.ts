@@ -40,8 +40,7 @@ export const standings = authQuery
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
-      .use(requireParty)
-      .extend,
+      .use(requireParty).extend,
   )
   .handler(async (ctx, { sessionId }) => {
     const now = Date.now();

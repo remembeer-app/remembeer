@@ -14,24 +14,36 @@ const { outputFiles } = await build({
       );`,
     resolveDir: process.cwd(),
   },
-  bundle: true, platform: "node", format: "esm", write: false,
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  write: false,
 });
 const { builtInQuests, questValidator } = await import(
-  `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`,
+  `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
 );
 
 function issuedQuest(definition) {
   const { availability, ...fields } = definition;
   return {
-    ...fields, sessionId: "party", startsAt: 1000, endsAt: 2000,
-    status: "active", updatedAt: 1000,
+    ...fields,
+    sessionId: "party",
+    startsAt: 1000,
+    endsAt: 2000,
+    status: "active",
+    updatedAt: 1000,
     selections: [{ userId: "a", selectedUserId: "b", selectedAt: 1200 }],
     results: [{ firstUserId: "a", secondUserId: "b", completedAt: 1500 }],
   };
 }
 
 test("built-in catalog preserves all existing definitions and availability stages", () => {
-  const legacy = JSON.parse(execFileSync("python3", ["-c", `
+  const legacy = JSON.parse(
+    execFileSync(
+      "python3",
+      [
+        "-c",
+        `
 import json
 from party_quest_catalog import BUILT_IN_QUEST_CATALOG
 print(json.dumps([
@@ -42,10 +54,16 @@ print(json.dumps([
     dict(kind=quest.eligibility_rule, title=quest.title, instructions=quest.instructions,
          pointsUnits=quest.points_units, availability=quest.availability)
     for quest in BUILT_IN_QUEST_CATALOG
-]))`,], { cwd: "functions", encoding: "utf8" }));
+]))`,
+      ],
+      { cwd: "functions", encoding: "utf8" },
+    ),
+  );
   assert.deepEqual(builtInQuests, legacy);
   assert.equal(builtInQuests.length, 18);
-  const identities = builtInQuests.map(quest => `${quest.kind}:${quest.drinkCategory?.kind ?? ""}`);
+  const identities = builtInQuests.map(
+    (quest) => `${quest.kind}:${quest.drinkCategory?.kind ?? ""}`,
+  );
   assert.equal(new Set(identities).size, builtInQuests.length);
 });
 

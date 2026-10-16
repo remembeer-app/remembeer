@@ -1,9 +1,6 @@
 import type { AuthMutationCtx, AuthQueryCtx } from "./authenticated";
 
-type AsyncHandler<TContext, TInput, TResult> = (
-  ctx: TContext,
-  input: TInput,
-) => Promise<TResult>;
+type AsyncHandler<TContext, TInput, TResult> = (ctx: TContext, input: TInput) => Promise<TResult>;
 
 type AccessStep<TContext, TInput, TAdded extends object> = (
   ctx: TContext,
@@ -14,8 +11,7 @@ type AccessStep<TContext, TInput, TAdded extends object> = (
 // authentication or Convex capabilities (including mutation-only capabilities).
 type ProtectedContextKeys = keyof AuthQueryCtx | keyof AuthMutationCtx;
 type Keys<T> = T extends unknown ? keyof T : never;
-type NoContextOverrides<T> =
-  Extract<ProtectedContextKeys, Keys<T>> extends never ? unknown : never;
+type NoContextOverrides<T> = Extract<ProtectedContextKeys, Keys<T>> extends never ? unknown : never;
 
 type RequiredKeys<T> = {
   [K in keyof T]-?: Record<never, never> extends Pick<T, K> ? never : K;
@@ -26,11 +22,11 @@ type RequiredKeys<T> = {
 type Merge<TPrevious, TAdded> = TPrevious extends unknown
   ? TAdded extends unknown
     ? {
-        [K in keyof TPrevious as K extends RequiredKeys<TAdded> ? never : K]:
-          K extends keyof TAdded
-            ? TPrevious[K] | Required<TAdded>[K]
-            : TPrevious[K];
-      } & Omit<TAdded, keyof TPrevious> & Pick<TAdded, RequiredKeys<TAdded>>
+        [K in keyof TPrevious as K extends RequiredKeys<TAdded> ? never : K]: K extends keyof TAdded
+          ? TPrevious[K] | Required<TAdded>[K]
+          : TPrevious[K];
+      } & Omit<TAdded, keyof TPrevious> &
+        Pick<TAdded, RequiredKeys<TAdded>>
     : never
   : never;
 
@@ -45,12 +41,7 @@ function mergeFields(previous: object, added: object) {
 }
 
 class AccessChain<TInput, TAccess extends object> {
-  constructor(
-    private readonly resolve: (
-      ctx: AuthQueryCtx,
-      input: TInput,
-    ) => Promise<TAccess>,
-  ) {}
+  constructor(private readonly resolve: (ctx: AuthQueryCtx, input: TInput) => Promise<TAccess>) {}
 
   use<TAdded extends object>(
     step: AccessStep<AuthQueryCtx & TAccess, TInput, TAdded> & NoContextOverrides<TAdded>,
@@ -70,20 +61,17 @@ class AccessChain<TInput, TAccess extends object> {
     THandlerInput extends TInput,
     TResult,
     TRegisteredFunction,
-  >(
-    builder: {
-      handler: (
-        callback: AsyncHandler<TContext, THandlerInput, TResult>,
-      ) => TRegisteredFunction;
-    },
-  ) => {
+  >(builder: {
+    handler: (callback: AsyncHandler<TContext, THandlerInput, TResult>) => TRegisteredFunction;
+  }) => {
     const registerHandler = (
       handler: AsyncHandler<Merge<TContext, TAccess>, THandlerInput, TResult>,
-    ) => builder.handler(async (ctx, input) => {
-      const loaded: TAccess = await this.resolve(ctx, input);
+    ) =>
+      builder.handler(async (ctx, input) => {
+        const loaded: TAccess = await this.resolve(ctx, input);
 
-      return await handler(mergeFields(ctx, loaded), input);
-    });
+        return await handler(mergeFields(ctx, loaded), input);
+      });
 
     return { handler: registerHandler };
   };

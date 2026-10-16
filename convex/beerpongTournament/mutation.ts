@@ -7,11 +7,7 @@ import { authMutation } from "../lib/authenticated";
 import { access } from "../lib/access";
 import { requireSessionAccess } from "../session/access";
 import { requireParty, requireOngoingParty } from "../party/access";
-import {
-  loadTournament,
-  requireBeerpongEnabled,
-  requireOngoingBeerpongParty,
-} from "./access";
+import { loadTournament, requireBeerpongEnabled, requireOngoingBeerpongParty } from "./access";
 import { createBracket } from "./bracket";
 import { loadTournamentAwards } from "./scoring";
 import {
@@ -23,11 +19,7 @@ import {
   defaultTeamNamePrefix,
 } from "./constants";
 
-const placementPoints = z
-  .number()
-  .int()
-  .min(minPlacementPointsUnits)
-  .max(maxPlacementPointsUnits);
+const placementPoints = z.number().int().min(minPlacementPointsUnits).max(maxPlacementPointsUnits);
 
 const tournamentAdminAccess = access<{ id: Id<"beerpongTournament"> }>()
   .use(loadTournament)
@@ -55,17 +47,14 @@ export const create = authMutation
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
       .use(requireParty)
       .use(requireOngoingParty)
-      .use(requireBeerpongEnabled)
-      .extend,
+      .use(requireBeerpongEnabled).extend,
   )
   .handler(async (ctx, { sessionId, ...input }) => {
     if (
       input.firstPlacePointsUnits < input.secondPlacePointsUnits ||
       input.secondPlacePointsUnits < input.thirdPlacePointsUnits
     )
-      throw new ConvexError(
-        "Placement points must not increase for lower placements",
-      );
+      throw new ConvexError("Placement points must not increase for lower placements");
 
     return await ctx.db.insert("beerpongTournament", {
       ...input,
@@ -89,9 +78,7 @@ export const draw = authMutation
     const members = await ctx.db
       .query("sessionMember")
       .withIndex("by_sessionId_and_sessionMemberStatus_kind", (q) =>
-        q
-          .eq("sessionId", tournament.sessionId)
-          .eq("sessionMemberStatus.kind", "joined"),
+        q.eq("sessionId", tournament.sessionId).eq("sessionMemberStatus.kind", "joined"),
       )
       .collect();
 
@@ -114,9 +101,7 @@ export const draw = authMutation
       await ctx.db.insert("beerpongTeam", {
         tournamentId: id,
         name: `${defaultTeamNamePrefix} ${index + 1}`,
-        memberUserIds: players.filter(
-          (_, position) => position % tournament.teamCount === index,
-        ),
+        memberUserIds: players.filter((_, position) => position % tournament.teamCount === index),
         updatedAt: now,
       });
     }
@@ -147,9 +132,7 @@ export const start = authMutation
       teams.length < minTeamCount ||
       teams.length > maxTeamCount
     )
-      throw new ConvexError(
-        "Tournament teams must match the configured team count",
-      );
+      throw new ConvexError("Tournament teams must match the configured team count");
 
     if (teams.some((team) => team.memberUserIds.length === 0))
       throw new ConvexError("Every team must have at least one player");
@@ -157,16 +140,12 @@ export const start = authMutation
     const members = await ctx.db
       .query("sessionMember")
       .withIndex("by_sessionId_and_sessionMemberStatus_kind", (q) =>
-        q
-          .eq("sessionId", tournament.sessionId)
-          .eq("sessionMemberStatus.kind", "joined"),
+        q.eq("sessionId", tournament.sessionId).eq("sessionMemberStatus.kind", "joined"),
       )
       .collect();
 
     const eligible = new Set(
-      members
-        .filter((member) => member.kind === "partyMember")
-        .map((member) => member.userId),
+      members.filter((member) => member.kind === "partyMember").map((member) => member.userId),
     );
     const players = teams.flatMap((team) => team.memberUserIds);
     if (new Set(players).size !== players.length)
@@ -177,12 +156,9 @@ export const start = authMutation
 
     const matches = await ctx.db
       .query("beerpongMatch")
-      .withIndex("by_tournamentId_and_round_and_position", (q) =>
-        q.eq("tournamentId", id),
-      )
+      .withIndex("by_tournamentId_and_round_and_position", (q) => q.eq("tournamentId", id))
       .collect();
-    if (matches.length > 0)
-      throw new ConvexError("Tournament already has a bracket");
+    if (matches.length > 0) throw new ConvexError("Tournament already has a bracket");
 
     const now = Date.now();
     await createBracket(
@@ -228,8 +204,7 @@ export const setEnabled = authMutation
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(requireOngoingBeerpongParty)
-      .extend,
+      .use(requireOngoingBeerpongParty).extend,
   )
   .handler(async (ctx, { sessionId, enabled }) => {
     const { session } = ctx;

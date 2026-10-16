@@ -35,23 +35,26 @@ export async function createBracket(
   for (let index = 0; index < positions.length; index += 2) {
     const slotA = slot(positions[index]!);
     const slotB = slot(positions[index + 1]!);
-    const byeWinner = slotA.kind === "bye" && slotB.kind === "team"
-      ? slotB.teamId
-      : slotB.kind === "bye" && slotA.kind === "team"
-        ? slotA.teamId
-        : null;
+    const byeWinner =
+      slotA.kind === "bye" && slotB.kind === "team"
+        ? slotB.teamId
+        : slotB.kind === "bye" && slotA.kind === "team"
+          ? slotA.teamId
+          : null;
 
-    previous.push(await ctx.db.insert("beerpongMatch", {
-      tournamentId: tournament._id,
-      round: 1,
-      position: index / 2 + 1,
-      kind: "main",
-      slotA,
-      slotB,
-      winnerTeamId: byeWinner,
-      completedAt: byeWinner === null ? null : now,
-      updatedAt: now,
-    }));
+    previous.push(
+      await ctx.db.insert("beerpongMatch", {
+        tournamentId: tournament._id,
+        round: 1,
+        position: index / 2 + 1,
+        kind: "main",
+        slotA,
+        slotB,
+        winnerTeamId: byeWinner,
+        completedAt: byeWinner === null ? null : now,
+        updatedAt: now,
+      }),
+    );
   }
 
   let round = 1;
@@ -65,17 +68,19 @@ export async function createBracket(
     const current: Id<"beerpongMatch">[] = [];
 
     for (let index = 0; index < previous.length; index += 2) {
-      current.push(await ctx.db.insert("beerpongMatch", {
-        tournamentId: tournament._id,
-        round,
-        position: index / 2 + 1,
-        kind: "main",
-        slotA: { kind: "winner", matchId: previous[index]! },
-        slotB: { kind: "winner", matchId: previous[index + 1]! },
-        winnerTeamId: null,
-        completedAt: null,
-        updatedAt: now,
-      }));
+      current.push(
+        await ctx.db.insert("beerpongMatch", {
+          tournamentId: tournament._id,
+          round,
+          position: index / 2 + 1,
+          kind: "main",
+          slotA: { kind: "winner", matchId: previous[index]! },
+          slotB: { kind: "winner", matchId: previous[index + 1]! },
+          winnerTeamId: null,
+          completedAt: null,
+          updatedAt: now,
+        }),
+      );
     }
 
     previous = current;

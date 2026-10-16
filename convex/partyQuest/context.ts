@@ -14,29 +14,24 @@ export async function loadQuestContext(
   const sessionId = typeof sessionOrId === "string" ? sessionOrId : sessionOrId._id;
   const { entries, quests } = await loadPartyScores(ctx, sessionId, now);
 
-  const session = typeof sessionOrId === "string"
-    ? await ctx.db.get("session", sessionOrId)
-    : sessionOrId;
+  const session =
+    typeof sessionOrId === "string" ? await ctx.db.get("session", sessionOrId) : sessionOrId;
 
-  const { teamByUserId, finalistTeamIds } = await loadBeerpongQuestContext(
-    ctx,
-    session,
-  );
+  const { teamByUserId, finalistTeamIds } = await loadBeerpongQuestContext(ctx, session);
 
-  const players: QuestPlayer[] = entries.flatMap(
-    ({ member, user, scoreUnits }) =>
-      member.selectedClass !== null && user
-        ? [
-            {
-              userId: user._id,
-              username: user.username,
-              selectedClass: member.selectedClass.kind,
-              accentColor: user.accentColor,
-              scoreUnits,
-              beerpongTeamId: teamByUserId.get(user._id) ?? null,
-            },
-          ]
-        : [],
+  const players: QuestPlayer[] = entries.flatMap(({ member, user, scoreUnits }) =>
+    member.selectedClass !== null && user
+      ? [
+          {
+            userId: user._id,
+            username: user.username,
+            selectedClass: member.selectedClass.kind,
+            accentColor: user.accentColor,
+            scoreUnits,
+            beerpongTeamId: teamByUserId.get(user._id) ?? null,
+          },
+        ]
+      : [],
   );
   if (players.length > maxQuestPlayers)
     throw new ConvexError(`Quests support at most ${maxQuestPlayers} players`);
@@ -45,9 +40,7 @@ export async function loadQuestContext(
 
   for (const quest of quests) {
     for (const result of quest.results) {
-      previousPairs.add(
-        JSON.stringify(memberPair(result.firstUserId, result.secondUserId)),
-      );
+      previousPairs.add(JSON.stringify(memberPair(result.firstUserId, result.secondUserId)));
     }
   }
 
@@ -56,26 +49,18 @@ export async function loadQuestContext(
 
 // The newest tournament owns the team context, including during enrollment or
 // after cancellation, so old assignments cannot leak into a new tournament.
-async function loadBeerpongQuestContext(
-  ctx: QueryCtx,
-  session: Doc<"session"> | null,
-) {
+async function loadBeerpongQuestContext(ctx: QueryCtx, session: Doc<"session"> | null) {
   const teamByUserId = new Map<Id<"user">, Id<"beerpongTeam">>();
   const finalistTeamIds = new Set<Id<"beerpongTeam">>();
   const context = { teamByUserId, finalistTeamIds };
-  if (session?.kind !== "party" || !session.modules.beerpongEnabled)
-    return context;
+  if (session?.kind !== "party" || !session.modules.beerpongEnabled) return context;
 
   const tournament = await ctx.db
     .query("beerpongTournament")
     .withIndex("by_sessionId", (q) => q.eq("sessionId", session._id))
     .order("desc")
     .first();
-  if (
-    !tournament ||
-    tournament.status === "enrollment" ||
-    tournament.status === "cancelled"
-  )
+  if (!tournament || tournament.status === "enrollment" || tournament.status === "cancelled")
     return context;
 
   const teams = await ctx.db
@@ -104,8 +89,7 @@ async function loadBeerpongQuestContext(
 
     // A finalist qualifies as soon as their path to the final is resolved.
     for (const teamId of [teamAId, teamBId]) {
-      if (teamId && teams.some((team) => team._id === teamId))
-        finalistTeamIds.add(teamId);
+      if (teamId && teams.some((team) => team._id === teamId)) finalistTeamIds.add(teamId);
     }
   }
 

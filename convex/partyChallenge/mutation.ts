@@ -22,11 +22,7 @@ import {
 const fields = z.object({
   title: z.string().trim().min(1).max(maxChallengeTitleLength),
   instructions: z.string().trim().min(1).max(maxChallengeInstructionsLength),
-  pointsUnits: z
-    .number()
-    .int()
-    .min(minChallengePointsUnits)
-    .max(maxChallengePointsUnits),
+  pointsUnits: z.number().int().min(minChallengePointsUnits).max(maxChallengePointsUnits),
   durationMinutes: z
     .number()
     .int()
@@ -110,11 +106,7 @@ export const update = authMutation
     let endsAt = challenge.endsAt;
     if (durationMinutes !== undefined) {
       endsAt = challenge.startsAt + durationMinutes * millisecondsPerMinute;
-      if (
-        challenge.status !== "active" ||
-        challenge.endsAt <= now ||
-        endsAt <= now
-      )
+      if (challenge.status !== "active" || challenge.endsAt <= now || endsAt <= now)
         throw new ConvexError(
           "Only an active challenge can have its duration changed; deadline must be in the future",
         );
@@ -150,8 +142,7 @@ export const addWinner = authMutation
     )
       throw new ConvexError("Winner must be a joined party member");
 
-    if (challenge.winners.some((winner) => winner.userId === userId))
-      return null;
+    if (challenge.winners.some((winner) => winner.userId === userId)) return null;
 
     const now = Date.now();
     await ctx.db.patch("partyChallenge", id, {

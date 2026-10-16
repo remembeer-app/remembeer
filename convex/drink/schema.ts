@@ -32,8 +32,6 @@ export const createDrinkInputValidator = convexToZod(
   alcoholPercentage: alcoholPercentageValidator,
 });
 
-export const updateDrinkInputValidator = createDrinkInputValidator
-  .partial()
-  .extend({
-    id: convexToZod(v.id("drink")),
-  });
+export const updateDrinkInputValidator = createDrinkInputValidator.partial().extend({
+  id: convexToZod(v.id("drink")),
+});

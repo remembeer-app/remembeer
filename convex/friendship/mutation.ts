@@ -21,8 +21,7 @@ export const sendRequest = authMutation
     access<{ userId: Id<"user"> }>()
       .use(requireFriendRequestTarget)
       .use(loadFriendship)
-      .use(requireNoIncomingFriendRequest)
-      .extend,
+      .use(requireNoIncomingFriendRequest).extend,
   )
   .handler(async (ctx, { userId }) => {
     if (ctx.relation) return null;
@@ -48,8 +47,7 @@ export const accept = authMutation
     access<{ userId: Id<"user"> }>()
       .use(loadFriendship)
       .use(requireFriendRequest)
-      .use(requireFriendRequestRecipient)
-      .extend,
+      .use(requireFriendRequestRecipient).extend,
   )
   .handler(async (ctx) => {
     const { relation } = ctx;
@@ -70,8 +68,7 @@ export const decline = authMutation
   .extend(
     access<{ userId: Id<"user"> }>()
       .use(loadFriendship)
-      .use((ctx) => requirePendingFriendRequest(ctx, "recipient"))
-      .extend,
+      .use((ctx) => requirePendingFriendRequest(ctx, "recipient")).extend,
   )
   .handler(async (ctx) => {
     if (!ctx.relation) return null;
@@ -87,8 +84,7 @@ export const cancel = authMutation
   .extend(
     access<{ userId: Id<"user"> }>()
       .use(loadFriendship)
-      .use((ctx) => requirePendingFriendRequest(ctx, "sender"))
-      .extend,
+      .use((ctx) => requirePendingFriendRequest(ctx, "sender")).extend,
   )
   .handler(async (ctx) => {
     if (!ctx.relation) return null;
@@ -102,10 +98,7 @@ export const remove = authMutation
   .input(targetInput)
   .returns(v.null())
   .extend(
-    access<{ userId: Id<"user"> }>()
-      .use(loadFriendship)
-      .use(requireAcceptedFriendship)
-      .extend,
+    access<{ userId: Id<"user"> }>().use(loadFriendship).use(requireAcceptedFriendship).extend,
   )
   .handler(async (ctx) => {
     if (!ctx.relation) return null;

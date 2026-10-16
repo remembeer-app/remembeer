@@ -4,11 +4,7 @@ import type { QueryCtx } from "../_generated/server";
 import { drinkScoreBreakdown } from "./scoring";
 import { loadBeerpongAwards } from "../beerpongTournament/scoring";
 
-export async function loadPartyScores(
-  ctx: QueryCtx,
-  sessionId: Id<"session">,
-  now: number,
-) {
+export async function loadPartyScores(ctx: QueryCtx, sessionId: Id<"session">, now: number) {
   const members = await ctx.db
     .query("sessionMember")
     .withIndex("by_sessionId_and_sessionMemberStatus_kind", (q) =>

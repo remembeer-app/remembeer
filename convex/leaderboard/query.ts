@@ -30,24 +30,17 @@ export const listCurrent = authQuery
   .handler(async (ctx) => {
     const memberships = await ctx.db
       .query("leaderboardMember")
-      .withIndex("by_userId_and_status", (q) =>
-        q.eq("userId", ctx.user._id).eq("status", "joined"),
-      )
+      .withIndex("by_userId_and_status", (q) => q.eq("userId", ctx.user._id).eq("status", "joined"))
       .collect();
 
     const leaderboards = await Promise.all(
-      memberships.map((member) =>
-        ctx.db.get("leaderboard", member.leaderboardId),
-      ),
+      memberships.map((member) => ctx.db.get("leaderboard", member.leaderboardId)),
     );
 
     const active = leaderboards
       .filter((board) => board !== null)
       .filter((board) => board.deletedAt === null)
-      .sort(
-        (a, b) =>
-          a._creationTime - b._creationTime || a._id.localeCompare(b._id),
-      );
+      .sort((a, b) => a._creationTime - b._creationTime || a._id.localeCompare(b._id));
 
     return await Promise.all(
       active.map(async (leaderboard) => ({
@@ -104,10 +97,7 @@ export const findByInviteCode = authQuery
         .toUpperCase()
         .length(inviteCodeLength)
         .refine(
-          (code) =>
-            [...code].every((character) =>
-              inviteCodeCharacters.includes(character),
-            ),
+          (code) => code.split("").every((character) => inviteCodeCharacters.includes(character)),
           "Invalid invite code",
         ),
     }),
@@ -175,20 +165,15 @@ export const standings = authQuery
     const day = new LogicalDay(leaderboard);
     const currentMonth = day.at(Date.now()).slice(0, 7);
     const month = selectedMonth ?? currentMonth;
-    if (month > currentMonth)
-      throw new ConvexError("Cannot view a future reporting month");
+    if (month > currentMonth) throw new ConvexError("Cannot view a future reporting month");
 
     const firstDay = Temporal.PlainDate.from(`${month}-01`);
     const start = day.boundaries(firstDay.toString()).start;
     const end = day.boundaries(firstDay.add({ months: 1 }).toString()).start;
     const nextMonthAt = day.boundaries(
-      Temporal.PlainDate.from(`${currentMonth}-01`)
-        .add({ months: 1 })
-        .toString(),
+      Temporal.PlainDate.from(`${currentMonth}-01`).add({ months: 1 }).toString(),
     ).start;
-    const memberships = (await listMemberships(ctx, id)).filter(
-      (m) => m.status === "joined",
-    );
+    const memberships = (await listMemberships(ctx, id)).filter((m) => m.status === "joined");
 
     const drinkCache = new Map<Id<"drink">, Promise<Doc<"drink"> | null>>();
     // shortcut: totals read every monthly log, add aggregates when query read limits become a constraint.
@@ -221,8 +206,7 @@ export const standings = authQuery
           const drink = await drinkPromise;
           if (!drink) throw new ConvexError("A logged drink is missing");
 
-          if (drink.drinkCategory.kind === "beer")
-            beersConsumed += log.volumeMl / beerVolumeMl;
+          if (drink.drinkCategory.kind === "beer") beersConsumed += log.volumeMl / beerVolumeMl;
 
           alcoholConsumedMl += (log.volumeMl * drink.alcoholPercentage) / 100;
         }
@@ -238,14 +222,10 @@ export const standings = authQuery
     );
 
     const byBeers = [...entries].sort(
-      (a, b) =>
-        b.beersConsumed - a.beersConsumed ||
-        a.user._id.localeCompare(b.user._id),
+      (a, b) => b.beersConsumed - a.beersConsumed || a.user._id.localeCompare(b.user._id),
     );
     const byAlcohol = [...entries].sort(
-      (a, b) =>
-        b.alcoholConsumedMl - a.alcoholConsumedMl ||
-        a.user._id.localeCompare(b.user._id),
+      (a, b) => b.alcoholConsumedMl - a.alcoholConsumedMl || a.user._id.localeCompare(b.user._id),
     );
 
     byBeers.forEach((entry, index) => {

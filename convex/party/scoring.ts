@@ -6,12 +6,8 @@ export function drinkScoreUnits(
   alcoholPercentage: number,
   matchesClass: boolean,
 ) {
-  const base = Math.round(
-    (volumeMl * alcoholPercentage * partyScoreUnitsPerPoint) / 100,
-  );
-  const score =
-    base +
-    (matchesClass ? Math.round((base * partyClassBonusPercent) / 100) : 0);
+  const base = Math.round((volumeMl * alcoholPercentage * partyScoreUnitsPerPoint) / 100);
+  const score = base + (matchesClass ? Math.round((base * partyClassBonusPercent) / 100) : 0);
   if (!Number.isSafeInteger(score) || score < 0)
     throw new ConvexError("Drink score is outside the supported range");
 
@@ -24,11 +20,7 @@ export function drinkScoreBreakdown(
   alcoholPercentage: number,
   matchesClass: boolean,
 ) {
-  const baseDrinkScoreUnits = drinkScoreUnits(
-    volumeMl,
-    alcoholPercentage,
-    false,
-  );
+  const baseDrinkScoreUnits = drinkScoreUnits(volumeMl, alcoholPercentage, false);
   const scoreUnits = drinkScoreUnits(volumeMl, alcoholPercentage, matchesClass);
 
   return {
@@ -40,9 +32,9 @@ export function drinkScoreBreakdown(
 }
 
 // Competition ranks: equal scores share a rank, and the next rank skips places.
-export function rankByScore<
-  T extends { userId: string; username: string; scoreUnits: number },
->(players: readonly T[]) {
+export function rankByScore<T extends { userId: string; username: string; scoreUnits: number }>(
+  players: readonly T[],
+) {
   const ordered = [...players].sort(
     (a, b) =>
       b.scoreUnits - a.scoreUnits ||
@@ -53,8 +45,7 @@ export function rankByScore<
   let rank = 0;
 
   return ordered.map((player, index) => {
-    if (index === 0 || player.scoreUnits !== ordered[index - 1]?.scoreUnits)
-      rank = index + 1;
+    if (index === 0 || player.scoreUnits !== ordered[index - 1]?.scoreUnits) rank = index + 1;
 
     return { ...player, rank };
   });

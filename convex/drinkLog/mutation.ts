@@ -12,10 +12,7 @@ import {
   requireJoinedDrinkLogSession,
 } from "./access";
 import type { Id } from "../_generated/dataModel";
-import {
-  createDrinkLogInputValidator,
-  updateDrinkLogInputValidator,
-} from "./schema";
+import { createDrinkLogInputValidator, updateDrinkLogInputValidator } from "./schema";
 
 const editableDrinkLogAccess = access<{
   id: Id<"drinkLog">;
@@ -39,8 +36,7 @@ export const create = authMutation
     }>()
       .use(requireValidConsumedTime)
       .use(requireUsableDrink)
-      .use(requireJoinedDrinkLogSession)
-      .extend,
+      .use(requireJoinedDrinkLogSession).extend,
   )
   .handler(async (ctx, input) => {
     const { now, consumedAt } = ctx;
@@ -62,20 +58,17 @@ export const update = authMutation
     editableDrinkLogAccess
       .use(requireValidConsumedTime)
       .use(requireUsableDrink)
-      .use(requireJoinedDrinkLogSession)
-      .extend,
+      .use(requireJoinedDrinkLogSession).extend,
   )
   .handler(async (ctx, { id, ...input }) => {
     const { drinkLog, now, consumedAt } = ctx;
 
     await ctx.db.patch("drinkLog", id, {
-      sessionId:
-        input.sessionId === undefined ? drinkLog.sessionId : input.sessionId,
+      sessionId: input.sessionId === undefined ? drinkLog.sessionId : input.sessionId,
       drinkId: input.drinkId ?? drinkLog.drinkId,
       consumedAt,
       volumeMl: input.volumeMl ?? drinkLog.volumeMl,
-      location:
-        input.location === undefined ? drinkLog.location : input.location,
+      location: input.location === undefined ? drinkLog.location : input.location,
       updatedAt: now,
     });
 

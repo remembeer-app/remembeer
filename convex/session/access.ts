@@ -4,16 +4,10 @@ import type { AuthQueryCtx } from "../lib/authenticated";
 
 type SessionPermission = "read" | "joined" | "admin" | "owner" | "membership";
 
-export function getMembership(
-  ctx: AuthQueryCtx,
-  sessionId: Id<"session">,
-  userId: Id<"user">,
-) {
+export function getMembership(ctx: AuthQueryCtx, sessionId: Id<"session">, userId: Id<"user">) {
   return ctx.db
     .query("sessionMember")
-    .withIndex("by_sessionId_and_userId", (q) =>
-      q.eq("sessionId", sessionId).eq("userId", userId),
-    )
+    .withIndex("by_sessionId_and_userId", (q) => q.eq("sessionId", sessionId).eq("userId", userId))
     .unique();
 }
 
@@ -23,8 +17,7 @@ export async function requireSessionAccess(
   permission: SessionPermission = "read",
 ) {
   const session = await ctx.db.get("session", id);
-  if (!session || session.deletedAt !== null)
-    throw new ConvexError("Session not found");
+  if (!session || session.deletedAt !== null) throw new ConvexError("Session not found");
 
   const isOwner = session.ownerId === ctx.user._id;
 
@@ -32,8 +25,7 @@ export async function requireSessionAccess(
 
   const isJoined = member?.sessionMemberStatus.kind === "joined";
 
-  const isAdmin =
-    isOwner || (isJoined && member.sessionMemberRole.kind === "admin");
+  const isAdmin = isOwner || (isJoined && member.sessionMemberRole.kind === "admin");
 
   const allowed =
     isOwner ||
@@ -44,8 +36,7 @@ export async function requireSessionAccess(
       owner: false,
       membership: member !== null,
     }[permission];
-  if (!allowed)
-    throw new ConvexError("You do not have permission to access this session");
+  if (!allowed) throw new ConvexError("You do not have permission to access this session");
 
   return { session, member, isOwner, isAdmin };
 }

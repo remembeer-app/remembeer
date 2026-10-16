@@ -3,11 +3,18 @@ import test from "node:test";
 import { build } from "esbuild";
 
 const { outputFiles } = await build({
-  stdin: { contents: 'export { LogicalDay } from "./convex/lib/logicalDay"; export { isValidTimeZone } from "./convex/lib/timeZone";', resolveDir: process.cwd() },
-  bundle: true, platform: "node", format: "esm", write: false,
+  stdin: {
+    contents:
+      'export { LogicalDay } from "./convex/lib/logicalDay"; export { isValidTimeZone } from "./convex/lib/timeZone";',
+    resolveDir: process.cwd(),
+  },
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  write: false,
 });
 const { LogicalDay, isValidTimeZone } = await import(
-  `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`,
+  `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
 );
 
 test("timezone validation accepts named zones and rejects invalid names and offsets", () => {

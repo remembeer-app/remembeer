@@ -14,9 +14,7 @@ import {
 } from "./schema";
 
 const defaultEndOfDayBoundary = 6 * 60;
-const accentColors = userTable.validator.fields.accentColor.members.map(
-  (color) => color.value,
-);
+const accentColors = userTable.validator.fields.accentColor.members.map((color) => color.value);
 
 export const ensureCurrent = convex
   .mutation()
@@ -35,8 +33,7 @@ export const ensureCurrent = convex
       authUserId: authUser._id,
       username,
       normalizedUsername: normalizeUsername(username),
-      accentColor:
-        accentColors[Math.floor(Math.random() * accentColors.length)]!,
+      accentColor: accentColors[Math.floor(Math.random() * accentColors.length)]!,
       avatarStorageId: null,
       endOfDayBoundary: defaultEndOfDayBoundary,
       timeZone: timeZone ?? "UTC",
@@ -81,9 +78,7 @@ export const updateAvatar = authMutation
     if (storageId !== null) {
       const owner = await ctx.db
         .query("user")
-        .withIndex("by_avatarStorageId", (q) =>
-          q.eq("avatarStorageId", storageId),
-        )
+        .withIndex("by_avatarStorageId", (q) => q.eq("avatarStorageId", storageId))
         .first();
 
       if (owner && owner._id !== ctx.user._id) {
@@ -175,9 +170,7 @@ export const deleteCurrent = authMutation
       await auth.api.deleteUser({ body: { password }, headers });
     } catch (error) {
       if (error instanceof APIError) {
-        throw new ConvexError(
-          error.body?.message ?? "Could not delete account.",
-        );
+        throw new ConvexError(error.body?.message ?? "Could not delete account.");
       }
 
       throw error;

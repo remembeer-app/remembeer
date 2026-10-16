@@ -16,11 +16,7 @@ import {
 } from "./lifecycle";
 import { eligiblePairs, memberPair } from "./eligibility";
 import { loadQuestContext } from "./context";
-import {
-  requireOngoingQuestParty,
-  loadQuest,
-  requireSocialQuestsEnabled,
-} from "./access";
+import { requireOngoingQuestParty, loadQuest, requireSocialQuestsEnabled } from "./access";
 
 const questPartyAdminAccess = access<{ sessionId: Id<"session"> }>()
   .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
@@ -104,12 +100,7 @@ export const setSchedule = authMutation
           updatedAt: now,
         });
 
-      await scheduleIssuance(
-        ctx,
-        party,
-        now + randomBreak(party.questSchedule),
-        now,
-      );
+      await scheduleIssuance(ctx, party, now + randomBreak(party.questSchedule), now);
     }
 
     return null;
@@ -123,36 +114,26 @@ export const selectPartner = authMutation
       .use((ctx, { questId }) => loadQuest(ctx, { id: questId }))
       .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"))
       .use(requireOngoingQuestParty)
-      .use(requireSocialQuestsEnabled)
-      .extend,
+      .use(requireSocialQuestsEnabled).extend,
   )
   .handler(async (ctx, { questId, selectedUserId }) => {
     const { quest, session } = ctx;
 
     const now = Date.now();
-    if (
-      quest.status !== "active" ||
-      now < quest.startsAt ||
-      now >= quest.endsAt
-    )
+    if (quest.status !== "active" || now < quest.startsAt || now >= quest.endsAt)
       throw new ConvexError("Quest is not active");
 
-    if (ctx.user._id === selectedUserId)
-      throw new ConvexError("You cannot select yourself");
+    if (ctx.user._id === selectedUserId) throw new ConvexError("You cannot select yourself");
 
     const partner = await getMembership(ctx, quest.sessionId, selectedUserId);
-    if (
-      partner?.kind !== "partyMember" ||
-      partner.sessionMemberStatus.kind !== "joined"
-    )
+    if (partner?.kind !== "partyMember" || partner.sessionMemberStatus.kind !== "joined")
       throw new ConvexError("Partner must be a joined party member");
 
     const pair = memberPair(ctx.user._id, selectedUserId);
     if (
       quest.results.some(
         (result) =>
-          result.firstUserId === pair.firstUserId &&
-          result.secondUserId === pair.secondUserId,
+          result.firstUserId === pair.firstUserId && result.secondUserId === pair.secondUserId,
       )
     )
       return true;
@@ -164,18 +145,14 @@ export const selectPartner = authMutation
         ),
       )
     )
-      throw new ConvexError(
-        "A member of this pair already completed the quest",
-      );
+      throw new ConvexError("A member of this pair already completed the quest");
 
     const matched = quest.selections.some(
       (selection) =>
-        selection.userId === selectedUserId &&
-        selection.selectedUserId === ctx.user._id,
+        selection.userId === selectedUserId && selection.selectedUserId === ctx.user._id,
     );
     if (matched) {
-      const { players, previousPairs, finalistTeamIds } =
-        await loadQuestContext(ctx, session, now);
+      const { players, previousPairs, finalistTeamIds } = await loadQuestContext(ctx, session, now);
       if (
         !eligiblePairs(quest, players, previousPairs, finalistTeamIds).some(
           (candidate) =>
@@ -183,21 +160,15 @@ export const selectPartner = authMutation
             candidate.secondUserId === pair.secondUserId,
         )
       )
-        throw new ConvexError(
-          "This pair does not currently qualify for this quest",
-        );
+        throw new ConvexError("This pair does not currently qualify for this quest");
     }
 
     await ctx.db.patch("partyQuest", questId, {
       selections: [
-        ...quest.selections.filter(
-          (selection) => selection.userId !== ctx.user._id,
-        ),
+        ...quest.selections.filter((selection) => selection.userId !== ctx.user._id),
         { userId: ctx.user._id, selectedUserId, selectedAt: now },
       ],
-      results: matched
-        ? [...quest.results, { ...pair, completedAt: now }]
-        : quest.results,
+      results: matched ? [...quest.results, { ...pair, completedAt: now }] : quest.results,
       updatedAt: now,
     });
 

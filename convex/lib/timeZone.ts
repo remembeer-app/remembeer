@@ -24,9 +24,7 @@ export const searchTimeZones = convex
     if (!normalizedSearch) return [];
 
     return ["UTC", ...Intl.supportedValuesOf("timeZone")]
-      .filter((timeZone) =>
-        timeZone.toLowerCase().replace(/[_/]/g, " ").includes(normalizedSearch),
-      )
+      .filter((timeZone) => timeZone.toLowerCase().replace(/[_/]/g, " ").includes(normalizedSearch))
       .slice(0, timeZoneSearchLimit);
   })
   .public();

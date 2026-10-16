@@ -12,22 +12,14 @@ export function activeChallenges(ctx: MutationCtx, sessionId: Id<"session">) {
 }
 
 // Jobs check the current deadline and status, so edits and closure make old jobs harmless.
-export async function scheduleExpiry(
-  ctx: MutationCtx,
-  id: Id<"partyChallenge">,
-  endsAt: number,
-) {
+export async function scheduleExpiry(ctx: MutationCtx, id: Id<"partyChallenge">, endsAt: number) {
   await ctx.scheduler.runAt(endsAt, internal.partyChallenge.expire, {
     id,
     endsAt,
   });
 }
 
-export async function stopChallenges(
-  ctx: MutationCtx,
-  session: Doc<"session">,
-  now: number,
-) {
+export async function stopChallenges(ctx: MutationCtx, session: Doc<"session">, now: number) {
   if (session.kind !== "party") return;
 
   for (const challenge of await activeChallenges(ctx, session._id)) {

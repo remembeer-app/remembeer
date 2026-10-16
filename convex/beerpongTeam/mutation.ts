@@ -14,121 +14,122 @@ import { maxTeamNameLength } from "./constants";
 const memberInput = { id: v.id("beerpongTeam"), userId: v.id("user") };
 
 const editableTeamAccess = access<{ id: Id<"beerpongTeam"> }>()
-    .use(loadTeam)
-    .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
-    .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-    .use(requireParty)
-    .use(requireOngoingParty)
-    .use(requireBeerpongEnabled)
-    .use(requireEditableTeamStatus);
+  .use(loadTeam)
+  .use((ctx) => loadTournament(ctx, { id: ctx.team.tournamentId }))
+  .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
+  .use(requireParty)
+  .use(requireOngoingParty)
+  .use(requireBeerpongEnabled)
+  .use(requireEditableTeamStatus);
 
 export const rename = authMutation
-    .extend(WithZod)
-    .input(z.object({
-        id: convexToZod(v.id("beerpongTeam")),
-        name: z.string().trim().min(1).max(maxTeamNameLength),
-    }))
-    .returns(v.null())
-    .extend(editableTeamAccess.extend)
-    .handler(async (ctx, { id, name }) => {
-        const { team } = ctx;
+  .extend(WithZod)
+  .input(
+    z.object({
+      id: convexToZod(v.id("beerpongTeam")),
+      name: z.string().trim().min(1).max(maxTeamNameLength),
+    }),
+  )
+  .returns(v.null())
+  .extend(editableTeamAccess.extend)
+  .handler(async (ctx, { id, name }) => {
+    const { team } = ctx;
 
-        const now = Date.now();
-        await ctx.db.patch("beerpongTeam", id, { name, updatedAt: now });
-        await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
+    const now = Date.now();
+    await ctx.db.patch("beerpongTeam", id, { name, updatedAt: now });
+    await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
 
-        return null;
-    });
+    return null;
+  });
 
 export const addMember = authMutation
-    .input(memberInput)
-    .returns(v.null())
-    .extend(editableTeamAccess.extend)
-    .handler(async (ctx, { id, userId }) => {
-        const { team, tournament } = ctx;
+  .input(memberInput)
+  .returns(v.null())
+  .extend(editableTeamAccess.extend)
+  .handler(async (ctx, { id, userId }) => {
+    const { team, tournament } = ctx;
 
-        const member = await getMembership(ctx, tournament.sessionId, userId);
-        if (
-            member?.kind !== "partyMember" ||
-            member.sessionMemberStatus.kind !== "joined" ||
-            !(await ctx.db.get("user", userId))
-        )
-            throw new ConvexError("Player must be a joined party member");
+    const member = await getMembership(ctx, tournament.sessionId, userId);
+    if (
+      member?.kind !== "partyMember" ||
+      member.sessionMemberStatus.kind !== "joined" ||
+      !(await ctx.db.get("user", userId))
+    )
+      throw new ConvexError("Player must be a joined party member");
 
-        const teams = await ctx.db
-            .query("beerpongTeam")
-            .withIndex("by_tournamentId", (q) => q.eq("tournamentId", team.tournamentId))
-            .collect();
-        if (teams.some((other) => other._id !== id && other.memberUserIds.includes(userId)))
-            throw new ConvexError("Player already belongs to another team; move them instead");
+    const teams = await ctx.db
+      .query("beerpongTeam")
+      .withIndex("by_tournamentId", (q) => q.eq("tournamentId", team.tournamentId))
+      .collect();
+    if (teams.some((other) => other._id !== id && other.memberUserIds.includes(userId)))
+      throw new ConvexError("Player already belongs to another team; move them instead");
 
-        if (team.memberUserIds.includes(userId)) return null;
+    if (team.memberUserIds.includes(userId)) return null;
 
-        const now = Date.now();
-        await ctx.db.patch("beerpongTeam", id, {
-            memberUserIds: [...team.memberUserIds, userId], updatedAt: now,
-        });
-        await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
-
-        return null;
+    const now = Date.now();
+    await ctx.db.patch("beerpongTeam", id, {
+      memberUserIds: [...team.memberUserIds, userId],
+      updatedAt: now,
     });
+    await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
+
+    return null;
+  });
 
 export const removeMember = authMutation
-    .input(memberInput)
-    .returns(v.null())
-    .extend(editableTeamAccess.extend)
-    .handler(async (ctx, { id, userId }) => {
-        const { team } = ctx;
-        if (!team.memberUserIds.includes(userId)) return null;
+  .input(memberInput)
+  .returns(v.null())
+  .extend(editableTeamAccess.extend)
+  .handler(async (ctx, { id, userId }) => {
+    const { team } = ctx;
+    if (!team.memberUserIds.includes(userId)) return null;
 
-        const now = Date.now();
-        await ctx.db.patch("beerpongTeam", id, {
-            memberUserIds: team.memberUserIds.filter((memberId) => memberId !== userId),
-            updatedAt: now,
-        });
-        await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
-
-        return null;
+    const now = Date.now();
+    await ctx.db.patch("beerpongTeam", id, {
+      memberUserIds: team.memberUserIds.filter((memberId) => memberId !== userId),
+      updatedAt: now,
     });
+    await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
+
+    return null;
+  });
 
 export const moveMember = authMutation
-    .input({ ...memberInput, targetTeamId: v.id("beerpongTeam") })
-    .returns(v.null())
-    .extend(editableTeamAccess.extend)
-    .handler(async (ctx, { id, userId, targetTeamId }) => {
-        const { team, tournament } = ctx;
+  .input({ ...memberInput, targetTeamId: v.id("beerpongTeam") })
+  .returns(v.null())
+  .extend(editableTeamAccess.extend)
+  .handler(async (ctx, { id, userId, targetTeamId }) => {
+    const { team, tournament } = ctx;
 
-        const target = await ctx.db.get("beerpongTeam", targetTeamId);
-        if (!target) throw new ConvexError("Target team not found");
+    const target = await ctx.db.get("beerpongTeam", targetTeamId);
+    if (!target) throw new ConvexError("Target team not found");
 
-        if (target.tournamentId !== team.tournamentId)
-            throw new ConvexError("Teams must belong to the same tournament");
+    if (target.tournamentId !== team.tournamentId)
+      throw new ConvexError("Teams must belong to the same tournament");
 
-        if (!team.memberUserIds.includes(userId))
-            throw new ConvexError("Player does not belong to the source team");
+    if (!team.memberUserIds.includes(userId))
+      throw new ConvexError("Player does not belong to the source team");
 
-        const member = await getMembership(ctx, tournament.sessionId, userId);
-        if (
-            member?.kind !== "partyMember" ||
-            member.sessionMemberStatus.kind !== "joined" ||
-            !(await ctx.db.get("user", userId))
-        )
-            throw new ConvexError("Player must be a joined party member");
+    const member = await getMembership(ctx, tournament.sessionId, userId);
+    if (
+      member?.kind !== "partyMember" ||
+      member.sessionMemberStatus.kind !== "joined" ||
+      !(await ctx.db.get("user", userId))
+    )
+      throw new ConvexError("Player must be a joined party member");
 
-        if (id === targetTeamId) return null;
+    if (id === targetTeamId) return null;
 
-        const now = Date.now();
-        await ctx.db.patch("beerpongTeam", id, {
-            memberUserIds: team.memberUserIds.filter((memberId) => memberId !== userId),
-            updatedAt: now,
-        });
-        await ctx.db.patch("beerpongTeam", targetTeamId, {
-            memberUserIds: [...target.memberUserIds.filter((memberId) => memberId !== userId), userId],
-            updatedAt: now,
-        });
-        await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
-
-        return null;
+    const now = Date.now();
+    await ctx.db.patch("beerpongTeam", id, {
+      memberUserIds: team.memberUserIds.filter((memberId) => memberId !== userId),
+      updatedAt: now,
     });
+    await ctx.db.patch("beerpongTeam", targetTeamId, {
+      memberUserIds: [...target.memberUserIds.filter((memberId) => memberId !== userId), userId],
+      updatedAt: now,
+    });
+    await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
 
-
+    return null;
+  });

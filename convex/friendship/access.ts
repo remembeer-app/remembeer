@@ -18,10 +18,7 @@ export async function requireFriendRequestTarget(
   return {};
 }
 
-export async function loadFriendship(
-  ctx: AuthQueryCtx,
-  { userId }: { userId: Id<"user"> },
-) {
+export async function loadFriendship(ctx: AuthQueryCtx, { userId }: { userId: Id<"user"> }) {
   const relation = await getFriendship(ctx, ctx.user._id, userId);
 
   return { relation };
@@ -30,27 +27,20 @@ export async function loadFriendship(
 export function requireNoIncomingFriendRequest(
   ctx: AuthQueryCtx & { relation: Doc<"friendship"> | null },
 ) {
-  if (
-    ctx.relation?.status === "pending" &&
-    ctx.relation.requestedById !== ctx.user._id
-  ) {
+  if (ctx.relation?.status === "pending" && ctx.relation.requestedById !== ctx.user._id) {
     throw new ConvexError("Accept the incoming friend request instead");
   }
 
   return {};
 }
 
-export function requireFriendRequest(
-  ctx: { relation: Doc<"friendship"> | null },
-) {
+export function requireFriendRequest(ctx: { relation: Doc<"friendship"> | null }) {
   if (!ctx.relation) throw new ConvexError("Friend request not found");
 
   return { relation: ctx.relation };
 }
 
-export function requireFriendRequestRecipient(
-  ctx: AuthQueryCtx & { relation: Doc<"friendship"> },
-) {
+export function requireFriendRequestRecipient(ctx: AuthQueryCtx & { relation: Doc<"friendship"> }) {
   if (ctx.relation.requestedById === ctx.user._id) {
     throw new ConvexError("Only the recipient can accept a friend request");
   }
@@ -75,9 +65,7 @@ export function requirePendingFriendRequest(
   return {};
 }
 
-export function requireAcceptedFriendship(
-  ctx: { relation: Doc<"friendship"> | null },
-) {
+export function requireAcceptedFriendship(ctx: { relation: Doc<"friendship"> | null }) {
   if (ctx.relation && ctx.relation.status !== "accepted") {
     throw new ConvexError("Users are not friends");
   }

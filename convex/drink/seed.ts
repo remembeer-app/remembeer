@@ -31,9 +31,7 @@ export const seedGlobal = convex
       if (drink.seedKey === undefined) continue;
 
       if (byKey.has(drink.seedKey)) {
-        throw new ConvexError(
-          `Duplicate global drink seed key: ${drink.seedKey}`,
-        );
+        throw new ConvexError(`Duplicate global drink seed key: ${drink.seedKey}`);
       }
 
       byKey.set(drink.seedKey, drink);

@@ -4,20 +4,35 @@ import { build } from "esbuild";
 import { fixture as createFixture } from "../support/party_fixture.mjs";
 
 const { outputFiles } = await build({
-  stdin: { contents: `export { standings } from "./convex/party/query";
-    export { loadQuestContext } from "./convex/partyQuest/context";`, resolveDir: process.cwd() },
-  bundle: true, platform: "node", format: "esm", write: false,
-  plugins: [{ name: "authenticated-context", setup(builder) {
-    builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
-      contents: 'import { createBuilder } from "fluent-convex"; export const authQuery = createBuilder().query();', loader: "ts",
-    }));
-  } }],
+  stdin: {
+    contents: `export { standings } from "./convex/party/query";
+    export { loadQuestContext } from "./convex/partyQuest/context";`,
+    resolveDir: process.cwd(),
+  },
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  write: false,
+  plugins: [
+    {
+      name: "authenticated-context",
+      setup(builder) {
+        builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
+          contents:
+            'import { createBuilder } from "fluent-convex"; export const authQuery = createBuilder().query();',
+          loader: "ts",
+        }));
+      },
+    },
+  ],
 });
-const { standings, loadQuestContext } = await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
+const { standings, loadQuestContext } = await import(
+  `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
+);
 
 const fixture = () => createFixture(standings);
 
-const entry = (result, id) => result.entries.find(e => e.userId === id);
+const entry = (result, id) => result.entries.find((e) => e.userId === id);
 
 test("standings require joined access to an existing non-deleted party, including archives", async () => {
   const f = fixture();
@@ -36,20 +51,34 @@ test("standings require joined access to an existing non-deleted party, includin
 
 test("drink totals and point breakdowns include unclassed members and count logs, not servings", async () => {
   const f = fixture();
-  f.log("a"); f.log("a", 125, "wine"); f.log("unclassed");
+  f.log("a");
+  f.log("a", 125, "wine");
+  f.log("unclassed");
   const result = await f.read();
   assert.deepEqual(entry(result, "a"), {
-    userId: "a", user: { _id: "a", username: "a", accentColor: "amber", avatarUrl: null }, selectedClass: { kind: "beer" },
-    rank: 1, scoreUnits: 42500, baseDrinkScoreUnits: 40000, classBonusScoreUnits: 2500,
-    questScoreUnits: 0, challengeScoreUnits: 0, beerpongScoreUnits: 0, wonChallengeCount: 0, completedQuestCount: 0, drinkCount: 2, volumeMl: 625, alcoholMl: 40,
+    userId: "a",
+    user: { _id: "a", username: "a", accentColor: "amber", avatarUrl: null },
+    selectedClass: { kind: "beer" },
+    rank: 1,
+    scoreUnits: 42500,
+    baseDrinkScoreUnits: 40000,
+    classBonusScoreUnits: 2500,
+    questScoreUnits: 0,
+    challengeScoreUnits: 0,
+    beerpongScoreUnits: 0,
+    wonChallengeCount: 0,
+    completedQuestCount: 0,
+    drinkCount: 2,
+    volumeMl: 625,
+    alcoholMl: 40,
   });
   assert.equal(entry(result, "unclassed").scoreUnits, 25000);
   assert.equal(entry(result, "unclassed").classBonusScoreUnits, 0);
   assert.equal(entry(result, "owner").drinkCount, 0);
   assert.equal(entry(result, "owner").rank, 3);
   assert.equal(entry(result, "b").rank, 3);
-  assert.equal(f.reads.filter(r => r === "drink:beer").length, 1);
-  assert.equal(f.reads.filter(r => r === "drink:wine").length, 1);
+  assert.equal(f.reads.filter((r) => r === "drink:beer").length, 1);
+  assert.equal(f.reads.filter((r) => r === "drink:wine").length, 1);
 });
 
 test("only live, due logs attached to this party and joined members affect totals", async () => {
@@ -60,7 +89,8 @@ test("only live, due logs attached to this party and joined members affect total
   f.log("a", 500, "beer", { sessionId: null });
   f.log("a", 500, "beer", { consumedAt: f.now + 1 });
   f.log("a", 500, "beer", { consumedAt: f.now + 10 });
-  for (const id of ["invited", "left", "banned", "other"]) f.log(id, 500, "missing", { consumedAt: f.now + 1 });
+  for (const id of ["invited", "left", "banned", "other"])
+    f.log(id, 500, "missing", { consumedAt: f.now + 1 });
   f.log("b", 500, "missing", { deletedAt: f.now, consumedAt: f.now + 1 });
   const result = await f.read();
   assert.equal(entry(result, "a").drinkCount, 1);
@@ -69,7 +99,8 @@ test("only live, due logs attached to this party and joined members affect total
 });
 
 test("edits, deletion, moving logs and catalogue/class changes recalculate scores", async () => {
-  const f = fixture(); f.log("a");
+  const f = fixture();
+  f.log("a");
   assert.equal(entry(await f.read(), "a").scoreUnits, 27500);
   f.tables.drinkLog[0].volumeMl = 1000;
   assert.equal(entry(await f.read(), "a").scoreUnits, 55000);
@@ -109,35 +140,44 @@ test("quest rewards count recorded completions per member and survive expiry, ca
 test("rank ties use case-insensitive username, exact username, then ID; profiles expose only public fields", async () => {
   const f = fixture();
   for (const user of f.tables.user) user.username = "Alice";
-  f.tables.user.find(u => u._id === "a").username = "alice";
-  f.tables.user.find(u => u._id === "b").avatarStorageId = "avatar";
+  f.tables.user.find((u) => u._id === "a").username = "alice";
+  f.tables.user.find((u) => u._id === "b").avatarStorageId = "avatar";
   const result = await f.read();
-  assert.deepEqual(result.entries.map(e => e.userId), ["a", "b", "owner", "unclassed"]);
-  assert.ok(result.entries.every(e => e.rank === 1));
+  assert.deepEqual(
+    result.entries.map((e) => e.userId),
+    ["a", "b", "owner", "unclassed"],
+  );
+  assert.ok(result.entries.every((e) => e.rank === 1));
   assert.equal(entry(result, "b").user.avatarUrl, "https://example.com/avatar");
-  assert.ok(result.entries.every(e => !JSON.stringify(e).includes("private-")));
+  assert.ok(result.entries.every((e) => !JSON.stringify(e).includes("private-")));
 });
 
 test("missing user profiles retain scores, missing drinks fail explicitly, and score overflow is rejected", async () => {
-  const f = fixture(); f.log("a");
-  f.tables.user = f.tables.user.filter(u => u._id !== "a");
+  const f = fixture();
+  f.log("a");
+  f.tables.user = f.tables.user.filter((u) => u._id !== "a");
   const result = await f.read();
   assert.equal(entry(result, "a").user, null);
   assert.equal(entry(result, "a").scoreUnits, 27500);
   f.tables.drink = [];
   await assert.rejects(f.read(), /logged drink is missing/);
   const g = fixture();
-  g.log("a", Number.MAX_SAFE_INTEGER / 100); g.log("a", Number.MAX_SAFE_INTEGER / 100);
+  g.log("a", Number.MAX_SAFE_INTEGER / 100);
+  g.log("a", Number.MAX_SAFE_INTEGER / 100);
   await assert.rejects(g.read(), /supported range/);
 });
 
 test("standings and completion context share scores, keeping unclassed members out of quest ranks", async () => {
-  const f = fixture(); f.log("a"); f.log("b", 100); f.log("unclassed", 1000);
+  const f = fixture();
+  f.log("a");
+  f.log("b", 100);
+  f.log("unclassed", 1000);
   f.quest("expired", [{ firstUserId: "a", secondUserId: "owner", completedAt: f.now }]);
   const result = await f.read();
   const context = await loadQuestContext(f.ctx("owner"), "party", f.now);
-  assert.deepEqual(context.players.map(p => p.userId).sort(), ["a", "b", "owner"]);
-  for (const player of context.players) assert.equal(player.scoreUnits, entry(result, player.userId).scoreUnits);
+  assert.deepEqual(context.players.map((p) => p.userId).sort(), ["a", "b", "owner"]);
+  for (const player of context.players)
+    assert.equal(player.scoreUnits, entry(result, player.userId).scoreUnits);
   assert.equal(context.previousPairs.size, 1);
 });
 

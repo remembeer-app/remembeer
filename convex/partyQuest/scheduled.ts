@@ -25,12 +25,7 @@ export const expire = convex
     const quest = await ctx.db.get("partyQuest", questId);
 
     const now = Date.now();
-    if (
-      !quest ||
-      quest.sessionId !== sessionId ||
-      quest.status !== "active" ||
-      quest.endsAt > now
-    )
+    if (!quest || quest.sessionId !== sessionId || quest.status !== "active" || quest.endsAt > now)
       return null;
 
     await ctx.db.patch("partyQuest", questId, {
@@ -61,10 +56,7 @@ export const issue = convex
     )
       return null;
 
-    if (
-      (await activeQuests(ctx, sessionId)).some((quest) => quest.endsAt > now)
-    )
-      return null;
+    if ((await activeQuests(ctx, sessionId)).some((quest) => quest.endsAt > now)) return null;
 
     // The issuing job is executing; do not cancel its own child expiry job.
     await issueQuest(

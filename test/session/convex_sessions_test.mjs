@@ -4,61 +4,127 @@ import test from "node:test";
 import { build } from "esbuild";
 
 const { outputFiles } = await build({
-  stdin: { contents: `export * as sessions from "./convex/session/mutation";
+  stdin: {
+    contents: `export * as sessions from "./convex/session/mutation";
     export * as sessionQueries from "./convex/session/query";
     export * as members from "./convex/sessionMember/mutation";
     export * as memberQueries from "./convex/sessionMember/query";
     export * as logs from "./convex/drinkLog/mutation";
-    export { deleteUserData } from "./convex/user/deletion";`, resolveDir: process.cwd() },
-  bundle: true, platform: "node", format: "esm", write: false,
-  plugins: [{ name: "authenticated-context", setup(builder) {
-    builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
-      contents: 'import { createBuilder } from "fluent-convex"; export const authQuery = createBuilder().query(); export const authMutation = createBuilder().mutation();', loader: "ts",
-    }));
-  } }],
+    export { deleteUserData } from "./convex/user/deletion";`,
+    resolveDir: process.cwd(),
+  },
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  write: false,
+  plugins: [
+    {
+      name: "authenticated-context",
+      setup(builder) {
+        builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
+          contents:
+            'import { createBuilder } from "fluent-convex"; export const authQuery = createBuilder().query(); export const authMutation = createBuilder().mutation();',
+          loader: "ts",
+        }));
+      },
+    },
+  ],
 });
-const { sessions, sessionQueries, members, memberQueries, logs, deleteUserData } =
-  await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
+const { sessions, sessionQueries, members, memberQueries, logs, deleteUserData } = await import(
+  `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
+);
 
 function fixture() {
-  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], leaderboard: [], leaderboardMember: [], drinkLog: [], drink: [], badge: [], friendship: [], partyChallenge: [], partyQuest: [] };
+  const tables = {
+    user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({
+      _id,
+      username: _id,
+      normalizedUsername: _id,
+      authUserId: `auth-${_id}`,
+    })),
+    session: [],
+    sessionMember: [],
+    leaderboard: [],
+    leaderboardMember: [],
+    drinkLog: [],
+    drink: [],
+    badge: [],
+    friendship: [],
+    partyChallenge: [],
+    partyQuest: [],
+  };
   let sequence = 0;
   const collected = [];
   const sessionGets = [];
   const membershipReads = [];
   const db = {
-    async get(table, id) { if (table === "session") sessionGets.push(id); return structuredClone(tables[table].find((row) => row._id === id) ?? null); },
-    async insert(table, fields) { const id = `${table}-${++sequence}`; tables[table].push({ _id: id, _creationTime: 1, ...structuredClone(fields) }); return id; },
-    async patch(table, id, fields) { const row = tables[table].find((row) => row._id === id); assert.ok(row); Object.assign(row, structuredClone(fields)); },
-    async delete(table, id) { tables[table] = tables[table].filter((row) => row._id !== id); },
+    async get(table, id) {
+      if (table === "session") sessionGets.push(id);
+      return structuredClone(tables[table].find((row) => row._id === id) ?? null);
+    },
+    async insert(table, fields) {
+      const id = `${table}-${++sequence}`;
+      tables[table].push({ _id: id, _creationTime: 1, ...structuredClone(fields) });
+      return id;
+    },
+    async patch(table, id, fields) {
+      const row = tables[table].find((row) => row._id === id);
+      assert.ok(row);
+      Object.assign(row, structuredClone(fields));
+    },
+    async delete(table, id) {
+      tables[table] = tables[table].filter((row) => row._id !== id);
+    },
     query(table) {
       let rows = tables[table];
       return {
         withIndex(name, range) {
           const at = (row, field) => field.split(".").reduce((v, key) => v[key], row);
           const q = {
-            eq(field, value) { rows = rows.filter((row) => at(row, field) === value); return q; },
-            gt(field, value) { rows = rows.filter((row) => typeof at(row, field) === "number" && at(row, field) > value); return q; },
+            eq(field, value) {
+              rows = rows.filter((row) => at(row, field) === value);
+              return q;
+            },
+            gt(field, value) {
+              rows = rows.filter(
+                (row) => typeof at(row, field) === "number" && at(row, field) > value,
+              );
+              return q;
+            },
           };
-          range(q); return this;
+          range(q);
+          return this;
         },
         async unique() {
           assert.ok(rows.length <= 1);
           if (table === "sessionMember") membershipReads.push(rows[0]?.userId ?? null);
           return rows[0] ?? null;
         },
-        async collect() { collected.push({ table, count: rows.length }); return rows; },
-        async take(count) { return rows.slice(0, count); },
-
+        async collect() {
+          collected.push({ table, count: rows.length });
+          return rows;
+        },
+        async take(count) {
+          return rows.slice(0, count);
+        },
       };
     },
   };
   const clock = questScheduler();
-  const ctx = (id) => ({ db, scheduler: clock.scheduler, user: { _id: id, drinkLogSortOrder: "desc" } });
+  const ctx = (id) => ({
+    db,
+    scheduler: clock.scheduler,
+    user: { _id: id, drinkLogSortOrder: "desc" },
+  });
   const owner = ctx("owner");
-  const create = () => sessions.create(owner, { name: " Evening ", description: " Test ", startedAt: 1000 });
-  const member = (sessionId, userId) => tables.sessionMember.find((row) => row.sessionId === sessionId && row.userId === userId);
-  const join = async (sessionId, userId) => { await members.invite(owner, { sessionId, userId }); await members.accept(ctx(userId), { sessionId }); };
+  const create = () =>
+    sessions.create(owner, { name: " Evening ", description: " Test ", startedAt: 1000 });
+  const member = (sessionId, userId) =>
+    tables.sessionMember.find((row) => row.sessionId === sessionId && row.userId === userId);
+  const join = async (sessionId, userId) => {
+    await members.invite(owner, { sessionId, userId });
+    await members.accept(ctx(userId), { sessionId });
+  };
   return { tables, db, ctx, owner, create, member, join, collected, sessionGets, membershipReads };
 }
 
@@ -76,9 +142,13 @@ test("party owners and joined members can opt in and out of beerpong draws", asy
       const otherActor = actor === "owner" ? "member" : "owner";
       const otherBefore = structuredClone(f.member(id, otherActor));
       const before = Date.now();
-      assert.equal(await members.setBeerpongOptIn(f.ctx(actor), {
-        sessionId: id, optedIn,
-      }), null);
+      assert.equal(
+        await members.setBeerpongOptIn(f.ctx(actor), {
+          sessionId: id,
+          optedIn,
+        }),
+        null,
+      );
       assert.equal(f.member(id, actor).beerpongOptIn, optedIn);
       assert.ok(f.member(id, actor).updatedAt >= before);
       assert.deepEqual(f.member(id, otherActor), otherBefore);
@@ -103,7 +173,14 @@ test("creation validates fields and atomically constructs the owner membership",
   assert.equal(f.member(id, "owner").kind, "sessionMember");
   assert.equal("selectedClass" in f.member(id, "owner"), false);
   const input = { name: "Name", description: "", startedAt: 1 };
-  for (const invalid of [ { name: "  a " }, { name: "a".repeat(31) }, { description: "a".repeat(501) }, { startedAt: 1.5 }, { startedAt: Infinity }, { startedAt: 8640000000000001 } ]) {
+  for (const invalid of [
+    { name: "  a " },
+    { name: "a".repeat(31) },
+    { description: "a".repeat(501) },
+    { startedAt: 1.5 },
+    { startedAt: Infinity },
+    { startedAt: 8640000000000001 },
+  ]) {
     await assert.rejects(sessions.create(f.owner, { ...input, ...invalid }));
   }
   assert.equal(f.tables.session.length, 1);
@@ -119,9 +196,7 @@ test("session access runs once for registered handlers and after input validatio
   assert.deepEqual(f.sessionGets, [id]);
 
   f.sessionGets.length = 0;
-  await assert.rejects(
-    sessions.update.public()._handler(f.owner, { id, name: "x" }),
-  );
+  await assert.rejects(sessions.update.public()._handler(f.owner, { id, name: "x" }));
   assert.deepEqual(f.sessionGets, []);
   assert.equal(f.tables.session[0].name, "Evening");
 
@@ -133,16 +208,22 @@ test("session access runs once for registered handlers and after input validatio
   assert.equal(f.tables.session[0].name, "Evening");
 
   f.sessionGets.length = 0;
-  assert.equal(await sessions.update.public()._handler(f.owner, {
-    id, name: " Changed ",
-  }), null);
+  assert.equal(
+    await sessions.update.public()._handler(f.owner, {
+      id,
+      name: " Changed ",
+    }),
+    null,
+  );
   assert.deepEqual(f.sessionGets, [id]);
   assert.equal(f.tables.session[0].name, "Changed");
 });
 
 test("shared session CRUD and promotion enforce roles, ranges and union kinds", async () => {
-  const f = fixture(); const id = await f.create();
-  await f.join(id, "admin"); await f.join(id, "member");
+  const f = fixture();
+  const id = await f.create();
+  await f.join(id, "admin");
+  await f.join(id, "member");
   await members.setRole(f.owner, { ...target(id, "admin"), role: { kind: "admin" } });
   for (const actor of ["member", "other"]) {
     await assert.rejects(sessions.update(f.ctx(actor), { id, name: "Changed" }));
@@ -192,9 +273,11 @@ test("shared session CRUD and promotion enforce roles, ranges and union kinds", 
 });
 
 test("party promotion converts all memberships and party invitations preserve gameplay state", async () => {
-  const f = fixture(); const id = await f.create();
+  const f = fixture();
+  const id = await f.create();
   f.tables.user.push({ _id: "declined" }, { _id: "newcomer" });
-  await f.join(id, "admin"); await f.join(id, "member");
+  await f.join(id, "admin");
+  await f.join(id, "member");
   await members.setRole(f.owner, { ...target(id, "admin"), role: { kind: "admin" } });
   await members.leave(f.ctx("member"), { sessionId: id });
   await members.invite(f.owner, target(id, "invitee"));
@@ -207,7 +290,9 @@ test("party promotion converts all memberships and party invitations preserve ga
   for (const original of before) {
     assert.deepEqual(f.member(id, original.userId), {
       ...original,
-      kind: "partyMember", selectedClass: null, beerpongOptIn: false,
+      kind: "partyMember",
+      selectedClass: null,
+      beerpongOptIn: false,
       updatedAt: (await f.db.get("session", id)).activatedAt,
     });
   }
@@ -233,12 +318,19 @@ test("party promotion converts all memberships and party invitations preserve ga
   assert.deepEqual(f.member(id, "newcomer").selectedClass, player.selectedClass);
   assert.equal(f.member(id, "newcomer").beerpongOptIn, true);
   const roster = await memberQueries.listForSession(f.ctx("newcomer"), { sessionId: id });
-  assert.ok(roster.every((row) => row.member.kind === "partyMember" && row.member.sessionMemberStatus.kind === "joined"));
+  assert.ok(
+    roster.every(
+      (row) =>
+        row.member.kind === "partyMember" && row.member.sessionMemberStatus.kind === "joined",
+    ),
+  );
 });
 
 test("members choose their own class while admins manage joined member classes", async () => {
-  const f = fixture(); const id = await f.create();
-  await f.join(id, "admin"); await f.join(id, "member");
+  const f = fixture();
+  const id = await f.create();
+  await f.join(id, "admin");
+  await f.join(id, "member");
   await members.setRole(f.owner, { ...target(id, "admin"), role: { kind: "admin" } });
   const input = { ...target(id, "member"), selectedClass: { kind: "beer" } };
   await assert.rejects(members.setClass(f.owner, input), /ongoing parties/);
@@ -254,7 +346,10 @@ test("members choose their own class while admins manage joined member classes",
     assert.deepEqual(f.member(id, "member"), firstChoice);
   }
   await assert.rejects(members.setClass(f.ctx("other"), input), /permission/);
-  await assert.rejects(members.setClass(f.ctx("member"), { ...input, userId: "admin" }), /permission/);
+  await assert.rejects(
+    members.setClass(f.ctx("member"), { ...input, userId: "admin" }),
+    /permission/,
+  );
   await members.setClass(f.owner, input);
   const assigned = structuredClone(f.member(id, "member"));
   assert.deepEqual(assigned.selectedClass, { kind: "beer" });
@@ -268,7 +363,10 @@ test("members choose their own class while admins manage joined member classes",
   for (const selectedClass of [{ kind: "water" }, "beer", {}]) {
     await assert.rejects(members.setClass(f.owner, { ...input, selectedClass }));
   }
-  await members.setClass(f.ctx("admin"), { ...target(id, "owner"), selectedClass: { kind: "beer" } });
+  await members.setClass(f.ctx("admin"), {
+    ...target(id, "owner"),
+    selectedClass: { kind: "beer" },
+  });
   assert.deepEqual(f.member(id, "owner").selectedClass, { kind: "beer" });
   await members.setClass(f.ctx("admin"), { ...input, selectedClass: null });
   const cleared = structuredClone(f.member(id, "member"));
@@ -276,23 +374,37 @@ test("members choose their own class while admins manage joined member classes",
   assert.ok(Number.isFinite(cleared.updatedAt));
   await members.setClass(f.owner, { ...input, selectedClass: null });
   assert.deepEqual(f.member(id, "member"), cleared);
-  await assert.rejects(members.setClass(f.owner, { ...input, userId: "missing" }), /joined party members/);
+  await assert.rejects(
+    members.setClass(f.owner, { ...input, userId: "missing" }),
+    /joined party members/,
+  );
   await members.invite(f.owner, target(id, "invitee"));
-  await assert.rejects(members.setClass(f.owner, { ...input, userId: "invitee" }), /joined party members/);
+  await assert.rejects(
+    members.setClass(f.owner, { ...input, userId: "invitee" }),
+    /joined party members/,
+  );
   await members.leave(f.ctx("member"), { sessionId: id });
   await assert.rejects(members.setClass(f.owner, input), /joined party members/);
   await members.ban(f.owner, target(id, "member"));
   await assert.rejects(members.setClass(f.owner, input), /joined party members/);
   await members.remove(f.owner, target(id, "admin"));
-  await assert.rejects(members.setClass(f.ctx("admin"), { ...input, userId: "owner" }), /permission/);
+  await assert.rejects(
+    members.setClass(f.ctx("admin"), { ...input, userId: "owner" }),
+    /permission/,
+  );
   await sessions.update(f.owner, { id, endedAt: 2000 });
   await assert.rejects(members.setClass(f.owner, { ...input, userId: "owner" }), /ongoing parties/);
   await sessions.softDelete(f.owner, { id });
-  await assert.rejects(members.setClass(f.owner, { ...input, userId: "owner" }), /Session not found/);
+  await assert.rejects(
+    members.setClass(f.owner, { ...input, userId: "owner" }),
+    /Session not found/,
+  );
 });
 
 test("invitations, acceptance, decline, leave and re-invitation keep one row and reset roles", async () => {
-  const f = fixture(); const id = await f.create(); const input = target(id, "invitee");
+  const f = fixture();
+  const id = await f.create();
+  const input = target(id, "invitee");
   await assert.rejects(members.invite(f.ctx("other"), input));
   await assert.rejects(members.invite(f.owner, target(id, "missing")));
   await members.invite(f.owner, input);
@@ -328,10 +440,13 @@ test("invitations, acceptance, decline, leave and re-invitation keep one row and
 });
 
 test("moderation and roles protect owners and admins and enforce valid transitions", async () => {
-  const f = fixture(); const id = await f.create();
-  await f.join(id, "admin"); await f.join(id, "member");
+  const f = fixture();
+  const id = await f.create();
+  await f.join(id, "admin");
+  await f.join(id, "member");
   await members.setRole(f.owner, { ...target(id, "admin"), role: { kind: "admin" } });
-  const admin = f.ctx("admin"); const input = target(id, "member");
+  const admin = f.ctx("admin");
+  const input = target(id, "member");
   for (const operation of [members.leave, members.decline, members.accept]) {
     await assert.rejects(operation(f.owner, { sessionId: id }));
   }
@@ -341,7 +456,9 @@ test("moderation and roles protect owners and admins and enforce valid transitio
     await assert.rejects(operation(admin, target(id, "admin")));
     await assert.rejects(operation(f.ctx("member"), target(id, "admin")));
   }
-  await assert.rejects(members.setRole(f.owner, { ...target(id, "owner"), role: { kind: "member" } }));
+  await assert.rejects(
+    members.setRole(f.owner, { ...target(id, "owner"), role: { kind: "member" } }),
+  );
   await assert.rejects(members.setRole(admin, { ...input, role: { kind: "admin" } }));
   await assert.rejects(members.unban(admin, input));
   await members.remove(admin, input);
@@ -372,20 +489,29 @@ test("moderation and roles protect owners and admins and enforce valid transitio
 });
 
 test("roster privacy exposes only joined rows to ordinary members", async () => {
-  const f = fixture(); const id = await f.create();
-  await f.join(id, "member"); await f.join(id, "admin");
+  const f = fixture();
+  const id = await f.create();
+  await f.join(id, "member");
+  await f.join(id, "admin");
   await members.setRole(f.owner, { ...target(id, "admin"), role: { kind: "admin" } });
   await members.invite(f.owner, target(id, "invitee"));
   assert.equal((await memberQueries.listForSession(f.owner, { sessionId: id })).length, 4);
   assert.equal((await memberQueries.listForSession(f.ctx("admin"), { sessionId: id })).length, 4);
   const roster = await memberQueries.listForSession(f.ctx("member"), { sessionId: id });
-  assert.deepEqual(roster.map((row) => row.member.userId), ["owner", "member", "admin"]);
-  assert.equal(roster.some((row) => "authUserId" in row.member), false);
+  assert.deepEqual(
+    roster.map((row) => row.member.userId),
+    ["owner", "member", "admin"],
+  );
+  assert.equal(
+    roster.some((row) => "authUserId" in row.member),
+    false,
+  );
   await assert.rejects(memberQueries.listForSession(f.ctx("other"), { sessionId: id }));
 });
 
 test("times stay descriptive; ended sessions accept members and logs; deletion preserves history", async () => {
-  const f = fixture(); const id = await f.create();
+  const f = fixture();
+  const id = await f.create();
   await sessions.update(f.owner, { id, endedAt: 1000 });
   await f.join(id, "member");
   f.tables.drink.push({ _id: "beer", ownerId: null, deletedAt: null });
@@ -412,37 +538,57 @@ test("times stay descriptive; ended sessions accept members and logs; deletion p
 });
 
 test("account deletion soft-deletes owned sessions and removes all of the user's memberships", async () => {
-  const f = fixture(); const ownedId = await f.create();
+  const f = fixture();
+  const ownedId = await f.create();
   await f.join(ownedId, "member");
-  const otherId = await sessions.create(f.ctx("other"), { name: "Other session", description: "", startedAt: 1 });
+  const otherId = await sessions.create(f.ctx("other"), {
+    name: "Other session",
+    description: "",
+    startedAt: 1,
+  });
   await members.invite(f.ctx("other"), target(otherId, "owner"));
   await f.db.insert("drinkLog", { userId: "member", sessionId: ownedId });
   await deleteUserData(f.owner, "auth-owner");
   assert.ok((await f.db.get("session", ownedId)).deletedAt);
   assert.equal((await f.db.get("session", otherId)).deletedAt, null);
-  assert.equal(f.tables.sessionMember.some((row) => row.userId === "owner"), false);
+  assert.equal(
+    f.tables.sessionMember.some((row) => row.userId === "owner"),
+    false,
+  );
   assert.equal(f.tables.drinkLog.length, 1);
   assert.ok(f.member(ownedId, "member"));
   assert.equal(await f.db.get("user", "owner"), null);
   await assert.rejects(sessionQueries.get(f.ctx("member"), { id: ownedId }));
 });
 
-
 test("invitation lookup requires admin access and only returns public identifiers and names", async () => {
-  const f = fixture(); const id = await f.create();
+  const f = fixture();
+  const id = await f.create();
   await f.join(id, "member");
-  await assert.rejects(memberQueries.findInvitee(f.ctx("member"), { sessionId: id, username: "other" }));
-  await assert.rejects(memberQueries.findInvitee(f.ctx("other"), { sessionId: id, username: "owner" }));
-  assert.deepEqual(await memberQueries.findInvitee(f.owner, { sessionId: id, username: "OTHER" }), [{ _id: "other", username: "other" }]);
-  assert.deepEqual(await memberQueries.findInvitee(f.owner, { sessionId: id, username: "missing" }), []);
+  await assert.rejects(
+    memberQueries.findInvitee(f.ctx("member"), { sessionId: id, username: "other" }),
+  );
+  await assert.rejects(
+    memberQueries.findInvitee(f.ctx("other"), { sessionId: id, username: "owner" }),
+  );
+  assert.deepEqual(await memberQueries.findInvitee(f.owner, { sessionId: id, username: "OTHER" }), [
+    { _id: "other", username: "other" },
+  ]);
+  assert.deepEqual(
+    await memberQueries.findInvitee(f.owner, { sessionId: id, username: "missing" }),
+    [],
+  );
   const roster = await memberQueries.listForSession(f.owner, { sessionId: id });
   assert.equal(roster[0].username, "owner");
-  assert.equal(roster.some((row) => "authUserId" in row.member), false);
+  assert.equal(
+    roster.some((row) => "authUserId" in row.member),
+    false,
+  );
 });
 
-
 test("membership date indexes follow creation, invitation, ending, reopening and deletion", async () => {
-  const f = fixture(); const id = await f.create();
+  const f = fixture();
+  const id = await f.create();
   await members.invite(f.owner, target(id, "invitee"));
   for (const member of f.tables.sessionMember) {
     assert.equal(member.sessionEndedAt, null);
@@ -458,7 +604,9 @@ test("membership date indexes follow creation, invitation, ending, reopening and
 });
 
 test("account deletion synchronizes remaining members' session visibility", async () => {
-  const f = fixture(); const id = await f.create(); await f.join(id, "member");
+  const f = fixture();
+  const id = await f.create();
+  await f.join(id, "member");
   await deleteUserData(f.owner, "auth-owner");
   const session = await f.db.get("session", id);
   assert.equal(f.member(id, "member").sessionDeletedAt, session.deletedAt);
@@ -466,14 +614,36 @@ test("account deletion synchronizes remaining members' session visibility", asyn
 
 test("day queries skip old owned and joined history before collecting or loading sessions", async () => {
   const f = fixture();
-  const row = (_id, ownerId, endedAt) => ({ _id, ownerId, kind: "session", name: _id, description: "", startedAt: 0, endedAt, updatedAt: 1, deletedAt: null });
+  const row = (_id, ownerId, endedAt) => ({
+    _id,
+    ownerId,
+    kind: "session",
+    name: _id,
+    description: "",
+    startedAt: 0,
+    endedAt,
+    updatedAt: 1,
+    deletedAt: null,
+  });
   for (let i = 0; i < 1000; i++) {
     f.tables.session.push(row(`owned-${i}`, "owner", 500), row(`joined-${i}`, "other", 500));
-    f.tables.sessionMember.push({ _id: `membership-${i}`, kind: "sessionMember", sessionId: `joined-${i}`, userId: "owner", sessionMemberStatus: { kind: "joined" }, sessionMemberRole: { kind: "member" }, sessionEndedAt: 500, sessionDeletedAt: null });
+    f.tables.sessionMember.push({
+      _id: `membership-${i}`,
+      kind: "sessionMember",
+      sessionId: `joined-${i}`,
+      userId: "owner",
+      sessionMemberStatus: { kind: "joined" },
+      sessionMemberRole: { kind: "member" },
+      sessionEndedAt: 500,
+      sessionDeletedAt: null,
+    });
   }
   f.tables.session.push(row("ongoing", "owner", null), row("ends-today", "owner", 1500));
   const result = await sessionQueries.listForDayHandler(f.owner, 1000, 2000, new Set(["owned-0"]));
-  assert.deepEqual(new Set(result.map((session) => session._id)), new Set(["ongoing", "ends-today", "owned-0"]));
+  assert.deepEqual(
+    new Set(result.map((session) => session._id)),
+    new Set(["ongoing", "ends-today", "owned-0"]),
+  );
   assert.ok(f.collected.every((query) => query.count <= 1));
   assert.deepEqual(f.sessionGets, ["owned-0"]);
 });
@@ -486,14 +656,19 @@ test("quick add uses server time when the consumed time is omitted", async () =>
   Date.now = () => now;
   try {
     const id = await logs.create(f.owner, {
-      sessionId: null, drinkId: "beer", volumeMl: 500, location: null,
+      sessionId: null,
+      drinkId: "beer",
+      volumeMl: 500,
+      location: null,
     });
-    const log = f.tables.drinkLog.find(log => log._id === id);
+    const log = f.tables.drinkLog.find((log) => log._id === id);
     assert.equal(log.consumedAt, now);
     assert.equal(log.updatedAt, now);
     await logs.update(f.owner, { id, volumeMl: 250 });
     assert.equal(log.consumedAt, now);
-  } finally { Date.now = originalNow; }
+  } finally {
+    Date.now = originalNow;
+  }
 });
 
 test("drink creates and updates reject future instants, including unchanged legacy timestamps", async () => {
@@ -503,13 +678,25 @@ test("drink creates and updates reject future instants, including unchanged lega
   const originalNow = Date.now;
   Date.now = () => now;
   try {
-    const input = { sessionId: null, drinkId: "beer", consumedAt: now, volumeMl: 500, location: null };
-    await assert.rejects(logs.create(f.owner, { ...input, consumedAt: now + 1 }), /cannot be in the future/);
+    const input = {
+      sessionId: null,
+      drinkId: "beer",
+      consumedAt: now,
+      volumeMl: 500,
+      location: null,
+    };
+    await assert.rejects(
+      logs.create(f.owner, { ...input, consumedAt: now + 1 }),
+      /cannot be in the future/,
+    );
     assert.equal(f.tables.drinkLog.length, 0);
     const id = await logs.create(f.owner, input);
     assert.equal(f.tables.drinkLog[0].consumedAt, now);
     const before = structuredClone(f.tables.drinkLog);
-    await assert.rejects(logs.update(f.owner, { id, consumedAt: now + 1, volumeMl: 250 }), /cannot be in the future/);
+    await assert.rejects(
+      logs.update(f.owner, { id, consumedAt: now + 1, volumeMl: 250 }),
+      /cannot be in the future/,
+    );
     assert.deepEqual(f.tables.drinkLog, before);
     await logs.update(f.owner, { id, consumedAt: now - 1 });
     await logs.update(f.owner, { id, volumeMl: 250 });
@@ -520,13 +707,16 @@ test("drink creates and updates reject future instants, including unchanged lega
     await logs.update(f.owner, { id, consumedAt: now - 1 });
     assert.equal(f.tables.drinkLog[0].consumedAt, now - 1);
     const pastId = await logs.create(f.owner, { ...input, consumedAt: now - 86400000 });
-    assert.equal(f.tables.drinkLog.find(log => log._id === pastId).consumedAt, now - 86400000);
-  } finally { Date.now = originalNow; }
+    assert.equal(f.tables.drinkLog.find((log) => log._id === pastId).consumedAt, now - 86400000);
+  } finally {
+    Date.now = originalNow;
+  }
 });
 
-
 test("beerpong opt-in belongs to the current joined member of an ongoing enabled party", async () => {
-  const f = fixture(); const id = await f.create(); await f.join(id, "member");
+  const f = fixture();
+  const id = await f.create();
+  await f.join(id, "member");
   const input = { sessionId: id, optedIn: true };
   await assert.rejects(members.setBeerpongOptIn(f.ctx("member"), input), /ongoing party/);
   await sessions.promoteToParty(f.owner, { id });
@@ -549,9 +739,8 @@ test("beerpong opt-in belongs to the current joined member of an ongoing enabled
 });
 
 for (const registered of [false, true]) {
-  const invoke = (endpoint, ctx, input) => registered
-    ? endpoint.public()._handler(ctx, input)
-    : endpoint(ctx, input);
+  const invoke = (endpoint, ctx, input) =>
+    registered ? endpoint.public()._handler(ctx, input) : endpoint(ctx, input);
   const mode = registered ? "registered" : "direct";
 
   test(`${mode} self class access reuses caller membership and preserves repeated selections`, async () => {
@@ -560,8 +749,11 @@ for (const registered of [false, true]) {
     await f.join(id, "member");
     await sessions.promoteToParty(f.owner, { id });
     const writes = [];
-    const patch = f.db.patch;
-    f.db.patch = async (...args) => { writes.push(args); return patch(...args); };
+    const patch = f.db.patch.bind(f.db);
+    f.db.patch = async (...args) => {
+      writes.push(args);
+      return patch(...args);
+    };
     const input = { sessionId: id, userId: "member", selectedClass: { kind: "beer" } };
 
     f.membershipReads.length = 0;
@@ -576,9 +768,13 @@ for (const registered of [false, true]) {
     assert.deepEqual(f.membershipReads, ["member"]);
     assert.deepEqual(writes, []);
 
-    await assert.rejects(invoke(members.setClass, f.ctx("member"), {
-      ...input, selectedClass: { kind: "wine" },
-    }), /Only admins can change/);
+    await assert.rejects(
+      invoke(members.setClass, f.ctx("member"), {
+        ...input,
+        selectedClass: { kind: "wine" },
+      }),
+      /Only admins can change/,
+    );
     assert.deepEqual(writes, []);
   });
 
@@ -587,23 +783,36 @@ for (const registered of [false, true]) {
     const id = await f.create();
     await f.join(id, "admin");
     await members.setRole(f.owner, {
-      sessionId: id, userId: "admin", role: { kind: "admin" },
+      sessionId: id,
+      userId: "admin",
+      role: { kind: "admin" },
     });
     const writes = [];
-    const patch = f.db.patch;
-    f.db.patch = async (...args) => { writes.push(args); return patch(...args); };
+    const patch = f.db.patch.bind(f.db);
+    f.db.patch = async (...args) => {
+      writes.push(args);
+      return patch(...args);
+    };
 
     f.membershipReads.length = 0;
-    await assert.rejects(invoke(members.remove, f.ctx("admin"), {
-      sessionId: id, userId: "owner",
-    }), /owner cannot be moderated/);
+    await assert.rejects(
+      invoke(members.remove, f.ctx("admin"), {
+        sessionId: id,
+        userId: "owner",
+      }),
+      /owner cannot be moderated/,
+    );
     assert.deepEqual(f.membershipReads, ["admin"]);
     assert.deepEqual(writes, []);
 
     f.membershipReads.length = 0;
-    await assert.rejects(invoke(members.remove, f.ctx("admin"), {
-      sessionId: id, userId: "admin",
-    }), /Only the owner can moderate admins/);
+    await assert.rejects(
+      invoke(members.remove, f.ctx("admin"), {
+        sessionId: id,
+        userId: "admin",
+      }),
+      /Only the owner can moderate admins/,
+    );
     assert.deepEqual(f.membershipReads, ["admin"]);
     assert.deepEqual(writes, []);
 
@@ -616,9 +825,13 @@ for (const registered of [false, true]) {
     assert.equal(writes.length, 1);
 
     writes.length = 0;
-    assert.equal(await invoke(members.remove, f.owner, {
-      sessionId: id, userId: "admin",
-    }), null);
+    assert.equal(
+      await invoke(members.remove, f.owner, {
+        sessionId: id,
+        userId: "admin",
+      }),
+      null,
+    );
     assert.deepEqual(writes, []);
   });
 }

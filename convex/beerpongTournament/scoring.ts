@@ -11,7 +11,8 @@ export function tournamentPlacements(
 ) {
   if (
     teams.length !== tournament.teamCount ||
-    teams.length < minTeamCount || teams.length > maxTeamCount
+    teams.length < minTeamCount ||
+    teams.length > maxTeamCount
   )
     throw new ConvexError("Tournament teams must match the configured team count");
 
@@ -41,7 +42,8 @@ export function tournamentPlacements(
   for (const match of matches) {
     const { teamAId, teamBId } = resolve(match._id);
     if (
-      teamAId === undefined || teamBId === undefined ||
+      teamAId === undefined ||
+      teamBId === undefined ||
       (teamAId !== null && !teamIds.has(teamAId)) ||
       (teamBId !== null && !teamIds.has(teamBId)) ||
       match.winnerTeamId === null ||
@@ -88,9 +90,14 @@ export function tournamentAwards(
 
   return teams.flatMap((team) => {
     const placement = placements.get(team._id)!;
-    const points = placement === 1 ? tournament.firstPlacePointsUnits
-      : placement === 2 ? tournament.secondPlacePointsUnits
-        : placement === 3 ? tournament.thirdPlacePointsUnits : 0;
+    const points =
+      placement === 1
+        ? tournament.firstPlacePointsUnits
+        : placement === 2
+          ? tournament.secondPlacePointsUnits
+          : placement === 3
+            ? tournament.thirdPlacePointsUnits
+            : 0;
     if (!Number.isSafeInteger(points) || points < 0)
       throw new ConvexError("Placement points are outside the supported range");
 
@@ -113,32 +120,43 @@ export function tournamentAwards(
 
 export async function loadTournamentAwards(ctx: QueryCtx, tournament: Doc<"beerpongTournament">) {
   const [teams, matches] = await Promise.all([
-    ctx.db.query("beerpongTeam")
-      .withIndex("by_tournamentId", (q) => q.eq("tournamentId", tournament._id)).collect(),
-    ctx.db.query("beerpongMatch")
-      .withIndex("by_tournamentId_and_round_and_position", (q) => q.eq("tournamentId", tournament._id)).collect(),
+    ctx.db
+      .query("beerpongTeam")
+      .withIndex("by_tournamentId", (q) => q.eq("tournamentId", tournament._id))
+      .collect(),
+    ctx.db
+      .query("beerpongMatch")
+      .withIndex("by_tournamentId_and_round_and_position", (q) =>
+        q.eq("tournamentId", tournament._id),
+      )
+      .collect(),
   ]);
 
   return tournamentAwards(tournament, teams, matches);
 }
 
 export async function loadBeerpongAwards(ctx: QueryCtx, sessionId: Id<"session">) {
-  const tournaments = await ctx.db.query("beerpongTournament")
-    .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId)).collect();
+  const tournaments = await ctx.db
+    .query("beerpongTournament")
+    .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
+    .collect();
 
-  const awards = await Promise.all(tournaments
-    .filter((tournament) => tournament.status === "completed")
-    .map(async (tournament) => {
-      const occurredAt = tournament.completedAt;
-      if (occurredAt === null) throw new ConvexError("Completed tournament has no completion time");
+  const awards = await Promise.all(
+    tournaments
+      .filter((tournament) => tournament.status === "completed")
+      .map(async (tournament) => {
+        const occurredAt = tournament.completedAt;
+        if (occurredAt === null)
+          throw new ConvexError("Completed tournament has no completion time");
 
-      return (await loadTournamentAwards(ctx, tournament)).map((award) => ({
-        ...award,
-        tournamentId: tournament._id,
-        tournamentName: tournament.name,
-        occurredAt,
-      }));
-    }));
+        return (await loadTournamentAwards(ctx, tournament)).map((award) => ({
+          ...award,
+          tournamentId: tournament._id,
+          tournamentName: tournament.name,
+          occurredAt,
+        }));
+      }),
+  );
 
   return awards.flat();
 }

@@ -50,8 +50,7 @@ export const invite = authMutation
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
       .use(loadTargetUser)
       .use(loadTargetMember)
-      .use(requireTargetNotBanned)
-      .extend,
+      .use(requireTargetNotBanned).extend,
   )
   .handler(async (ctx, { sessionId, userId }) => {
     const { session, targetMember } = ctx;
@@ -69,8 +68,7 @@ export const invite = authMutation
       updatedAt: Date.now(),
     };
 
-    if (targetMember)
-      await ctx.db.patch("sessionMember", targetMember._id, fields);
+    if (targetMember) await ctx.db.patch("sessionMember", targetMember._id, fields);
     else
       await ctx.db.insert("sessionMember", {
         ...(session.kind === "party"
@@ -175,8 +173,7 @@ export const setRole = authMutation
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "owner"))
       .use(requireTargetNotOwner("changeRole"))
       .use(loadTargetMember)
-      .use(requireJoinedTargetMember)
-      .extend,
+      .use(requireJoinedTargetMember).extend,
   )
   .handler(async (ctx, { role }) => {
     const { targetMember } = ctx;
@@ -193,25 +190,16 @@ export const setRole = authMutation
 
 export const setClass = authMutation
   .extend(WithZod)
-  .input(
-    convexToZod(
-      partyMemberValidator.pick("sessionId", "userId", "selectedClass"),
-    ),
-  )
+  .input(convexToZod(partyMemberValidator.pick("sessionId", "userId", "selectedClass")))
   .returns(v.null())
   .extend(
     access<{ sessionId: Id<"session">; userId: Id<"user"> }>()
       .use((ctx, { sessionId, userId }) =>
-        requireSessionAccess(
-          ctx,
-          sessionId,
-          userId === ctx.user._id ? "joined" : "admin",
-        ),
+        requireSessionAccess(ctx, sessionId, userId === ctx.user._id ? "joined" : "admin"),
       )
       .use(requireOngoingClassParty)
       .use(loadTargetMember)
-      .use(requireJoinedTargetPartyMember)
-      .extend,
+      .use(requireJoinedTargetPartyMember).extend,
   )
   .handler(async (ctx, { selectedClass }) => {
     const { targetMember, isAdmin } = ctx;
@@ -237,8 +225,7 @@ export const setBeerpongOptIn = authMutation
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
       .use(requireBeerpongOptInParty)
-      .use(requireCallerPartyMember)
-      .extend,
+      .use(requireCallerPartyMember).extend,
   )
   .handler(async (ctx, { optedIn }) => {
     const { member } = ctx;

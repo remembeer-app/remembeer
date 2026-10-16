@@ -20,10 +20,7 @@ export type Party = Extract<Doc<"session">, { kind: "party" }>;
 type Schedule = Party["questSchedule"];
 
 export function validateSchedule(
-  schedule: Pick<
-    Schedule,
-    "minIntervalMinutes" | "maxIntervalMinutes" | "defaultDurationMinutes"
-  >,
+  schedule: Pick<Schedule, "minIntervalMinutes" | "maxIntervalMinutes" | "defaultDurationMinutes">,
 ) {
   const {
     minIntervalMinutes: min,
@@ -46,18 +43,13 @@ export function validateSchedule(
     duration < minQuestDurationMinutes ||
     duration > maxQuestDurationMinutes
   )
-    throw new ConvexError(
-      "Invalid quest duration: use whole minutes from 1 to 60",
-    );
+    throw new ConvexError("Invalid quest duration: use whole minutes from 1 to 60");
 }
 
 export function randomBreak(schedule: Schedule) {
   return (
     (schedule.minIntervalMinutes +
-      Math.floor(
-        Math.random() *
-          (schedule.maxIntervalMinutes - schedule.minIntervalMinutes + 1),
-      )) *
+      Math.floor(Math.random() * (schedule.maxIntervalMinutes - schedule.minIntervalMinutes + 1))) *
     millisecondsPerMinute
   );
 }
@@ -76,11 +68,7 @@ export async function cancelJob(ctx: MutationCtx, party: Party) {
     await ctx.scheduler.cancel(party.questSchedule.scheduledFunctionId);
 }
 
-export async function stopQuests(
-  ctx: MutationCtx,
-  session: Doc<"session">,
-  now: number,
-) {
+export async function stopQuests(ctx: MutationCtx, session: Doc<"session">, now: number) {
   if (session.kind !== "party") return;
 
   await cancelJob(ctx, session);
@@ -110,15 +98,11 @@ export async function scheduleExpiry(
   nextQuestAt: number,
   now: number,
 ) {
-  const scheduledFunctionId = await ctx.scheduler.runAt(
-    quest.endsAt,
-    internal.partyQuest.expire,
-    {
-      sessionId: party._id,
-      questId: quest._id,
-      nextQuestAt,
-    },
-  );
+  const scheduledFunctionId = await ctx.scheduler.runAt(quest.endsAt, internal.partyQuest.expire, {
+    sessionId: party._id,
+    questId: quest._id,
+    nextQuestAt,
+  });
 
   await ctx.db.patch("session", party._id, {
     questSchedule: { ...party.questSchedule, nextQuestAt, scheduledFunctionId },
@@ -132,14 +116,10 @@ export async function scheduleIssuance(
   nextQuestAt: number,
   now: number,
 ) {
-  const scheduledFunctionId = await ctx.scheduler.runAt(
+  const scheduledFunctionId = await ctx.scheduler.runAt(nextQuestAt, internal.partyQuest.issue, {
+    sessionId: party._id,
     nextQuestAt,
-    internal.partyQuest.issue,
-    {
-      sessionId: party._id,
-      nextQuestAt,
-    },
-  );
+  });
 
   await ctx.db.patch("session", party._id, {
     questSchedule: { ...party.questSchedule, nextQuestAt, scheduledFunctionId },
@@ -166,8 +146,7 @@ export async function issueQuest(
         ctx,
         party,
         running,
-        party.questSchedule.nextQuestAt ??
-          running.endsAt + randomBreak(party.questSchedule),
+        party.questSchedule.nextQuestAt ?? running.endsAt + randomBreak(party.questSchedule),
         now,
       );
     }
@@ -191,10 +170,8 @@ export async function issueQuest(
 
   const cycleCount = quests.length % questCycleLength;
   const cycle = cycleCount === 0 ? [] : quests.slice(-cycleCount);
-  const identity = (quest: {
-    kind: string;
-    drinkCategory?: { kind: string };
-  }) => `${quest.kind}:${quest.drinkCategory?.kind ?? ""}`;
+  const identity = (quest: { kind: string; drinkCategory?: { kind: string } }) =>
+    `${quest.kind}:${quest.drinkCategory?.kind ?? ""}`;
   const used = new Set(cycle.map(identity));
   const beerpongContext =
     party.modules.beerpongEnabled && cycleCount >= earlyQuestCount
@@ -203,9 +180,7 @@ export async function issueQuest(
 
   const candidates = builtInQuests.filter(
     (quest) =>
-      (!["differentBeerpongTeam", "sameBeerpongTeam", "finalistTeam"].includes(
-        quest.kind,
-      ) ||
+      (!["differentBeerpongTeam", "sameBeerpongTeam", "finalistTeam"].includes(quest.kind) ||
         (beerpongContext !== null &&
           eligiblePairs(
             quest,
@@ -223,8 +198,7 @@ export async function issueQuest(
   if (!chosen) throw new ConvexError("No quest templates available");
 
   const { availability, ...definition } = chosen;
-  const endsAt =
-    now + party.questSchedule.defaultDurationMinutes * millisecondsPerMinute;
+  const endsAt = now + party.questSchedule.defaultDurationMinutes * millisecondsPerMinute;
   const fields = {
     ...definition,
     sessionId: party._id,
@@ -248,11 +222,7 @@ export async function issueQuest(
   return questId;
 }
 
-export async function ensureLifecycle(
-  ctx: MutationCtx,
-  party: Party,
-  now: number,
-) {
+export async function ensureLifecycle(ctx: MutationCtx, party: Party, now: number) {
   const active = await activeQuests(ctx, party._id);
   if (active.some((quest) => quest.endsAt > now)) {
     await issueQuest(ctx, party, now);

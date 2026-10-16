@@ -7,10 +7,7 @@ import { requireSessionAccess } from "../session/access";
 import { requireParty } from "../party/access";
 import { loadChallenge } from "./access";
 
-function visibleChallenge(
-  challenge: Doc<"partyChallenge">,
-  session: Doc<"session">,
-) {
+function visibleChallenge(challenge: Doc<"partyChallenge">, session: Doc<"session">) {
   return {
     ...challenge,
     status:
@@ -31,8 +28,7 @@ export const get = authQuery
     access<{ id: Id<"partyChallenge"> }>()
       .use(loadChallenge)
       .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "joined"))
-      .use(requireParty)
-      .extend,
+      .use(requireParty).extend,
   )
   .handler(async (ctx) => visibleChallenge(ctx.challenge, ctx.session));
 
@@ -42,17 +38,14 @@ export const listForSession = authQuery
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
-      .use(requireParty)
-      .extend,
+      .use(requireParty).extend,
   )
   .handler(async (ctx, { sessionId }) => {
     const { session } = ctx;
 
     const challenges = await ctx.db
       .query("partyChallenge")
-      .withIndex("by_sessionId_and_startsAt", (q) =>
-        q.eq("sessionId", sessionId),
-      )
+      .withIndex("by_sessionId_and_startsAt", (q) => q.eq("sessionId", sessionId))
       .order("desc")
       .collect();
 

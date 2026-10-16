@@ -15,22 +15,14 @@ export function getMembership(
     .unique();
 }
 
-export function listMemberships(
-  ctx: AuthQueryCtx,
-  leaderboardId: Id<"leaderboard">,
-) {
+export function listMemberships(ctx: AuthQueryCtx, leaderboardId: Id<"leaderboard">) {
   return ctx.db
     .query("leaderboardMember")
-    .withIndex("by_leaderboardId_and_userId", (q) =>
-      q.eq("leaderboardId", leaderboardId),
-    )
+    .withIndex("by_leaderboardId_and_userId", (q) => q.eq("leaderboardId", leaderboardId))
     .collect();
 }
 
-export async function loadLeaderboard(
-  ctx: AuthQueryCtx,
-  { id }: { id: Id<"leaderboard"> },
-) {
+export async function loadLeaderboard(ctx: AuthQueryCtx, { id }: { id: Id<"leaderboard"> }) {
   const leaderboard = await ctx.db.get("leaderboard", id);
   if (!leaderboard || leaderboard.deletedAt !== null) {
     throw new ConvexError("Leaderboard not found");
@@ -44,18 +36,12 @@ export function requireLeaderboardPermission(permission: "member" | "owner") {
     const { leaderboard } = ctx;
     const isOwner = leaderboard.ownerId === ctx.user._id;
     if (permission === "owner" && !isOwner) {
-      throw new ConvexError(
-        "You do not have permission to access this leaderboard",
-      );
+      throw new ConvexError("You do not have permission to access this leaderboard");
     }
 
-    const member = isOwner
-      ? null
-      : await getMembership(ctx, leaderboard._id, ctx.user._id);
+    const member = isOwner ? null : await getMembership(ctx, leaderboard._id, ctx.user._id);
     if (!isOwner && member?.status !== "joined") {
-      throw new ConvexError(
-        "You do not have permission to access this leaderboard",
-      );
+      throw new ConvexError("You do not have permission to access this leaderboard");
     }
 
     return { member, isOwner };

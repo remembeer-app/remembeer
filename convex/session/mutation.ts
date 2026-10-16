@@ -15,8 +15,9 @@ import {
   defaultPartyQuestDurationMinutes,
 } from "./constants";
 
-const sessionAdminAccess = access<{ id: Id<"session"> }>()
-  .use((ctx, { id }) => requireSessionAccess(ctx, id, "admin"));
+const sessionAdminAccess = access<{ id: Id<"session"> }>().use((ctx, { id }) =>
+  requireSessionAccess(ctx, id, "admin"),
+);
 
 export const create = authMutation
   .extend(WithZod)
@@ -56,8 +57,7 @@ export const update = authMutation
     const { session } = ctx;
 
     const startedAt = input.startedAt ?? session.startedAt;
-    const endedAt =
-      input.endedAt === undefined ? session.endedAt : input.endedAt;
+    const endedAt = input.endedAt === undefined ? session.endedAt : input.endedAt;
     if (endedAt !== null && endedAt < startedAt)
       throw new ConvexError("End time must not precede start time");
 
@@ -86,8 +86,7 @@ export const softDelete = authMutation
   .input({ id: v.id("session") })
   .returns(v.null())
   .extend(
-    access<{ id: Id<"session"> }>()
-      .use((ctx, { id }) => requireSessionAccess(ctx, id, "owner"))
+    access<{ id: Id<"session"> }>().use((ctx, { id }) => requireSessionAccess(ctx, id, "owner"))
       .extend,
   )
   .handler(async (ctx, { id }) => {
@@ -111,8 +110,7 @@ export const promoteToParty = authMutation
     const { session } = ctx;
     if (session.kind === "party") return null;
 
-    if (session.endedAt !== null)
-      throw new ConvexError("Only ongoing sessions can become parties");
+    if (session.endedAt !== null) throw new ConvexError("Only ongoing sessions can become parties");
 
     const now = Date.now();
     await ctx.db.patch("session", id, {

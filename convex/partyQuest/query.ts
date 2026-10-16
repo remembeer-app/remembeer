@@ -9,11 +9,7 @@ import { loadQuestContext } from "./context";
 import { loadQuest } from "./access";
 import { eligiblePairs } from "./eligibility";
 
-function visibleQuest(
-  quest: Doc<"partyQuest">,
-  session: Doc<"session">,
-  userId: string,
-) {
+function visibleQuest(quest: Doc<"partyQuest">, session: Doc<"session">, userId: string) {
   return {
     ...quest,
     status:
@@ -24,9 +20,7 @@ function visibleQuest(
           : session.endedAt !== null
             ? ("cancelled" as const)
             : quest.status,
-    selections: quest.selections.filter(
-      (selection) => selection.userId === userId,
-    ),
+    selections: quest.selections.filter((selection) => selection.userId === userId),
   };
 }
 
@@ -36,8 +30,7 @@ export const get = authQuery
   .extend(
     access<{ id: Id<"partyQuest"> }>()
       .use(loadQuest)
-      .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"))
-      .extend,
+      .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined")).extend,
   )
   .handler(async (ctx) => visibleQuest(ctx.quest, ctx.session, ctx.user._id));
 
@@ -45,18 +38,16 @@ export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
   .returns(v.array(schema.doc("partyQuest")))
   .extend(
-    access<{ sessionId: Id<"session"> }>()
-      .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
-      .extend,
+    access<{ sessionId: Id<"session"> }>().use((ctx, { sessionId }) =>
+      requireSessionAccess(ctx, sessionId, "joined"),
+    ).extend,
   )
   .handler(async (ctx, { sessionId }) => {
     const { session } = ctx;
 
     const quests = await ctx.db
       .query("partyQuest")
-      .withIndex("by_sessionId_and_startsAt", (q) =>
-        q.eq("sessionId", sessionId),
-      )
+      .withIndex("by_sessionId_and_startsAt", (q) => q.eq("sessionId", sessionId))
       .order("desc")
       .collect();
 
@@ -70,8 +61,7 @@ export const partners = authQuery
   .extend(
     access<{ questId: Id<"partyQuest"> }>()
       .use((ctx, { questId }) => loadQuest(ctx, { id: questId }))
-      .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"))
-      .extend,
+      .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined")).extend,
   )
   .handler(async (ctx) => {
     const { quest, session } = ctx;
@@ -88,18 +78,11 @@ export const partners = authQuery
       return [];
 
     const completed = new Set(
-      quest.results.flatMap((result) => [
-        result.firstUserId,
-        result.secondUserId,
-      ]),
+      quest.results.flatMap((result) => [result.firstUserId, result.secondUserId]),
     );
     if (completed.has(ctx.user._id)) return [];
 
-    const { players, previousPairs, finalistTeamIds } = await loadQuestContext(
-      ctx,
-      session,
-      now,
-    );
+    const { players, previousPairs, finalistTeamIds } = await loadQuestContext(ctx, session, now);
 
     const ids = eligiblePairs(quest, players, previousPairs, finalistTeamIds)
       .flatMap((pair) =>

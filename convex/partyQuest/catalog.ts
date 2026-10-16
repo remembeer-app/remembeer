@@ -29,8 +29,7 @@ export const builtInQuests = [
   {
     kind: "sameAccent",
     title: "Color Alliance",
-    instructions:
-      "Have a toast with someone with the same profile accent and select each other.",
+    instructions: "Have a toast with someone with the same profile accent and select each other.",
     pointsUnits: 25 * partyScoreUnitsPerPoint,
     availability: "early",
   },
@@ -53,16 +52,14 @@ export const builtInQuests = [
   {
     kind: "differentClass",
     title: "Cross-Class Alliance",
-    instructions:
-      "Have a toast with someone from a different Party class and select each other.",
+    instructions: "Have a toast with someone from a different Party class and select each other.",
     pointsUnits: 25 * partyScoreUnitsPerPoint,
     availability: "early",
   },
   {
     kind: "sameClass",
     title: "Class Fellowship",
-    instructions:
-      "Have a toast with someone from your Party class and select each other.",
+    instructions: "Have a toast with someone from your Party class and select each other.",
     pointsUnits: 25 * partyScoreUnitsPerPoint,
     availability: "early",
   },
@@ -117,8 +114,7 @@ export const builtInQuests = [
   {
     kind: "sameBeerpongTeam",
     title: "Team Morale",
-    instructions:
-      "Have a toast with a member of your beerpong team and select each other.",
+    instructions: "Have a toast with a member of your beerpong team and select each other.",
     pointsUnits: 25 * partyScoreUnitsPerPoint,
     availability: "regular",
   },

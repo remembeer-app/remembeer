@@ -31,9 +31,7 @@ export const search = authQuery
       .take(20);
 
     const profiles = await Promise.all(
-      users
-        .filter((user) => user._id !== ctx.user._id)
-        .map((user) => publicUser(ctx, user._id)),
+      users.filter((user) => user._id !== ctx.user._id).map((user) => publicUser(ctx, user._id)),
     );
 
     return profiles.filter((user) => user !== null);
@@ -51,9 +49,7 @@ export const current = authQuery
 
     return {
       ...user,
-      avatarUrl: avatarStorageId
-        ? await ctx.storage.getUrl(avatarStorageId)
-        : null,
+      avatarUrl: avatarStorageId ? await ctx.storage.getUrl(avatarStorageId) : null,
     };
   });
 
@@ -109,9 +105,7 @@ export const stats = authQuery
         drinks.set(log.drinkId, drink);
       }
 
-      const beers = drink.drinkCategory.kind === "beer"
-        ? log.volumeMl / beerVolumeMl
-        : 0;
+      const beers = drink.drinkCategory.kind === "beer" ? log.volumeMl / beerVolumeMl : 0;
       const alcohol = (log.volumeMl * drink.alcoholPercentage) / 100;
       const day = userDay.at(log.consumedAt);
 
@@ -135,7 +129,12 @@ export const stats = authQuery
     }
 
     return {
-      totalBeersConsumed, totalAlcoholConsumed, beersConsumedLast30Days,
-      alcoholConsumedLast30Days, streakDays, isStreakActive, nextRefreshAt,
+      totalBeersConsumed,
+      totalAlcoholConsumed,
+      beersConsumedLast30Days,
+      alcoholConsumedLast30Days,
+      streakDays,
+      isStreakActive,
+      nextRefreshAt,
     };
   });

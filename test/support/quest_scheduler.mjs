@@ -6,11 +6,17 @@ export function questScheduler() {
   const scheduler = {
     async runAt(at, reference, args) {
       const id = `job-${jobs.length}`;
-      jobs.push({ id, at, name: getFunctionName(reference), args: structuredClone(args), state: "pending" });
+      jobs.push({
+        id,
+        at,
+        name: getFunctionName(reference),
+        args: structuredClone(args),
+        state: "pending",
+      });
       return id;
     },
     async cancel(id) {
-      const job = jobs.find(job => job.id === id);
+      const job = jobs.find((job) => job.id === id);
       assert.ok(job, `Missing job ${id}`);
       if (job.state === "pending") job.state = "cancelled";
     },
@@ -23,7 +29,9 @@ export function questScheduler() {
     try {
       await handlers[job.name.split(":")[1]]._handler(ctx, job.args);
       job.state = "success";
-    } finally { Date.now = original; }
+    } finally {
+      Date.now = original;
+    }
   }
   return { scheduler, jobs, execute };
 }

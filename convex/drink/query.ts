@@ -16,9 +16,7 @@ export const listAvailable = authQuery
       listCustomHanlder(ctx),
       ctx.db
         .query("drink")
-        .withIndex("by_ownerId_and_deletedAt", (q) =>
-          q.eq("ownerId", null).eq("deletedAt", null),
-        )
+        .withIndex("by_ownerId_and_deletedAt", (q) => q.eq("ownerId", null).eq("deletedAt", null))
         .collect(),
     ]);
 
@@ -40,10 +38,7 @@ export const get = authQuery
   })
   .returns(schema.doc("drink"))
   .extend(
-    access<{ id: Id<"drink"> }>()
-      .use(loadDrink)
-      .use(requireDrinkOwner)
-      .use(requireUndeletedDrink)
+    access<{ id: Id<"drink"> }>().use(loadDrink).use(requireDrinkOwner).use(requireUndeletedDrink)
       .extend,
   )
   .handler(async (ctx) => ctx.drink);

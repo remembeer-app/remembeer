@@ -12,12 +12,7 @@ export const listCurrent = authQuery
 
     const users = await Promise.all(
       relations.map((relation) =>
-        publicUser(
-          ctx,
-          relation.userAId === ctx.user._id
-            ? relation.userBId
-            : relation.userAId,
-        ),
+        publicUser(ctx, relation.userAId === ctx.user._id ? relation.userBId : relation.userAId),
       ),
     );
 
@@ -41,9 +36,7 @@ export const listRequests = authQuery
       relations.map(async (friendship) => {
         const user = await publicUser(
           ctx,
-          friendship.userAId === ctx.user._id
-            ? friendship.userBId
-            : friendship.userAId,
+          friendship.userAId === ctx.user._id ? friendship.userBId : friendship.userAId,
         );
 
         return user ? { friendship, user } : null;

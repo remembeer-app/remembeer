@@ -2,11 +2,7 @@ import { defineTable } from "convex/server";
 import { v } from "convex/values";
 import { z } from "zod";
 import { convexToZod } from "convex-helpers/server/zod4";
-import {
-  leaderboardIcons,
-  minLeaderboardNameLength,
-  maxLeaderboardNameLength,
-} from "./constants";
+import { leaderboardIcons, minLeaderboardNameLength, maxLeaderboardNameLength } from "./constants";
 
 export const leaderboardTable = defineTable({
   ownerId: v.id("user"),
@@ -22,11 +18,7 @@ export const leaderboardTable = defineTable({
   .index("by_inviteCode", ["inviteCode"]);
 
 export const createLeaderboardInputValidator = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(minLeaderboardNameLength)
-    .max(maxLeaderboardNameLength),
+  name: z.string().trim().min(minLeaderboardNameLength).max(maxLeaderboardNameLength),
   iconName: z.enum(leaderboardIcons),
 });
 export const updateLeaderboardInputValidator = createLeaderboardInputValidator

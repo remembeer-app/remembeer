@@ -23,11 +23,7 @@ const commonFields = {
   pointsUnits: v.number(),
   startsAt: v.number(),
   endsAt: v.number(),
-  status: v.union(
-    v.literal("active"),
-    v.literal("expired"),
-    v.literal("cancelled"),
-  ),
+  status: v.union(v.literal("active"), v.literal("expired"), v.literal("cancelled")),
   selections: v.array(
     v.object({
       userId: v.id("user"),
@@ -40,11 +36,7 @@ const commonFields = {
 };
 
 export const partyQuestTable = defineTable(
-  v.union(
-    ...partyQuestKindValidator.members.map((quest) =>
-      quest.extend(commonFields),
-    ),
-  ),
+  v.union(...partyQuestKindValidator.members.map((quest) => quest.extend(commonFields))),
 )
   .index("by_sessionId_and_startsAt", ["sessionId", "startsAt"])
   .index("by_sessionId_and_status", ["sessionId", "status"])

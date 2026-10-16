@@ -45,10 +45,7 @@ export const create = authMutation
     do {
       inviteCode = Array.from(
         { length: inviteCodeLength },
-        () =>
-          inviteCodeCharacters[
-            Math.floor(Math.random() * inviteCodeCharacters.length)
-          ],
+        () => inviteCodeCharacters[Math.floor(Math.random() * inviteCodeCharacters.length)],
       ).join("");
     } while (
       await ctx.db
@@ -127,8 +124,8 @@ export const join = authMutation
     if (member?.status === "banned") return "banned";
 
     if (
-      (await listMemberships(ctx, id)).filter((m) => m.status === "joined")
-        .length >= maxLeaderboardMembers
+      (await listMemberships(ctx, id)).filter((m) => m.status === "joined").length >=
+      maxLeaderboardMembers
     )
       return "full";
 
@@ -149,8 +146,7 @@ export const leave = authMutation
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
       .use(requireLeaderboardPermission("member"))
-      .use(requireCallerNotOwner)
-      .extend,
+      .use(requireCallerNotOwner).extend,
   )
   .handler(async (ctx) => {
     const { member } = ctx;
@@ -185,8 +181,7 @@ async function changeMember(
 ) {
   const member = await getMembership(ctx, id, userId);
   if (action === "ban") {
-    if (!(await ctx.db.get("user", userId)))
-      throw new ConvexError("User not found");
+    if (!(await ctx.db.get("user", userId))) throw new ConvexError("User not found");
 
     if (member)
       await ctx.db.patch("leaderboardMember", member._id, {

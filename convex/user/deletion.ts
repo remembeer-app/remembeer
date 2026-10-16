@@ -45,9 +45,7 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
 
   const logs = await ctx.db
     .query("drinkLog")
-    .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) =>
-      q.eq("userId", user._id),
-    )
+    .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) => q.eq("userId", user._id))
     .collect();
 
   for (const log of logs) {
@@ -93,9 +91,7 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
 
   const memberships = await ctx.db
     .query("sessionMember")
-    .withIndex("by_userId_and_sessionMemberStatus_kind", (q) =>
-      q.eq("userId", user._id),
-    )
+    .withIndex("by_userId_and_sessionMemberStatus_kind", (q) => q.eq("userId", user._id))
     .collect();
 
   for (const member of memberships) {

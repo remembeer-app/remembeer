@@ -9,12 +9,7 @@ export const expire = convex
     const challenge = await ctx.db.get("partyChallenge", id);
 
     const now = Date.now();
-    if (
-      !challenge ||
-      challenge.status !== "active" ||
-      challenge.endsAt !== endsAt ||
-      endsAt > now
-    )
+    if (!challenge || challenge.status !== "active" || challenge.endsAt !== endsAt || endsAt > now)
       return null;
 
     await ctx.db.patch("partyChallenge", id, {

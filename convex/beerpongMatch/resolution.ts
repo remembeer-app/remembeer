@@ -21,10 +21,7 @@ export function matchResolver(matches: Doc<"beerpongMatch">[]) {
     const { teamAId, teamBId } = resolve(source._id);
     if (source.winnerTeamId === null) return undefined;
 
-    if (
-      source.winnerTeamId !== teamAId &&
-      source.winnerTeamId !== teamBId
-    )
+    if (source.winnerTeamId !== teamAId && source.winnerTeamId !== teamBId)
       throw new ConvexError("Bracket source has an invalid winner");
 
     if (slot.kind === "winner") return source.winnerTeamId;
@@ -57,10 +54,7 @@ export function matchResolver(matches: Doc<"beerpongMatch">[]) {
   return resolve;
 }
 
-export function downstreamMatches(
-  matches: Doc<"beerpongMatch">[],
-  sourceId: Id<"beerpongMatch">,
-) {
+export function downstreamMatches(matches: Doc<"beerpongMatch">[], sourceId: Id<"beerpongMatch">) {
   const affected = new Set([sourceId]);
   let changed = true;
 
@@ -70,9 +64,11 @@ export function downstreamMatches(
     for (const match of matches) {
       if (affected.has(match._id)) continue;
 
-      if ([match.slotA, match.slotB].some((slot) =>
-        (slot.kind === "winner" || slot.kind === "loser") && affected.has(slot.matchId),
-      )) {
+      if (
+        [match.slotA, match.slotB].some(
+          (slot) => (slot.kind === "winner" || slot.kind === "loser") && affected.has(slot.matchId),
+        )
+      ) {
         affected.add(match._id);
         changed = true;
       }

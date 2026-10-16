@@ -19,15 +19,15 @@ function resultMutation(correcting: boolean) {
         .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
         .use(requireParty)
         .use(requireOngoingParty)
-        .use(requireBeerpongEnabled)
-        .extend,
+        .use(requireBeerpongEnabled).extend,
     )
     .handler(async (ctx, { id, winnerTeamId }) => {
       const { match, tournament } = ctx;
       if (tournament.status !== "active")
         throw new ConvexError("Results can only be changed in an active tournament");
 
-      const matches = await ctx.db.query("beerpongMatch")
+      const matches = await ctx.db
+        .query("beerpongMatch")
         .withIndex("by_tournamentId_and_round_and_position", (q) =>
           q.eq("tournamentId", match.tournamentId),
         )
@@ -57,13 +57,17 @@ function resultMutation(correcting: boolean) {
           if (dependent.winnerTeamId === null && dependent.completedAt === null) continue;
 
           await ctx.db.patch("beerpongMatch", dependent._id, {
-            winnerTeamId: null, completedAt: null, updatedAt: now,
+            winnerTeamId: null,
+            completedAt: null,
+            updatedAt: now,
           });
         }
       }
 
       await ctx.db.patch("beerpongMatch", id, {
-        winnerTeamId, completedAt: now, updatedAt: now,
+        winnerTeamId,
+        completedAt: now,
+        updatedAt: now,
       });
       await ctx.db.patch("beerpongTournament", tournament._id, { updatedAt: now });
 

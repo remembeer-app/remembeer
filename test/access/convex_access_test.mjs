@@ -67,7 +67,10 @@ const { outputFiles } = await build({
     `,
     resolveDir: process.cwd(),
   },
-  bundle: true, platform: "node", format: "esm", write: false,
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  write: false,
 });
 const { endpoint, strictEndpoint, replacementEndpoint } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
@@ -77,22 +80,24 @@ function fixture(actor = "alice") {
   const reads = [];
   const writes = [];
   const ctx = {
-    actor, trace: [],
+    actor,
+    trace: [],
     db: {
       async get(table, id) {
         reads.push({ table, id });
         return id === "missing" ? null : { ownerId: id };
       },
-      async patch(table, id, fields) { writes.push({ table, id, fields }); },
+      async patch(table, id, fields) {
+        writes.push({ table, id, fields });
+      },
     },
   };
   return { ctx, reads, writes };
 }
 
 for (const registered of [false, true]) {
-  const invoke = (fn, ctx, input) => registered
-    ? fn.public()._handler(ctx, input)
-    : fn(ctx, input);
+  const invoke = (fn, ctx, input) =>
+    registered ? fn.public()._handler(ctx, input) : fn(ctx, input);
   const mode = registered ? "registered" : "direct";
 
   test(`${mode} chains use parsed input, accumulate context, and preserve mutation capabilities`, async () => {
@@ -139,7 +144,10 @@ for (const registered of [false, true]) {
     ]) {
       const f = fixture();
       assert.deepEqual(await invoke(replacementEndpoint, f.ctx, { mode: replacementMode }), {
-        value, observedType, retained: true, label: "new label",
+        value,
+        observedType,
+        retained: true,
+        label: "new label",
       });
       assert.equal("value" in f.ctx, false);
       assert.equal("label" in f.ctx, false);

@@ -24,9 +24,7 @@ export function eligiblePairs(
   previousPairs: ReadonlySet<string>,
   finalistTeamIds: ReadonlySet<string> = new Set(),
 ) {
-  const ranks = new Map(
-    rankByScore(players).map((player) => [player.userId, player.rank]),
-  );
+  const ranks = new Map(rankByScore(players).map((player) => [player.userId, player.rank]));
 
   function matches(a: QuestPlayer, b: QuestPlayer) {
     const aRank = ranks.get(a.userId)!;
@@ -43,27 +41,21 @@ export function eligiblePairs(
       case "differentAccent":
         return a.accentColor !== b.accentColor;
       case "newAlly":
-        return !previousPairs.has(
-          JSON.stringify(memberPair(a.userId, b.userId)),
-        );
+        return !previousPairs.has(JSON.stringify(memberPair(a.userId, b.userId)));
       case "sameClass":
         return a.selectedClass === b.selectedClass;
       case "differentClass":
         return a.selectedClass !== b.selectedClass;
       case "bottomQuarter":
         return (
-          aRank > Math.floor(players.length * 0.75) !==
-          bRank > Math.floor(players.length * 0.75)
+          aRank > Math.floor(players.length * 0.75) !== bRank > Math.floor(players.length * 0.75)
         );
       case "leader":
         return (aRank === 1) !== (bRank === 1);
       case "topThree":
         return aRank <= 3 !== bRank <= 3;
       case "oppositeRankingHalves":
-        return (
-          aRank <= Math.ceil(players.length / 2) !==
-          bRank <= Math.ceil(players.length / 2)
-        );
+        return aRank <= Math.ceil(players.length / 2) !== bRank <= Math.ceil(players.length / 2);
       case "nearbyRank":
         return Math.abs(aRank - bRank) <= 3;
       case "differentBeerpongTeam":
@@ -73,29 +65,23 @@ export function eligiblePairs(
           a.beerpongTeamId !== b.beerpongTeamId
         );
       case "sameBeerpongTeam":
-        return (
-          a.beerpongTeamId !== null && a.beerpongTeamId === b.beerpongTeamId
-        );
+        return a.beerpongTeamId !== null && a.beerpongTeamId === b.beerpongTeamId;
       case "finalistTeam":
         return (
-          (a.beerpongTeamId !== null &&
-            finalistTeamIds.has(a.beerpongTeamId)) ||
+          (a.beerpongTeamId !== null && finalistTeamIds.has(a.beerpongTeamId)) ||
           (b.beerpongTeamId !== null && finalistTeamIds.has(b.beerpongTeamId))
         );
     }
   }
 
-  const candidates = [...players].sort((a, b) =>
-    a.userId.localeCompare(b.userId),
-  );
+  const candidates = [...players].sort((a, b) => a.userId.localeCompare(b.userId));
   const pairs: ReturnType<typeof memberPair>[] = [];
 
   for (let index = 0; index < candidates.length; index++) {
     const first = candidates[index]!;
 
     for (const second of candidates.slice(index + 1)) {
-      if (matches(first, second))
-        pairs.push(memberPair(first.userId, second.userId));
+      if (matches(first, second)) pairs.push(memberPair(first.userId, second.userId));
     }
   }
 

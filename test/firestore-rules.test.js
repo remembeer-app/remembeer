@@ -165,29 +165,18 @@ describe("Session-backed Party reads", () => {
   test("non-members cannot write any Party path", async () => {
     const db = testEnv.authenticatedContext("outsider").firestore();
     for (const path of paths) {
-      await assertFails(
-        db.doc(`parties/${partyId}${path}`).set({ forged: true }),
-      );
+      await assertFails(db.doc(`parties/${partyId}${path}`).set({ forged: true }));
     }
-    await assertFails(
-      db.doc(`parties/${partyId}/events/new-event`).set({ forged: true }),
-    );
+    await assertFails(db.doc(`parties/${partyId}/events/new-event`).set({ forged: true }));
   });
 
   test.skip("actual Party collection queries authorize signed-in users", async () => {
     const memberDb = testEnv.authenticatedContext("member").firestore();
-    const outsiderDb = testEnv.authenticatedContext("outsider").firestore();
     const party = memberDb.doc(`parties/${partyId}`);
     const queries = [
-      party
-        .collection("members")
-        .orderBy("scoreUnits", "desc")
-        .orderBy("userId"),
+      party.collection("members").orderBy("scoreUnits", "desc").orderBy("userId"),
       party.collection("events").orderBy("occurredAt", "desc"),
-      party
-        .collection("events")
-        .where("kind", "==", "drinkLog")
-        .orderBy("occurredAt", "desc"),
+      party.collection("events").where("kind", "==", "drinkLog").orderBy("occurredAt", "desc"),
       party
         .collection("events")
         .where("participantIds", "array-contains", "member")
@@ -206,19 +195,13 @@ describe("Session-backed Party reads", () => {
       party.collection("challenges").orderBy("createdAt", "desc"),
       party.collection("tournaments").orderBy("createdAt", "desc"),
       party.collection("tournaments/tournament-1/teams").orderBy("seed"),
-      party
-        .collection("tournaments/tournament-1/matches")
-        .orderBy("round")
-        .orderBy("position"),
+      party.collection("tournaments/tournament-1/matches").orderBy("round").orderBy("position"),
     ];
     for (const query of queries) {
       await assertSucceeds(query.get());
     }
     await assertFails(
-      unauthenticatedDb
-        .collection(`parties/${partyId}/events`)
-        .orderBy("occurredAt", "desc")
-        .get(),
+      unauthenticatedDb.collection(`parties/${partyId}/events`).orderBy("occurredAt", "desc").get(),
     );
   });
 });
@@ -230,9 +213,7 @@ describe("Party indexes", () => {
       index.queryScope,
       ...index.fields
         .filter((field) => field.fieldPath !== "__name__")
-        .map(
-          (field) => `${field.fieldPath}:${field.order || field.arrayConfig}`,
-        ),
+        .map((field) => `${field.fieldPath}:${field.order || field.arrayConfig}`),
     ].join("|");
   const signatures = new Set(indexConfig.indexes.map(signature));
 
@@ -266,11 +247,7 @@ describe("Party indexes", () => {
         "challenges.instructions",
       ],
     );
-    assert(
-      indexConfig.fieldOverrides.every(
-        (override) => override.indexes.length === 0,
-      ),
-    );
+    assert(indexConfig.fieldOverrides.every((override) => override.indexes.length === 0));
   });
 });
 
@@ -298,9 +275,7 @@ describe("callable-only Party state", () => {
         await assertFails(ref.set({ forged: true }, { merge: true }));
         await assertFails(ref.delete());
       }
-      await assertFails(
-        db.doc(`parties/${partyId}/events/new-event`).set({ forged: true }),
-      );
+      await assertFails(db.doc(`parties/${partyId}/events/new-event`).set({ forged: true }));
       await assertFails(
         db.doc(`parties/${partyId}/quests/quest-1/selections/new`).set({
           forged: true,
@@ -354,10 +329,7 @@ describe("Party Session protection", () => {
       { isParty: false },
     ];
     for (const actor of ["member", "admin", "owner"]) {
-      const ref = testEnv
-        .authenticatedContext(actor)
-        .firestore()
-        .doc(`sessions/${partyId}`);
+      const ref = testEnv.authenticatedContext(actor).firestore().doc(`sessions/${partyId}`);
       for (const update of protectedUpdates) {
         await assertFails(ref.update(update));
       }
@@ -381,26 +353,13 @@ describe("Party Session protection", () => {
         .doc("sessions/ordinary")
         .set(session({ isParty: false }));
     });
-    const ownerRef = testEnv
-      .authenticatedContext("owner")
-      .firestore()
-      .doc("sessions/ordinary");
-    const adminRef = testEnv
-      .authenticatedContext("admin")
-      .firestore()
-      .doc("sessions/ordinary");
-    const memberRef = testEnv
-      .authenticatedContext("member")
-      .firestore()
-      .doc("sessions/ordinary");
+    const ownerRef = testEnv.authenticatedContext("owner").firestore().doc("sessions/ordinary");
+    const adminRef = testEnv.authenticatedContext("admin").firestore().doc("sessions/ordinary");
+    const memberRef = testEnv.authenticatedContext("member").firestore().doc("sessions/ordinary");
 
     await assertSucceeds(ownerRef.update({ endedAt: "2026-09-05T01:00:00Z" }));
-    await assertSucceeds(
-      adminRef.update({ drinkLogs: [], updatedAt: "admin" }),
-    );
-    await assertSucceeds(
-      memberRef.update({ drinkLogs: [], updatedAt: "member" }),
-    );
+    await assertSucceeds(adminRef.update({ drinkLogs: [], updatedAt: "admin" }));
+    await assertSucceeds(memberRef.update({ drinkLogs: [], updatedAt: "member" }));
     await assertSucceeds(
       testEnv
         .authenticatedContext("owner")
@@ -417,10 +376,7 @@ describe("Party Session protection", () => {
   });
 
   test("non-protected Party Session presentation and admin-role updates remain valid", async () => {
-    const ownerRef = testEnv
-      .authenticatedContext("owner")
-      .firestore()
-      .doc(`sessions/${partyId}`);
+    const ownerRef = testEnv.authenticatedContext("owner").firestore().doc(`sessions/${partyId}`);
     await assertSucceeds(ownerRef.update({ name: "Renamed Party" }));
     await assertSucceeds(ownerRef.update({ adminIds: ["owner"] }));
   });
@@ -428,20 +384,8 @@ describe("Party Session protection", () => {
 
 describe("user accent palette", () => {
   test("owner may update only accentColorKey to a palette-v1 value", async () => {
-    const ref = testEnv
-      .authenticatedContext("member")
-      .firestore()
-      .doc("users/member");
-    const colors = [
-      "amber",
-      "rose",
-      "violet",
-      "sky",
-      "emerald",
-      "lime",
-      "orange",
-      "fuchsia",
-    ];
+    const ref = testEnv.authenticatedContext("member").firestore().doc("users/member");
+    const colors = ["amber", "rose", "violet", "sky", "emerald", "lime", "orange", "fuchsia"];
     for (const accentColorKey of colors) {
       await assertSucceeds(ref.update({ accentColorKey }));
     }
@@ -451,15 +395,10 @@ describe("user accent palette", () => {
   });
 
   test("invalid, removed, mixed-field, and non-owner accent updates are denied", async () => {
-    const ownRef = testEnv
-      .authenticatedContext("member")
-      .firestore()
-      .doc("users/member");
+    const ownRef = testEnv.authenticatedContext("member").firestore().doc("users/member");
     await assertFails(ownRef.update({ accentColorKey: "blue" }));
     await assertFails(ownRef.update({ accentColorKey: null }));
-    await assertFails(
-      ownRef.update({ accentColorKey: "rose", username: "Forged together" }),
-    );
+    await assertFails(ownRef.update({ accentColorKey: "rose", username: "Forged together" }));
     await assertFails(
       testEnv
         .authenticatedContext("other")
@@ -470,16 +409,10 @@ describe("user accent palette", () => {
   });
 
   test("owner profile updates and non-owner friend self-array changes still work", async () => {
-    const ownRef = testEnv
-      .authenticatedContext("member")
-      .firestore()
-      .doc("users/member");
+    const ownRef = testEnv.authenticatedContext("member").firestore().doc("users/member");
     await assertSucceeds(ownRef.update({ username: "Updated" }));
 
-    const otherRef = testEnv
-      .authenticatedContext("member")
-      .firestore()
-      .doc("users/other");
+    const otherRef = testEnv.authenticatedContext("member").firestore().doc("users/other");
     await assertSucceeds(otherRef.update({ friends: ["member"] }));
     await assertSucceeds(otherRef.update({ friends: [] }));
     await assertFails(otherRef.update({ friends: ["someone-else"] }));

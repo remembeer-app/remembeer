@@ -8,13 +8,22 @@ const { outputFiles } = await build({
       export * as mutations from "./convex/drink/mutation";`,
     resolveDir: process.cwd(),
   },
-  bundle: true, platform: "node", format: "esm", write: false,
-  plugins: [{ name: "authenticated-context", setup(builder) {
-    builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
-      contents: 'import { createBuilder } from "fluent-convex"; export const authQuery = createBuilder().query(); export const authMutation = createBuilder().mutation();',
-      loader: "ts",
-    }));
-  } }],
+  bundle: true,
+  platform: "node",
+  format: "esm",
+  write: false,
+  plugins: [
+    {
+      name: "authenticated-context",
+      setup(builder) {
+        builder.onLoad({ filter: /convex\/lib\/authenticated\.ts$/ }, () => ({
+          contents:
+            'import { createBuilder } from "fluent-convex"; export const authQuery = createBuilder().query(); export const authMutation = createBuilder().mutation();',
+          loader: "ts",
+        }));
+      },
+    },
+  ],
 });
 const { queries, mutations } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
@@ -22,9 +31,14 @@ const { queries, mutations } = await import(
 
 function fixture() {
   const drink = {
-    _id: "drink-1", _creationTime: 1, ownerId: "owner", name: "Lager",
-    drinkCategory: { kind: "beer" }, alcoholPercentage: 5,
-    updatedAt: 1, deletedAt: null,
+    _id: "drink-1",
+    _creationTime: 1,
+    ownerId: "owner",
+    name: "Lager",
+    drinkCategory: { kind: "beer" },
+    alcoholPercentage: 5,
+    updatedAt: 1,
+    deletedAt: null,
   };
   const reads = [];
   const writes = [];
@@ -45,9 +59,8 @@ function fixture() {
 }
 
 for (const registered of [false, true]) {
-  const invoke = (endpoint, ctx, input) => registered
-    ? endpoint.public()._handler(ctx, input)
-    : endpoint(ctx, input);
+  const invoke = (endpoint, ctx, input) =>
+    registered ? endpoint.public()._handler(ctx, input) : endpoint(ctx, input);
   const mode = registered ? "registered" : "direct";
 
   test(`${mode} drink handlers load once and preserve partial updates and soft deletion`, async () => {
@@ -56,9 +69,13 @@ for (const registered of [false, true]) {
     assert.deepEqual(await invoke(queries.get, f.ctx, input), f.drink);
     assert.equal(f.reads.length, 1);
 
-    assert.equal(await invoke(mutations.update, f.ctx, {
-      ...input, name: "Renamed",
-    }), null);
+    assert.equal(
+      await invoke(mutations.update, f.ctx, {
+        ...input,
+        name: "Renamed",
+      }),
+      null,
+    );
     assert.equal(f.reads.length, 2);
     assert.equal(f.drink.name, "Renamed");
     assert.equal(f.drink.alcoholPercentage, 5);
@@ -79,12 +96,19 @@ for (const registered of [false, true]) {
         if (state === "global") f.drink.ownerId = null;
         if (state === "deleted") f.drink.deletedAt = 2;
         const before = structuredClone(f.drink);
-        const error = state === "missing" ? /Drink not found/
-          : state === "deleted" ? /Drink has been deleted/ : /permission/;
+        const error =
+          state === "missing"
+            ? /Drink not found/
+            : state === "deleted"
+              ? /Drink has been deleted/
+              : /permission/;
 
-        await assert.rejects(invoke(endpoint, f.ctx, {
-          id: state === "missing" ? "missing" : f.drink._id,
-        }), error);
+        await assert.rejects(
+          invoke(endpoint, f.ctx, {
+            id: state === "missing" ? "missing" : f.drink._id,
+          }),
+          error,
+        );
         assert.equal(f.reads.length, 1);
         assert.deepEqual(f.writes, []);
         assert.deepEqual(f.drink, before);
@@ -94,9 +118,12 @@ for (const registered of [false, true]) {
 
   test(`${mode} drink updates validate input before loading a drink`, async () => {
     const f = fixture();
-    await assert.rejects(invoke(mutations.update, f.ctx, {
-      id: f.drink._id, alcoholPercentage: 100,
-    }));
+    await assert.rejects(
+      invoke(mutations.update, f.ctx, {
+        id: f.drink._id,
+        alcoholPercentage: 100,
+      }),
+    );
     assert.deepEqual(f.reads, []);
     assert.deepEqual(f.writes, []);
   });

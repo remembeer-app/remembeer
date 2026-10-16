@@ -1,9 +1,6 @@
 {
   "name": "remembeer",
   "private": true,
-  "engines": {
-    "node": ">=24 <25"
-  },
   "scripts": {
     "convex:codegen": "convex codegen",
     "convex:dev": "convex dev",
@@ -23,7 +20,12 @@
     "test:convex:friends": "node --test test/friendship/convex_friendship_test.mjs",
     "test:seed:drinks": "node --test test/drink/seed_data/convex_seed_test.mjs",
     "seed": "node scripts/seed_drinks.mjs",
-    "seed:drinks": "convex run drink:seedGlobal"
+    "seed:drinks": "convex run drink:seedGlobal",
+    "lint": "oxlint --max-warnings=0 convex scripts test",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "check": "npm run format:check && npm run lint && npm run convex:typecheck"
   },
   "dependencies": {
     "@convex-dev/better-auth": "0.12.3",
@@ -38,6 +40,12 @@
     "@types/node": "^24",
     "firebase": "^12.2.1",
     "firebase-admin": "^14.5.0",
+    "oxfmt": "0.73.0",
+    "oxlint": "1.88.0",
+    "oxlint-tsgolint": "7.0.2004",
     "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=24 <25"
   }
 }

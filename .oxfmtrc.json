@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "ignorePatterns": [
+    "convex/_generated/**",
+    "lib/convex_api/**",
+    "android/**",
+    "ios/**",
+    "build/**",
+    "coverage/**",
+    "node_modules/**",
+    ".dart_tool/**",
+    ".devenv/**",
+    ".direnv/**",
+    "**/.terraform/**",
+    "package-lock.json",
+    "pubspec.lock",
+    "devenv.lock"
+  ]
+}

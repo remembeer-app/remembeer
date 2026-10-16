@@ -8,21 +8,17 @@ type CurrentUserContext = Awaited<ReturnType<typeof getCurrentUser>>;
 export type AuthQueryCtx = QueryCtx<DataModel> & CurrentUserContext;
 export type AuthMutationCtx = MutationCtx<DataModel> & CurrentUserContext;
 
-const authQueryMiddleware = convex
-  .query()
-  .createMiddleware(async (ctx, next) => {
-    const { user, authUser } = await getCurrentUser(ctx);
+const authQueryMiddleware = convex.query().createMiddleware(async (ctx, next) => {
+  const { user, authUser } = await getCurrentUser(ctx);
 
-    return next({ ...ctx, user, authUser });
-  });
+  return next({ ...ctx, user, authUser });
+});
 
-const authMutationMiddleware = convex
-  .mutation()
-  .createMiddleware(async (ctx, next) => {
-    const { user, authUser } = await getCurrentUser(ctx);
+const authMutationMiddleware = convex.mutation().createMiddleware(async (ctx, next) => {
+  const { user, authUser } = await getCurrentUser(ctx);
 
-    return next({ ...ctx, user, authUser });
-  });
+  return next({ ...ctx, user, authUser });
+});
 
 export const authQuery = convex.query().use(authQueryMiddleware);
 export const authMutation = convex.mutation().use(authMutationMiddleware);

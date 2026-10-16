@@ -18,8 +18,4 @@ export const beerpongMatchTable = defineTable({
   winnerTeamId: v.nullable(v.id("beerpongTeam")),
   completedAt: v.nullable(v.number()),
   updatedAt: v.number(),
-}).index("by_tournamentId_and_round_and_position", [
-  "tournamentId",
-  "round",
-  "position",
-]);
+}).index("by_tournamentId_and_round_and_position", ["tournamentId", "round", "position"]);

@@ -70,13 +70,8 @@ const entryValidator = v.union(
 );
 
 // Descending time, then descending stable ID. Use the same ordering for cursors.
-function compare(
-  a: Infer<typeof cursorValidator>,
-  b: Infer<typeof cursorValidator>,
-) {
-  return (
-    b.occurredAt - a.occurredAt || (a.id < b.id ? 1 : a.id > b.id ? -1 : 0)
-  );
+function compare(a: Infer<typeof cursorValidator>, b: Infer<typeof cursorValidator>) {
+  return b.occurredAt - a.occurredAt || (a.id < b.id ? 1 : a.id > b.id ? -1 : 0);
 }
 
 // A live projection of source rows. Cursors use the same descending ordering.
@@ -112,227 +107,185 @@ export const activity = authQuery
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
-      .use(requireParty)
-      .extend,
+      .use(requireParty).extend,
   )
-  .handler(
-    async (ctx, { sessionId, kinds, participantIds, paginationOpts }) => {
-      const pageSize = paginationOpts.numItems;
-      const cursor = decodeCursor(paginationOpts.cursor);
-      const endCursor = decodeCursor(paginationOpts.endCursor ?? null);
+  .handler(async (ctx, { sessionId, kinds, participantIds, paginationOpts }) => {
+    const pageSize = paginationOpts.numItems;
+    const cursor = decodeCursor(paginationOpts.cursor);
+    const endCursor = decodeCursor(paginationOpts.endCursor ?? null);
 
-      if (
-        !Number.isInteger(pageSize) ||
-        pageSize < 1 ||
-        pageSize > partyActivityMaxPageSize
-      )
-        throw new ConvexError(
-          `Page size must be an integer from 1 to ${partyActivityMaxPageSize}`,
-        );
+    if (!Number.isInteger(pageSize) || pageSize < 1 || pageSize > partyActivityMaxPageSize)
+      throw new ConvexError(`Page size must be an integer from 1 to ${partyActivityMaxPageSize}`);
 
-      const now = Date.now();
-      // TODO(ohtenkay): Eliminate these full-session reads and the in-memory
-      // merge/sort once the activity index exists. Every page subscription,
-      // including split pages and reactive reruns, currently repeats this work;
-      // the smaller response does not reduce the source data read or processed.
-      const [members, logs, quests, challenges, beerpongAwards] =
-        await Promise.all([
-          ctx.db
-            .query("sessionMember")
-            .withIndex("by_sessionId_and_userId", (q) =>
-              q.eq("sessionId", sessionId),
-            )
-            .collect(),
-          ctx.db
-            .query("drinkLog")
-            .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
-            .collect(),
-          ctx.db
-            .query("partyQuest")
-            .withIndex("by_sessionId_and_startsAt", (q) =>
-              q.eq("sessionId", sessionId),
-            )
-            .collect(),
-          ctx.db
-            .query("partyChallenge")
-            .withIndex("by_sessionId_and_startsAt", (q) =>
-              q.eq("sessionId", sessionId),
-            )
-            .collect(),
-          loadBeerpongAwards(ctx, sessionId),
-        ]);
+    const now = Date.now();
+    // TODO(ohtenkay): Eliminate these full-session reads and the in-memory
+    // merge/sort once the activity index exists. Every page subscription,
+    // including split pages and reactive reruns, currently repeats this work;
+    // the smaller response does not reduce the source data read or processed.
+    const [members, logs, quests, challenges, beerpongAwards] = await Promise.all([
+      ctx.db
+        .query("sessionMember")
+        .withIndex("by_sessionId_and_userId", (q) => q.eq("sessionId", sessionId))
+        .collect(),
+      ctx.db
+        .query("drinkLog")
+        .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
+        .collect(),
+      ctx.db
+        .query("partyQuest")
+        .withIndex("by_sessionId_and_startsAt", (q) => q.eq("sessionId", sessionId))
+        .collect(),
+      ctx.db
+        .query("partyChallenge")
+        .withIndex("by_sessionId_and_startsAt", (q) => q.eq("sessionId", sessionId))
+        .collect(),
+      loadBeerpongAwards(ctx, sessionId),
+    ]);
 
-      const classes = new Map(
-        members.map((member) => [
-          member.userId,
-          member.kind === "partyMember" ? member.selectedClass : null,
-        ]),
-      );
-      const drinks = new Map<Id<"drink">, Doc<"drink">>();
-      const entries: Infer<typeof entryValidator>[] = [];
+    const classes = new Map(
+      members.map((member) => [
+        member.userId,
+        member.kind === "partyMember" ? member.selectedClass : null,
+      ]),
+    );
+    const drinks = new Map<Id<"drink">, Doc<"drink">>();
+    const entries: Infer<typeof entryValidator>[] = [];
 
-      for (const log of logs) {
-        if (log.deletedAt !== null || log.consumedAt > now) continue;
+    for (const log of logs) {
+      if (log.deletedAt !== null || log.consumedAt > now) continue;
 
-        let drink = drinks.get(log.drinkId);
-        if (!drink) {
-          const referencedDrink = await ctx.db.get("drink", log.drinkId);
-          if (!referencedDrink)
-            throw new ConvexError("A logged drink is missing");
+      let drink = drinks.get(log.drinkId);
+      if (!drink) {
+        const referencedDrink = await ctx.db.get("drink", log.drinkId);
+        if (!referencedDrink) throw new ConvexError("A logged drink is missing");
 
-          drink = referencedDrink;
-          drinks.set(log.drinkId, drink);
-        }
-
-        entries.push({
-          kind: "drinkLog",
-          id: JSON.stringify(["drinkLog", log._id]),
-          occurredAt: log.consumedAt,
-          participantIds: [log.userId],
-          drinkLogId: log._id,
-          userId: log.userId,
-          drinkId: log.drinkId,
-          drinkName: drink.name,
-          drinkCategory: drink.drinkCategory,
-          volumeMl: log.volumeMl,
-          ...drinkScoreBreakdown(
-            log.volumeMl,
-            drink.alcoholPercentage,
-            classes.get(log.userId)?.kind === drink.drinkCategory.kind,
-          ),
-        });
+        drink = referencedDrink;
+        drinks.set(log.drinkId, drink);
       }
 
-      const seen = new Set<string>();
-
-      for (const quest of quests) {
-        for (const result of quest.results) {
-          const [firstUserId, secondUserId] =
-            result.firstUserId < result.secondUserId
-              ? ([result.firstUserId, result.secondUserId] as const)
-              : ([result.secondUserId, result.firstUserId] as const);
-          const id = JSON.stringify([
-            "socialQuest",
-            quest._id,
-            firstUserId,
-            secondUserId,
-          ]);
-          if (seen.has(id)) continue;
-
-          seen.add(id);
-          entries.push({
-            kind: "socialQuest",
-            id,
-            occurredAt: result.completedAt,
-            participantIds: [firstUserId, secondUserId],
-            firstUserId,
-            secondUserId,
-            questId: quest._id,
-            questTitle: quest.title,
-            scoreUnits: quest.pointsUnits,
-          });
-        }
-      }
-
-      for (const challenge of challenges) {
-        for (const winner of challenge.winners) {
-          entries.push({
-            kind: "partyChallenge",
-            id: JSON.stringify([
-              "partyChallenge",
-              challenge._id,
-              winner.userId,
-            ]),
-            occurredAt: winner.awardedAt,
-            participantIds: [winner.userId],
-            challengeId: challenge._id,
-            challengeTitle: challenge.title,
-            userId: winner.userId,
-            scoreUnits: challenge.pointsUnits,
-          });
-        }
-      }
-
-      for (const award of beerpongAwards) {
-        entries.push({
-          ...award,
-          kind: "beerpongPlacement",
-          id: JSON.stringify([
-            "beerpongPlacement",
-            award.tournamentId,
-            award.teamId,
-            award.userId,
-          ]),
-        });
-      }
-
-      const filtered = entries
-        .filter(
-          (entry) =>
-            (!kinds?.length || kinds.includes(entry.kind)) &&
-            (!participantIds?.length ||
-              entry.participantIds.some((id) => participantIds.includes(id))) &&
-            (!cursor || compare(entry, cursor) > 0),
-        )
-        .sort(compare);
-      const bounded = paginationOpts.endCursor !== undefined;
-      const page = bounded
-        ? filtered.filter(
-            (entry) => !endCursor || compare(entry, endCursor) <= 0,
-          )
-        : filtered.slice(0, pageSize);
-      const hasMore = bounded
-        ? endCursor !== null &&
-          filtered.some((entry) => compare(entry, endCursor) > 0)
-        : filtered.length > pageSize;
-      const last = page[page.length - 1];
-      const users = await Promise.all(
-        [...new Set(page.flatMap((entry) => entry.participantIds))].map((id) =>
-          publicUser(ctx, id),
+      entries.push({
+        kind: "drinkLog",
+        id: JSON.stringify(["drinkLog", log._id]),
+        occurredAt: log.consumedAt,
+        participantIds: [log.userId],
+        drinkLogId: log._id,
+        userId: log.userId,
+        drinkId: log.drinkId,
+        drinkName: drink.name,
+        drinkCategory: drink.drinkCategory,
+        volumeMl: log.volumeMl,
+        ...drinkScoreBreakdown(
+          log.volumeMl,
+          drink.alcoholPercentage,
+          classes.get(log.userId)?.kind === drink.drinkCategory.kind,
         ),
-      );
+      });
+    }
 
-      const profiles = new Map(
-        users.filter((user) => user !== null).map((user) => [user._id, user]),
-      );
+    const seen = new Set<string>();
 
-      return {
-        page: page.map((entry) => ({
-          entry,
-          users: entry.participantIds.flatMap((id) => {
-            const user = profiles.get(id);
+    for (const quest of quests) {
+      for (const result of quest.results) {
+        const [firstUserId, secondUserId] =
+          result.firstUserId < result.secondUserId
+            ? ([result.firstUserId, result.secondUserId] as const)
+            : ([result.secondUserId, result.firstUserId] as const);
+        const id = JSON.stringify(["socialQuest", quest._id, firstUserId, secondUserId]);
+        if (seen.has(id)) continue;
 
-            return user ? [user] : [];
-          }),
-        })),
-        isDone: !hasMore,
-        continueCursor: bounded
-          ? (paginationOpts.endCursor ?? "")
-          : hasMore && last
-            ? encodeCursor(last)
-            : "",
-        // Unlike a native DB paginate call, a projection has no server-side
-        // page journal. Splitting pins both ranges before subsequent live
-        // updates can move the boundary between loaded pages. An empty string
-        // marks the unbounded tail, so backdated activity remains visible too.
-        // TODO(ohtenkay): Return native paginate() cursor/split metadata after
-        // indexing activity, and remove this eager splitting, compare(), and
-        // the custom JSON cursor encoder/decoder. Keep Dartvex cursors opaque.
-        ...(page.length
-          ? {
-              splitCursor: encodeCursor(
-                page[Math.floor((page.length - 1) / 2)]!,
-              ),
-              ...(!bounded ? { pageStatus: "SplitRecommended" as const } : {}),
-            }
-          : {}),
-      };
-    },
-  );
+        seen.add(id);
+        entries.push({
+          kind: "socialQuest",
+          id,
+          occurredAt: result.completedAt,
+          participantIds: [firstUserId, secondUserId],
+          firstUserId,
+          secondUserId,
+          questId: quest._id,
+          questTitle: quest.title,
+          scoreUnits: quest.pointsUnits,
+        });
+      }
+    }
 
-function decodeCursor(
-  raw: string | null,
-): Infer<typeof cursorValidator> | null {
+    for (const challenge of challenges) {
+      for (const winner of challenge.winners) {
+        entries.push({
+          kind: "partyChallenge",
+          id: JSON.stringify(["partyChallenge", challenge._id, winner.userId]),
+          occurredAt: winner.awardedAt,
+          participantIds: [winner.userId],
+          challengeId: challenge._id,
+          challengeTitle: challenge.title,
+          userId: winner.userId,
+          scoreUnits: challenge.pointsUnits,
+        });
+      }
+    }
+
+    for (const award of beerpongAwards) {
+      entries.push({
+        ...award,
+        kind: "beerpongPlacement",
+        id: JSON.stringify(["beerpongPlacement", award.tournamentId, award.teamId, award.userId]),
+      });
+    }
+
+    const filtered = entries
+      .filter(
+        (entry) =>
+          (!kinds?.length || kinds.includes(entry.kind)) &&
+          (!participantIds?.length ||
+            entry.participantIds.some((id) => participantIds.includes(id))) &&
+          (!cursor || compare(entry, cursor) > 0),
+      )
+      .sort(compare);
+    const bounded = paginationOpts.endCursor !== undefined;
+    const page = bounded
+      ? filtered.filter((entry) => !endCursor || compare(entry, endCursor) <= 0)
+      : filtered.slice(0, pageSize);
+    const hasMore = bounded
+      ? endCursor !== null && filtered.some((entry) => compare(entry, endCursor) > 0)
+      : filtered.length > pageSize;
+    const last = page[page.length - 1];
+    const users = await Promise.all(
+      [...new Set(page.flatMap((entry) => entry.participantIds))].map((id) => publicUser(ctx, id)),
+    );
+
+    const profiles = new Map(users.filter((user) => user !== null).map((user) => [user._id, user]));
+
+    return {
+      page: page.map((entry) => ({
+        entry,
+        users: entry.participantIds.flatMap((id) => {
+          const user = profiles.get(id);
+
+          return user ? [user] : [];
+        }),
+      })),
+      isDone: !hasMore,
+      continueCursor: bounded
+        ? (paginationOpts.endCursor ?? "")
+        : hasMore && last
+          ? encodeCursor(last)
+          : "",
+      // Unlike a native DB paginate call, a projection has no server-side
+      // page journal. Splitting pins both ranges before subsequent live
+      // updates can move the boundary between loaded pages. An empty string
+      // marks the unbounded tail, so backdated activity remains visible too.
+      // TODO(ohtenkay): Return native paginate() cursor/split metadata after
+      // indexing activity, and remove this eager splitting, compare(), and
+      // the custom JSON cursor encoder/decoder. Keep Dartvex cursors opaque.
+      ...(page.length
+        ? {
+            splitCursor: encodeCursor(page[Math.floor((page.length - 1) / 2)]!),
+            ...(!bounded ? { pageStatus: "SplitRecommended" as const } : {}),
+          }
+        : {}),
+    };
+  });
+
+function decodeCursor(raw: string | null): Infer<typeof cursorValidator> | null {
   if (raw === null || raw === "") return null;
 
   try {

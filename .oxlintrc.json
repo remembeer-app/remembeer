@@ -1,0 +1,47 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "unicorn", "oxc"],
+  "categories": {
+    "correctness": "warn"
+  },
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "typescript/no-floating-promises": "error",
+    "typescript/no-misused-promises": "error",
+    "eslint/no-unused-vars": [
+      "warn",
+      {
+        "ignoreRestSiblings": true
+      }
+    ]
+  },
+  "ignorePatterns": ["convex/_generated/**"],
+  "overrides": [
+    {
+      "files": ["test/**/*.mjs", "test/**/*.js"],
+      "rules": {
+        "typescript/no-floating-promises": [
+          "error",
+          {
+            "allowForKnownSafeCalls": [
+              {
+                "from": "package",
+                "name": ["test", "describe", "skip"],
+                "package": "node"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["test/access/access_types.ts"],
+      "rules": {
+        "eslint/no-unused-expressions": "off",
+        "typescript/no-floating-promises": "off"
+      }
+    }
+  ]
+}

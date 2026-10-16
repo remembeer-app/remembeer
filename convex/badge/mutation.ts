@@ -2,10 +2,7 @@ import { ConvexError, v } from "convex/values";
 import { WithZod } from "fluent-convex/zod";
 import { authMutation } from "../lib/authenticated";
 import { convex } from "../lib/builder";
-import {
-  setBadgeVisibilityInputValidator,
-  unlockBadgeInputValidator,
-} from "./schema";
+import { setBadgeVisibilityInputValidator, unlockBadgeInputValidator } from "./schema";
 
 const maxBadgesShown = 6;
 
@@ -21,9 +18,7 @@ export const unlockForUser = convex
 
     const existing = await ctx.db
       .query("badge")
-      .withIndex("by_userId_and_badgeKey", (q) =>
-        q.eq("userId", userId).eq("badgeKey", badgeKey),
-      )
+      .withIndex("by_userId_and_badgeKey", (q) => q.eq("userId", userId).eq("badgeKey", badgeKey))
       .unique();
     if (existing) {
       return existing._id;
@@ -62,13 +57,9 @@ export const setVisibility = authMutation
     if (isShown && !badge.isShown) {
       const badges = await ctx.db
         .query("badge")
-        .withIndex("by_userId_and_badgeKey", (q) =>
-          q.eq("userId", ctx.user._id),
-        )
+        .withIndex("by_userId_and_badgeKey", (q) => q.eq("userId", ctx.user._id))
         .collect();
-      if (
-        badges.filter((unlocked) => unlocked.isShown).length >= maxBadgesShown
-      ) {
+      if (badges.filter((unlocked) => unlocked.isShown).length >= maxBadgesShown) {
         throw new ConvexError(`Only ${maxBadgesShown} badges can be shown`);
       }
     }
