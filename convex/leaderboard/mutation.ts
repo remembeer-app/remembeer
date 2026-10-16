@@ -16,7 +16,7 @@ import {
   listMemberships,
   type LeaderboardAccess,
   loadLeaderboard,
-  leaderboardPermission,
+  requireLeaderboardPermission,
 } from "./access";
 
 const idInput = { id: v.id("leaderboard") };
@@ -72,7 +72,7 @@ export const update = authMutation
   .extend(
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
-      .use(leaderboardPermission("owner"))
+      .use(requireLeaderboardPermission("owner"))
       .extend,
   )
   .handler(async (ctx, { id, ...input }) => {
@@ -93,7 +93,7 @@ export const softDelete = authMutation
   .extend(
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
-      .use(leaderboardPermission("owner"))
+      .use(requireLeaderboardPermission("owner"))
       .extend,
   )
   .handler(async (ctx, { id }) => {
@@ -145,7 +145,7 @@ export const leave = authMutation
   .extend(
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
-      .use(leaderboardPermission("member"))
+      .use(requireLeaderboardPermission("member"))
       .extend,
   )
   .handler(async (ctx) => {
@@ -164,7 +164,7 @@ export const remove = authMutation
   .extend(
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
-      .use(leaderboardPermission("owner"))
+      .use(requireLeaderboardPermission("owner"))
       .extend,
   )
   .handler((ctx, input) => changeMember(ctx, input, "remove"));
@@ -175,7 +175,7 @@ export const ban = authMutation
   .extend(
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
-      .use(leaderboardPermission("owner"))
+      .use(requireLeaderboardPermission("owner"))
       .extend,
   )
   .handler((ctx, input) => changeMember(ctx, input, "ban"));
@@ -186,7 +186,7 @@ export const unban = authMutation
   .extend(
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
-      .use(leaderboardPermission("owner"))
+      .use(requireLeaderboardPermission("owner"))
       .extend,
   )
   .handler((ctx, input) => changeMember(ctx, input, "unban"));

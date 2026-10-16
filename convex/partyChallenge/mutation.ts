@@ -6,7 +6,7 @@ import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
 import { access } from "../lib/access";
 import { getMembership, requireSessionAccess } from "../session/access";
-import { partyAccess, ongoingPartyAccess } from "../party/access";
+import { requireParty, requireOngoingParty } from "../party/access";
 import { loadChallenge } from "./access";
 import { activeChallenges, scheduleExpiry, stopChallenges } from "./lifecycle";
 import {
@@ -41,8 +41,8 @@ export const setEnabled = authMutation
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
       .extend,
   )
   .handler(async (ctx, { sessionId, enabled }) => {
@@ -66,8 +66,8 @@ export const create = authMutation
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
       .extend,
   )
   .handler(async (ctx, { sessionId, durationMinutes, ...input }) => {
@@ -111,8 +111,8 @@ export const update = authMutation
     access<{ id: Id<"partyChallenge"> }>()
       .use(loadChallenge)
       .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
       .extend,
   )
   .handler(async (ctx, { id, durationMinutes, ...input }) => {
@@ -153,8 +153,8 @@ export const addWinner = authMutation
     access<{ id: Id<"partyChallenge"> }>()
       .use(loadChallenge)
       .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
       .extend,
   )
   .handler(async (ctx, { id, userId }) => {
@@ -188,8 +188,8 @@ export const removeWinner = authMutation
     access<{ id: Id<"partyChallenge"> }>()
       .use(loadChallenge)
       .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
       .extend,
   )
   .handler(async (ctx, { id, userId }) => {
@@ -211,8 +211,8 @@ function close(status: "completed" | "cancelled") {
       access<{ id: Id<"partyChallenge"> }>()
         .use(loadChallenge)
         .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "admin"))
-        .use(partyAccess)
-        .use(ongoingPartyAccess)
+        .use(requireParty)
+        .use(requireOngoingParty)
         .extend,
     )
     .handler(async (ctx, { id }) => {

@@ -1,18 +1,18 @@
-import { loadDrink, drinkOwnerAccess, undeletedDrinkAccess } from "../../convex/drink/access";
+import { loadDrink, requireDrinkOwner, requireUndeletedDrink } from "../../convex/drink/access";
 import { loadQuest } from "../../convex/partyQuest/access";
 import { requireSessionAccess } from "../../convex/session/access";
-import { loadTournament, beerpongEnabledAccess } from "../../convex/beerpongTournament/access";
+import { loadTournament, requireBeerpongEnabled } from "../../convex/beerpongTournament/access";
 import type { RegisteredQuery, RegisteredMutation } from "convex/server";
 import { v } from "convex/values";
 import type { Id } from "../../convex/_generated/dataModel";
 import { access } from "../../convex/lib/access";
 import { authMutation, authQuery } from "../../convex/lib/authenticated";
-import { ongoingPartyAccess, partyAccess } from "../../convex/party/access";
+import { requireOngoingParty, requireParty } from "../../convex/party/access";
 
 const drinkAccess = access<{ id: Id<"drink"> }>()
   .use(loadDrink)
-  .use(drinkOwnerAccess)
-  .use(undeletedDrinkAccess)
+  .use(requireDrinkOwner)
+  .use(requireUndeletedDrink)
   .use((ctx) => ({ ownerId: ctx.drink.ownerId }));
 
 const query = authQuery
@@ -64,8 +64,8 @@ const loadedSession = access<{ id: Id<"session"> }>()
   });
 
 loadedSession
-  .use(partyAccess)
-  .use(ongoingPartyAccess)
+  .use(requireParty)
+  .use(requireOngoingParty)
   .use((ctx) => {
     const kind: "party" = ctx.session.kind;
     const enabled: boolean = ctx.session.modules.beerpongEnabled;
@@ -74,7 +74,7 @@ loadedSession
   });
 
 // @ts-expect-error Party-only steps require the party narrowing step first.
-loadedSession.use(ongoingPartyAccess);
+loadedSession.use(requireOngoingParty);
 // @ts-expect-error A step cannot access a resource before it has been loaded.
 access<{ id: Id<"drink"> }>().use((ctx) => ({ drink: ctx.drink }));
 
@@ -112,9 +112,9 @@ access<{ id: Id<"drink"> }>().use(loadQuest);
 access<{ id: Id<"beerpongTournament"> }>()
   .use(loadTournament)
   .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-  .use(partyAccess)
-  .use(ongoingPartyAccess)
-  .use(beerpongEnabledAccess)
+  .use(requireParty)
+  .use(requireOngoingParty)
+  .use(requireBeerpongEnabled)
   .use((ctx) => {
     const partyKind: "party" = ctx.session.kind;
 

@@ -3,23 +3,23 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { AuthQueryCtx } from "../lib/authenticated";
 
 export async function loadTeam(
-  ctx: AuthQueryCtx,
-  { id }: { id: Id<"beerpongTeam"> },
+    ctx: AuthQueryCtx,
+    { id }: { id: Id<"beerpongTeam"> },
 ) {
-  const team = await ctx.db.get("beerpongTeam", id);
-  if (!team) {
-    throw new ConvexError("Team not found");
-  }
+    const team = await ctx.db.get("beerpongTeam", id);
+    if (!team) {
+        throw new ConvexError("Team not found");
+    }
 
-  return { team };
+    return { team };
 }
 
-export function editableTeamStatusAccess(ctx: {
-  tournament: Doc<"beerpongTournament">;
+export function requireEditableTeamStatus(ctx: {
+    tournament: Doc<"beerpongTournament">;
 }) {
-  if (ctx.tournament.status !== "setup" && ctx.tournament.status !== "active") {
-    throw new ConvexError("Teams can only be edited during setup or active play");
-  }
+    if (ctx.tournament.status !== "setup" && ctx.tournament.status !== "active") {
+        throw new ConvexError("Teams can only be edited during setup or active play");
+    }
 
-  return {};
+    return {};
 }

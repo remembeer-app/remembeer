@@ -6,8 +6,8 @@ import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
 import { access } from "../lib/access";
 import { requireSessionAccess } from "../session/access";
-import { partyAccess, ongoingPartyAccess } from "../party/access";
-import { loadTournament, beerpongEnabledAccess } from "./access";
+import { requireParty, requireOngoingParty } from "../party/access";
+import { loadTournament, requireBeerpongEnabled } from "./access";
 import { createBracket } from "./bracket";
 import { loadTournamentAwards } from "./scoring";
 import {
@@ -42,9 +42,9 @@ export const create = authMutation
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
-      .use(beerpongEnabledAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
+      .use(requireBeerpongEnabled)
       .extend,
   )
   .handler(async (ctx, { sessionId, ...input }) => {
@@ -73,9 +73,9 @@ export const draw = authMutation
     access<{ id: Id<"beerpongTournament"> }>()
       .use(loadTournament)
       .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
-      .use(beerpongEnabledAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
+      .use(requireBeerpongEnabled)
       .extend,
   )
   .handler(async (ctx, { id }) => {
@@ -133,9 +133,9 @@ export const start = authMutation
     access<{ id: Id<"beerpongTournament"> }>()
       .use(loadTournament)
       .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
-      .use(beerpongEnabledAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
+      .use(requireBeerpongEnabled)
       .extend,
   )
   .handler(async (ctx, { id }) => {
@@ -211,9 +211,9 @@ export const finalize = authMutation
     access<{ id: Id<"beerpongTournament"> }>()
       .use(loadTournament)
       .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-      .use(partyAccess)
-      .use(ongoingPartyAccess)
-      .use(beerpongEnabledAccess)
+      .use(requireParty)
+      .use(requireOngoingParty)
+      .use(requireBeerpongEnabled)
       .extend,
   )
   .handler(async (ctx, { id }) => {

@@ -16,7 +16,7 @@ import {
 } from "./lifecycle";
 import { eligiblePairs, memberPair } from "./eligibility";
 import { loadQuestContext } from "./context";
-import { activeQuestPartyAccess, loadQuest } from "./access";
+import { requireOngoingQuestParty, loadQuest } from "./access";
 
 export const setEnabled = authMutation
   .input({ sessionId: v.id("session"), enabled: v.boolean() })
@@ -24,7 +24,7 @@ export const setEnabled = authMutation
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(activeQuestPartyAccess)
+      .use(requireOngoingQuestParty)
       .extend,
   )
   .handler(async (ctx, { sessionId, enabled }) => {
@@ -52,7 +52,7 @@ export const startNext = authMutation
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(activeQuestPartyAccess)
+      .use(requireOngoingQuestParty)
       .extend,
   )
   .handler(async (ctx) => {
@@ -74,7 +74,7 @@ export const setSchedule = authMutation
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
-      .use(activeQuestPartyAccess)
+      .use(requireOngoingQuestParty)
       .extend,
   )
   .handler(async (ctx, { sessionId, ...settings }) => {
@@ -131,7 +131,7 @@ export const selectPartner = authMutation
     access<{ questId: Id<"partyQuest"> }>()
       .use((ctx, { questId }) => loadQuest(ctx, { id: questId }))
       .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"))
-      .use(activeQuestPartyAccess)
+      .use(requireOngoingQuestParty)
       .extend,
   )
   .handler(async (ctx, { questId, selectedUserId }) => {

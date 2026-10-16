@@ -5,7 +5,7 @@ import { authMutation } from "../lib/authenticated";
 import { access } from "../lib/access";
 import { schema } from "../schema";
 import { createDrinkInputValidator, updateDrinkInputValidator } from "./schema";
-import { loadDrink, drinkOwnerAccess, undeletedDrinkAccess } from "./access";
+import { loadDrink, requireDrinkOwner, requireUndeletedDrink } from "./access";
 
 export const create = authMutation
   .extend(WithZod)
@@ -27,8 +27,8 @@ export const update = authMutation
   .extend(
     access<{ id: Id<"drink"> }>()
       .use(loadDrink)
-      .use(drinkOwnerAccess)
-      .use(undeletedDrinkAccess)
+      .use(requireDrinkOwner)
+      .use(requireUndeletedDrink)
       .extend,
   )
   .handler(async (ctx, { id, name, drinkCategory, alcoholPercentage }) => {
@@ -52,8 +52,8 @@ export const softDelete = authMutation
   .extend(
     access<{ id: Id<"drink"> }>()
       .use(loadDrink)
-      .use(drinkOwnerAccess)
-      .use(undeletedDrinkAccess)
+      .use(requireDrinkOwner)
+      .use(requireUndeletedDrink)
       .extend,
   )
   .handler(async (ctx, { id }) => {

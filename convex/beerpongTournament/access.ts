@@ -14,7 +14,7 @@ export async function loadTournament(
   return { tournament };
 }
 
-export function beerpongEnabledAccess(ctx: {
+export function requireBeerpongEnabled(ctx: {
   session: Extract<Doc<"session">, { kind: "party" }>;
 }) {
   if (!ctx.session.modules.beerpongEnabled) {

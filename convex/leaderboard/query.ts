@@ -8,7 +8,7 @@ import { LogicalDay } from "../lib/logicalDay";
 import { access } from "../lib/access";
 import { schema } from "../schema";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
-import { listMemberships, loadLeaderboard, leaderboardPermission } from "./access";
+import { listMemberships, loadLeaderboard, requireLeaderboardPermission } from "./access";
 import { beerVolumeMl, inviteCodeLength, inviteCodeCharacters } from "./constants";
 
 const idInput = { id: v.id("leaderboard") };
@@ -67,7 +67,7 @@ export const get = authQuery
   .extend(
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
-      .use(leaderboardPermission("member"))
+      .use(requireLeaderboardPermission("member"))
       .extend,
   )
   .handler(async (ctx, { id }) => {
@@ -172,7 +172,7 @@ export const standings = authQuery
   .extend(
     access<{ id: Id<"leaderboard"> }>()
       .use(loadLeaderboard)
-      .use(leaderboardPermission("member"))
+      .use(requireLeaderboardPermission("member"))
       .extend,
   )
   .handler(async (ctx, { id, month: selectedMonth }) => {

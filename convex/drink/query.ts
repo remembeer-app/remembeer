@@ -3,7 +3,7 @@ import type { Id } from "../_generated/dataModel";
 import { authQuery, type AuthQueryCtx } from "../lib/authenticated";
 import { access } from "../lib/access";
 import { schema } from "../schema";
-import { loadDrink, drinkOwnerAccess, undeletedDrinkAccess } from "./access";
+import { loadDrink, requireDrinkOwner, requireUndeletedDrink } from "./access";
 
 export const listCustom = authQuery
   .returns(v.array(schema.doc("drink")))
@@ -42,8 +42,8 @@ export const get = authQuery
   .extend(
     access<{ id: Id<"drink"> }>()
       .use(loadDrink)
-      .use(drinkOwnerAccess)
-      .use(undeletedDrinkAccess)
+      .use(requireDrinkOwner)
+      .use(requireUndeletedDrink)
       .extend,
   )
   .handler(async (ctx) => ctx.drink);

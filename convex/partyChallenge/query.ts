@@ -4,7 +4,7 @@ import { authQuery } from "../lib/authenticated";
 import { access } from "../lib/access";
 import { schema } from "../schema";
 import { requireSessionAccess } from "../session/access";
-import { partyAccess } from "../party/access";
+import { requireParty } from "../party/access";
 import { loadChallenge } from "./access";
 
 function visibleChallenge(
@@ -31,7 +31,7 @@ export const get = authQuery
     access<{ id: Id<"partyChallenge"> }>()
       .use(loadChallenge)
       .use((ctx) => requireSessionAccess(ctx, ctx.challenge.sessionId, "joined"))
-      .use(partyAccess)
+      .use(requireParty)
       .extend,
   )
   .handler(async (ctx) => visibleChallenge(ctx.challenge, ctx.session));
@@ -42,7 +42,7 @@ export const listForSession = authQuery
   .extend(
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "joined"))
-      .use(partyAccess)
+      .use(requireParty)
       .extend,
   )
   .handler(async (ctx, { sessionId }) => {

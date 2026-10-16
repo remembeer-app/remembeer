@@ -2,9 +2,9 @@ import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { authMutation } from "../lib/authenticated";
 import { access } from "../lib/access";
-import { loadTournament, beerpongEnabledAccess } from "../beerpongTournament/access";
+import { loadTournament, requireBeerpongEnabled } from "../beerpongTournament/access";
 import { requireSessionAccess } from "../session/access";
-import { partyAccess, ongoingPartyAccess } from "../party/access";
+import { requireParty, requireOngoingParty } from "../party/access";
 import { loadMatch } from "./access";
 import { downstreamMatches, matchResolver } from "./resolution";
 
@@ -17,9 +17,9 @@ function resultMutation(correcting: boolean) {
         .use(loadMatch)
         .use((ctx) => loadTournament(ctx, { id: ctx.match.tournamentId }))
         .use((ctx) => requireSessionAccess(ctx, ctx.tournament.sessionId, "admin"))
-        .use(partyAccess)
-        .use(ongoingPartyAccess)
-        .use(beerpongEnabledAccess)
+        .use(requireParty)
+        .use(requireOngoingParty)
+        .use(requireBeerpongEnabled)
         .extend,
     )
     .handler(async (ctx, { id, winnerTeamId }) => {

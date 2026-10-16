@@ -46,7 +46,7 @@ export async function loadLeaderboard(
   return { leaderboard };
 }
 
-export function leaderboardPermission(permission: "member" | "owner") {
+export function requireLeaderboardPermission(permission: "member" | "owner") {
   return async (ctx: AuthQueryCtx & { leaderboard: Doc<"leaderboard"> }) => {
     const { leaderboard } = ctx;
     const isOwner = leaderboard.ownerId === ctx.user._id;

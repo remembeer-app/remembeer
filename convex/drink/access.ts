@@ -11,7 +11,7 @@ export async function loadDrink(ctx: AuthQueryCtx, { id }: { id: Id<"drink"> }) 
   return { drink };
 }
 
-export function drinkOwnerAccess(ctx: AuthQueryCtx & { drink: Doc<"drink"> }) {
+export function requireDrinkOwner(ctx: AuthQueryCtx & { drink: Doc<"drink"> }) {
   if (ctx.drink.ownerId !== ctx.user._id) {
     throw new ConvexError("You do not have permission to access this drink");
   }
@@ -19,7 +19,7 @@ export function drinkOwnerAccess(ctx: AuthQueryCtx & { drink: Doc<"drink"> }) {
   return {};
 }
 
-export function undeletedDrinkAccess(ctx: { drink: Doc<"drink"> }) {
+export function requireUndeletedDrink(ctx: { drink: Doc<"drink"> }) {
   if (ctx.drink.deletedAt !== null) {
     throw new ConvexError("Drink has been deleted");
   }

@@ -14,7 +14,7 @@ export async function loadQuest(
   return { quest };
 }
 
-export function activeQuestPartyAccess(ctx: { session: Doc<"session"> }) {
+export function requireOngoingQuestParty(ctx: { session: Doc<"session"> }) {
   const { session } = ctx;
   if (session.kind !== "party" || session.endedAt !== null) {
     throw new ConvexError("An ongoing party is required");
