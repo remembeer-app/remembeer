@@ -25,8 +25,6 @@ function issuedQuest(definition) {
   return {
     ...fields, sessionId: "party", startsAt: 1000, endsAt: 2000,
     status: "active", updatedAt: 1000,
-    eligibleMemberIds: ["a", "b"],
-    eligiblePairs: [{ firstUserId: "a", secondUserId: "b" }],
     selections: [{ userId: "a", selectedUserId: "b", selectedAt: 1200 }],
     results: [{ firstUserId: "a", secondUserId: "b", completedAt: 1500 }],
   };
@@ -71,7 +69,8 @@ test("quest union rejects unknown kinds and incorrect variant or result shapes",
     { ...toast, drinkCategory: { kind: "water" } },
     { ...toast, kind: "sameClass" },
     { ...toast, status: "completed" },
-    { ...toast, eligiblePairs: [{ firstUserId: "a" }] },
+    { ...toast, eligibleMemberIds: ["a", "b"] },
+    { ...toast, eligiblePairs: [{ firstUserId: "a", secondUserId: "b" }] },
     { ...toast, results: [{ firstUserId: "a", secondUserId: "b" }] },
     { ...toast, selections: [{ userId: "a", selectedAt: 1200 }] },
   ];

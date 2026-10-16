@@ -28,8 +28,6 @@ const commonFields = {
     v.literal("expired"),
     v.literal("cancelled"),
   ),
-  eligibleMemberIds: v.array(v.id("user")),
-  eligiblePairs: v.array(memberPairValidator),
   selections: v.array(
     v.object({
       userId: v.id("user"),
@@ -49,4 +47,5 @@ export const partyQuestTable = defineTable(
   ),
 )
   .index("by_sessionId_and_startsAt", ["sessionId", "startsAt"])
+  .index("by_sessionId_and_status", ["sessionId", "status"])
   .index("by_sessionId_and_kind", ["sessionId", "kind"]);

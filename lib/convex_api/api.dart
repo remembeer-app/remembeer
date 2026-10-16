@@ -7,6 +7,7 @@ import './modules/drinkLog.dart';
 import './modules/friendship.dart';
 import './modules/leaderboard.dart';
 import './modules/lib.dart';
+import './modules/partyQuest.dart';
 import './modules/session.dart';
 import './modules/sessionMember.dart';
 import './modules/user.dart';
@@ -30,6 +31,7 @@ class ConvexApi {
   FriendshipApi get friendship => FriendshipApi(_client);
   LeaderboardApi get leaderboard => LeaderboardApi(_client);
   LibApi get lib => LibApi(_client);
+  PartyQuestApi get partyQuest => PartyQuestApi(_client);
   SessionApi get session => SessionApi(_client);
   SessionMemberApi get sessionMember => SessionMemberApi(_client);
   UserApi get user => UserApi(_client);

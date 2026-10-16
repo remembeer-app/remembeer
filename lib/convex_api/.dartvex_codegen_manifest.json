@@ -8,6 +8,7 @@
     "modules/leaderboard.dart",
     "modules/lib.dart",
     "modules/lib/timeZone.dart",
+    "modules/partyQuest.dart",
     "modules/session.dart",
     "modules/sessionMember.dart",
     "modules/user.dart",
@@ -21,6 +22,7 @@
     "widgets/friendship.dart",
     "widgets/leaderboard.dart",
     "widgets/lib/timeZone.dart",
+    "widgets/partyQuest.dart",
     "widgets/session.dart",
     "widgets/sessionMember.dart",
     "widgets/user.dart"

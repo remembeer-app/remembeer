@@ -171,11 +171,6 @@ enum PartyQuestDocumentStatus {
   }
 }
 
-typedef PartyQuestDocumentEligiblePairsItem = ({
-  UserId firstUserId,
-  UserId secondUserId,
-});
-
 typedef PartyQuestDocumentSelectionsItem = ({
   UserId userId,
   UserId selectedUserId,
@@ -197,8 +192,6 @@ sealed class PartyQuestDocument {
   double get startsAt;
   double get endsAt;
   PartyQuestDocumentStatus get status;
-  List<UserId> get eligibleMemberIds;
-  List<PartyQuestDocumentEligiblePairsItem> get eligiblePairs;
   List<PartyQuestDocumentSelectionsItem> get selections;
   List<PartyQuestDocumentResultsItem> get results;
   double get updatedAt;
@@ -230,8 +223,6 @@ final class ToastWithClass extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -255,10 +246,6 @@ final class ToastWithClass extends PartyQuestDocument {
 
   final PartyQuestDocumentStatus status;
 
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
-
   final List<PartyQuestDocumentSelectionsItem> selections;
 
   final List<PartyQuestDocumentResultsItem> results;
@@ -279,8 +266,6 @@ final class SameAccent extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -301,10 +286,6 @@ final class SameAccent extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -326,8 +307,6 @@ final class DifferentAccent extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -348,10 +327,6 @@ final class DifferentAccent extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -373,8 +348,6 @@ final class NewAlly extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -395,10 +368,6 @@ final class NewAlly extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -420,8 +389,6 @@ final class SameClass extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -442,10 +409,6 @@ final class SameClass extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -467,8 +430,6 @@ final class DifferentClass extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -489,10 +450,6 @@ final class DifferentClass extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -514,8 +471,6 @@ final class BottomQuarter extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -536,10 +491,6 @@ final class BottomQuarter extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -561,8 +512,6 @@ final class Leader extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -583,10 +532,6 @@ final class Leader extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -608,8 +553,6 @@ final class TopThree extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -630,10 +573,6 @@ final class TopThree extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -655,8 +594,6 @@ final class OppositeRankingHalves extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -677,10 +614,6 @@ final class OppositeRankingHalves extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -702,8 +635,6 @@ final class NearbyRank extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -724,10 +655,6 @@ final class NearbyRank extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -749,8 +676,6 @@ final class DifferentBeerpongTeam extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -771,10 +696,6 @@ final class DifferentBeerpongTeam extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -796,8 +717,6 @@ final class SameBeerpongTeam extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -818,10 +737,6 @@ final class SameBeerpongTeam extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 
@@ -843,8 +758,6 @@ final class FinalistTeam extends PartyQuestDocument {
     required this.startsAt,
     required this.endsAt,
     required this.status,
-    required this.eligibleMemberIds,
-    required this.eligiblePairs,
     required this.selections,
     required this.results,
     required this.updatedAt,
@@ -865,10 +778,6 @@ final class FinalistTeam extends PartyQuestDocument {
   final double endsAt;
 
   final PartyQuestDocumentStatus status;
-
-  final List<UserId> eligibleMemberIds;
-
-  final List<PartyQuestDocumentEligiblePairsItem> eligiblePairs;
 
   final List<PartyQuestDocumentSelectionsItem> selections;
 

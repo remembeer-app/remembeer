@@ -6,6 +6,7 @@ export 'widgets/drinkLog.dart';
 export 'widgets/friendship.dart';
 export 'widgets/leaderboard.dart';
 export 'widgets/lib/timeZone.dart';
+export 'widgets/partyQuest.dart';
 export 'widgets/session.dart';
 export 'widgets/sessionMember.dart';
 export 'widgets/user.dart';
