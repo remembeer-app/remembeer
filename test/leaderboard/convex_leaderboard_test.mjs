@@ -40,6 +40,7 @@ function fixture() {
     },
     async delete(table, id) { tables[table] = tables[table].filter(row => row._id !== id); },
     query(table) {
+      reads.set(`${table}:query`, (reads.get(`${table}:query`) ?? 0) + 1);
       assert.ok(tables[table], `Unknown table ${table}`);
       let rows = tables[table];
       return {
@@ -244,3 +245,43 @@ test("200 members with daily logs produce standings and share catalog reads", as
   assert.ok(result.entries.every(entry => entry.beersConsumed === 31 && entry.alcoholConsumedMl === 775));
   assert.equal(f.reads.get("drink:beer"), 1);
 });
+
+for (const registered of [false, true]) {
+  const invoke = (endpoint, ctx, input) => registered
+    ? endpoint.public()._handler(ctx, input)
+    : endpoint(ctx, input);
+
+  test(`${registered ? "registered" : "direct"} leaderboard access reuses membership and preserves owner shortcuts`, async () => {
+    const f = fixture();
+    const id = await f.create();
+    await m.join(f.ctx("b"), { id });
+    f.reads.clear();
+
+    assert.equal(await invoke(m.leave, f.ctx("b"), { id }), null);
+    assert.equal(f.reads.get(`leaderboard:${id}`), 1);
+    assert.equal(f.reads.get("leaderboardMember:query"), 1);
+    assert.equal(f.tables.leaderboardMember.some(row => row.userId === "b"), false);
+
+    f.reads.clear();
+    await assert.rejects(invoke(m.leave, f.ctx("a"), { id }), /owner cannot leave/);
+    assert.equal(f.reads.get("leaderboardMember:query"), undefined);
+
+    await invoke(m.update, f.ctx("a"), { id, name: " Updated board " });
+    assert.equal(f.tables.leaderboard[0].name, "Updated board");
+    assert.equal(f.reads.get("leaderboardMember:query"), undefined);
+
+    const before = structuredClone(f.tables);
+    for (const endpoint of [m.update, m.softDelete, m.remove, m.ban, m.unban]) {
+      await assert.rejects(invoke(endpoint, f.ctx("c"), { id, userId: "b" }), /permission/);
+    }
+    await assert.rejects(invoke(q.get, f.ctx("c"), { id }), /permission/);
+    assert.deepEqual(f.tables, before);
+
+    f.reads.clear();
+    await assert.rejects(invoke(m.update, f.ctx("a"), { id, name: "ab" }));
+    assert.equal(f.reads.size, 0);
+
+    await invoke(m.softDelete, f.ctx("a"), { id });
+    await assert.rejects(invoke(q.get, f.ctx("a"), { id }), /Leaderboard not found/);
+  });
+}

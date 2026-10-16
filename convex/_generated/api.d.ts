@@ -45,6 +45,7 @@ import type * as leaderboard_access from "../leaderboard/access.js";
 import type * as leaderboard_constants from "../leaderboard/constants.js";
 import type * as leaderboard_mutation from "../leaderboard/mutation.js";
 import type * as leaderboard_query from "../leaderboard/query.js";
+import type * as leaderboard_withLeaderboardAccess from "../leaderboard/withLeaderboardAccess.js";
 import type * as lib_auth from "../lib/auth.js";
 import type * as lib_authenticated from "../lib/authenticated.js";
 import type * as lib_builder from "../lib/builder.js";
@@ -134,6 +135,7 @@ declare const fullApi: ApiFromModules<{
   "leaderboard/constants": typeof leaderboard_constants;
   "leaderboard/mutation": typeof leaderboard_mutation;
   "leaderboard/query": typeof leaderboard_query;
+  "leaderboard/withLeaderboardAccess": typeof leaderboard_withLeaderboardAccess;
   "lib/auth": typeof lib_auth;
   "lib/authenticated": typeof lib_authenticated;
   "lib/builder": typeof lib_builder;

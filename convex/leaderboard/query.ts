@@ -7,7 +7,8 @@ import { LogicalDay } from "../lib/logicalDay";
 import { schema } from "../schema";
 import { publicUser, publicUserValidator } from "../user/publicProfile";
 import type { Doc, Id } from "../_generated/dataModel";
-import { listMemberships, requireLeaderboardAccess } from "./access";
+import { listMemberships } from "./access";
+import { withLeaderboardAccess } from "./withLeaderboardAccess";
 import {
   beerVolumeMl,
   inviteCodeLength,
@@ -67,8 +68,9 @@ export const get = authQuery
       bannedMembers: v.array(publicUserValidator),
     }),
   )
+  .extend(withLeaderboardAccess("member"))
   .handler(async (ctx, { id }) => {
-    const { leaderboard, isOwner } = await requireLeaderboardAccess(ctx, id);
+    const { leaderboard, isOwner } = ctx;
 
     const memberships = await listMemberships(ctx, id);
 
@@ -166,8 +168,9 @@ export const standings = authQuery
       ),
     }),
   )
+  .extend(withLeaderboardAccess("member"))
   .handler(async (ctx, { id, month: selectedMonth }) => {
-    const { leaderboard } = await requireLeaderboardAccess(ctx, id);
+    const { leaderboard } = ctx;
 
     const day = new LogicalDay(leaderboard);
     const currentMonth = day.at(Date.now()).slice(0, 7);

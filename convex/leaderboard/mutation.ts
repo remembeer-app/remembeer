@@ -13,11 +13,11 @@ import {
   inviteCodeLength,
   inviteCodeCharacters,
 } from "./constants";
+import { getMembership, listMemberships } from "./access";
 import {
-  getMembership,
-  listMemberships,
-  requireLeaderboardAccess,
-} from "./access";
+  withLeaderboardAccess,
+  type LeaderboardAccess,
+} from "./withLeaderboardAccess";
 
 const idInput = { id: v.id("leaderboard") };
 const memberInput = { ...idInput, userId: v.id("user") };
@@ -69,8 +69,9 @@ export const update = authMutation
   .extend(WithZod)
   .input(updateLeaderboardInputValidator)
   .returns(v.null())
+  .extend(withLeaderboardAccess("owner"))
   .handler(async (ctx, { id, ...input }) => {
-    const { leaderboard } = await requireLeaderboardAccess(ctx, id, true);
+    const { leaderboard } = ctx;
 
     await ctx.db.patch("leaderboard", id, {
       name: input.name ?? leaderboard.name,
@@ -84,9 +85,8 @@ export const update = authMutation
 export const softDelete = authMutation
   .input(idInput)
   .returns(v.null())
+  .extend(withLeaderboardAccess("owner"))
   .handler(async (ctx, { id }) => {
-    await requireLeaderboardAccess(ctx, id, true);
-
     const now = Date.now();
     await ctx.db.patch("leaderboard", id, { deletedAt: now, updatedAt: now });
 
@@ -132,12 +132,12 @@ export const join = authMutation
 export const leave = authMutation
   .input(idInput)
   .returns(v.null())
-  .handler(async (ctx, { id }) => {
-    const { isOwner } = await requireLeaderboardAccess(ctx, id);
+  .extend(withLeaderboardAccess("member"))
+  .handler(async (ctx) => {
+    const { isOwner, member } = ctx;
     if (isOwner)
       throw new ConvexError("The owner cannot leave their own leaderboard");
 
-    const member = await getMembership(ctx, id, ctx.user._id);
     if (member) await ctx.db.delete("leaderboardMember", member._id);
 
     return null;
@@ -146,24 +146,27 @@ export const leave = authMutation
 export const remove = authMutation
   .input(memberInput)
   .returns(v.null())
+  .extend(withLeaderboardAccess("owner"))
   .handler((ctx, input) => changeMember(ctx, input, "remove"));
 
 export const ban = authMutation
   .input(memberInput)
   .returns(v.null())
+  .extend(withLeaderboardAccess("owner"))
   .handler((ctx, input) => changeMember(ctx, input, "ban"));
 
 export const unban = authMutation
   .input(memberInput)
   .returns(v.null())
+  .extend(withLeaderboardAccess("owner"))
   .handler((ctx, input) => changeMember(ctx, input, "unban"));
 
 async function changeMember(
-  ctx: AuthMutationCtx,
+  ctx: AuthMutationCtx & LeaderboardAccess,
   { id, userId }: { id: Id<"leaderboard">; userId: Id<"user"> },
   action: "remove" | "ban" | "unban",
 ) {
-  const { leaderboard } = await requireLeaderboardAccess(ctx, id, true);
+  const { leaderboard } = ctx;
   if (userId === leaderboard.ownerId)
     throw new ConvexError("The owner cannot remove or ban themselves");
 
