@@ -31,7 +31,7 @@ function fixture() {
       sessionMemberStatus: { kind: userId === "invitee" ? "invited" : "joined" },
       sessionMemberRole: { kind: ["owner", "admin"].includes(userId) ? "admin" : "member" },
       selectedClass: ["a", "b", "c"].includes(userId) ? { kind: "beer" } : null,
-      classChangedAt: null, beerpongOptIn: false,
+      beerpongOptIn: false,
     })),
     partyQuest: [], drinkLog: [], drink: [],
   };

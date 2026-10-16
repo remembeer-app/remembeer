@@ -189,7 +189,6 @@ export const setClass = authMutation
     const now = Date.now();
     await ctx.db.patch("sessionMember", member._id, {
       selectedClass,
-      classChangedAt: now,
       updatedAt: now,
     });
 

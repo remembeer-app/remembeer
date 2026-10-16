@@ -34,7 +34,6 @@ export const partyMemberValidator = v.object({
   ...commonFields,
   kind: v.literal("partyMember"),
   selectedClass: v.nullable(drinkCategoryValidator),
-  classChangedAt: v.nullable(v.number()),
   beerpongOptIn: v.boolean(),
 });
 

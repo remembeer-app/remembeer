@@ -597,7 +597,6 @@ Map<String, dynamic> _encodeSessionMemberDocument(SessionMemberDocument value) {
       sessionEndedAt: final sessionEndedAt,
       sessionDeletedAt: final sessionDeletedAt,
       selectedClass: final selectedClass,
-      classChangedAt: final classChangedAt,
       beerpongOptIn: final beerpongOptIn,
       id: final id,
       creationTime: final creationTime,
@@ -615,7 +614,6 @@ Map<String, dynamic> _encodeSessionMemberDocument(SessionMemberDocument value) {
           null => null,
           final v$ => _encodeDrinkCategory(v$),
         },
-        'classChangedAt': classChangedAt,
         'beerpongOptIn': beerpongOptIn,
         '_id': id.value,
         '_creationTime': creationTime,
@@ -758,11 +756,6 @@ SessionMemberDocument _decodeSessionMemberDocument(dynamic raw) {
           'Missing required field "selectedClass" for PartyMember',
         );
       }
-      if (!map.containsKey('classChangedAt')) {
-        throw FormatException(
-          'Missing required field "classChangedAt" for PartyMember',
-        );
-      }
       if (!map.containsKey('beerpongOptIn')) {
         throw FormatException(
           'Missing required field "beerpongOptIn" for PartyMember',
@@ -809,12 +802,6 @@ SessionMemberDocument _decodeSessionMemberDocument(dynamic raw) {
         selectedClass: map['selectedClass'] == null
             ? null
             : _decodeDrinkCategory(map['selectedClass']),
-        classChangedAt: map['classChangedAt'] == null
-            ? null
-            : expectDouble(
-                map['classChangedAt'],
-                label: 'PartyMemberClassChangedAt',
-              ),
         beerpongOptIn: expectBool(
           map['beerpongOptIn'],
           label: 'PartyMemberBeerpongOptIn',

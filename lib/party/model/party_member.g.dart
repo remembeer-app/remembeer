@@ -14,10 +14,6 @@ _PartyMember _$PartyMemberFromJson(Map<String, dynamic> json) => _PartyMember(
     const DrinkCategoryConverter().fromJson,
   ),
   classVersion: (json['classVersion'] as num?)?.toInt() ?? 0,
-  classChangedAt: _$JsonConverterFromJson<Timestamp, DateTime>(
-    json['classChangedAt'],
-    const TimestampConverter().fromJson,
-  ),
   beerpongOptIn: json['beerpongOptIn'] as bool? ?? false,
   scoreUnits: (json['scoreUnits'] as num?)?.toInt() ?? 0,
   drinkCount: (json['drinkCount'] as num?)?.toInt() ?? 0,
@@ -38,10 +34,6 @@ Map<String, dynamic> _$PartyMemberToJson(
     const DrinkCategoryConverter().toJson,
   ),
   'classVersion': instance.classVersion,
-  'classChangedAt': _$JsonConverterToJson<Timestamp, DateTime>(
-    instance.classChangedAt,
-    const TimestampConverter().toJson,
-  ),
   'beerpongOptIn': instance.beerpongOptIn,
   'scoreUnits': instance.scoreUnits,
   'drinkCount': instance.drinkCount,

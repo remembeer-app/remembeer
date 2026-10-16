@@ -45,7 +45,6 @@ void main() {
       id: 'user-1',
       userId: 'user-1',
       selectedClass: const Cider(),
-      classChangedAt: now,
       joinedAt: now,
       updatedAt: now,
     );

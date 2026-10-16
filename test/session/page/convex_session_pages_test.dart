@@ -141,7 +141,6 @@ void main() {
                 ..remove('username'),
               'kind': 'partyMember',
               'selectedClass': {'kind': 'wine'},
-              'classChangedAt': 1500,
               'beerpongOptIn': false,
             },
             'username': userId,

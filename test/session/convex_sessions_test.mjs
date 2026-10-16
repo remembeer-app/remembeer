@@ -147,7 +147,7 @@ test("party promotion converts all memberships and party invitations preserve ga
   for (const original of before) {
     assert.deepEqual(f.member(id, original.userId), {
       ...original,
-      kind: "partyMember", selectedClass: null, classChangedAt: null, beerpongOptIn: false,
+      kind: "partyMember", selectedClass: null, beerpongOptIn: false,
       updatedAt: (await f.db.get("session", id)).activatedAt,
     });
   }
@@ -156,7 +156,6 @@ test("party promotion converts all memberships and party invitations preserve ga
   await members.invite(f.owner, target(id, "newcomer"));
   assert.equal(f.member(id, "newcomer").kind, "partyMember");
   assert.equal(f.member(id, "newcomer").selectedClass, null);
-  assert.equal(f.member(id, "newcomer").classChangedAt, null);
   assert.equal(f.member(id, "newcomer").beerpongOptIn, false);
   const invitations = await memberQueries.listInvitations(f.ctx("newcomer"), {});
   assert.equal(invitations[0].member.kind, "partyMember");
@@ -172,7 +171,6 @@ test("party promotion converts all memberships and party invitations preserve ga
   await members.accept(f.ctx("newcomer"), { sessionId: id });
   assert.equal(f.member(id, "newcomer")._id, player._id);
   assert.deepEqual(f.member(id, "newcomer").selectedClass, player.selectedClass);
-  assert.equal(f.member(id, "newcomer").classChangedAt, player.classChangedAt);
   assert.equal(f.member(id, "newcomer").beerpongOptIn, true);
   const roster = await memberQueries.listForSession(f.ctx("newcomer"), { sessionId: id });
   assert.ok(roster.every((row) => row.member.kind === "partyMember" && row.member.sessionMemberStatus.kind === "joined"));
@@ -191,8 +189,7 @@ test("only party admins assign and clear classes of joined members", async () =>
   await members.setClass(f.owner, input);
   const assigned = structuredClone(f.member(id, "member"));
   assert.deepEqual(assigned.selectedClass, { kind: "beer" });
-  assert.equal(assigned.classChangedAt, assigned.updatedAt);
-  assert.ok(Number.isFinite(assigned.classChangedAt));
+  assert.ok(Number.isFinite(assigned.updatedAt));
   await members.setClass(f.ctx("admin"), input);
   assert.deepEqual(f.member(id, "member"), assigned);
   for (const kind of ["cider", "cocktail", "spirit", "wine"]) {
@@ -207,7 +204,7 @@ test("only party admins assign and clear classes of joined members", async () =>
   await members.setClass(f.ctx("admin"), { ...input, selectedClass: null });
   const cleared = structuredClone(f.member(id, "member"));
   assert.equal(cleared.selectedClass, null);
-  assert.ok(Number.isFinite(cleared.classChangedAt));
+  assert.ok(Number.isFinite(cleared.updatedAt));
   await members.setClass(f.owner, { ...input, selectedClass: null });
   assert.deepEqual(f.member(id, "member"), cleared);
   await assert.rejects(members.setClass(f.owner, { ...input, userId: "missing" }), /joined party members/);

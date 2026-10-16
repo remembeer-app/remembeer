@@ -995,7 +995,6 @@ final class PartyMember extends SessionMemberDocument {
     required this.sessionEndedAt,
     required this.sessionDeletedAt,
     required this.selectedClass,
-    required this.classChangedAt,
     required this.beerpongOptIn,
     required this.id,
     required this.creationTime,
@@ -1016,8 +1015,6 @@ final class PartyMember extends SessionMemberDocument {
   final double? sessionDeletedAt;
 
   final DrinkCategory? selectedClass;
-
-  final double? classChangedAt;
 
   final bool beerpongOptIn;
 

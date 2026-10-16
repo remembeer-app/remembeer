@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PartyMember {
 
- String get id; String get userId;@DrinkCategoryConverter() DrinkCategory? get selectedClass; int get classVersion;@TimestampConverter() DateTime? get classChangedAt; bool get beerpongOptIn; int get scoreUnits; int get drinkCount; bool get isActive;@TimestampConverter() DateTime get joinedAt;@TimestampConverterOptimistic() DateTime get updatedAt;
+ String get id; String get userId;@DrinkCategoryConverter() DrinkCategory? get selectedClass; int get classVersion; bool get beerpongOptIn; int get scoreUnits; int get drinkCount; bool get isActive;@TimestampConverter() DateTime get joinedAt;@TimestampConverterOptimistic() DateTime get updatedAt;
 /// Create a copy of PartyMember
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $PartyMemberCopyWith<PartyMember> get copyWith => _$PartyMemberCopyWithImpl<Part
 @override
 bool operator ==(Object other) {
   final _this = this as PartyMember;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PartyMember&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.selectedClass, _this.selectedClass) || other.selectedClass == _this.selectedClass)&&(identical(other.classVersion, _this.classVersion) || other.classVersion == _this.classVersion)&&(identical(other.classChangedAt, _this.classChangedAt) || other.classChangedAt == _this.classChangedAt)&&(identical(other.beerpongOptIn, _this.beerpongOptIn) || other.beerpongOptIn == _this.beerpongOptIn)&&(identical(other.scoreUnits, _this.scoreUnits) || other.scoreUnits == _this.scoreUnits)&&(identical(other.drinkCount, _this.drinkCount) || other.drinkCount == _this.drinkCount)&&(identical(other.isActive, _this.isActive) || other.isActive == _this.isActive)&&(identical(other.joinedAt, _this.joinedAt) || other.joinedAt == _this.joinedAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PartyMember&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.userId, _this.userId) || other.userId == _this.userId)&&(identical(other.selectedClass, _this.selectedClass) || other.selectedClass == _this.selectedClass)&&(identical(other.classVersion, _this.classVersion) || other.classVersion == _this.classVersion)&&(identical(other.beerpongOptIn, _this.beerpongOptIn) || other.beerpongOptIn == _this.beerpongOptIn)&&(identical(other.scoreUnits, _this.scoreUnits) || other.scoreUnits == _this.scoreUnits)&&(identical(other.drinkCount, _this.drinkCount) || other.drinkCount == _this.drinkCount)&&(identical(other.isActive, _this.isActive) || other.isActive == _this.isActive)&&(identical(other.joinedAt, _this.joinedAt) || other.joinedAt == _this.joinedAt)&&(identical(other.updatedAt, _this.updatedAt) || other.updatedAt == _this.updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PartyMember;
-  return Object.hash(runtimeType,_this.id,_this.userId,_this.selectedClass,_this.classVersion,_this.classChangedAt,_this.beerpongOptIn,_this.scoreUnits,_this.drinkCount,_this.isActive,_this.joinedAt,_this.updatedAt);
+  return Object.hash(runtimeType,_this.id,_this.userId,_this.selectedClass,_this.classVersion,_this.beerpongOptIn,_this.scoreUnits,_this.drinkCount,_this.isActive,_this.joinedAt,_this.updatedAt);
 }
 
 @override
 String toString() {
   final _this = this as PartyMember;
-  return 'PartyMember(id: ${_this.id}, userId: ${_this.userId}, selectedClass: ${_this.selectedClass}, classVersion: ${_this.classVersion}, classChangedAt: ${_this.classChangedAt}, beerpongOptIn: ${_this.beerpongOptIn}, scoreUnits: ${_this.scoreUnits}, drinkCount: ${_this.drinkCount}, isActive: ${_this.isActive}, joinedAt: ${_this.joinedAt}, updatedAt: ${_this.updatedAt})';
+  return 'PartyMember(id: ${_this.id}, userId: ${_this.userId}, selectedClass: ${_this.selectedClass}, classVersion: ${_this.classVersion}, beerpongOptIn: ${_this.beerpongOptIn}, scoreUnits: ${_this.scoreUnits}, drinkCount: ${_this.drinkCount}, isActive: ${_this.isActive}, joinedAt: ${_this.joinedAt}, updatedAt: ${_this.updatedAt})';
 }
 
 
@@ -54,7 +54,7 @@ abstract mixin class $PartyMemberCopyWith<$Res>  {
   factory $PartyMemberCopyWith(PartyMember value, $Res Function(PartyMember) _then) = _$PartyMemberCopyWithImpl;
 @useResult
 $Res call({
- String id, String userId,@DrinkCategoryConverter() DrinkCategory? selectedClass, int classVersion,@TimestampConverter() DateTime? classChangedAt, bool beerpongOptIn, int scoreUnits, int drinkCount, bool isActive,@TimestampConverter() DateTime joinedAt,@TimestampConverterOptimistic() DateTime updatedAt
+ String id, String userId,@DrinkCategoryConverter() DrinkCategory? selectedClass, int classVersion, bool beerpongOptIn, int scoreUnits, int drinkCount, bool isActive,@TimestampConverter() DateTime joinedAt,@TimestampConverterOptimistic() DateTime updatedAt
 });
 
 
@@ -71,14 +71,13 @@ class _$PartyMemberCopyWithImpl<$Res>
 
 /// Create a copy of PartyMember
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? selectedClass = freezed,Object? classVersion = null,Object? classChangedAt = freezed,Object? beerpongOptIn = null,Object? scoreUnits = null,Object? drinkCount = null,Object? isActive = null,Object? joinedAt = null,Object? updatedAt = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? userId = null,Object? selectedClass = freezed,Object? classVersion = null,Object? beerpongOptIn = null,Object? scoreUnits = null,Object? drinkCount = null,Object? isActive = null,Object? joinedAt = null,Object? updatedAt = null,}) {
   return _then(PartyMember(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,selectedClass: freezed == selectedClass ? _self.selectedClass : selectedClass // ignore: cast_nullable_to_non_nullable
 as DrinkCategory?,classVersion: null == classVersion ? _self.classVersion : classVersion // ignore: cast_nullable_to_non_nullable
-as int,classChangedAt: freezed == classChangedAt ? _self.classChangedAt : classChangedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,beerpongOptIn: null == beerpongOptIn ? _self.beerpongOptIn : beerpongOptIn // ignore: cast_nullable_to_non_nullable
+as int,beerpongOptIn: null == beerpongOptIn ? _self.beerpongOptIn : beerpongOptIn // ignore: cast_nullable_to_non_nullable
 as bool,scoreUnits: null == scoreUnits ? _self.scoreUnits : scoreUnits // ignore: cast_nullable_to_non_nullable
 as int,drinkCount: null == drinkCount ? _self.drinkCount : drinkCount // ignore: cast_nullable_to_non_nullable
 as int,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable
@@ -169,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @DrinkCategoryConverter()  DrinkCategory? selectedClass,  int classVersion, @TimestampConverter()  DateTime? classChangedAt,  bool beerpongOptIn,  int scoreUnits,  int drinkCount,  bool isActive, @TimestampConverter()  DateTime joinedAt, @TimestampConverterOptimistic()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String userId, @DrinkCategoryConverter()  DrinkCategory? selectedClass,  int classVersion,  bool beerpongOptIn,  int scoreUnits,  int drinkCount,  bool isActive, @TimestampConverter()  DateTime joinedAt, @TimestampConverterOptimistic()  DateTime updatedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PartyMember() when $default != null:
-return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_that.classChangedAt,_that.beerpongOptIn,_that.scoreUnits,_that.drinkCount,_that.isActive,_that.joinedAt,_that.updatedAt);case _:
+return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_that.beerpongOptIn,_that.scoreUnits,_that.drinkCount,_that.isActive,_that.joinedAt,_that.updatedAt);case _:
   return orElse();
 
 }
@@ -190,10 +189,10 @@ return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @DrinkCategoryConverter()  DrinkCategory? selectedClass,  int classVersion, @TimestampConverter()  DateTime? classChangedAt,  bool beerpongOptIn,  int scoreUnits,  int drinkCount,  bool isActive, @TimestampConverter()  DateTime joinedAt, @TimestampConverterOptimistic()  DateTime updatedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String userId, @DrinkCategoryConverter()  DrinkCategory? selectedClass,  int classVersion,  bool beerpongOptIn,  int scoreUnits,  int drinkCount,  bool isActive, @TimestampConverter()  DateTime joinedAt, @TimestampConverterOptimistic()  DateTime updatedAt)  $default,) {final _that = this;
 switch (_that) {
 case _PartyMember():
-return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_that.classChangedAt,_that.beerpongOptIn,_that.scoreUnits,_that.drinkCount,_that.isActive,_that.joinedAt,_that.updatedAt);case _:
+return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_that.beerpongOptIn,_that.scoreUnits,_that.drinkCount,_that.isActive,_that.joinedAt,_that.updatedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -210,10 +209,10 @@ return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @DrinkCategoryConverter()  DrinkCategory? selectedClass,  int classVersion, @TimestampConverter()  DateTime? classChangedAt,  bool beerpongOptIn,  int scoreUnits,  int drinkCount,  bool isActive, @TimestampConverter()  DateTime joinedAt, @TimestampConverterOptimistic()  DateTime updatedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String userId, @DrinkCategoryConverter()  DrinkCategory? selectedClass,  int classVersion,  bool beerpongOptIn,  int scoreUnits,  int drinkCount,  bool isActive, @TimestampConverter()  DateTime joinedAt, @TimestampConverterOptimistic()  DateTime updatedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _PartyMember() when $default != null:
-return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_that.classChangedAt,_that.beerpongOptIn,_that.scoreUnits,_that.drinkCount,_that.isActive,_that.joinedAt,_that.updatedAt);case _:
+return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_that.beerpongOptIn,_that.scoreUnits,_that.drinkCount,_that.isActive,_that.joinedAt,_that.updatedAt);case _:
   return null;
 
 }
@@ -225,14 +224,13 @@ return $default(_that.id,_that.userId,_that.selectedClass,_that.classVersion,_th
 @JsonSerializable()
 
 class _PartyMember implements PartyMember {
-  const _PartyMember({required this.id, required this.userId, @DrinkCategoryConverter() this.selectedClass, this.classVersion = 0, @TimestampConverter() this.classChangedAt, this.beerpongOptIn = false, this.scoreUnits = 0, this.drinkCount = 0, this.isActive = true, @TimestampConverter() required this.joinedAt, @TimestampConverterOptimistic() required this.updatedAt});
+  const _PartyMember({required this.id, required this.userId, @DrinkCategoryConverter() this.selectedClass, this.classVersion = 0, this.beerpongOptIn = false, this.scoreUnits = 0, this.drinkCount = 0, this.isActive = true, @TimestampConverter() required this.joinedAt, @TimestampConverterOptimistic() required this.updatedAt});
   factory _PartyMember.fromJson(Map<String, dynamic> json) => _$PartyMemberFromJson(json);
 
 @override final  String id;
 @override final  String userId;
 @override@DrinkCategoryConverter() final  DrinkCategory? selectedClass;
 @override@JsonKey() final  int classVersion;
-@override@TimestampConverter() final  DateTime? classChangedAt;
 @override@JsonKey() final  bool beerpongOptIn;
 @override@JsonKey() final  int scoreUnits;
 @override@JsonKey() final  int drinkCount;
@@ -253,18 +251,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PartyMember&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.selectedClass, selectedClass) || other.selectedClass == selectedClass)&&(identical(other.classVersion, classVersion) || other.classVersion == classVersion)&&(identical(other.classChangedAt, classChangedAt) || other.classChangedAt == classChangedAt)&&(identical(other.beerpongOptIn, beerpongOptIn) || other.beerpongOptIn == beerpongOptIn)&&(identical(other.scoreUnits, scoreUnits) || other.scoreUnits == scoreUnits)&&(identical(other.drinkCount, drinkCount) || other.drinkCount == drinkCount)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.joinedAt, joinedAt) || other.joinedAt == joinedAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PartyMember&&(identical(other.id, id) || other.id == id)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.selectedClass, selectedClass) || other.selectedClass == selectedClass)&&(identical(other.classVersion, classVersion) || other.classVersion == classVersion)&&(identical(other.beerpongOptIn, beerpongOptIn) || other.beerpongOptIn == beerpongOptIn)&&(identical(other.scoreUnits, scoreUnits) || other.scoreUnits == scoreUnits)&&(identical(other.drinkCount, drinkCount) || other.drinkCount == drinkCount)&&(identical(other.isActive, isActive) || other.isActive == isActive)&&(identical(other.joinedAt, joinedAt) || other.joinedAt == joinedAt)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,userId,selectedClass,classVersion,classChangedAt,beerpongOptIn,scoreUnits,drinkCount,isActive,joinedAt,updatedAt);
+    return Object.hash(runtimeType,id,userId,selectedClass,classVersion,beerpongOptIn,scoreUnits,drinkCount,isActive,joinedAt,updatedAt);
 }
 
 @override
 String toString() {
-    return 'PartyMember(id: $id, userId: $userId, selectedClass: $selectedClass, classVersion: $classVersion, classChangedAt: $classChangedAt, beerpongOptIn: $beerpongOptIn, scoreUnits: $scoreUnits, drinkCount: $drinkCount, isActive: $isActive, joinedAt: $joinedAt, updatedAt: $updatedAt)';
+    return 'PartyMember(id: $id, userId: $userId, selectedClass: $selectedClass, classVersion: $classVersion, beerpongOptIn: $beerpongOptIn, scoreUnits: $scoreUnits, drinkCount: $drinkCount, isActive: $isActive, joinedAt: $joinedAt, updatedAt: $updatedAt)';
 }
 
 
@@ -275,7 +273,7 @@ abstract mixin class _$PartyMemberCopyWith<$Res> implements $PartyMemberCopyWith
   factory _$PartyMemberCopyWith(_PartyMember value, $Res Function(_PartyMember) _then) = __$PartyMemberCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String userId,@DrinkCategoryConverter() DrinkCategory? selectedClass, int classVersion,@TimestampConverter() DateTime? classChangedAt, bool beerpongOptIn, int scoreUnits, int drinkCount, bool isActive,@TimestampConverter() DateTime joinedAt,@TimestampConverterOptimistic() DateTime updatedAt
+ String id, String userId,@DrinkCategoryConverter() DrinkCategory? selectedClass, int classVersion, bool beerpongOptIn, int scoreUnits, int drinkCount, bool isActive,@TimestampConverter() DateTime joinedAt,@TimestampConverterOptimistic() DateTime updatedAt
 });
 
 
@@ -292,14 +290,13 @@ class __$PartyMemberCopyWithImpl<$Res>
 
 /// Create a copy of PartyMember
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? selectedClass = freezed,Object? classVersion = null,Object? classChangedAt = freezed,Object? beerpongOptIn = null,Object? scoreUnits = null,Object? drinkCount = null,Object? isActive = null,Object? joinedAt = null,Object? updatedAt = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? userId = null,Object? selectedClass = freezed,Object? classVersion = null,Object? beerpongOptIn = null,Object? scoreUnits = null,Object? drinkCount = null,Object? isActive = null,Object? joinedAt = null,Object? updatedAt = null,}) {
   return _then(_PartyMember(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,userId: null == userId ? _self.userId : userId // ignore: cast_nullable_to_non_nullable
 as String,selectedClass: freezed == selectedClass ? _self.selectedClass : selectedClass // ignore: cast_nullable_to_non_nullable
 as DrinkCategory?,classVersion: null == classVersion ? _self.classVersion : classVersion // ignore: cast_nullable_to_non_nullable
-as int,classChangedAt: freezed == classChangedAt ? _self.classChangedAt : classChangedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,beerpongOptIn: null == beerpongOptIn ? _self.beerpongOptIn : beerpongOptIn // ignore: cast_nullable_to_non_nullable
+as int,beerpongOptIn: null == beerpongOptIn ? _self.beerpongOptIn : beerpongOptIn // ignore: cast_nullable_to_non_nullable
 as bool,scoreUnits: null == scoreUnits ? _self.scoreUnits : scoreUnits // ignore: cast_nullable_to_non_nullable
 as int,drinkCount: null == drinkCount ? _self.drinkCount : drinkCount // ignore: cast_nullable_to_non_nullable
 as int,isActive: null == isActive ? _self.isActive : isActive // ignore: cast_nullable_to_non_nullable

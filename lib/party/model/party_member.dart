@@ -15,7 +15,6 @@ abstract class PartyMember with _$PartyMember implements Document {
     required String userId,
     @DrinkCategoryConverter() DrinkCategory? selectedClass,
     @Default(0) int classVersion,
-    @TimestampConverter() DateTime? classChangedAt,
     @Default(false) bool beerpongOptIn,
     @Default(0) int scoreUnits,
     @Default(0) int drinkCount,
