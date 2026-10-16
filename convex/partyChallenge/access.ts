@@ -1,5 +1,5 @@
 import { ConvexError } from "convex/values";
-import type { Id } from "../_generated/dataModel";
+import type { Doc, Id } from "../_generated/dataModel";
 import type { AuthQueryCtx } from "../lib/authenticated";
 
 export async function loadChallenge(
@@ -12,4 +12,14 @@ export async function loadChallenge(
   }
 
   return { challenge };
+}
+
+export function requireChallengesEnabled(ctx: {
+  session: Extract<Doc<"session">, { kind: "party" }>;
+}) {
+  if (!ctx.session.modules.partyChallengesEnabled) {
+    throw new ConvexError("Challenges are disabled");
+  }
+
+  return {};
 }

@@ -7,7 +7,7 @@ import { authMutation } from "../lib/authenticated";
 import { access } from "../lib/access";
 import { getMembership, requireSessionAccess } from "../session/access";
 import { requireParty, requireOngoingParty } from "../party/access";
-import { loadChallenge } from "./access";
+import { loadChallenge, requireChallengesEnabled } from "./access";
 import { activeChallenges, scheduleExpiry, stopChallenges } from "./lifecycle";
 import {
   maxChallengeTitleLength,
@@ -68,13 +68,10 @@ export const create = authMutation
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
       .use(requireParty)
       .use(requireOngoingParty)
+      .use(requireChallengesEnabled)
       .extend,
   )
   .handler(async (ctx, { sessionId, durationMinutes, ...input }) => {
-    const { session } = ctx;
-    if (!session.modules.partyChallengesEnabled)
-      throw new ConvexError("Challenges are disabled");
-
     const now = Date.now();
     const active = await activeChallenges(ctx, sessionId);
     if (active.some((challenge) => challenge.endsAt > now))

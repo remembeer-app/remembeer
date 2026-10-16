@@ -22,3 +22,13 @@ export function requireOngoingQuestParty(ctx: { session: Doc<"session"> }) {
 
   return { session };
 }
+
+export function requireSocialQuestsEnabled(ctx: {
+  session: Extract<Doc<"session">, { kind: "party" }>;
+}) {
+  if (!ctx.session.modules.socialQuestsEnabled) {
+    throw new ConvexError("Social quests are disabled");
+  }
+
+  return {};
+}

@@ -16,7 +16,11 @@ import {
 } from "./lifecycle";
 import { eligiblePairs, memberPair } from "./eligibility";
 import { loadQuestContext } from "./context";
-import { requireOngoingQuestParty, loadQuest } from "./access";
+import {
+  requireOngoingQuestParty,
+  loadQuest,
+  requireSocialQuestsEnabled,
+} from "./access";
 
 export const setEnabled = authMutation
   .input({ sessionId: v.id("session"), enabled: v.boolean() })
@@ -53,12 +57,11 @@ export const startNext = authMutation
     access<{ sessionId: Id<"session"> }>()
       .use((ctx, { sessionId }) => requireSessionAccess(ctx, sessionId, "admin"))
       .use(requireOngoingQuestParty)
+      .use(requireSocialQuestsEnabled)
       .extend,
   )
   .handler(async (ctx) => {
     const { session } = ctx;
-    if (!session.modules.socialQuestsEnabled)
-      throw new ConvexError("Social quests are disabled");
 
     return await issueQuest(ctx, session, Date.now());
   });
@@ -132,12 +135,11 @@ export const selectPartner = authMutation
       .use((ctx, { questId }) => loadQuest(ctx, { id: questId }))
       .use((ctx) => requireSessionAccess(ctx, ctx.quest.sessionId, "joined"))
       .use(requireOngoingQuestParty)
+      .use(requireSocialQuestsEnabled)
       .extend,
   )
   .handler(async (ctx, { questId, selectedUserId }) => {
     const { quest, session } = ctx;
-    if (!session.modules.socialQuestsEnabled)
-      throw new ConvexError("Social quests are disabled");
 
     const now = Date.now();
     if (
