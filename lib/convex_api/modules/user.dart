@@ -43,6 +43,51 @@ class UserApi {
   ConvexQueryReference<NoArgs, CurrentResult> get currentQuery =>
       currentQueryReference;
 
+  Future<CurrentDayConsumptionResult> currentDayConsumption({
+    Optional<double> refreshAt = const Optional.absent(),
+  }) async {
+    final raw$ = await _client.query(
+      'user:currentDayConsumption',
+      _encodeCurrentDayConsumptionArgs((refreshAt: refreshAt)),
+    );
+    return _decodeCurrentDayConsumptionResult(raw$);
+  }
+
+  TypedConvexSubscription<CurrentDayConsumptionResult>
+  currentDayConsumptionSubscribe({
+    Optional<double> refreshAt = const Optional.absent(),
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:currentDayConsumption',
+      _encodeCurrentDayConsumptionArgs((refreshAt: refreshAt)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<CurrentDayConsumptionResult>(
+            _decodeCurrentDayConsumptionResult(value),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<CurrentDayConsumptionResult>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<CurrentDayConsumptionResult>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<CurrentDayConsumptionResult>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<CurrentDayConsumptionArgs, CurrentDayConsumptionResult>
+  get currentDayConsumptionQuery => currentDayConsumptionQueryReference;
+
   Future<Null> deleteCurrent({required String password}) async {
     await _client.mutate(
       'user:deleteCurrent',
@@ -489,6 +534,71 @@ CurrentResult _decodeCurrentResult(dynamic raw) {
     ),
     timeZone: expectString(map['timeZone'], label: 'CurrentResultTimeZone'),
     username: expectString(map['username'], label: 'CurrentResultUsername'),
+  );
+}
+
+typedef CurrentDayConsumptionResult = ({
+  double alcoholConsumedMl,
+  double nextRefreshAt,
+});
+
+Map<String, dynamic> _encodeCurrentDayConsumptionResult(
+  CurrentDayConsumptionResult value$,
+) {
+  final (alcoholConsumedMl: alcoholConsumedMl, nextRefreshAt: nextRefreshAt) =
+      value$;
+  return <String, dynamic>{
+    'alcoholConsumedMl': alcoholConsumedMl,
+    'nextRefreshAt': nextRefreshAt,
+  };
+}
+
+CurrentDayConsumptionResult _decodeCurrentDayConsumptionResult(dynamic raw) {
+  final map = expectMap(raw, label: 'CurrentDayConsumptionResult');
+  if (!map.containsKey('alcoholConsumedMl')) {
+    throw FormatException(
+      'Missing required field "alcoholConsumedMl" for CurrentDayConsumptionResult',
+    );
+  }
+  if (!map.containsKey('nextRefreshAt')) {
+    throw FormatException(
+      'Missing required field "nextRefreshAt" for CurrentDayConsumptionResult',
+    );
+  }
+  return (
+    alcoholConsumedMl: expectDouble(
+      map['alcoholConsumedMl'],
+      label: 'CurrentDayConsumptionResultAlcoholConsumedMl',
+    ),
+    nextRefreshAt: expectDouble(
+      map['nextRefreshAt'],
+      label: 'CurrentDayConsumptionResultNextRefreshAt',
+    ),
+  );
+}
+
+typedef CurrentDayConsumptionArgs = ({Optional<double> refreshAt});
+
+Map<String, dynamic> _encodeCurrentDayConsumptionArgs(
+  CurrentDayConsumptionArgs value$,
+) {
+  final (refreshAt: refreshAt) = value$;
+  return <String, dynamic>{
+    if (refreshAt.isDefined) 'refreshAt': refreshAt.value,
+  };
+}
+
+CurrentDayConsumptionArgs _decodeCurrentDayConsumptionArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'CurrentDayConsumptionArgs');
+  return (
+    refreshAt: map.containsKey('refreshAt')
+        ? Optional.of(
+            expectDouble(
+              map['refreshAt'],
+              label: 'CurrentDayConsumptionArgsRefreshAt',
+            ),
+          )
+        : const Optional.absent(),
   );
 }
 
@@ -1110,6 +1220,18 @@ final ConvexQueryReference<NoArgs, CurrentResult> currentQueryReference =
       decode: (raw) => _decodeCurrentResult(raw),
       encodeResult: (value) => _encodeCurrentResult(value),
     );
+
+final ConvexQueryReference<
+  CurrentDayConsumptionArgs,
+  CurrentDayConsumptionResult
+>
+currentDayConsumptionQueryReference = ConvexQueryReference(
+  name: 'user:currentDayConsumption',
+  encode: (args) => _encodeCurrentDayConsumptionArgs(args),
+  decodeArgs: (raw) => _decodeCurrentDayConsumptionArgs(raw),
+  decode: (raw) => _decodeCurrentDayConsumptionResult(raw),
+  encodeResult: (value) => _encodeCurrentDayConsumptionResult(value),
+);
 
 final ConvexMutationReference<DeleteCurrentArgs, void>
 deleteCurrentMutationReference = ConvexMutationReference(

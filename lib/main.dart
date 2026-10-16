@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:remembeer/app.dart';
+import 'package:remembeer/app_icon/service/app_icon_service.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/drink_log/service/drink_log_service.dart';
 import 'package:remembeer/firebase_options.dart';
@@ -19,6 +20,7 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   IoCContainer.initialize();
+  get<AppIconService>().initialize();
 
   await get<NotificationService>().initialize();
 

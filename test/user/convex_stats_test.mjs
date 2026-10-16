@@ -3,7 +3,10 @@ import test from "node:test";
 import { build } from "esbuild";
 
 const { outputFiles } = await build({
-  stdin: { contents: 'export { stats } from "./convex/user/query";', resolveDir: process.cwd() },
+  stdin: {
+    contents: 'export { stats, currentDayConsumption } from "./convex/user/query";',
+    resolveDir: process.cwd(),
+  },
   bundle: true,
   platform: "node",
   format: "esm",
@@ -21,7 +24,7 @@ const { outputFiles } = await build({
     },
   ],
 });
-const { stats } = await import(
+const { stats, currentDayConsumption } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`
 );
 
@@ -52,6 +55,14 @@ function fixture(timeZone = "UTC", endOfDayBoundary = 360) {
                 rows = rows.filter((row) => row[field] === value);
                 return range;
               },
+              gte(field, value) {
+                rows = rows.filter((row) => row[field] >= value);
+                return range;
+              },
+              lt(field, value) {
+                rows = rows.filter((row) => row[field] < value);
+                return range;
+              },
             };
             filter(range);
             return this;
@@ -77,11 +88,13 @@ function fixture(timeZone = "UTC", endOfDayBoundary = 360) {
         ...extra,
       });
     },
-    async run(at, userId = "target") {
+    async run(at, userId = "target", todayOnly = false) {
       const original = Date.now;
       Date.now = () => Date.parse(at);
       try {
-        return await stats(ctx, { userId });
+        return todayOnly
+          ? await currentDayConsumption({ ...ctx, user }, {})
+          : await stats(ctx, { userId });
       } finally {
         Date.now = original;
       }
@@ -163,4 +176,28 @@ test("missing drinks fail explicitly and catalog changes affect totals", async (
   assert.equal((await f.run("2026-10-12T12:00Z")).totalAlcoholConsumed, 50);
   delete f.drinks.beer;
   await assert.rejects(f.run("2026-10-12T12:00Z"), /logged drink is missing/);
+});
+
+test("icon consumption uses only the current logical day and refreshes at future logs and DST boundaries", async () => {
+  const f = fixture("Europe/Prague", 360);
+  f.log("2026-03-28T04:59Z"); // before this logical day
+  f.log("2026-03-28T05:00Z"); // inclusive start (06:00 local)
+  f.log("2026-03-29T03:00Z", "wine", 100); // before DST day's 06:00 boundary
+  f.log("2026-03-29T03:30Z"); // not yet consumed
+  f.log("2026-03-29T04:00Z"); // next logical day
+  f.log("2026-03-29T03:00Z", "beer", 500, { deletedAt: 1 });
+  f.log("2026-03-29T03:00Z", "beer", 500, { userId: "viewer" });
+  assert.deepEqual(await f.run("2026-03-29T03:00Z", "target", true), {
+    alcoholConsumedMl: 37,
+    nextRefreshAt: Date.parse("2026-03-29T03:30Z"),
+  });
+  assert.deepEqual(await f.run("2026-03-29T03:30Z", "target", true), {
+    alcoholConsumedMl: 62,
+    nextRefreshAt: Date.parse("2026-03-29T04:00Z"),
+  });
+  assert.deepEqual(await f.run("2026-03-29T04:00Z", "target", true), {
+    alcoholConsumedMl: 25,
+    nextRefreshAt: Date.parse("2026-03-30T04:00Z"),
+  });
+  assert.equal((await f.run("2026-03-30T04:00Z", "target", true)).alcoholConsumedMl, 0);
 });

@@ -87,6 +87,44 @@ export const current = authQuery
     };
   });
 
+export const currentDayConsumption = authQuery
+  .input({ refreshAt: v.optional(v.number()) })
+  .returns(v.object({ alcoholConsumedMl: v.number(), nextRefreshAt: v.number() }))
+  .handler(async (ctx) => {
+    const day = new LogicalDay(ctx.user);
+    const now = Date.now();
+    const { start, end } = day.boundaries(day.at(now));
+    const logs = await ctx.db
+      .query("drinkLog")
+      .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) =>
+        q
+          .eq("userId", ctx.user._id)
+          .eq("deletedAt", null)
+          .gte("consumedAt", start)
+          .lt("consumedAt", end),
+      )
+      .collect();
+
+    const drinks = new Map<Id<"drink">, Doc<"drink">>();
+    let alcoholConsumedMl = 0;
+    let nextRefreshAt = end;
+    for (const log of logs) {
+      if (log.consumedAt > now) {
+        nextRefreshAt = Math.min(nextRefreshAt, log.consumedAt);
+        continue;
+      }
+      let drink = drinks.get(log.drinkId);
+      if (!drink) {
+        const referencedDrink = await ctx.db.get("drink", log.drinkId);
+        if (!referencedDrink) throw new ConvexError("A logged drink is missing");
+        drink = referencedDrink;
+        drinks.set(log.drinkId, drink);
+      }
+      alcoholConsumedMl += (log.volumeMl * drink.alcoholPercentage) / 100;
+    }
+    return { alcoholConsumedMl, nextRefreshAt };
+  });
+
 export const stats = authQuery
   .input({ userId: v.id("user"), refreshAt: v.optional(v.number()) })
   .returns(

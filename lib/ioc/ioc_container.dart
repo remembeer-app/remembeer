@@ -96,8 +96,8 @@ class IoCContainer {
       )
       ..registerSingleton(
         AppIconService(
-          authService: get<AuthService>(),
-          userController: get<UserController>(),
+          authService: get<ConvexAuthService>(),
+          api: get<ConvexApi>(),
         ),
       )
       ..registerSingleton(
