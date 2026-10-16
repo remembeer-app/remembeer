@@ -40,6 +40,7 @@ export function validateSchedule(
     throw new ConvexError(
       "Quest intervals must be whole minutes from 5 to 180, with minimum <= maximum",
     );
+
   if (
     !Number.isInteger(duration) ||
     duration < minQuestDurationMinutes ||
@@ -81,13 +82,16 @@ export async function stopQuests(
   now: number,
 ) {
   if (session.kind !== "party") return;
+
   await cancelJob(ctx, session);
+
   for (const quest of await activeQuests(ctx, session._id)) {
     await ctx.db.patch("partyQuest", quest._id, {
       status: quest.endsAt <= now ? "expired" : "cancelled",
       updatedAt: now,
     });
   }
+
   await ctx.db.patch("session", session._id, {
     modules: { ...session.modules, socialQuestsEnabled: false },
     questSchedule: {
@@ -115,6 +119,7 @@ export async function scheduleExpiry(
       nextQuestAt,
     },
   );
+
   await ctx.db.patch("session", party._id, {
     questSchedule: { ...party.questSchedule, nextQuestAt, scheduledFunctionId },
     updatedAt: now,
@@ -135,6 +140,7 @@ export async function scheduleIssuance(
       nextQuestAt,
     },
   );
+
   await ctx.db.patch("session", party._id, {
     questSchedule: { ...party.questSchedule, nextQuestAt, scheduledFunctionId },
     updatedAt: now,
@@ -148,6 +154,7 @@ export async function issueQuest(
   now: number,
 ): Promise<Id<"partyQuest">> {
   const active = await activeQuests(ctx, party._id);
+
   const running = active.find((quest) => quest.endsAt > now);
   if (running) {
     if (
@@ -164,19 +171,24 @@ export async function issueQuest(
         now,
       );
     }
+
     return running._id;
   }
+
   validateSchedule(party.questSchedule);
   await cancelJob(ctx, party);
+
   for (const quest of active)
     await ctx.db.patch("partyQuest", quest._id, {
       status: "expired",
       updatedAt: now,
     });
+
   const quests = await ctx.db
     .query("partyQuest")
     .withIndex("by_sessionId_and_startsAt", (q) => q.eq("sessionId", party._id))
     .collect();
+
   const cycleCount = quests.length % questCycleLength;
   const cycle = cycleCount === 0 ? [] : quests.slice(-cycleCount);
   const identity = (quest: {
@@ -188,6 +200,7 @@ export async function issueQuest(
     party.modules.beerpongEnabled && cycleCount >= earlyQuestCount
       ? await loadQuestContext(ctx, party._id, now)
       : null;
+
   const candidates = builtInQuests.filter(
     (quest) =>
       (!["differentBeerpongTeam", "sameBeerpongTeam", "finalistTeam"].includes(
@@ -208,6 +221,7 @@ export async function issueQuest(
   const choices = unused.length ? unused : candidates;
   const chosen = choices[Math.floor(Math.random() * choices.length)];
   if (!chosen) throw new ConvexError("No quest templates available");
+
   const { availability, ...definition } = chosen;
   const endsAt =
     now + party.questSchedule.defaultDurationMinutes * millisecondsPerMinute;
@@ -222,6 +236,7 @@ export async function issueQuest(
     results: [],
   };
   const questId = await ctx.db.insert("partyQuest", fields);
+
   await scheduleExpiry(
     ctx,
     party,
@@ -229,6 +244,7 @@ export async function issueQuest(
     endsAt + randomBreak(party.questSchedule),
     now,
   );
+
   return questId;
 }
 
@@ -240,8 +256,10 @@ export async function ensureLifecycle(
   const active = await activeQuests(ctx, party._id);
   if (active.some((quest) => quest.endsAt > now)) {
     await issueQuest(ctx, party, now);
+
     return;
   }
+
   if (party.questSchedule.nextQuestAt !== null) {
     if (party.questSchedule.scheduledFunctionId === null) {
       for (const quest of active)
@@ -249,9 +267,12 @@ export async function ensureLifecycle(
           status: "expired",
           updatedAt: now,
         });
+
       await scheduleIssuance(ctx, party, party.questSchedule.nextQuestAt, now);
     }
+
     return;
   }
+
   await issueQuest(ctx, party, now);
 }

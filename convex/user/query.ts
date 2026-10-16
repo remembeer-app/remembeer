@@ -14,6 +14,7 @@ export const get = authQuery
   .handler(async (ctx, { userId }) => {
     const user = await publicUser(ctx, userId);
     if (!user) throw new ConvexError("User not found");
+
     return user;
   });
 
@@ -28,11 +29,13 @@ export const search = authQuery
         q.eq("normalizedUsername", normalizeUsername(username)),
       )
       .take(20);
+
     const profiles = await Promise.all(
       users
         .filter((user) => user._id !== ctx.user._id)
         .map((user) => publicUser(ctx, user._id)),
     );
+
     return profiles.filter((user) => user !== null);
   });
 
@@ -45,6 +48,7 @@ export const current = authQuery
   )
   .handler(async (ctx) => {
     const { avatarStorageId, ...user } = ctx.user;
+
     return {
       ...user,
       avatarUrl: avatarStorageId
@@ -69,6 +73,7 @@ export const stats = authQuery
   .handler(async (ctx, { userId }) => {
     const user = await ctx.db.get("user", userId);
     if (!user) throw new ConvexError("User not found");
+
     const userDay = new LogicalDay(user);
     const now = Date.now();
     const today = Temporal.PlainDate.from(userDay.at(now));
@@ -81,44 +86,54 @@ export const stats = authQuery
         q.eq("userId", userId).eq("deletedAt", null),
       )
       .collect();
+
     const drinks = new Map<Id<"drink">, Doc<"drink">>();
     const drinkingDays = new Set<string>();
     let totalBeersConsumed = 0;
     let totalAlcoholConsumed = 0;
     let beersConsumedLast30Days = 0;
     let alcoholConsumedLast30Days = 0;
+
     for (const log of logs) {
       if (log.consumedAt > now) {
         nextRefreshAt = Math.min(nextRefreshAt, log.consumedAt);
         continue;
       }
+
       let drink = drinks.get(log.drinkId);
       if (!drink) {
         const referencedDrink = await ctx.db.get("drink", log.drinkId);
         if (!referencedDrink) throw new ConvexError("A logged drink is missing");
+
         drink = referencedDrink;
         drinks.set(log.drinkId, drink);
       }
+
       const beers = drink.drinkCategory.kind === "beer"
         ? log.volumeMl / beerVolumeMl
         : 0;
       const alcohol = (log.volumeMl * drink.alcoholPercentage) / 100;
       const day = userDay.at(log.consumedAt);
+
       totalBeersConsumed += beers;
       totalAlcoholConsumed += alcohol;
       if (day >= firstDay) {
         beersConsumedLast30Days += beers;
         alcoholConsumedLast30Days += alcohol;
       }
+
       if (alcohol > 0) drinkingDays.add(day);
     }
+
     const isStreakActive = drinkingDays.has(today.toString());
     let day = isStreakActive ? today : today.subtract({ days: 1 });
     let streakDays = 0;
+
     while (drinkingDays.has(day.toString())) {
       streakDays++;
       day = day.subtract({ days: 1 });
     }
+
     return {
       totalBeersConsumed, totalAlcoholConsumed, beersConsumedLast30Days,
       alcoholConsumedLast30Days, streakDays, isStreakActive, nextRefreshAt,

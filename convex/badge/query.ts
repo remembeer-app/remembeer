@@ -9,5 +9,6 @@ export const listCurrent = authQuery
       .query("badge")
       .withIndex("by_userId_and_badgeKey", (q) => q.eq("userId", ctx.user._id))
       .collect();
+
     return badges.sort((a, b) => b.unlockedAt - a.unlockedAt);
   });

@@ -12,11 +12,14 @@ export async function loadQuestContext(
   now: number,
 ) {
   const { entries, quests } = await loadPartyScores(ctx, sessionId, now);
+
   const session = await ctx.db.get("session", sessionId);
+
   const { teamByUserId, finalistTeamIds } = await loadBeerpongQuestContext(
     ctx,
     session,
   );
+
   const players: QuestPlayer[] = entries.flatMap(
     ({ member, user, scoreUnits }) =>
       member.selectedClass !== null && user
@@ -34,7 +37,9 @@ export async function loadQuestContext(
   );
   if (players.length > maxQuestPlayers)
     throw new ConvexError(`Quests support at most ${maxQuestPlayers} players`);
+
   const previousPairs = new Set<string>();
+
   for (const quest of quests) {
     for (const result of quest.results) {
       previousPairs.add(
@@ -42,6 +47,7 @@ export async function loadQuestContext(
       );
     }
   }
+
   return { players, previousPairs, quests, finalistTeamIds };
 }
 
@@ -56,6 +62,7 @@ async function loadBeerpongQuestContext(
   const context = { teamByUserId, finalistTeamIds };
   if (session?.kind !== "party" || !session.modules.beerpongEnabled)
     return context;
+
   const tournament = await ctx.db
     .query("beerpongTournament")
     .withIndex("by_sessionId", (q) => q.eq("sessionId", session._id))
@@ -67,30 +74,37 @@ async function loadBeerpongQuestContext(
     tournament.status === "cancelled"
   )
     return context;
+
   const teams = await ctx.db
     .query("beerpongTeam")
     .withIndex("by_tournamentId", (q) => q.eq("tournamentId", tournament._id))
     .collect();
+
   for (const team of teams) {
     for (const userId of team.memberUserIds) teamByUserId.set(userId, team._id);
   }
+
   if (tournament.status === "setup") return context;
+
   const matches = await ctx.db
     .query("beerpongMatch")
     .withIndex("by_tournamentId_and_round_and_position", (q) =>
       q.eq("tournamentId", tournament._id),
     )
     .collect();
+
   const final = matches
     .filter((match) => match.kind === "main")
     .sort((a, b) => b.round - a.round)[0];
   if (final) {
     const { teamAId, teamBId } = matchResolver(matches)(final._id);
+
     // A finalist qualifies as soon as their path to the final is resolved.
     for (const teamId of [teamAId, teamBId]) {
       if (teamId && teams.some((team) => team._id === teamId))
         finalistTeamIds.add(teamId);
     }
   }
+
   return context;
 }

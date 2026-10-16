@@ -16,6 +16,7 @@ export const listForSession = authQuery
   )
   .handler(async (ctx, { sessionId }) => {
     const { isAdmin } = await requireSessionAccess(ctx, sessionId, "joined");
+
     const members = await (isAdmin
       ? ctx.db
           .query("sessionMember")
@@ -63,6 +64,7 @@ export const listInvitations = authQuery
     const invitations = await Promise.all(
       members.map(async (member) => {
         const session = await ctx.db.get("session", member.sessionId);
+
         return session !== null && session.deletedAt === null
           ? { member, session }
           : null;

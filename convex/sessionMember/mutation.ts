@@ -77,10 +77,12 @@ async function respond(
   );
   if (session.ownerId === ctx.user._id)
     throw new ConvexError("The session owner cannot change their membership");
+
   if (!member) throw new ConvexError("Membership not found");
 
   const current = member.sessionMemberStatus.kind;
   if (current === next) return null;
+
   if (current !== (next === "left" ? "joined" : "invited"))
     throw new ConvexError("Invalid membership transition");
 
@@ -123,12 +125,14 @@ async function moderate(
 
   const member = await getMembership(ctx, sessionId, userId);
   if (!member) throw new ConvexError("Membership not found");
+
   if (!isOwner && member.sessionMemberRole.kind === "admin")
     throw new ConvexError("Only the owner can moderate admins");
 
   const next = action === "unban" ? "left" : action;
   const current = member.sessionMemberStatus.kind;
   if (current === next) return null;
+
   if (
     (action === "unban" && current !== "banned") ||
     (action === "left" && current !== "invited" && current !== "joined")
@@ -156,6 +160,7 @@ export const setRole = authMutation
     const member = await getMembership(ctx, sessionId, userId);
     if (!member || member.sessionMemberStatus.kind !== "joined")
       throw new ConvexError("Only joined members can have roles assigned");
+
     if (member.sessionMemberRole.kind === role.kind) return null;
 
     await ctx.db.patch("sessionMember", member._id, {
@@ -192,7 +197,9 @@ export const setClass = authMutation
       throw new ConvexError(
         "Only joined party members can have classes assigned",
       );
+
     if (member.selectedClass?.kind === selectedClass?.kind) return null;
+
     if (member.selectedClass !== null && !isAdmin)
       throw new ConvexError("Only admins can change a selected class");
 
@@ -222,11 +229,14 @@ export const setBeerpongOptIn = authMutation
       throw new ConvexError(
         "An ongoing party with beerpong enabled is required",
       );
+
     if (member?.kind !== "partyMember")
       throw new ConvexError("Party membership required");
+
     await ctx.db.patch("sessionMember", member._id, {
       beerpongOptIn: optedIn,
       updatedAt: Date.now(),
     });
+
     return null;
   });

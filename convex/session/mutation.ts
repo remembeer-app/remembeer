@@ -84,6 +84,7 @@ export const softDelete = authMutation
   .returns(v.null())
   .handler(async (ctx, { id }) => {
     const { session } = await requireSessionAccess(ctx, id, "owner");
+
     const now = Date.now();
 
     await stopQuests(ctx, session, now);
@@ -100,6 +101,7 @@ export const promoteToParty = authMutation
   .handler(async (ctx, { id }) => {
     const { session } = await requireSessionAccess(ctx, id, "admin");
     if (session.kind === "party") return null;
+
     if (session.endedAt !== null)
       throw new ConvexError("Only ongoing sessions can become parties");
 
@@ -127,6 +129,7 @@ export const promoteToParty = authMutation
       .query("sessionMember")
       .withIndex("by_sessionId_and_userId", (q) => q.eq("sessionId", id))
       .collect();
+
     for (const member of members) {
       await ctx.db.patch("sessionMember", member._id, {
         ...defaultPartyMemberFields,

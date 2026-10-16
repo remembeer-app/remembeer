@@ -16,6 +16,7 @@ export const create = authMutation
   .handler(async (ctx, input) => {
     const now = Date.now();
     const consumedAt = input.consumedAt ?? now;
+
     requireConsumedTime(consumedAt, now);
     await checkReferences(ctx, input);
 
@@ -34,8 +35,10 @@ export const update = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, ...input }) => {
     const drinkLog = await getDrinkLog(ctx, { id });
+
     const now = Date.now();
     const consumedAt = input.consumedAt ?? drinkLog.consumedAt;
+
     requireConsumedTime(consumedAt, now);
     await checkReferences(ctx, {
       sessionId: input.sessionId,
@@ -61,11 +64,13 @@ export const softDelete = authMutation
   .returns(v.null())
   .handler(async (ctx, { id }) => {
     await getDrinkLog(ctx, { id });
+
     const now = Date.now();
     await ctx.db.patch("drinkLog", id, {
       updatedAt: now,
       deletedAt: now,
     });
+
     return null;
   });
 
@@ -77,11 +82,13 @@ async function getDrinkLog(
   if (!drinkLog) {
     throw new ConvexError("Drink log not found");
   }
+
   if (drinkLog.userId !== ctx.user._id) {
     throw new ConvexError(
       "You do not have permission to access this drink log",
     );
   }
+
   if (drinkLog.deletedAt !== null) {
     throw new ConvexError("Drink log has been deleted");
   }
@@ -104,10 +111,12 @@ async function checkReferences(
     if (!drink || drink.deletedAt !== null) {
       throw new ConvexError("Drink not found");
     }
+
     if (drink.ownerId !== null && drink.ownerId !== ctx.user._id) {
       throw new ConvexError("You do not have permission to use this drink");
     }
   }
+
   if (sessionId !== undefined && sessionId !== null) {
     await requireSessionAccess(ctx, sessionId, "joined");
   }

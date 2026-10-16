@@ -10,6 +10,7 @@ export const listForSession = authQuery
   .returns(v.array(schema.doc("beerpongTournament")))
   .handler(async (ctx, { sessionId }) => {
     await requirePartyMember(ctx, sessionId);
+
     return await ctx.db.query("beerpongTournament")
       .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
       .order("desc")
@@ -37,14 +38,18 @@ export const get = authQuery
   .handler(async (ctx, { id }) => {
     const tournament = await ctx.db.get("beerpongTournament", id);
     if (!tournament) throw new ConvexError("Tournament not found");
+
     await requirePartyMember(ctx, tournament.sessionId);
+
     const [teams, matches] = await Promise.all([
       ctx.db.query("beerpongTeam")
         .withIndex("by_tournamentId", (q) => q.eq("tournamentId", id)).collect(),
       ctx.db.query("beerpongMatch")
         .withIndex("by_tournamentId_and_round_and_position", (q) => q.eq("tournamentId", id)).collect(),
     ]);
+
     const resolve = matchResolver(matches);
+
     return {
       tournament,
       teams,
@@ -53,6 +58,7 @@ export const get = authQuery
         const status = match.winnerTeamId !== null
           ? teamAId === null || teamBId === null ? "bye" as const : "completed" as const
           : teamAId && teamBId ? "ready" as const : "pending" as const;
+
         return { ...match, teamAId: teamAId ?? null, teamBId: teamBId ?? null, status };
       }),
       placements: tournament.status === "completed"

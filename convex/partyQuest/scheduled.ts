@@ -21,7 +21,9 @@ export const expire = convex
       party.questSchedule.nextQuestAt !== nextQuestAt
     )
       return null;
+
     const quest = await ctx.db.get("partyQuest", questId);
+
     const now = Date.now();
     if (
       !quest ||
@@ -30,11 +32,13 @@ export const expire = convex
       quest.endsAt > now
     )
       return null;
+
     await ctx.db.patch("partyQuest", questId, {
       status: "expired",
       updatedAt: now,
     });
     await scheduleIssuance(ctx, party, nextQuestAt, now);
+
     return null;
   });
 
@@ -44,6 +48,7 @@ export const issue = convex
   .returns(v.null())
   .handler(async (ctx, { sessionId, nextQuestAt }) => {
     const party = await ctx.db.get("session", sessionId);
+
     const now = Date.now();
     if (
       !party ||
@@ -55,10 +60,12 @@ export const issue = convex
       now < nextQuestAt
     )
       return null;
+
     if (
       (await activeQuests(ctx, sessionId)).some((quest) => quest.endsAt > now)
     )
       return null;
+
     // The issuing job is executing; do not cancel its own child expiry job.
     await issueQuest(
       ctx,
@@ -68,5 +75,6 @@ export const issue = convex
       },
       now,
     );
+
     return null;
   });

@@ -33,6 +33,7 @@ export const unlockForUser = convex
       .query("badge")
       .withIndex("by_userId_and_badgeKey", (q) => q.eq("userId", userId))
       .collect();
+
     const shownCount = badges.filter((badge) => badge.isShown).length;
 
     return await ctx.db.insert("badge", {
@@ -73,5 +74,6 @@ export const setVisibility = authMutation
     }
 
     await ctx.db.patch("badge", badge._id, { isShown });
+
     return null;
   });

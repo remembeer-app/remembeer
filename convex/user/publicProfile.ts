@@ -11,6 +11,7 @@ export const publicUserValidator = schema
 export async function publicUser(ctx: QueryCtx, userId: Id<"user">) {
   const user = await ctx.db.get("user", userId);
   if (!user) return null;
+
   return {
     _id: user._id,
     username: user.username,

@@ -115,6 +115,7 @@ export const activity = authQuery
       const { session } = await requireSessionAccess(ctx, sessionId, "joined");
       if (session.kind !== "party")
         throw new ConvexError("A party is required");
+
       if (
         !Number.isInteger(pageSize) ||
         pageSize < 1 ||
@@ -123,6 +124,7 @@ export const activity = authQuery
         throw new ConvexError(
           `Page size must be an integer from 1 to ${partyActivityMaxPageSize}`,
         );
+
       const now = Date.now();
       // TODO(ohtenkay): Eliminate these full-session reads and the in-memory
       // merge/sort once the activity index exists. Every page subscription,
@@ -154,6 +156,7 @@ export const activity = authQuery
             .collect(),
           loadBeerpongAwards(ctx, sessionId),
         ]);
+
       const classes = new Map(
         members.map((member) => [
           member.userId,
@@ -162,16 +165,20 @@ export const activity = authQuery
       );
       const drinks = new Map<Id<"drink">, Doc<"drink">>();
       const entries: Infer<typeof entryValidator>[] = [];
+
       for (const log of logs) {
         if (log.deletedAt !== null || log.consumedAt > now) continue;
+
         let drink = drinks.get(log.drinkId);
         if (!drink) {
           const referencedDrink = await ctx.db.get("drink", log.drinkId);
           if (!referencedDrink)
             throw new ConvexError("A logged drink is missing");
+
           drink = referencedDrink;
           drinks.set(log.drinkId, drink);
         }
+
         entries.push({
           kind: "drinkLog",
           id: JSON.stringify(["drinkLog", log._id]),
@@ -190,7 +197,9 @@ export const activity = authQuery
           ),
         });
       }
+
       const seen = new Set<string>();
+
       for (const quest of quests) {
         for (const result of quest.results) {
           const [firstUserId, secondUserId] =
@@ -204,6 +213,7 @@ export const activity = authQuery
             secondUserId,
           ]);
           if (seen.has(id)) continue;
+
           seen.add(id);
           entries.push({
             kind: "socialQuest",
@@ -218,6 +228,7 @@ export const activity = authQuery
           });
         }
       }
+
       for (const challenge of challenges) {
         for (const winner of challenge.winners) {
           entries.push({
@@ -236,6 +247,7 @@ export const activity = authQuery
           });
         }
       }
+
       for (const award of beerpongAwards) {
         entries.push({
           ...award,
@@ -248,6 +260,7 @@ export const activity = authQuery
           ]),
         });
       }
+
       const filtered = entries
         .filter(
           (entry) =>
@@ -273,14 +286,17 @@ export const activity = authQuery
           publicUser(ctx, id),
         ),
       );
+
       const profiles = new Map(
         users.filter((user) => user !== null).map((user) => [user._id, user]),
       );
+
       return {
         page: page.map((entry) => ({
           entry,
           users: entry.participantIds.flatMap((id) => {
             const user = profiles.get(id);
+
             return user ? [user] : [];
           }),
         })),
@@ -313,6 +329,7 @@ function decodeCursor(
   raw: string | null,
 ): Infer<typeof cursorValidator> | null {
   if (raw === null || raw === "") return null;
+
   try {
     const value: unknown = JSON.parse(raw);
     if (
@@ -328,6 +345,7 @@ function decodeCursor(
   } catch {
     // Invalid client cursors are reported as an application error below.
   }
+
   throw new ConvexError("Invalid activity cursor");
 }
 

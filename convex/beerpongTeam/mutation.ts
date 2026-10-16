@@ -18,9 +18,11 @@ export const rename = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, name }) => {
     const { team } = await requireEditableTeam(ctx, id);
+
     const now = Date.now();
     await ctx.db.patch("beerpongTeam", id, { name, updatedAt: now });
     await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
+
     return null;
   });
 
@@ -29,6 +31,7 @@ export const addMember = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, userId }) => {
     const { team, tournament } = await requireEditableTeam(ctx, id);
+
     const member = await getMembership(ctx, tournament.sessionId, userId);
     if (
       member?.kind !== "partyMember" ||
@@ -36,18 +39,22 @@ export const addMember = authMutation
       !(await ctx.db.get("user", userId))
     )
       throw new ConvexError("Player must be a joined party member");
+
     const teams = await ctx.db
       .query("beerpongTeam")
       .withIndex("by_tournamentId", (q) => q.eq("tournamentId", team.tournamentId))
       .collect();
     if (teams.some((other) => other._id !== id && other.memberUserIds.includes(userId)))
       throw new ConvexError("Player already belongs to another team; move them instead");
+
     if (team.memberUserIds.includes(userId)) return null;
+
     const now = Date.now();
     await ctx.db.patch("beerpongTeam", id, {
       memberUserIds: [...team.memberUserIds, userId], updatedAt: now,
     });
     await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
+
     return null;
   });
 
@@ -57,12 +64,14 @@ export const removeMember = authMutation
   .handler(async (ctx, { id, userId }) => {
     const { team } = await requireEditableTeam(ctx, id);
     if (!team.memberUserIds.includes(userId)) return null;
+
     const now = Date.now();
     await ctx.db.patch("beerpongTeam", id, {
       memberUserIds: team.memberUserIds.filter((memberId) => memberId !== userId),
       updatedAt: now,
     });
     await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
+
     return null;
   });
 
@@ -71,12 +80,16 @@ export const moveMember = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, userId, targetTeamId }) => {
     const { team, tournament } = await requireEditableTeam(ctx, id);
+
     const target = await ctx.db.get("beerpongTeam", targetTeamId);
     if (!target) throw new ConvexError("Target team not found");
+
     if (target.tournamentId !== team.tournamentId)
       throw new ConvexError("Teams must belong to the same tournament");
+
     if (!team.memberUserIds.includes(userId))
       throw new ConvexError("Player does not belong to the source team");
+
     const member = await getMembership(ctx, tournament.sessionId, userId);
     if (
       member?.kind !== "partyMember" ||
@@ -84,7 +97,9 @@ export const moveMember = authMutation
       !(await ctx.db.get("user", userId))
     )
       throw new ConvexError("Player must be a joined party member");
+
     if (id === targetTeamId) return null;
+
     const now = Date.now();
     await ctx.db.patch("beerpongTeam", id, {
       memberUserIds: team.memberUserIds.filter((memberId) => memberId !== userId),
@@ -95,5 +110,6 @@ export const moveMember = authMutation
       updatedAt: now,
     });
     await ctx.db.patch("beerpongTournament", team.tournamentId, { updatedAt: now });
+
     return null;
   });

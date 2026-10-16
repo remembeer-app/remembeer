@@ -33,11 +33,13 @@ export const listCurrent = authQuery
         q.eq("userId", ctx.user._id).eq("status", "joined"),
       )
       .collect();
+
     const leaderboards = await Promise.all(
       memberships.map((member) =>
         ctx.db.get("leaderboard", member.leaderboardId),
       ),
     );
+
     const active = leaderboards
       .filter((board) => board !== null)
       .filter((board) => board.deletedAt === null)
@@ -45,6 +47,7 @@ export const listCurrent = authQuery
         (a, b) =>
           a._creationTime - b._creationTime || a._id.localeCompare(b._id),
       );
+
     return await Promise.all(
       active.map(async (leaderboard) => ({
         leaderboard,
@@ -66,7 +69,9 @@ export const get = authQuery
   )
   .handler(async (ctx, { id }) => {
     const { leaderboard, isOwner } = await requireLeaderboardAccess(ctx, id);
+
     const memberships = await listMemberships(ctx, id);
+
     const profiles = await Promise.all(
       memberships
         .filter((member) => member.status === "joined" || isOwner)
@@ -75,6 +80,7 @@ export const get = authQuery
           user: await publicUser(ctx, member.userId),
         })),
     );
+
     return {
       leaderboard,
       members: profiles
@@ -120,6 +126,7 @@ export const findByInviteCode = authQuery
       .withIndex("by_inviteCode", (q) => q.eq("inviteCode", inviteCode))
       .unique();
     if (!leaderboard || leaderboard.deletedAt !== null) return null;
+
     return {
       id: leaderboard._id,
       name: leaderboard.name,
@@ -161,11 +168,13 @@ export const standings = authQuery
   )
   .handler(async (ctx, { id, month: selectedMonth }) => {
     const { leaderboard } = await requireLeaderboardAccess(ctx, id);
+
     const day = new LogicalDay(leaderboard);
     const currentMonth = day.at(Date.now()).slice(0, 7);
     const month = selectedMonth ?? currentMonth;
     if (month > currentMonth)
       throw new ConvexError("Cannot view a future reporting month");
+
     const firstDay = Temporal.PlainDate.from(`${month}-01`);
     const start = day.boundaries(firstDay.toString()).start;
     const end = day.boundaries(firstDay.add({ months: 1 }).toString()).start;
@@ -177,12 +186,14 @@ export const standings = authQuery
     const memberships = (await listMemberships(ctx, id)).filter(
       (m) => m.status === "joined",
     );
+
     const drinkCache = new Map<Id<"drink">, Promise<Doc<"drink"> | null>>();
     // shortcut: totals read every monthly log, add aggregates when query read limits become a constraint.
     const entries = await Promise.all(
       memberships.map(async (member) => {
         const user = await publicUser(ctx, member.userId);
         if (!user) throw new ConvexError("Leaderboard member not found");
+
         const logs = await ctx.db
           .query("drinkLog")
           .withIndex("by_userId_and_deletedAt_and_consumedAt", (q) =>
@@ -193,20 +204,26 @@ export const standings = authQuery
               .lt("consumedAt", end),
           )
           .collect();
+
         let beersConsumed = 0;
         let alcoholConsumedMl = 0;
+
         for (const log of logs) {
           let drinkPromise = drinkCache.get(log.drinkId);
           if (!drinkPromise) {
             drinkPromise = ctx.db.get("drink", log.drinkId);
             drinkCache.set(log.drinkId, drinkPromise);
           }
+
           const drink = await drinkPromise;
           if (!drink) throw new ConvexError("A logged drink is missing");
+
           if (drink.drinkCategory.kind === "beer")
             beersConsumed += log.volumeMl / beerVolumeMl;
+
           alcoholConsumedMl += (log.volumeMl * drink.alcoholPercentage) / 100;
         }
+
         return {
           user,
           beersConsumed,
@@ -216,6 +233,7 @@ export const standings = authQuery
         };
       }),
     );
+
     const byBeers = [...entries].sort(
       (a, b) =>
         b.beersConsumed - a.beersConsumed ||
@@ -226,11 +244,13 @@ export const standings = authQuery
         b.alcoholConsumedMl - a.alcoholConsumedMl ||
         a.user._id.localeCompare(b.user._id),
     );
+
     byBeers.forEach((entry, index) => {
       entry.rankByBeers = index + 1;
     });
     byAlcohol.forEach((entry, index) => {
       entry.rankByAlcohol = index + 1;
     });
+
     return { month, currentMonth, nextMonthAt, entries: byAlcohol };
   });

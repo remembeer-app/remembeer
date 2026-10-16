@@ -37,14 +37,17 @@ export const standings = authQuery
   .handler(async (ctx, { sessionId }) => {
     const { session } = await requireSessionAccess(ctx, sessionId, "joined");
     if (session.kind !== "party") throw new ConvexError("A party is required");
+
     const now = Date.now();
     const { entries } = await loadPartyScores(ctx, sessionId, now);
+
     const ranked = rankByScore(
       entries.map((entry) => ({
         ...entry,
         username: entry.user?.username ?? "Unavailable user",
       })),
     );
+
     return {
       entries: await Promise.all(
         ranked.map(async ({ member, user, username, ...score }) => ({

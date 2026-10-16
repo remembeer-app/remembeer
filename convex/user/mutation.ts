@@ -170,6 +170,7 @@ export const deleteCurrent = authMutation
     if (!password) throw new ConvexError("Please enter your password.");
 
     const { auth, headers } = await authComponent.getAuth(createAuth, ctx);
+
     try {
       await auth.api.deleteUser({ body: { password }, headers });
     } catch (error) {
@@ -178,6 +179,7 @@ export const deleteCurrent = authMutation
           error.body?.message ?? "Could not delete account.",
         );
       }
+
       throw error;
     }
 

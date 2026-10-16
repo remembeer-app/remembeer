@@ -45,6 +45,7 @@ export const create = authMutation
       throw new ConvexError(
         "Placement points must not increase for lower placements",
       );
+
     return await ctx.db.insert("beerpongTournament", {
       ...input,
       sessionId,
@@ -61,6 +62,7 @@ export const draw = authMutation
   .handler(async (ctx, { id }) => {
     const tournament = await ctx.db.get("beerpongTournament", id);
     if (!tournament) throw new ConvexError("Tournament not found");
+
     await requireEnabledPartyAdmin(ctx, tournament.sessionId);
     if (tournament.status !== "enrollment")
       throw new ConvexError("Only an enrollment tournament can be drawn");
@@ -73,6 +75,7 @@ export const draw = authMutation
           .eq("sessionMemberStatus.kind", "joined"),
       )
       .collect();
+
     const players = members
       .filter((member) => member.kind === "partyMember" && member.beerpongOptIn)
       .map((member) => member.userId);
@@ -82,9 +85,12 @@ export const draw = authMutation
     // Fisher-Yates gives every player order equal probability.
     for (let index = players.length - 1; index > 0; index--) {
       const other = Math.floor(Math.random() * (index + 1));
+
       [players[index], players[other]] = [players[other]!, players[index]!];
     }
+
     const now = Date.now();
+
     for (let index = 0; index < tournament.teamCount; index++) {
       await ctx.db.insert("beerpongTeam", {
         tournamentId: id,
@@ -95,10 +101,12 @@ export const draw = authMutation
         updatedAt: now,
       });
     }
+
     await ctx.db.patch("beerpongTournament", id, {
       status: "setup",
       updatedAt: now,
     });
+
     return null;
   });
 
@@ -108,6 +116,7 @@ export const start = authMutation
   .handler(async (ctx, { id }) => {
     const tournament = await ctx.db.get("beerpongTournament", id);
     if (!tournament) throw new ConvexError("Tournament not found");
+
     await requireEnabledPartyAdmin(ctx, tournament.sessionId);
     if (tournament.status !== "setup")
       throw new ConvexError("Only a setup tournament can be started");
@@ -124,8 +133,10 @@ export const start = authMutation
       throw new ConvexError(
         "Tournament teams must match the configured team count",
       );
+
     if (teams.some((team) => team.memberUserIds.length === 0))
       throw new ConvexError("Every team must have at least one player");
+
     const members = await ctx.db
       .query("sessionMember")
       .withIndex("by_sessionId_and_sessionMemberStatus_kind", (q) =>
@@ -134,6 +145,7 @@ export const start = authMutation
           .eq("sessionMemberStatus.kind", "joined"),
       )
       .collect();
+
     const eligible = new Set(
       members
         .filter((member) => member.kind === "partyMember")
@@ -142,8 +154,10 @@ export const start = authMutation
     const players = teams.flatMap((team) => team.memberUserIds);
     if (new Set(players).size !== players.length)
       throw new ConvexError("A player cannot belong to multiple teams");
+
     if (players.some((userId) => !eligible.has(userId)))
       throw new ConvexError("Players must be joined party members");
+
     const matches = await ctx.db
       .query("beerpongMatch")
       .withIndex("by_tournamentId_and_round_and_position", (q) =>
@@ -164,6 +178,7 @@ export const start = authMutation
       status: "active",
       updatedAt: now,
     });
+
     return null;
   });
 
@@ -173,17 +188,22 @@ export const finalize = authMutation
   .handler(async (ctx, { id }) => {
     const tournament = await ctx.db.get("beerpongTournament", id);
     if (!tournament) throw new ConvexError("Tournament not found");
+
     await requireEnabledPartyAdmin(ctx, tournament.sessionId);
     if (tournament.status === "completed") return null;
+
     if (tournament.status !== "active")
       throw new ConvexError("Only an active tournament can be finalized");
+
     await loadTournamentAwards(ctx, tournament);
+
     const now = Date.now();
     await ctx.db.patch("beerpongTournament", id, {
       status: "completed",
       completedAt: now,
       updatedAt: now,
     });
+
     return null;
   });
 
@@ -194,9 +214,11 @@ export const setEnabled = authMutation
     const { session } = await requireSessionAccess(ctx, sessionId, "admin");
     if (session.kind !== "party" || session.endedAt !== null)
       throw new ConvexError("An ongoing party is required");
+
     await ctx.db.patch("session", sessionId, {
       modules: { ...session.modules, beerpongEnabled: enabled },
       updatedAt: Date.now(),
     });
+
     return null;
   });

@@ -26,6 +26,7 @@ export const get = authQuery
   .returns(schema.doc("partyChallenge"))
   .handler(async (ctx, { id }) => {
     const { challenge, session } = await requireChallenge(ctx, id, "joined");
+
     return visibleChallenge(challenge, session);
   });
 
@@ -34,6 +35,7 @@ export const listForSession = authQuery
   .returns(v.array(schema.doc("partyChallenge")))
   .handler(async (ctx, { sessionId }) => {
     const session = await requireParty(ctx, sessionId, "joined");
+
     const challenges = await ctx.db
       .query("partyChallenge")
       .withIndex("by_sessionId_and_startsAt", (q) =>
@@ -41,5 +43,6 @@ export const listForSession = authQuery
       )
       .order("desc")
       .collect();
+
     return challenges.map((challenge) => visibleChallenge(challenge, session));
   });

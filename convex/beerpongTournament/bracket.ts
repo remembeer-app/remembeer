@@ -11,21 +11,27 @@ export async function createBracket(
 ) {
   for (let index = teamIds.length - 1; index > 0; index--) {
     const other = Math.floor(Math.random() * (index + 1));
+
     [teamIds[index], teamIds[other]] = [teamIds[other]!, teamIds[index]!];
   }
 
   // Spread the empty slots across the bracket so no match has two byes.
   // These positions are temporary; the stored matches define the bracket.
   let positions = [1, 2];
+
   while (positions.length < teamIds.length) {
     const size = positions.length * 2;
+
     positions = positions.flatMap((position) => [position, size + 1 - position]);
   }
+
   const slot = (position: number): Slot => {
     const teamId = teamIds[position - 1];
+
     return teamId ? { kind: "team", teamId } : { kind: "bye" };
   };
   let previous: Id<"beerpongMatch">[] = [];
+
   for (let index = 0; index < positions.length; index += 2) {
     const slotA = slot(positions[index]!);
     const slotB = slot(positions[index + 1]!);
@@ -34,6 +40,7 @@ export async function createBracket(
       : slotB.kind === "bye" && slotA.kind === "team"
         ? slotA.teamId
         : null;
+
     previous.push(await ctx.db.insert("beerpongMatch", {
       tournamentId: tournament._id,
       round: 1,
@@ -49,10 +56,14 @@ export async function createBracket(
 
   let round = 1;
   let semifinals: Id<"beerpongMatch">[] = [];
+
   while (previous.length > 1) {
     if (previous.length === 2) semifinals = previous;
+
     round++;
+
     const current: Id<"beerpongMatch">[] = [];
+
     for (let index = 0; index < previous.length; index += 2) {
       current.push(await ctx.db.insert("beerpongMatch", {
         tournamentId: tournament._id,
@@ -66,6 +77,7 @@ export async function createBracket(
         updatedAt: now,
       }));
     }
+
     previous = current;
   }
 

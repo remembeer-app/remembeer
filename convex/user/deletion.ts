@@ -13,6 +13,7 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
   if (!user) return;
 
   const friendships = await listForUser(ctx, user._id);
+
   for (const friendship of friendships) {
     await ctx.db.delete("friendship", friendship._id);
   }
@@ -21,7 +22,9 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     .query("leaderboard")
     .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
     .collect();
+
   const deletionTime = Date.now();
+
   for (const leaderboard of leaderboards) {
     if (leaderboard.deletedAt === null) {
       await ctx.db.patch("leaderboard", leaderboard._id, {
@@ -30,10 +33,12 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
       });
     }
   }
+
   const leaderboardMemberships = await ctx.db
     .query("leaderboardMember")
     .withIndex("by_userId_and_status", (q) => q.eq("userId", user._id))
     .collect();
+
   for (const member of leaderboardMemberships) {
     await ctx.db.delete("leaderboardMember", member._id);
   }
@@ -44,6 +49,7 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
       q.eq("userId", user._id),
     )
     .collect();
+
   for (const log of logs) {
     await ctx.db.delete("drinkLog", log._id);
   }
@@ -52,6 +58,7 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     .query("drink")
     .withIndex("by_ownerId_and_deletedAt", (q) => q.eq("ownerId", user._id))
     .collect();
+
   for (const drink of drinks) {
     await ctx.db.delete("drink", drink._id);
   }
@@ -60,6 +67,7 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     .query("badge")
     .withIndex("by_userId_and_badgeKey", (q) => q.eq("userId", user._id))
     .collect();
+
   for (const badge of badges) {
     await ctx.db.delete("badge", badge._id);
   }
@@ -68,7 +76,9 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     .query("session")
     .withIndex("by_ownerId_and_kind", (q) => q.eq("ownerId", user._id))
     .collect();
+
   const now = Date.now();
+
   for (const session of sessions) {
     await stopQuests(ctx, session, now);
     await stopChallenges(ctx, session, now);
@@ -80,12 +90,14 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
       await syncSessionIndex(ctx, { ...session, deletedAt: now });
     }
   }
+
   const memberships = await ctx.db
     .query("sessionMember")
     .withIndex("by_userId_and_sessionMemberStatus_kind", (q) =>
       q.eq("userId", user._id),
     )
     .collect();
+
   for (const member of memberships) {
     await ctx.db.delete("sessionMember", member._id);
   }
@@ -93,5 +105,6 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
   if (user.avatarStorageId) {
     await ctx.storage.delete(user.avatarStorageId);
   }
+
   await ctx.db.delete("user", user._id);
 }

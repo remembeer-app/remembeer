@@ -24,6 +24,7 @@ async function requireActiveParty(
   const { session } = await requireSessionAccess(ctx, sessionId, permission);
   if (session.kind !== "party" || session.endedAt !== null)
     throw new ConvexError("An ongoing party is required");
+
   return session;
 }
 
@@ -32,17 +33,22 @@ export const setEnabled = authMutation
   .returns(v.null())
   .handler(async (ctx, { sessionId, enabled }) => {
     const session = await requireActiveParty(ctx, sessionId, "admin");
+
     const now = Date.now();
     if (!enabled) {
       await stopQuests(ctx, session, now);
+
       return null;
     }
+
     if (session.kind !== "party") throw new ConvexError("Party required");
+
     await ctx.db.patch("session", sessionId, {
       modules: { ...session.modules, socialQuestsEnabled: true },
       updatedAt: now,
     });
     await ensureLifecycle(ctx, session, now);
+
     return null;
   });
 
@@ -53,6 +59,7 @@ export const startNext = authMutation
     const session = await requireActiveParty(ctx, sessionId, "admin");
     if (session.kind !== "party" || !session.modules.socialQuestsEnabled)
       throw new ConvexError("Social quests are disabled");
+
     return await issueQuest(ctx, session, Date.now());
   });
 
@@ -67,19 +74,25 @@ export const setSchedule = authMutation
   .handler(async (ctx, { sessionId, ...settings }) => {
     const session = await requireActiveParty(ctx, sessionId, "admin");
     if (session.kind !== "party") throw new ConvexError("Party required");
+
     validateSchedule(settings);
+
     const now = Date.now();
     const party = {
       ...session,
       questSchedule: { ...session.questSchedule, ...settings },
     };
+
     await ctx.db.patch("session", sessionId, {
       questSchedule: party.questSchedule,
       updatedAt: now,
     });
     if (!party.modules.socialQuestsEnabled) return null;
+
     await cancelJob(ctx, party);
+
     const active = await activeQuests(ctx, sessionId);
+
     const running = active.find((quest) => quest.endsAt > now);
     if (running) {
       await scheduleExpiry(
@@ -95,6 +108,7 @@ export const setSchedule = authMutation
           status: "expired",
           updatedAt: now,
         });
+
       await scheduleIssuance(
         ctx,
         party,
@@ -102,6 +116,7 @@ export const setSchedule = authMutation
         now,
       );
     }
+
     return null;
   });
 
@@ -111,9 +126,11 @@ export const selectPartner = authMutation
   .handler(async (ctx, { questId, selectedUserId }) => {
     const quest = await ctx.db.get("partyQuest", questId);
     if (!quest) throw new ConvexError("Quest not found");
+
     const session = await requireActiveParty(ctx, quest.sessionId, "joined");
     if (!session.modules.socialQuestsEnabled)
       throw new ConvexError("Social quests are disabled");
+
     const now = Date.now();
     if (
       quest.status !== "active" ||
@@ -121,14 +138,17 @@ export const selectPartner = authMutation
       now >= quest.endsAt
     )
       throw new ConvexError("Quest is not active");
+
     if (ctx.user._id === selectedUserId)
       throw new ConvexError("You cannot select yourself");
+
     const partner = await getMembership(ctx, quest.sessionId, selectedUserId);
     if (
       partner?.kind !== "partyMember" ||
       partner.sessionMemberStatus.kind !== "joined"
     )
       throw new ConvexError("Partner must be a joined party member");
+
     const pair = memberPair(ctx.user._id, selectedUserId);
     if (
       quest.results.some(
@@ -138,6 +158,7 @@ export const selectPartner = authMutation
       )
     )
       return true;
+
     if (
       quest.results.some((result) =>
         [result.firstUserId, result.secondUserId].some(
@@ -148,6 +169,7 @@ export const selectPartner = authMutation
       throw new ConvexError(
         "A member of this pair already completed the quest",
       );
+
     const matched = quest.selections.some(
       (selection) =>
         selection.userId === selectedUserId &&
@@ -167,6 +189,7 @@ export const selectPartner = authMutation
           "This pair does not currently qualify for this quest",
         );
     }
+
     await ctx.db.patch("partyQuest", questId, {
       selections: [
         ...quest.selections.filter(
@@ -179,5 +202,6 @@ export const selectPartner = authMutation
         : quest.results,
       updatedAt: now,
     });
+
     return matched;
   });

@@ -14,6 +14,7 @@ export function drinkScoreUnits(
     (matchesClass ? Math.round((base * partyClassBonusPercent) / 100) : 0);
   if (!Number.isSafeInteger(score) || score < 0)
     throw new ConvexError("Drink score is outside the supported range");
+
   return score;
 }
 
@@ -29,6 +30,7 @@ export function drinkScoreBreakdown(
     false,
   );
   const scoreUnits = drinkScoreUnits(volumeMl, alcoholPercentage, matchesClass);
+
   return {
     baseDrinkScoreUnits,
     classBonusScoreUnits: scoreUnits - baseDrinkScoreUnits,
@@ -49,9 +51,11 @@ export function rankByScore<
       a.userId.localeCompare(b.userId),
   );
   let rank = 0;
+
   return ordered.map((player, index) => {
     if (index === 0 || player.scoreUnits !== ordered[index - 1]?.scoreUnits)
       rank = index + 1;
+
     return { ...player, rank };
   });
 }

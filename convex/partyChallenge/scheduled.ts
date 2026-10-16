@@ -7,6 +7,7 @@ export const expire = convex
   .returns(v.null())
   .handler(async (ctx, { id, endsAt }) => {
     const challenge = await ctx.db.get("partyChallenge", id);
+
     const now = Date.now();
     if (
       !challenge ||
@@ -15,9 +16,11 @@ export const expire = convex
       endsAt > now
     )
       return null;
+
     await ctx.db.patch("partyChallenge", id, {
       status: "expired",
       updatedAt: now,
     });
+
     return null;
   });

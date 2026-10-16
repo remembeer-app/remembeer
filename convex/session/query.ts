@@ -68,6 +68,7 @@ export async function listForDayHandler(
           .query("session")
           .withIndex("by_ownerId_and_deletedAt_and_endedAt", (q) => {
             const range = q.eq("ownerId", ctx.user._id).eq("deletedAt", null);
+
             return endedAt === null
               ? range.eq("endedAt", null)
               : range.gt("endedAt", endedAt);
@@ -86,6 +87,7 @@ export async function listForDayHandler(
                 .eq("userId", ctx.user._id)
                 .eq("sessionMemberStatus.kind", "joined")
                 .eq("sessionDeletedAt", null);
+
               return endedAt === null
                 ? range.eq("sessionEndedAt", null)
                 : range.gt("sessionEndedAt", endedAt);
@@ -98,8 +100,11 @@ export async function listForDayHandler(
       [...referencedIds].map(async (id) => {
         const session = await ctx.db.get("session", id);
         if (!session || session.deletedAt !== null) return null;
+
         if (session.ownerId === ctx.user._id) return session;
+
         const member = await getMembership(ctx, id, ctx.user._id);
+
         return member?.sessionMemberStatus.kind === "joined" ? session : null;
       }),
     ),

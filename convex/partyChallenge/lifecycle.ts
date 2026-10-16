@@ -29,6 +29,7 @@ export async function stopChallenges(
   now: number,
 ) {
   if (session.kind !== "party") return;
+
   for (const challenge of await activeChallenges(ctx, session._id)) {
     await ctx.db.patch("partyChallenge", challenge._id, {
       status: challenge.endsAt <= now ? "expired" : "cancelled",

@@ -18,6 +18,7 @@ export async function syncSessionIndex(
     .query("sessionMember")
     .withIndex("by_sessionId_and_userId", (q) => q.eq("sessionId", session._id))
     .collect();
+
   for (const member of members) {
     await ctx.db.patch(
       "sessionMember",

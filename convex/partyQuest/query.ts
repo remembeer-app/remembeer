@@ -34,11 +34,13 @@ export const get = authQuery
   .handler(async (ctx, { id }) => {
     const quest = await ctx.db.get("partyQuest", id);
     if (!quest) throw new ConvexError("Quest not found");
+
     const { session } = await requireSessionAccess(
       ctx,
       quest.sessionId,
       "joined",
     );
+
     return visibleQuest(quest, session, ctx.user._id);
   });
 
@@ -47,6 +49,7 @@ export const listForSession = authQuery
   .returns(v.array(schema.doc("partyQuest")))
   .handler(async (ctx, { sessionId }) => {
     const { session } = await requireSessionAccess(ctx, sessionId, "joined");
+
     const quests = await ctx.db
       .query("partyQuest")
       .withIndex("by_sessionId_and_startsAt", (q) =>
@@ -54,6 +57,7 @@ export const listForSession = authQuery
       )
       .order("desc")
       .collect();
+
     return quests.map((quest) => visibleQuest(quest, session, ctx.user._id));
   });
 
@@ -64,11 +68,13 @@ export const partners = authQuery
   .handler(async (ctx, { questId }) => {
     const quest = await ctx.db.get("partyQuest", questId);
     if (!quest) throw new ConvexError("Quest not found");
+
     const { session } = await requireSessionAccess(
       ctx,
       quest.sessionId,
       "joined",
     );
+
     const now = Date.now();
     if (
       session.kind !== "party" ||
@@ -79,6 +85,7 @@ export const partners = authQuery
       now >= quest.endsAt
     )
       return [];
+
     const completed = new Set(
       quest.results.flatMap((result) => [
         result.firstUserId,
@@ -86,11 +93,13 @@ export const partners = authQuery
       ]),
     );
     if (completed.has(ctx.user._id)) return [];
+
     const { players, previousPairs, finalistTeamIds } = await loadQuestContext(
       ctx,
       quest.sessionId,
       now,
     );
+
     const ids = eligiblePairs(quest, players, previousPairs, finalistTeamIds)
       .flatMap((pair) =>
         pair.firstUserId === ctx.user._id
@@ -101,5 +110,6 @@ export const partners = authQuery
       )
       .filter((id) => !completed.has(id));
     const users = await Promise.all(ids.map((id) => publicUser(ctx, id)));
+
     return users.filter((user) => user !== null);
   });

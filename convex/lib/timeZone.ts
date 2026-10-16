@@ -5,8 +5,10 @@ const timeZoneSearchLimit = 20;
 
 export function isValidTimeZone(timeZone: string) {
   if (!/^[A-Za-z]/.test(timeZone)) return false;
+
   try {
     Temporal.Instant.fromEpochMilliseconds(0).toZonedDateTimeISO(timeZone);
+
     return true;
   } catch {
     return false;

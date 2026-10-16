@@ -8,6 +8,7 @@ export function getFriendship(
 ) {
   const [userAId, userBId] =
     userId < otherUserId ? [userId, otherUserId] : [otherUserId, userId];
+
   return ctx.db
     .query("friendship")
     .withIndex("by_pair", (q) =>
@@ -39,5 +40,6 @@ export async function listForUser(
       )
       .collect(),
   ]);
+
   return [...asA, ...asB];
 }

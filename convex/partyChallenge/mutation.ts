@@ -37,12 +37,15 @@ export const setEnabled = authMutation
   .returns(v.null())
   .handler(async (ctx, { sessionId, enabled }) => {
     const session = await requireParty(ctx, sessionId, "admin");
+
     const now = Date.now();
     if (!enabled) await stopChallenges(ctx, session, now);
+
     await ctx.db.patch("session", sessionId, {
       modules: { ...session.modules, partyChallengesEnabled: enabled },
       updatedAt: now,
     });
+
     return null;
   });
 
@@ -54,15 +57,18 @@ export const create = authMutation
     const session = await requireParty(ctx, sessionId, "admin");
     if (!session.modules.partyChallengesEnabled)
       throw new ConvexError("Challenges are disabled");
+
     const now = Date.now();
     const active = await activeChallenges(ctx, sessionId);
     if (active.some((challenge) => challenge.endsAt > now))
       throw new ConvexError("A challenge is already active");
+
     for (const challenge of active)
       await ctx.db.patch("partyChallenge", challenge._id, {
         status: "expired",
         updatedAt: now,
       });
+
     const endsAt = now + durationMinutes * millisecondsPerMinute;
     const id = await ctx.db.insert("partyChallenge", {
       ...input,
@@ -74,7 +80,9 @@ export const create = authMutation
       updatedAt: now,
       winners: [],
     });
+
     await scheduleExpiry(ctx, id, endsAt);
+
     return id;
   });
 
@@ -84,6 +92,7 @@ export const update = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, durationMinutes, ...input }) => {
     const { challenge } = await requireChallenge(ctx, id, "admin");
+
     const now = Date.now();
     let endsAt = challenge.endsAt;
     if (durationMinutes !== undefined) {
@@ -96,8 +105,10 @@ export const update = authMutation
         throw new ConvexError(
           "Only an active challenge can have its duration changed; deadline must be in the future",
         );
+
       await scheduleExpiry(ctx, id, endsAt);
     }
+
     await ctx.db.patch("partyChallenge", id, {
       title: input.title ?? challenge.title,
       instructions: input.instructions ?? challenge.instructions,
@@ -105,6 +116,7 @@ export const update = authMutation
       endsAt,
       updatedAt: now,
     });
+
     return null;
   });
 
@@ -114,6 +126,7 @@ export const addWinner = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, userId }) => {
     const { challenge } = await requireChallenge(ctx, id, "admin");
+
     const member = await getMembership(ctx, challenge.sessionId, userId);
     if (
       !member ||
@@ -122,13 +135,16 @@ export const addWinner = authMutation
       !(await ctx.db.get("user", userId))
     )
       throw new ConvexError("Winner must be a joined party member");
+
     if (challenge.winners.some((winner) => winner.userId === userId))
       return null;
+
     const now = Date.now();
     await ctx.db.patch("partyChallenge", id, {
       winners: [...challenge.winners, { userId, awardedAt: now }],
       updatedAt: now,
     });
+
     return null;
   });
 
@@ -137,10 +153,12 @@ export const removeWinner = authMutation
   .returns(v.null())
   .handler(async (ctx, { id, userId }) => {
     const { challenge } = await requireChallenge(ctx, id, "admin");
+
     await ctx.db.patch("partyChallenge", id, {
       winners: challenge.winners.filter((winner) => winner.userId !== userId),
       updatedAt: Date.now(),
     });
+
     return null;
   });
 
@@ -151,10 +169,13 @@ function close(status: "completed" | "cancelled") {
     .handler(async (ctx, { id }) => {
       const { challenge } = await requireChallenge(ctx, id, "admin");
       if (challenge.status === status) return null;
+
       const now = Date.now();
       if (challenge.status !== "active" || challenge.endsAt <= now)
         throw new ConvexError("Challenge is not active");
+
       await ctx.db.patch("partyChallenge", id, { status, updatedAt: now });
+
       return null;
     });
 }

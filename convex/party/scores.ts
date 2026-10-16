@@ -15,6 +15,7 @@ export async function loadPartyScores(
       q.eq("sessionId", sessionId).eq("sessionMemberStatus.kind", "joined"),
     )
     .collect();
+
   const entries = await Promise.all(
     members
       .filter((member) => member.kind === "partyMember")
@@ -35,65 +36,79 @@ export async function loadPartyScores(
         scoreUnits: 0,
       })),
   );
+
   const byId = new Map(entries.map((entry) => [entry.userId, entry]));
   // shortcut: derive scores from party history; add aggregates when read limits become a constraint.
   const quests = await ctx.db
     .query("partyQuest")
     .withIndex("by_sessionId_and_startsAt", (q) => q.eq("sessionId", sessionId))
     .collect();
+
   for (const quest of quests) {
     for (const result of quest.results) {
       for (const userId of [result.firstUserId, result.secondUserId]) {
         const entry = byId.get(userId);
         if (!entry) continue;
+
         // Recorded results survive expiry, cancellation and later eligibility changes.
         entry.questScoreUnits += quest.pointsUnits;
         entry.completedQuestCount++;
       }
     }
   }
+
   const challenges = await ctx.db
     .query("partyChallenge")
     .withIndex("by_sessionId_and_startsAt", (q) => q.eq("sessionId", sessionId))
     .collect();
+
   for (const challenge of challenges) {
     for (const winner of challenge.winners) {
       const entry = byId.get(winner.userId);
       if (!entry) continue;
+
       entry.challengeScoreUnits += challenge.pointsUnits;
       entry.wonChallengeCount++;
     }
   }
+
   for (const award of await loadBeerpongAwards(ctx, sessionId)) {
     const entry = byId.get(award.userId);
     if (entry) entry.beerpongScoreUnits += award.scoreUnits;
   }
+
   const drinks = new Map<Id<"drink">, Doc<"drink">>();
   const logs = await ctx.db
     .query("drinkLog")
     .withIndex("by_sessionId", (q) => q.eq("sessionId", sessionId))
     .collect();
+
   for (const log of logs) {
     const entry = byId.get(log.userId);
     if (!entry || log.deletedAt !== null || log.consumedAt > now) continue;
+
     let drink = drinks.get(log.drinkId);
     if (!drink) {
       const referencedDrink = await ctx.db.get("drink", log.drinkId);
       if (!referencedDrink) throw new ConvexError("A logged drink is missing");
+
       drink = referencedDrink;
       drinks.set(log.drinkId, drink);
     }
+
     const score = drinkScoreBreakdown(
       log.volumeMl,
       drink.alcoholPercentage,
       entry.member.selectedClass?.kind === drink.drinkCategory.kind,
     );
+
     entry.drinkCount++;
     entry.volumeMl += log.volumeMl;
     entry.alcoholMl += score.alcoholMl;
     entry.baseDrinkScoreUnits += score.baseDrinkScoreUnits;
     entry.classBonusScoreUnits += score.classBonusScoreUnits;
   }
+
   for (const entry of entries) {
     entry.scoreUnits =
       entry.baseDrinkScoreUnits +
@@ -113,5 +128,6 @@ export async function loadPartyScores(
     )
       throw new ConvexError("Party score is outside the supported range");
   }
+
   return { entries, quests };
 }

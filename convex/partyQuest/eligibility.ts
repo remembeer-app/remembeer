@@ -31,6 +31,7 @@ export function eligiblePairs(
   function matches(a: QuestPlayer, b: QuestPlayer) {
     const aRank = ranks.get(a.userId)!;
     const bRank = ranks.get(b.userId)!;
+
     switch (definition.kind) {
       case "toastWithClass":
         return (
@@ -88,12 +89,15 @@ export function eligiblePairs(
     a.userId.localeCompare(b.userId),
   );
   const pairs: ReturnType<typeof memberPair>[] = [];
+
   for (let index = 0; index < candidates.length; index++) {
     const first = candidates[index]!;
+
     for (const second of candidates.slice(index + 1)) {
       if (matches(first, second))
         pairs.push(memberPair(first.userId, second.userId));
     }
   }
+
   return pairs;
 }

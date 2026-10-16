@@ -35,6 +35,7 @@ export async function requireLeaderboardAccess(
   const leaderboard = await ctx.db.get("leaderboard", id);
   if (!leaderboard || leaderboard.deletedAt !== null)
     throw new ConvexError("Leaderboard not found");
+
   const isOwner = leaderboard.ownerId === ctx.user._id;
   if (
     !isOwner &&
@@ -45,5 +46,6 @@ export async function requireLeaderboardAccess(
       "You do not have permission to access this leaderboard",
     );
   }
+
   return { leaderboard, isOwner };
 }
