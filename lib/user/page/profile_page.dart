@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
-import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/widgets/badge.dart';
@@ -95,14 +94,7 @@ class ProfilePage extends StatelessWidget {
                 builder: (context, badges) => BadgesSection(
                   badges: [
                     for (final badge in badges)
-                      if (getBadgeByIdOrNull(badge.badgeKey) != null)
-                        UnlockedBadge(
-                          badgeId: badge.badgeKey,
-                          unlockedAt: DateTime.fromMillisecondsSinceEpoch(
-                            badge.unlockedAt.toInt(),
-                          ),
-                          isShown: badge.isShown,
-                        ),
+                      if (getBadgeByIdOrNull(badge.badgeKey) != null) badge,
                   ],
                 ),
               )

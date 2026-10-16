@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/widgets/leaderboard.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
+import 'package:remembeer/leaderboard/extension/leaderboard_icon_extension.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_form.dart';
 
 class UpdateLeaderboardNamePage extends StatelessWidget {
@@ -18,7 +18,7 @@ class UpdateLeaderboardNamePage extends StatelessWidget {
       child: LeaderboardUpdateMutation(
         builder: (_, update, snapshot) => LeaderboardForm(
           initialName: result.leaderboard.name,
-          initialIcon: LeaderboardIcon.fromName(result.leaderboard.iconName),
+          initialIcon: leaderboardIconFor(result.leaderboard.iconName),
           submitButtonText: 'Save',
           isEditing: true,
           onSubmit: (name, _) async {

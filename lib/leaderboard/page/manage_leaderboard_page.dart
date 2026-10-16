@@ -7,7 +7,7 @@ import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/leaderboard.dart';
 import 'package:remembeer/convex_api/widgets/leaderboard.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
+import 'package:remembeer/leaderboard/extension/leaderboard_icon_extension.dart';
 import 'package:remembeer/leaderboard/widget/banned_member_card.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_icon_picker.dart';
 import 'package:remembeer/leaderboard/widget/member_card.dart';
@@ -51,7 +51,7 @@ class ManageLeaderboardPage extends StatelessWidget {
     LeaderboardDocument currentLeaderboard,
   ) {
     final theme = Theme.of(context);
-    final icon = LeaderboardIcon.fromName(currentLeaderboard.iconName);
+    final icon = leaderboardIconFor(currentLeaderboard.iconName);
 
     return Column(
       children: [
@@ -112,7 +112,7 @@ class ManageLeaderboardPage extends StatelessWidget {
     BuildContext context,
     LeaderboardDocument currentLeaderboard,
   ) {
-    var selectedIcon = LeaderboardIcon.fromName(currentLeaderboard.iconName);
+    var selectedIcon = leaderboardIconFor(currentLeaderboard.iconName);
 
     showDialog<void>(
       context: context,
@@ -144,7 +144,7 @@ class ManageLeaderboardPage extends StatelessWidget {
                     : () => update.run(
                         id: currentLeaderboard.id,
                         iconName: Optional.of(
-                          UpdateArgsIconName.fromJson(selectedIcon.name),
+                          UpdateArgsIconName.fromJson(selectedIcon.value),
                         ),
                         onSuccess: (_) {
                           if (dialogContext.mounted) {

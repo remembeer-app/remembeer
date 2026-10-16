@@ -55,7 +55,6 @@ dependencies:
   flutter_map: ^8.3.1
   flutter_svg: ^2.3.0
   flutter_timezone: ^5.1.1
-  freezed_annotation: ^3.1.0
   gap: ^3.0.1
   geolocator: ^14.1.1
   get_it: ^9.3.0
@@ -63,7 +62,6 @@ dependencies:
   image_cropper: ^13.0.0
   image_picker: ^1.2.4
   intl: ^0.20.3
-  json_annotation: ^4.12.0
   latlong2: ^0.10.1
   persistent_bottom_nav_bar_v2: ^6.4.0
   rxdart: ^0.28.0
@@ -78,9 +76,7 @@ dev_dependencies:
       ref: main
       path: packages/dartvex_codegen
   flutter_lints: ^6.0.0
-  freezed: ^4.0.2
   go_router_builder: ^4.4.0
-  json_serializable: ^6.14.0
 
 dependency_overrides:
   # TODO(ohtenkay): Remove when geolocator_linux supports dbus 0.8.

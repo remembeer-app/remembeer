@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/convex_api/modules/user.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
-import 'package:remembeer/user/model/accent_color.dart';
 import 'package:remembeer/user/widget/accent_color_selector.dart';
 import 'package:remembeer/user_settings/widget/settings_page.dart';
 
@@ -28,14 +28,14 @@ class AccentColorPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 AccentColorSelector(
-                  value: AccentColorKey.values.byName(
-                    user.accentColor.value! as String,
+                  value: UserDocumentAccentColor.fromJson(
+                    user.accentColor.value,
                   ),
                   onChanged: (color) {
-                    if (color.name == user.accentColor.value) return;
+                    if (color.value == user.accentColor.value) return;
                     mutate.run(
                       accentColor: UpdateAccentColorArgsAccentColor.fromJson(
-                        color.name,
+                        color.value,
                       ),
                     );
                   },

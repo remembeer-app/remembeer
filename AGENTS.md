@@ -15,7 +15,7 @@ hardcoded placeholders with TODOs when their data is not available yet.
 flutter pub get
 npm ci
 
-# Generate Freezed, JSON serialization, and typed routes
+# Generate typed routes
 dart run build_runner build --delete-conflicting-outputs
 
 # Generate Convex TypeScript bindings and the typed Dart API/widgets
@@ -32,7 +32,7 @@ and Oxfmt. Keep Oxfmt defaults; `.oxfmtrc.json` only controls exclusions. Run
 `npm run lint:fix` for safe lint fixes. Generated Convex bindings, native platform
 files, lockfiles, and build output are excluded from formatting.
 
-CI checks generated output. Run build_runner after changing Freezed models or
+CI checks generated output. Run build_runner after changing
 routes and commit generated output. Run `npm run convex:generate` after changing
 the backend schema or public endpoints. Existing tests and test plumbing have
 been removed; a new suite will be designed separately.
@@ -60,8 +60,8 @@ service and quick-add channel. Client environment values are `CONVEX_URL` and
 
 go_router with go_router_builder provides typed routes in `lib/routes.dart` and
 `routes.g.dart`. NavbarShellRoute has Profile, Leaderboards, Drink, Activity, and
-Settings tabs. Freezed and json_serializable generate model implementations and
-JSON serialization where needed. Keep all generated output committed.
+Settings tabs. Backend data uses generated Convex types with local display
+extensions where needed. Keep all generated output committed.
 
 ### Backend
 

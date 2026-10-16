@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:intl/intl.dart';
 import 'package:remembeer/badge/data/badge_definitions.dart';
-import 'package:remembeer/badge/model/unlocked_badge.dart';
 import 'package:remembeer/badge/type/badge_definition.dart';
 import 'package:remembeer/badge/widget/badge_icon.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/user/constants.dart';
 
 class BadgesSection extends StatelessWidget {
-  final List<UnlockedBadge> badges;
+  final List<BadgeDocument> badges;
 
   const BadgesSection({super.key, required this.badges});
 
@@ -82,7 +82,7 @@ class BadgesSection extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgesGrid(BuildContext context, List<UnlockedBadge> badges) {
+  Widget _buildBadgesGrid(BuildContext context, List<BadgeDocument> badges) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -97,8 +97,8 @@ class BadgesSection extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgeItem(BuildContext context, UnlockedBadge unlockedBadge) {
-    final definition = getBadgeById(unlockedBadge.badgeId);
+  Widget _buildBadgeItem(BuildContext context, BadgeDocument unlockedBadge) {
+    final definition = getBadgeById(unlockedBadge.badgeKey);
 
     return InkWell(
       onTap: () => _showBadgeDetails(context, unlockedBadge, definition),
@@ -120,10 +120,13 @@ class BadgesSection extends StatelessWidget {
 
   void _showBadgeDetails(
     BuildContext context,
-    UnlockedBadge unlockedBadge,
+    BadgeDocument unlockedBadge,
     BadgeDefinition definition,
   ) {
     final theme = Theme.of(context);
+    final unlockedAt = DateTime.fromMillisecondsSinceEpoch(
+      unlockedBadge.unlockedAt.toInt(),
+    );
 
     showDialog<void>(
       context: context,
@@ -171,7 +174,7 @@ class BadgesSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    'Unlocked on ${DateFormat.yMMMd().format(unlockedBadge.unlockedAt)}',
+                    'Unlocked on ${DateFormat.yMMMd().format(unlockedAt)}',
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.bold,
@@ -204,7 +207,7 @@ class BadgesSection extends StatelessWidget {
 
   void _showAllBadgesDialog(
     BuildContext context,
-    List<UnlockedBadge> allBadges,
+    List<BadgeDocument> allBadges,
   ) {
     showDialog<void>(
       context: context,

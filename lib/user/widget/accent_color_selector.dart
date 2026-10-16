@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:remembeer/user/constants.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/user/extension/accent_color_extension.dart';
 import 'package:remembeer/user/model/accent_color.dart';
 
 class AccentColorSelector extends StatelessWidget {
-  final AccentColorKey? value;
-  final ValueChanged<AccentColorKey> onChanged;
+  final UserDocumentAccentColor? value;
+  final ValueChanged<UserDocumentAccentColor> onChanged;
   final bool enabled;
 
   const AccentColorSelector({
@@ -23,11 +24,11 @@ class AccentColorSelector extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: [
-        for (final entry in accentColorPalette.entries)
+        for (final color in UserDocumentAccentColor.values)
           _AccentChoice(
-            accent: entry.value,
-            isSelected: entry.key == value,
-            onPressed: enabled ? () => onChanged(entry.key) : null,
+            accent: color.presentation,
+            isSelected: color == value,
+            onPressed: enabled ? () => onChanged(color) : null,
           ),
       ],
     );

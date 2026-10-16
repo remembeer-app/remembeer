@@ -10,7 +10,7 @@ import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/leaderboard.dart';
 import 'package:remembeer/convex_api/widgets/leaderboard.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
+import 'package:remembeer/leaderboard/extension/leaderboard_icon_extension.dart';
 import 'package:remembeer/leaderboard/model/leaderboard_type.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_standings.dart';
 import 'package:remembeer/leaderboard/widget/month_selector.dart';
@@ -47,7 +47,7 @@ class _LeaderboardDetailPageState extends State<LeaderboardDetailPage> {
     UserId currentUserId,
   ) {
     final isOwner = leaderboard.ownerId == currentUserId;
-    final icon = LeaderboardIcon.fromName(leaderboard.iconName);
+    final icon = leaderboardIconFor(leaderboard.iconName);
 
     return PageTemplate(
       title: Row(

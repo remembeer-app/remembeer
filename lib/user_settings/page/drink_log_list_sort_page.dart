@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/convex_api/modules/user.dart';
+import 'package:remembeer/convex_api/types.dart';
 import 'package:remembeer/convex_api/widgets/user.dart';
-import 'package:remembeer/user_settings/model/drink_log_list_sort.dart';
+import 'package:remembeer/user_settings/extension/drink_log_sort_extension.dart';
 import 'package:remembeer/user_settings/widget/settings_page.dart';
 
 class DrinkLogListSortPage extends StatelessWidget {
@@ -25,16 +26,15 @@ class DrinkLogListSortPage extends StatelessWidget {
           mode: MutationMode.latest,
           optimisticUpdate: _optimisticUpdateSortOrder,
           builder: (context, mutate, snapshot) {
-            final selectedSort = switch (user.drinkLogSortOrder.value) {
-              'asc' => DrinkLogListSortOrder.ascending,
-              _ => DrinkLogListSortOrder.descending,
-            };
-            void onChanged(DrinkLogListSortOrder? value) {
+            final selectedSort = UserDocumentDrinkLogSortOrder.fromJson(
+              user.drinkLogSortOrder.value,
+            );
+            void onChanged(UserDocumentDrinkLogSortOrder? value) {
               if (value == null || value == selectedSort) return;
               mutate.run(
                 drinkLogSortOrder:
                     UpdateDrinkLogSortOrderArgsDrinkLogSortOrder.fromJson(
-                      value == DrinkLogListSortOrder.ascending ? 'asc' : 'desc',
+                      value.value,
                     ),
               );
             }
@@ -43,15 +43,16 @@ class DrinkLogListSortPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  RadioGroup<DrinkLogListSortOrder>(
+                  RadioGroup<UserDocumentDrinkLogSortOrder>(
                     groupValue: selectedSort,
                     onChanged: onChanged,
                     child: Column(
                       children: [
-                        for (final sort in DrinkLogListSortOrder.values)
+                        for (final sort
+                            in UserDocumentDrinkLogSortOrder.values.reversed)
                           Card(
                             child: ListTile(
-                              leading: Radio<DrinkLogListSortOrder>(
+                              leading: Radio<UserDocumentDrinkLogSortOrder>(
                                 value: sort,
                               ),
                               title: Text(sort.displayName),
