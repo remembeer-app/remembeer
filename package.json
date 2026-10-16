@@ -15,6 +15,7 @@
     "test:convex:sessions": "node --harmony-temporal --test test/session/convex_sessions_test.mjs test/drink_log/convex_day_query_test.mjs",
     "test:convex:quests": "node --test test/party/convex_quest_schema_test.mjs test/party/convex_quest_gameplay_test.mjs",
     "test:convex:challenges": "node --test test/party/convex_challenges_test.mjs",
+    "test:convex:beerpong": "node --test test/party/convex_beerpong_tournament_test.mjs",
     "test:convex:party": "node --test test/party/convex_party_standings_test.mjs test/party/convex_party_activity_test.mjs",
     "test:convex:leaderboards": "node --harmony-temporal --test test/leaderboard/convex_leaderboard_test.mjs",
     "test:convex:stats": "node --harmony-temporal --test test/user/convex_stats_test.mjs",
