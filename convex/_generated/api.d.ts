@@ -13,6 +13,7 @@ import type * as badge from "../badge.js";
 import type * as badge_mutation from "../badge/mutation.js";
 import type * as badge_query from "../badge/query.js";
 import type * as beerpongTournament from "../beerpongTournament.js";
+import type * as beerpongTournament_access from "../beerpongTournament/access.js";
 import type * as beerpongTournament_constants from "../beerpongTournament/constants.js";
 import type * as beerpongTournament_mutation from "../beerpongTournament/mutation.js";
 import type * as drink from "../drink.js";
@@ -89,6 +90,7 @@ declare const fullApi: ApiFromModules<{
   "badge/mutation": typeof badge_mutation;
   "badge/query": typeof badge_query;
   beerpongTournament: typeof beerpongTournament;
+  "beerpongTournament/access": typeof beerpongTournament_access;
   "beerpongTournament/constants": typeof beerpongTournament_constants;
   "beerpongTournament/mutation": typeof beerpongTournament_mutation;
   drink: typeof drink;
