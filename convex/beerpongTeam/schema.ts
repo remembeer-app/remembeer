@@ -5,6 +5,5 @@ export const beerpongTeamTable = defineTable({
   tournamentId: v.id("beerpongTournament"),
   name: v.string(),
   memberUserIds: v.array(v.id("user")),
-  seed: v.number(),
   updatedAt: v.number(),
-}).index("by_tournamentId_and_seed", ["tournamentId", "seed"]);
+}).index("by_tournamentId", ["tournamentId"]);

@@ -82,14 +82,12 @@ export const draw = authMutation
     }
     const now = Date.now();
     for (let index = 0; index < tournament.teamCount; index++) {
-      const seed = index + 1;
       await ctx.db.insert("beerpongTeam", {
         tournamentId: id,
-        name: `${defaultTeamNamePrefix} ${seed}`,
+        name: `${defaultTeamNamePrefix} ${index + 1}`,
         memberUserIds: players.filter(
           (_, position) => position % tournament.teamCount === index,
         ),
-        seed,
         updatedAt: now,
       });
     }

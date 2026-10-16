@@ -5,7 +5,7 @@ import { fixture } from "../support/party_fixture.mjs";
 
 const { outputFiles } = await build({
   stdin: {
-    contents: 'export { create, draw } from "./convex/beerpongTournament";',
+    contents: 'export { create, draw } from "./convex/beerpongTournament"; export * as teams from "./convex/beerpongTeam";',
     resolveDir: process.cwd(),
   },
   bundle: true, platform: "node", format: "esm", write: false,
@@ -16,7 +16,7 @@ const { outputFiles } = await build({
     }));
   } }],
 });
-const { create, draw } = await import(
+const { create, draw, teams } = await import(
   `data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`,
 );
 
@@ -144,7 +144,6 @@ test("draw assigns every eligible member once, balances teams, and enters setup 
     assert.ok(Math.max(...sizes) - Math.min(...sizes) <= 1);
     for (const [index, team] of teams.entries()) {
       assert.equal(team.tournamentId, id);
-      assert.equal(team.seed, index + 1);
       assert.equal(team.name, `Team ${index + 1}`);
       assert.ok(team.updatedAt >= before && team.updatedAt <= Date.now());
     }
@@ -238,4 +237,140 @@ test("draw requires ongoing, non-deleted parties with beerpong enabled and check
   f.tables.session.push({ ...f.tables.session[0], _id: "private", ownerId: "other" });
   f.tables.beerpongTournament[0].sessionId = "private";
   await assert.rejects(runDraw(f, id), /permission/);
+});
+
+async function teamSetup() {
+  const f = setup();
+  const tournamentId = await f.run({ teamCount: 2 });
+  enroll(f, "p0"); enroll(f, "p1");
+  await runDraw(f, tournamentId);
+  const [first, second] = f.tables.beerpongTeam;
+  const runTeam = (name, args, actor = "owner") => teams[name]._handler(f.ctx(actor), args);
+  return { ...f, tournamentId, first, second, runTeam };
+}
+
+test("admins can rename, add opted-out members, move, and remove players during setup and active play", async () => {
+  for (const status of ["setup", "active"]) {
+    const f = await teamSetup();
+    f.tables.beerpongTournament[0].status = status;
+    f.tables.beerpongMatch.push({ _id: "match", winnerTeamId: f.first._id });
+    const savedMatches = structuredClone(f.tables.beerpongMatch);
+    await f.runTeam("rename", { id: f.first._id, name: "  The Bees  " }, "b");
+    assert.equal(f.first.name, "The Bees");
+    assert.equal(f.member("a").beerpongOptIn, undefined);
+    await f.runTeam("addMember", { id: f.first._id, userId: "a" }, "b");
+    await f.runTeam("addMember", { id: f.first._id, userId: "a" });
+    assert.equal(f.first.memberUserIds.filter(id => id === "a").length, 1);
+    const saved = structuredClone(f.tables.beerpongTeam);
+    await assert.rejects(f.runTeam("addMember", { id: f.second._id, userId: "a" }), /another team/);
+    assert.deepEqual(f.tables.beerpongTeam, saved);
+    await f.runTeam("moveMember", { id: f.first._id, userId: "a", targetTeamId: f.second._id });
+    assert.ok(!f.first.memberUserIds.includes("a"));
+    assert.equal(f.second.memberUserIds.filter(id => id === "a").length, 1);
+    assert.equal(f.first.updatedAt, f.second.updatedAt);
+    assert.equal(f.second.updatedAt, f.tables.beerpongTournament[0].updatedAt);
+    // A departure must not prevent an admin from removing the old roster entry.
+    f.member("a").sessionMemberStatus.kind = "left";
+    await f.runTeam("removeMember", { id: f.second._id, userId: "a" });
+    await f.runTeam("removeMember", { id: f.second._id, userId: "a" });
+    assert.ok(!f.second.memberUserIds.includes("a"));
+    assert.deepEqual(f.tables.beerpongMatch, savedMatches);
+    assert.equal(f.tables.beerpongTournament[0].status, status);
+  }
+});
+
+test("team edits require admin access and leave all teams unchanged on rejected calls", async () => {
+  const f = await teamSetup();
+  for (const actor of ["a", "other", "invited", "left", "banned"]) {
+    if (["invited", "left", "banned"].includes(actor)) f.member(actor).sessionMemberRole.kind = "admin";
+    for (const [name, args] of teamActions(f)) {
+      const saved = structuredClone(f.tables);
+      await assert.rejects(f.runTeam(name, args, actor), /permission/);
+      assert.deepEqual(f.tables, saved);
+    }
+  }
+});
+
+function teamActions(f) {
+  return [
+    ["rename", { id: f.first._id, name: "New name" }],
+    ["addMember", { id: f.first._id, userId: "a" }],
+    ["removeMember", { id: f.first._id, userId: f.first.memberUserIds[0] }],
+    ["moveMember", { id: f.first._id, userId: f.first.memberUserIds[0], targetTeamId: f.second._id }],
+  ];
+}
+
+test("all team edits lock outside setup/active and when the party ends, is deleted, or disables beerpong", async () => {
+  for (const status of ["enrollment", "completed", "cancelled"]) {
+    const f = await teamSetup();
+    f.tables.beerpongTournament[0].status = status;
+    const saved = structuredClone(f.tables);
+    for (const [name, args] of teamActions(f))
+      await assert.rejects(f.runTeam(name, args), /setup or active/);
+    assert.deepEqual(f.tables, saved);
+  }
+  for (const [fields, error] of [
+    [{ endedAt: 1000 }, /read-only/], [{ deletedAt: 1000 }, /not found/],
+    [{ modules: { beerpongEnabled: false } }, /disabled/], [{ kind: "session" }, /party/],
+  ]) {
+    const f = await teamSetup();
+    Object.assign(f.tables.session[0], fields);
+    const saved = structuredClone(f.tables);
+    for (const [name, args] of teamActions(f)) await assert.rejects(f.runTeam(name, args), error);
+    assert.deepEqual(f.tables, saved);
+  }
+});
+
+test("adding and moving require current joined party membership and an existing user", async () => {
+  const f = await teamSetup();
+  for (const userId of ["invited", "left", "banned", "other", "missing"]) {
+    await assert.rejects(f.runTeam("addMember", { id: f.first._id, userId }), /joined party member/);
+  }
+  f.member("a").kind = "sessionMember";
+  await assert.rejects(f.runTeam("addMember", { id: f.first._id, userId: "a" }), /joined party member/);
+  f.member("a").kind = "partyMember";
+  f.member("a").sessionId = "another-party";
+  await assert.rejects(f.runTeam("addMember", { id: f.first._id, userId: "a" }), /joined party member/);
+  f.member("a").sessionId = "party";
+  f.tables.user = f.tables.user.filter(user => user._id !== "a");
+  await assert.rejects(f.runTeam("addMember", { id: f.first._id, userId: "a" }), /joined party member/);
+  const player = f.first.memberUserIds[0];
+  f.member(player).sessionMemberStatus.kind = "left";
+  const saved = structuredClone(f.tables.beerpongTeam);
+  await assert.rejects(f.runTeam("moveMember", { id: f.first._id, userId: player, targetTeamId: f.second._id }), /joined party member/);
+  assert.deepEqual(f.tables.beerpongTeam, saved);
+});
+
+test("moving rejects missing players, missing teams, and other tournaments without changing either roster", async () => {
+  const f = await teamSetup();
+  const otherTournamentId = await f.run({ teamCount: 2 });
+  await runDraw(f, otherTournamentId);
+  const foreign = f.tables.beerpongTeam.find(team => team.tournamentId === otherTournamentId);
+  const saved = structuredClone(f.tables.beerpongTeam);
+  for (const [targetTeamId, userId, error] of [
+    [foreign._id, f.first.memberUserIds[0], /same tournament/],
+    ["missing", f.first.memberUserIds[0], /Target team not found/],
+    [f.second._id, "a", /source team/],
+  ]) await assert.rejects(f.runTeam("moveMember", { id: f.first._id, userId, targetTeamId }), error);
+  await f.runTeam("moveMember", { id: f.first._id, userId: f.first.memberUserIds[0], targetTeamId: f.first._id });
+  assert.deepEqual(f.tables.beerpongTeam, saved);
+  // The same player may participate in separate tournaments.
+  await f.runTeam("addMember", { id: f.first._id, userId: "a" });
+  await f.runTeam("addMember", { id: foreign._id, userId: "a" });
+});
+
+test("team names are trimmed and bounded; missing teams/tournaments and foreign parties are rejected", async () => {
+  const f = await teamSetup();
+  for (const name of [" ", "x".repeat(31)])
+    await assert.rejects(f.runTeam("rename", { id: f.first._id, name }));
+  await f.runTeam("rename", { id: f.first._id, name: "x".repeat(30) });
+  for (const [name, args] of teamActions(f))
+    await assert.rejects(f.runTeam(name, { ...args, id: "missing" }), /Team not found/);
+  f.tables.beerpongTournament[0].sessionId = "missing";
+  await assert.rejects(f.runTeam("rename", { id: f.first._id, name: "New" }), /not found/);
+  f.tables.session.push({ ...f.tables.session[0], _id: "private", ownerId: "other" });
+  f.tables.beerpongTournament[0].sessionId = "private";
+  for (const [name, args] of teamActions(f)) await assert.rejects(f.runTeam(name, args), /permission/);
+  f.tables.beerpongTournament = [];
+  await assert.rejects(f.runTeam("rename", { id: f.first._id, name: "New" }), /Tournament not found/);
 });
