@@ -1,3 +1,4 @@
+import { stopQuests } from "../partyQuest/lifecycle";
 import { syncSessionIndex } from "../sessionMember/sessionIndex";
 import { listForUser } from "../friendship/relation";
 import type { MutationCtx } from "../_generated/server";
@@ -68,6 +69,7 @@ export async function deleteUserData(ctx: MutationCtx, authUserId: string) {
     .collect();
   const now = Date.now();
   for (const session of sessions) {
+    await stopQuests(ctx, session, now);
     if (session.deletedAt === null) {
       await ctx.db.patch("session", session._id, {
         deletedAt: now,

@@ -23,3 +23,6 @@ export const pairQuestKinds = [
   "sameBeerpongTeam",
   "finalistTeam",
 ] as const;
+
+export const minQuestIntervalMinutes = 5;
+export const maxQuestIntervalMinutes = 180;

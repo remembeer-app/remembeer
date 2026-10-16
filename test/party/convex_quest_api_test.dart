@@ -22,11 +22,19 @@ void main() {
         const PartyQuestId('quest'),
       );
       expect(caller.calls.last.args, <String, dynamic>{'sessionId': 'party'});
-      caller.nextQuestId = null;
-      expect(
-        await quests.startNext(sessionId: const SessionId('party')),
-        isNull,
+      await quests.setSchedule(
+        sessionId: const SessionId('party'),
+        minIntervalMinutes: 5,
+        maxIntervalMinutes: 180,
+        defaultDurationMinutes: 60,
       );
+      expect(caller.calls.last.name, 'partyQuest:setSchedule');
+      expect(caller.calls.last.args, <String, dynamic>{
+        'sessionId': 'party',
+        'minIntervalMinutes': 5.0,
+        'maxIntervalMinutes': 180.0,
+        'defaultDurationMinutes': 60.0,
+      });
       expect(
         await quests.selectPartner(
           questId: const PartyQuestId('quest'),
@@ -73,7 +81,7 @@ void main() {
 
 class _Caller implements ConvexFunctionCaller {
   final calls = <({String name, Map<String, dynamic> args})>[];
-  String? nextQuestId = 'quest';
+  final nextQuestId = 'quest';
   var matched = false;
 
   @override

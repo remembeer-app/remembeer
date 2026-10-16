@@ -2,15 +2,17 @@ import { ConvexError, v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import { authMutation, type AuthMutationCtx } from "../lib/authenticated";
 import { getMembership, requireSessionAccess } from "../session/access";
-import { builtInQuests } from "./catalog";
 import {
-  earlyQuestCount,
-  regularQuestCount,
-  questCycleLength,
-  minQuestDurationMinutes,
-  maxQuestDurationMinutes,
-  millisecondsPerMinute,
-} from "./constants";
+  activeQuests,
+  cancelJob,
+  ensureLifecycle,
+  issueQuest,
+  randomBreak,
+  scheduleExpiry,
+  scheduleIssuance,
+  stopQuests,
+  validateSchedule,
+} from "./lifecycle";
 import { eligiblePairs, memberPair } from "./eligibility";
 import { loadQuestContext } from "./context";
 
@@ -25,15 +27,6 @@ async function requireActiveParty(
   return session;
 }
 
-function activeQuests(ctx: AuthMutationCtx, sessionId: Id<"session">) {
-  return ctx.db
-    .query("partyQuest")
-    .withIndex("by_sessionId_and_status", (q) =>
-      q.eq("sessionId", sessionId).eq("status", "active"),
-    )
-    .collect();
-}
-
 export const setEnabled = authMutation
   .input({ sessionId: v.id("session"), enabled: v.boolean() })
   .returns(v.null())
@@ -41,84 +34,75 @@ export const setEnabled = authMutation
     const session = await requireActiveParty(ctx, sessionId, "admin");
     const now = Date.now();
     if (!enabled) {
-      for (const quest of await activeQuests(ctx, sessionId)) {
-        await ctx.db.patch("partyQuest", quest._id, {
-          status: quest.endsAt <= now ? "expired" : "cancelled",
-          updatedAt: now,
-        });
-      }
+      await stopQuests(ctx, session, now);
+      return null;
     }
+    if (session.kind !== "party") throw new ConvexError("Party required");
     await ctx.db.patch("session", sessionId, {
-      modules: { ...session.modules, socialQuestsEnabled: enabled },
+      modules: { ...session.modules, socialQuestsEnabled: true },
       updatedAt: now,
     });
+    await ensureLifecycle(ctx, session, now);
     return null;
   });
 
 export const startNext = authMutation
   .input({ sessionId: v.id("session") })
-  .returns(v.nullable(v.id("partyQuest")))
+  .returns(v.id("partyQuest"))
   .handler(async (ctx, { sessionId }) => {
     const session = await requireActiveParty(ctx, sessionId, "admin");
-    if (!session.modules.socialQuestsEnabled)
+    if (session.kind !== "party" || !session.modules.socialQuestsEnabled)
       throw new ConvexError("Social quests are disabled");
+    return await issueQuest(ctx, session, Date.now());
+  });
+
+export const setSchedule = authMutation
+  .input({
+    sessionId: v.id("session"),
+    minIntervalMinutes: v.number(),
+    maxIntervalMinutes: v.number(),
+    defaultDurationMinutes: v.number(),
+  })
+  .returns(v.null())
+  .handler(async (ctx, { sessionId, ...settings }) => {
+    const session = await requireActiveParty(ctx, sessionId, "admin");
+    if (session.kind !== "party") throw new ConvexError("Party required");
+    validateSchedule(settings);
     const now = Date.now();
-    for (const quest of await activeQuests(ctx, sessionId)) {
-      if (quest.endsAt > now) return quest._id;
-      await ctx.db.patch("partyQuest", quest._id, {
-        status: "expired",
-        updatedAt: now,
-      });
-    }
-    const duration = session.questSchedule.defaultDurationMinutes;
-    if (
-      !Number.isInteger(duration) ||
-      duration < minQuestDurationMinutes ||
-      duration > maxQuestDurationMinutes
-    )
-      throw new ConvexError("Invalid quest duration");
-    const { players, previousPairs, quests } = await loadQuestContext(
-      ctx,
-      sessionId,
-      now,
-    );
-    if (players.length < 2) return null;
-    const cycleCount = quests.length % questCycleLength;
-    const cycle = cycleCount === 0 ? [] : quests.slice(-cycleCount);
-    const identity = (quest: {
-      kind: string;
-      drinkCategory?: { kind: string };
-    }) => `${quest.kind}:${quest.drinkCategory?.kind ?? ""}`;
-    const used = new Set(cycle.map(identity));
-    const candidates = builtInQuests
-      .filter(
-        (quest) =>
-          quest.availability === "early" ||
-          (quest.availability === "regular" && cycleCount >= earlyQuestCount) ||
-          (quest.availability === "final" && cycleCount >= regularQuestCount),
-      )
-      .map((definition) => ({
-        definition,
-        pairs: eligiblePairs(definition, players, previousPairs),
-      }))
-      .filter((candidate) => candidate.pairs.length > 0);
-    const unused = candidates.filter(
-      (candidate) => !used.has(identity(candidate.definition)),
-    );
-    const choices = unused.length ? unused : candidates;
-    const chosen = choices[Math.floor(Math.random() * choices.length)];
-    if (!chosen) return null;
-    const { availability, ...definition } = chosen.definition;
-    return await ctx.db.insert("partyQuest", {
-      ...definition,
-      sessionId,
-      startsAt: now,
-      endsAt: now + duration * millisecondsPerMinute,
-      status: "active",
+    const party = {
+      ...session,
+      questSchedule: { ...session.questSchedule, ...settings },
+    };
+    await ctx.db.patch("session", sessionId, {
+      questSchedule: party.questSchedule,
       updatedAt: now,
-      selections: [],
-      results: [],
     });
+    if (!party.modules.socialQuestsEnabled) return null;
+    await cancelJob(ctx, party);
+    const active = await activeQuests(ctx, sessionId);
+    const running = active.find((quest) => quest.endsAt > now);
+    if (running) {
+      await scheduleExpiry(
+        ctx,
+        party,
+        running,
+        running.endsAt + randomBreak(party.questSchedule),
+        now,
+      );
+    } else {
+      for (const quest of active)
+        await ctx.db.patch("partyQuest", quest._id, {
+          status: "expired",
+          updatedAt: now,
+        });
+      await scheduleIssuance(
+        ctx,
+        party,
+        now + randomBreak(party.questSchedule),
+        now,
+      );
+    }
+    return null;
   });
 
 export const selectPartner = authMutation

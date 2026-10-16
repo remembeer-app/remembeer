@@ -1,3 +1,4 @@
+import { questScheduler } from "../support/quest_scheduler.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { build } from "esbuild";
@@ -20,7 +21,7 @@ const { sessions, sessionQueries, members, memberQueries, logs, deleteUserData }
   await import(`data:text/javascript;base64,${Buffer.from(outputFiles[0].text).toString("base64")}`);
 
 function fixture() {
-  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], leaderboard: [], leaderboardMember: [], drinkLog: [], drink: [], badge: [], friendship: [] };
+  const tables = { user: ["owner", "admin", "member", "invitee", "other"].map((_id) => ({ _id, username: _id, normalizedUsername: _id, authUserId: `auth-${_id}` })), session: [], sessionMember: [], leaderboard: [], leaderboardMember: [], drinkLog: [], drink: [], badge: [], friendship: [], partyQuest: [] };
   let sequence = 0;
   const collected = [];
   const sessionGets = [];
@@ -47,7 +48,8 @@ function fixture() {
       };
     },
   };
-  const ctx = (id) => ({ db, user: { _id: id, drinkLogSortOrder: "desc" } });
+  const clock = questScheduler();
+  const ctx = (id) => ({ db, scheduler: clock.scheduler, user: { _id: id, drinkLogSortOrder: "desc" } });
   const owner = ctx("owner");
   const create = () => sessions.create(owner, { name: " Evening ", description: " Test ", startedAt: 1000 });
   const member = (sessionId, userId) => tables.sessionMember.find((row) => row.sessionId === sessionId && row.userId === userId);

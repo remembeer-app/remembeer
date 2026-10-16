@@ -135,17 +135,36 @@ class PartyQuestApi {
   ConvexMutationReference<SetEnabledArgs, void> get setEnabledMutation =>
       setEnabledMutationReference;
 
-  Future<PartyQuestId?> startNext({required SessionId sessionId}) async {
+  Future<Null> setSchedule({
+    required double defaultDurationMinutes,
+    required double maxIntervalMinutes,
+    required double minIntervalMinutes,
+    required SessionId sessionId,
+  }) async {
+    await _client.mutate(
+      'partyQuest:setSchedule',
+      _encodeSetScheduleArgs((
+        defaultDurationMinutes: defaultDurationMinutes,
+        maxIntervalMinutes: maxIntervalMinutes,
+        minIntervalMinutes: minIntervalMinutes,
+        sessionId: sessionId,
+      )),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<SetScheduleArgs, void> get setScheduleMutation =>
+      setScheduleMutationReference;
+
+  Future<PartyQuestId> startNext({required SessionId sessionId}) async {
     final raw$ = await _client.mutate(
       'partyQuest:startNext',
       _encodeStartNextArgs((sessionId: sessionId)),
     );
-    return raw$ == null
-        ? null
-        : PartyQuestId(expectString(raw$, label: 'StartNextResult'));
+    return PartyQuestId(expectString(raw$, label: 'StartNextResult'));
   }
 
-  ConvexMutationReference<StartNextArgs, PartyQuestId?> get startNextMutation =>
+  ConvexMutationReference<StartNextArgs, PartyQuestId> get startNextMutation =>
       startNextMutationReference;
 }
 
@@ -2212,6 +2231,69 @@ SetEnabledArgs _decodeSetEnabledArgs(dynamic raw) {
   );
 }
 
+typedef SetScheduleArgs = ({
+  double defaultDurationMinutes,
+  double maxIntervalMinutes,
+  double minIntervalMinutes,
+  SessionId sessionId,
+});
+
+Map<String, dynamic> _encodeSetScheduleArgs(SetScheduleArgs value$) {
+  final (
+    defaultDurationMinutes: defaultDurationMinutes,
+    maxIntervalMinutes: maxIntervalMinutes,
+    minIntervalMinutes: minIntervalMinutes,
+    sessionId: sessionId,
+  ) = value$;
+  return <String, dynamic>{
+    'defaultDurationMinutes': defaultDurationMinutes,
+    'maxIntervalMinutes': maxIntervalMinutes,
+    'minIntervalMinutes': minIntervalMinutes,
+    'sessionId': sessionId.value,
+  };
+}
+
+SetScheduleArgs _decodeSetScheduleArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SetScheduleArgs');
+  if (!map.containsKey('defaultDurationMinutes')) {
+    throw FormatException(
+      'Missing required field "defaultDurationMinutes" for SetScheduleArgs',
+    );
+  }
+  if (!map.containsKey('maxIntervalMinutes')) {
+    throw FormatException(
+      'Missing required field "maxIntervalMinutes" for SetScheduleArgs',
+    );
+  }
+  if (!map.containsKey('minIntervalMinutes')) {
+    throw FormatException(
+      'Missing required field "minIntervalMinutes" for SetScheduleArgs',
+    );
+  }
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for SetScheduleArgs',
+    );
+  }
+  return (
+    defaultDurationMinutes: expectDouble(
+      map['defaultDurationMinutes'],
+      label: 'SetScheduleArgsDefaultDurationMinutes',
+    ),
+    maxIntervalMinutes: expectDouble(
+      map['maxIntervalMinutes'],
+      label: 'SetScheduleArgsMaxIntervalMinutes',
+    ),
+    minIntervalMinutes: expectDouble(
+      map['minIntervalMinutes'],
+      label: 'SetScheduleArgsMinIntervalMinutes',
+    ),
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'SetScheduleArgsSessionId'),
+    ),
+  );
+}
+
 typedef StartNextArgs = ({SessionId sessionId});
 
 Map<String, dynamic> _encodeStartNextArgs(StartNextArgs value$) {
@@ -2269,11 +2351,16 @@ setEnabledMutationReference = ConvexMutationReference(
   decode: (raw) => null,
 );
 
-final ConvexMutationReference<StartNextArgs, PartyQuestId?>
+final ConvexMutationReference<SetScheduleArgs, void>
+setScheduleMutationReference = ConvexMutationReference(
+  name: 'partyQuest:setSchedule',
+  encode: (args) => _encodeSetScheduleArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<StartNextArgs, PartyQuestId>
 startNextMutationReference = ConvexMutationReference(
   name: 'partyQuest:startNext',
   encode: (args) => _encodeStartNextArgs(args),
-  decode: (raw) => raw == null
-      ? null
-      : PartyQuestId(expectString(raw, label: 'StartNextResult')),
+  decode: (raw) => PartyQuestId(expectString(raw, label: 'StartNextResult')),
 );
