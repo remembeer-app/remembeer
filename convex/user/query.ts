@@ -1,12 +1,13 @@
 import { ConvexError, v } from "convex/values";
-import { WithZod } from "fluent-convex/zod";
 import { authQuery } from "../lib/authenticated";
 import { schema } from "../schema";
 import type { Doc, Id } from "../_generated/dataModel";
 import { LogicalDay } from "../lib/logicalDay";
 import { beerVolumeMl } from "../leaderboard/constants";
 import { publicUser, publicUserValidator } from "./publicProfile";
-import { normalizeUsername, updateUsernameInputValidator } from "./schema";
+import { normalizeUsername } from "./schema";
+import { components } from "../_generated/api";
+import { userSearchResultsPerField } from "./constants";
 
 export const get = authQuery
   .input({ userId: v.id("user") })
@@ -19,19 +20,52 @@ export const get = authQuery
   });
 
 export const search = authQuery
-  .extend(WithZod)
-  .input(updateUsernameInputValidator)
+  .input({ query: v.string() })
   .returns(v.array(publicUserValidator))
-  .handler(async (ctx, { username }) => {
-    const users = await ctx.db
-      .query("user")
-      .withIndex("by_normalizedUsername", (q) =>
-        q.eq("normalizedUsername", normalizeUsername(username)),
-      )
-      .take(20);
+  .handler(async (ctx, { query }) => {
+    const emailPrefix = query.trim().toLowerCase();
+    const usernamePrefix = normalizeUsername(query);
+    if (!emailPrefix) return [];
 
+    const [usernameMatches, emailMatches] = await Promise.all([
+      usernamePrefix
+        ? ctx.db
+            .query("user")
+            .withIndex("by_normalizedUsername", (q) =>
+              q
+                .gte("normalizedUsername", usernamePrefix)
+                .lt("normalizedUsername", `${usernamePrefix}\uffff`),
+            )
+            .take(userSearchResultsPerField)
+        : Promise.resolve([]),
+      ctx.runQuery(components.betterAuth.adapter.findMany, {
+        model: "user",
+        where: [
+          { field: "email", operator: "gte", value: emailPrefix },
+          { field: "email", operator: "lt", value: `${emailPrefix}\uffff` },
+        ],
+        select: ["_id"],
+        sortBy: { field: "email", direction: "asc" },
+        paginationOpts: { cursor: null, numItems: userSearchResultsPerField },
+      }) as Promise<{ page: { _id: string }[] }>,
+    ]);
+
+    const emailUsers = await Promise.all(
+      emailMatches.page.map((authUser) =>
+        ctx.db
+          .query("user")
+          .withIndex("by_authUserId", (q) => q.eq("authUserId", authUser._id))
+          .unique(),
+      ),
+    );
+    const users = new Map(
+      [...usernameMatches, ...emailUsers]
+        .filter((user) => user !== null)
+        .filter((user) => user._id !== ctx.user._id)
+        .map((user) => [user._id, user]),
+    );
     const profiles = await Promise.all(
-      users.filter((user) => user._id !== ctx.user._id).map((user) => publicUser(ctx, user._id)),
+      [...users.values()].map((user) => publicUser(ctx, user._id)),
     );
 
     return profiles.filter((user) => user !== null);

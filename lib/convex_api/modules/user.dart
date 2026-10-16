@@ -115,10 +115,10 @@ class UserApi {
   ConvexQueryReference<GetTypeArgs, GetTypeResult> get getValueQuery =>
       getValueQueryReference;
 
-  Future<List<SearchResultItem>> search({required String username}) async {
+  Future<List<SearchResultItem>> search({required String query}) async {
     final raw$ = await _client.query(
       'user:search',
-      _encodeSearchArgs((username: username)),
+      _encodeSearchArgs((query: query)),
     );
     return expectList(
       raw$,
@@ -127,11 +127,11 @@ class UserApi {
   }
 
   TypedConvexSubscription<List<SearchResultItem>> searchSubscribe({
-    required String username,
+    required String query,
   }) {
     final subscription$ = _client.subscribe(
       'user:search',
-      _encodeSearchArgs((username: username)),
+      _encodeSearchArgs((query: query)),
     );
     final typedStream$ = subscription$.stream.map((event) {
       switch (event) {
@@ -728,19 +728,19 @@ SearchResultItem _decodeSearchResultItem(dynamic raw) {
   );
 }
 
-typedef SearchArgs = ({String username});
+typedef SearchArgs = ({String query});
 
 Map<String, dynamic> _encodeSearchArgs(SearchArgs value$) {
-  final (username: username) = value$;
-  return <String, dynamic>{'username': username};
+  final (query: query) = value$;
+  return <String, dynamic>{'query': query};
 }
 
 SearchArgs _decodeSearchArgs(dynamic raw) {
   final map = expectMap(raw, label: 'SearchArgs');
-  if (!map.containsKey('username')) {
-    throw FormatException('Missing required field "username" for SearchArgs');
+  if (!map.containsKey('query')) {
+    throw FormatException('Missing required field "query" for SearchArgs');
   }
-  return (username: expectString(map['username'], label: 'SearchArgsUsername'));
+  return (query: expectString(map['query'], label: 'SearchArgsQuery'));
 }
 
 typedef StatsResult = ({

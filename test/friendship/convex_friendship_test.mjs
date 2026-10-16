@@ -39,6 +39,7 @@ function fixture() {
       normalizedUsername: _id,
       accentColor: "amber",
       authUserId: `auth-${_id}`,
+      email: `${_id}@example.com`,
       avatarStorageId: _id === "b" ? "avatar-b" : null,
       timeZone: "Europe/Prague",
       defaultDrink: null,
@@ -79,6 +80,14 @@ function fixture() {
               rows = rows.filter((row) => row[field] === value);
               return q;
             },
+            gte(field, value) {
+              rows = rows.filter((row) => row[field] >= value);
+              return q;
+            },
+            lt(field, value) {
+              rows = rows.filter((row) => row[field] < value);
+              return q;
+            },
           };
           range(q);
           return this;
@@ -98,6 +107,19 @@ function fixture() {
   };
   const ctx = (id) => ({
     db,
+    async runQuery(reference, args) {
+      assert.equal(args.model, "user");
+      assert.deepEqual(args.select, ["_id"]);
+      let rows = tables.user;
+      for (const { field, operator, value } of args.where) {
+        assert.equal(field, "email");
+        rows = rows.filter((row) => (operator === "gte" ? row.email >= value : row.email < value));
+      }
+      rows = [...rows].sort((a, b) => a.email.localeCompare(b.email));
+      return {
+        page: rows.slice(0, args.paginationOpts.numItems).map((row) => ({ _id: row.authUserId })),
+      };
+    },
     user: { _id: id },
     storage: {
       async getUrl(id) {
@@ -116,15 +138,35 @@ test("public profiles and username lookup expose only public data and exclude th
   await assert.rejects(userQueries.get(f.ctx("a"), { userId: "missing" }), /User not found/);
   f.tables.user.find((user) => user._id === "b").normalizedUsername = "friend";
   f.tables.user.find((user) => user._id === "a").normalizedUsername = "friend";
-  const matches = await userQueries.search(f.ctx("a"), { username: "  Fríend  " });
+  const matches = await userQueries.search(f.ctx("a"), { query: "  Fríend  " });
   assert.deepEqual(
     matches.map((user) => user._id),
     ["b"],
   );
   assert.deepEqual(Object.keys(matches[0]).sort(), fields);
-  assert.deepEqual(await userQueries.search(f.ctx("a"), { username: "missing" }), []);
-  await assert.rejects(userQueries.search(f.ctx("a"), { username: "ab" }));
-  await assert.rejects(userQueries.search(f.ctx("a"), { username: "a".repeat(21) }));
+  assert.deepEqual(await userQueries.search(f.ctx("a"), { query: "missing" }), []);
+  assert.deepEqual(await userQueries.search(f.ctx("a"), { query: "ab" }), []);
+  assert.deepEqual(await userQueries.search(f.ctx("a"), { query: "a".repeat(21) }), []);
+});
+
+test("search matches short normalized username prefixes and case-insensitive email prefixes", async () => {
+  const f = fixture();
+  Object.assign(f.tables.user[1], { normalizedUsername: "ondrej", email: "ondrej@example.com" });
+  Object.assign(f.tables.user[2], { normalizedUsername: "ondrasek", email: "other@example.com" });
+  Object.assign(f.tables.user[3], { normalizedUsername: "someone", email: "ondrej@other.com" });
+  const ids = async (query) =>
+    (await userQueries.search(f.ctx("a"), { query })).map((user) => user._id);
+  assert.deepEqual(await ids("  Ó n  "), ["b", "c"]);
+  assert.deepEqual(await ids("O"), ["b", "c", "d"]);
+  assert.deepEqual(await ids(" ONDREJ@EXAMPLE.COM "), ["b"]);
+  assert.deepEqual(await ids("ondrej@"), ["b", "d"]);
+  assert.deepEqual(await ids("ondrej@example.comx"), []);
+  assert.deepEqual(await ids(""), []);
+  assert.deepEqual(await ids("   "), []);
+  assert.deepEqual(await ids("a@"), []);
+  for (const result of await userQueries.search(f.ctx("a"), { query: "o" })) {
+    assert.deepEqual(Object.keys(result).sort(), ["_id", "accentColor", "avatarUrl", "username"]);
+  }
 });
 
 test("requests use one canonical pair, require explicit acceptance and preserve timestamps on retries", async () => {
