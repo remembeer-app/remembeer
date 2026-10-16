@@ -10,7 +10,14 @@ import type { Id } from "../_generated/dataModel";
 
 export const listForSession = authQuery
   .input({ sessionId: v.id("session") })
-  .returns(v.array(v.object({ member: schema.doc("sessionMember"), username: v.string() })))
+  .returns(
+    v.array(
+      v.object({
+        member: schema.doc("sessionMember"),
+        username: v.string(),
+      }),
+    ),
+  )
   .extend(
     access<{ sessionId: Id<"session"> }>().use((ctx, { sessionId }) =>
       requireSessionAccess(ctx, sessionId, "joined"),
@@ -75,7 +82,14 @@ export const findInvitee = authQuery
       sessionId: convexToZod(v.id("session")),
     }),
   )
-  .returns(v.array(v.object({ _id: v.id("user"), username: v.string() })))
+  .returns(
+    v.array(
+      v.object({
+        _id: v.id("user"),
+        username: v.string(),
+      }),
+    ),
+  )
   .extend(
     access<{ sessionId: Id<"session"> }>().use((ctx, { sessionId }) =>
       requireSessionAccess(ctx, sessionId, "admin"),

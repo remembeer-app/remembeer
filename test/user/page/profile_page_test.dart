@@ -199,20 +199,25 @@ void main() {
       await tester.enterText(find.byType(TextField), 'ab');
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
-      expect(find.text('No users found.'), findsOneWidget);
+      expect(find.text('Friend'), findsOneWidget);
       expect(find.text('Search by username or email'), findsOneWidget);
       expect(find.text('Find users'), findsNothing);
       expect(
         client.requests.where((request) => request.name == 'user:search'),
-        isEmpty,
+        hasLength(1),
       );
+      expect(client.requests.last.args, <String, dynamic>{'query': 'ab'});
+      await tester.enterText(find.byType(TextField), ' FRIEND@EXAMPLE.COM ');
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+      expect(client.requests.last.args, <String, dynamic>{
+        'query': 'FRIEND@EXAMPLE.COM',
+      });
       await tester.enterText(find.byType(TextField), '  Friend  ');
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
       expect(client.requests.last.name, 'user:search');
-      expect(client.requests.last.args, <String, dynamic>{
-        'username': 'Friend',
-      });
+      expect(client.requests.last.args, <String, dynamic>{'query': 'Friend'});
       await tester.tap(find.text('Friend'));
       await tester.pumpAndSettle();
       expect(

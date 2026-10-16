@@ -17,3 +17,5 @@ export const updateDrinkLogSortOrder = mutation.updateDrinkLogSortOrder.public()
 export const deleteCurrent = mutation.deleteCurrent.public();
 
 export const stats = query.stats.public();
+
+export const currentDayConsumption = query.currentDayConsumption.public();

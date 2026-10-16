@@ -44,7 +44,12 @@ export const get = authQuery
         }),
       ),
       // Placements are final only after finalization, and include every team.
-      placements: v.array(v.object({ teamId: v.id("beerpongTeam"), placement: v.number() })),
+      placements: v.array(
+        v.object({
+          teamId: v.id("beerpongTeam"),
+          placement: v.number(),
+        }),
+      ),
     }),
   )
   .extend(

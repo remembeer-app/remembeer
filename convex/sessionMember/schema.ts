@@ -3,16 +3,30 @@ import { v } from "convex/values";
 import { drinkCategoryValidator } from "../drink/schema";
 
 const sessionMemberStatusValidator = v.union(
-  v.object({ kind: v.literal("invited") }),
-  v.object({ kind: v.literal("joined") }),
-  v.object({ kind: v.literal("left") }),
-  v.object({ kind: v.literal("banned") }),
-  v.object({ kind: v.literal("declined") }),
+  v.object({
+    kind: v.literal("invited"),
+  }),
+  v.object({
+    kind: v.literal("joined"),
+  }),
+  v.object({
+    kind: v.literal("left"),
+  }),
+  v.object({
+    kind: v.literal("banned"),
+  }),
+  v.object({
+    kind: v.literal("declined"),
+  }),
 );
 
 export const sessionMemberRoleValidator = v.union(
-  v.object({ kind: v.literal("member") }),
-  v.object({ kind: v.literal("admin") }),
+  v.object({
+    kind: v.literal("member"),
+  }),
+  v.object({
+    kind: v.literal("admin"),
+  }),
 );
 
 const commonFields = {

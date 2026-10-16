@@ -66,14 +66,8 @@ class _SearchUserPageState extends State<SearchUserPage> {
         child: Text('Enter a username or email to start searching.'),
       );
     }
-    // TODO(ohtenkay): Replace empty email/short-query results and full-username matching with Convex prefix/email search.
-    if (query.contains('@') ||
-        query.length < minUsernameLength ||
-        query.length > maxUsernameLength) {
-      return const Center(child: Text('No users found.'));
-    }
     return UserSearchQuery(
-      username: query,
+      query: query,
       builder: (context, users) => users.isEmpty
           ? const Center(child: Text('No users found.'))
           : ListView.builder(

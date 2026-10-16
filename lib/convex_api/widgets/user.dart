@@ -751,6 +751,77 @@ class UserCurrentQuery extends StatelessWidget {
   }
 }
 
+/// Flutter widget for user:currentDayConsumption.
+class UserCurrentDayConsumptionQuery extends StatelessWidget {
+  /// Creates a typed query widget with default loading and error UI.
+  const UserCurrentDayConsumptionQuery({
+    super.key,
+    required this.builder,
+    this.client,
+    this.waitingBuilder,
+    this.errorBuilder,
+    this.refreshAt = const Optional.absent(),
+  }) : snapshotBuilder = null;
+
+  /// Creates a query widget whose builder handles every snapshot state.
+  const UserCurrentDayConsumptionQuery.snapshot({
+    super.key,
+    required this.snapshotBuilder,
+    this.client,
+    this.refreshAt = const Optional.absent(),
+  }) : builder = null,
+       waitingBuilder = null,
+       errorBuilder = null;
+
+  /// Builds the UI when query data is available.
+  final Widget Function(BuildContext, CurrentDayConsumptionResult)? builder;
+
+  /// Builds the UI from every query snapshot in snapshot mode.
+  final Widget Function(
+    BuildContext,
+    ConvexQuerySnapshot<CurrentDayConsumptionResult>,
+  )?
+  snapshotBuilder;
+
+  /// Overrides the initial loading UI.
+  final WidgetBuilder? waitingBuilder;
+
+  /// Overrides the error UI.
+  final Widget Function(BuildContext, Object)? errorBuilder;
+
+  /// Optional runtime client override.
+  final ConvexRuntimeClient? client;
+
+  final Optional<double> refreshAt;
+
+  @override
+  Widget build(BuildContext context) {
+    final buildSnapshot = snapshotBuilder;
+    if (buildSnapshot != null) {
+      return ConvexTypedQuery<
+        CurrentDayConsumptionArgs,
+        CurrentDayConsumptionResult
+      >.snapshot(
+        query: currentDayConsumptionQueryReference,
+        args: (refreshAt: refreshAt),
+        client: client,
+        snapshotBuilder: buildSnapshot,
+      );
+    }
+    return ConvexTypedQuery<
+      CurrentDayConsumptionArgs,
+      CurrentDayConsumptionResult
+    >(
+      query: currentDayConsumptionQueryReference,
+      args: (refreshAt: refreshAt),
+      client: client,
+      builder: builder!,
+      waitingBuilder: waitingBuilder,
+      errorBuilder: errorBuilder,
+    );
+  }
+}
+
 /// Flutter widget for user:get.
 class UserGetTypeQuery extends StatelessWidget {
   /// Creates a typed query widget with default loading and error UI.
@@ -822,7 +893,7 @@ class UserSearchQuery extends StatelessWidget {
     this.client,
     this.waitingBuilder,
     this.errorBuilder,
-    required this.username,
+    required this.query,
   }) : snapshotBuilder = null;
 
   /// Creates a query widget whose builder handles every snapshot state.
@@ -830,7 +901,7 @@ class UserSearchQuery extends StatelessWidget {
     super.key,
     required this.snapshotBuilder,
     this.client,
-    required this.username,
+    required this.query,
   }) : builder = null,
        waitingBuilder = null,
        errorBuilder = null;
@@ -854,7 +925,7 @@ class UserSearchQuery extends StatelessWidget {
   /// Optional runtime client override.
   final ConvexRuntimeClient? client;
 
-  final String username;
+  final String query;
 
   @override
   Widget build(BuildContext context) {
@@ -862,14 +933,14 @@ class UserSearchQuery extends StatelessWidget {
     if (buildSnapshot != null) {
       return ConvexTypedQuery<SearchArgs, List<SearchResultItem>>.snapshot(
         query: searchQueryReference,
-        args: (username: username),
+        args: (query: query),
         client: client,
         snapshotBuilder: buildSnapshot,
       );
     }
     return ConvexTypedQuery<SearchArgs, List<SearchResultItem>>(
       query: searchQueryReference,
-      args: (username: username),
+      args: (query: query),
       client: client,
       builder: builder!,
       waitingBuilder: waitingBuilder,
