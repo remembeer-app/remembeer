@@ -21,6 +21,7 @@
     "test:seed:drinks": "node --test test/drink/seed_data/convex_seed_test.mjs",
     "seed": "node scripts/seed_drinks.mjs",
     "seed:drinks": "convex run drink:seedGlobal",
+    "auth:jwks": "convex env set JWKS \"$(convex run auth:getLatestJwks | node -e 'process.stdout.write(JSON.parse(require(\"fs\").readFileSync(0, \"utf8\")))')\"",
     "lint": "oxlint --max-warnings=0 convex scripts test",
     "lint:fix": "npm run lint -- --fix",
     "format": "oxfmt .",

@@ -8,6 +8,7 @@ import authConfig from "../auth.config";
 import { deleteUserData } from "../user/deletion";
 
 const authFunctions: AuthFunctions = internal.auth;
+const jwks = process.env["JWKS"];
 
 export const authComponent = createClient<DataModel>(components.betterAuth, {
   authFunctions,
@@ -30,5 +31,5 @@ export const createAuth = (ctx: GenericCtx<DataModel>) =>
       enabled: true,
       requireEmailVerification: false,
     },
-    plugins: [convex({ authConfig }), bearer()],
+    plugins: [convex({ authConfig, ...(jwks ? { jwks } : {}) }), bearer()],
   });
