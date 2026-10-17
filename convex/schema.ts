@@ -5,6 +5,7 @@ import { beerpongTeamTable } from "./beerpongTeam/schema";
 import { beerpongTournamentTable } from "./beerpongTournament/schema";
 import { drinkTable } from "./drink/schema";
 import { drinkLogTable } from "./drinkLog/schema";
+import { eventTable } from "./event/schema";
 import { friendshipTable } from "./friendship/schema";
 import { sessionTable } from "./session/schema";
 import { sessionMemberTable } from "./sessionMember/schema";
@@ -29,6 +30,7 @@ export const schema = defineSchema({
   beerpongTeam: beerpongTeamTable,
   beerpongMatch: beerpongMatchTable,
   friendship: friendshipTable,
+  event: eventTable,
 });
 
 export default schema;

@@ -193,6 +193,128 @@ typedef DrinkLogDocument = ({
   double creationTime,
 });
 
+typedef DrinkLogCreatedDrinkLogDrink = ({
+  DrinkId id,
+  DrinkCategory drinkCategory,
+  double alcoholPercentage,
+});
+
+typedef DrinkLogCreatedDrinkLog = ({
+  double consumedAt,
+  double volumeMl,
+  DrinkLogCreatedDrinkLogDrink drink,
+});
+
+typedef DrinkLogUpdatedBeforeDrink = ({
+  DrinkId id,
+  DrinkCategory drinkCategory,
+  double alcoholPercentage,
+});
+
+typedef DrinkLogUpdatedBefore = ({
+  double consumedAt,
+  double volumeMl,
+  DrinkLogUpdatedBeforeDrink drink,
+});
+
+typedef DrinkLogUpdatedAfterDrink = ({
+  DrinkId id,
+  DrinkCategory drinkCategory,
+  double alcoholPercentage,
+});
+
+typedef DrinkLogUpdatedAfter = ({
+  double consumedAt,
+  double volumeMl,
+  DrinkLogUpdatedAfterDrink drink,
+});
+
+typedef DrinkLogDeletedDrinkLogDrink = ({
+  DrinkId id,
+  DrinkCategory drinkCategory,
+  double alcoholPercentage,
+});
+
+typedef DrinkLogDeletedDrinkLog = ({
+  double consumedAt,
+  double volumeMl,
+  DrinkLogDeletedDrinkLogDrink drink,
+});
+
+sealed class EventDocument {
+  const EventDocument();
+  UserId get userId;
+  DrinkLogId get drinkLogId;
+  EventId get id;
+  double get creationTime;
+  bool get isDrinkLogCreated => this is DrinkLogCreated;
+  bool get isDrinkLogUpdated => this is DrinkLogUpdated;
+  bool get isDrinkLogDeleted => this is DrinkLogDeleted;
+}
+
+final class DrinkLogCreated extends EventDocument {
+  const DrinkLogCreated({
+    required this.userId,
+    required this.drinkLogId,
+    required this.drinkLog,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final UserId userId;
+
+  final DrinkLogId drinkLogId;
+
+  final DrinkLogCreatedDrinkLog drinkLog;
+
+  final EventId id;
+
+  final double creationTime;
+}
+
+final class DrinkLogUpdated extends EventDocument {
+  const DrinkLogUpdated({
+    required this.userId,
+    required this.drinkLogId,
+    required this.before,
+    required this.after,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final UserId userId;
+
+  final DrinkLogId drinkLogId;
+
+  final DrinkLogUpdatedBefore before;
+
+  final DrinkLogUpdatedAfter after;
+
+  final EventId id;
+
+  final double creationTime;
+}
+
+final class DrinkLogDeleted extends EventDocument {
+  const DrinkLogDeleted({
+    required this.userId,
+    required this.drinkLogId,
+    required this.drinkLog,
+    required this.id,
+    required this.creationTime,
+  });
+
+  final UserId userId;
+
+  final DrinkLogId drinkLogId;
+
+  final DrinkLogDeletedDrinkLog drinkLog;
+
+  final EventId id;
+
+  final double creationTime;
+}
+
 enum FriendshipDocumentStatus {
   pendingValue('pending'),
   acceptedValue('accepted');
