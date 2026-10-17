@@ -4,6 +4,7 @@
   "scripts": {
     "convex:codegen": "convex codegen",
     "convex:dev": "convex dev",
+    "convex:setup": "scripts/setup_local_convex.sh",
     "convex:generate": "npm run convex:codegen && npm run dartvex:codegen && dart format lib/convex_api",
     "convex:typecheck": "tsc -p convex/tsconfig.json",
     "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api --flutter-widgets",
