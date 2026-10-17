@@ -7,27 +7,51 @@ So that you may never forget how many beers you have consumed.
 Copy each tracked template to its untracked counterpart:
 
 ```bash
-cp .env.example .env
 cp .env.client.example .env.client
 cp .env.local.example .env.local
 ```
 
-- `.env` configures Docker Compose.
 - `.env.client` contains client-safe values bundled into the Flutter app.
 - `.env.local` contains local Convex configuration and backend secrets.
 
 Never put secrets in `.env.client`; Flutter packages the entire file in the
 application.
 
-For local Android emulator development, set
-`CONVEX_CLOUD_ORIGIN=http://10.0.2.2:3210` in `.env`, matching `CONVEX_URL`
-in `.env.client`. Convex uses this origin for upload and download URLs;
-`127.0.0.1` points to the emulator itself. After changing `.env`, run
-`docker compose up -d backend`. For a physical device, use your computer's
-LAN address in both settings instead.
-
 CI builds populate `.env.client` from repository secrets, including
 `CONVEX_SITE_URL`.
+
+## Local Convex backend
+
+Convex runs in the local k3d cluster from `remembeer-infra` (manifests in
+`remembeer-gitops`), served over plain HTTP by the Traefik gateway:
+
+- API / WebSocket: `http://convex.remembeer.localhost:8080`
+- HTTP actions / Better Auth: `http://convex-site.remembeer.localhost:8080`
+- Dashboard: `http://convex-dash.remembeer.localhost:8080`
+
+With the cluster running, put the admin key printed by `make convex-dashboard`
+(in `remembeer-infra`) into `.env.local`, then:
+
+```bash
+npm run convex:setup
+```
+
+It sets `BETTER_AUTH_SECRET` if missing, deploys the functions, stores the
+static JWKS and seeds the drinks. It is safe to rerun, and only needed again
+after recreating the cluster or changing `BETTER_AUTH_SECRET`.
+
+After the setup, use either `npx convex deploy` for one-off deploys or
+`npm run convex:dev` for live updates of convex schema, functions, etc.
+
+The iOS simulator reaches `*.localhost` directly. Inside an Android emulator it
+is the emulator's own loopback, so the gateway port has to be forwarded:
+devenv's `startem` does this, otherwise run `adb reverse tcp:8080 tcp:8080`
+after the emulator boots. The same works for USB-connected Android phones.
+
+The backend cannot reach its own `*.remembeer.localhost` URLs from inside the
+cluster, so token verification uses a static JWKS from the `JWKS` environment
+variable instead of fetching `/api/auth/convex/jwks`. After changing
+`BETTER_AUTH_SECRET`, run `npm run auth:jwks` and `npx convex deploy`.
 
 ## TypeScript checks
 

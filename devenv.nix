@@ -60,6 +60,9 @@
     # Exclude Android toolchain libraries that provide an incompatible libc++.so,
     # while keeping the host GL/Vulkan drivers available to the emulator.
     # Select NVIDIA for GLX as well as Vulkan on hybrid-GPU systems.
+    # *.remembeer.localhost is 127.0.0.1 inside the emulator too, so forward
+    # the k3d gateway port to the host once the emulator is up.
+    (adb wait-for-device && adb reverse tcp:8080 tcp:8080) >/dev/null 2>&1 &
     exec env LD_LIBRARY_PATH="${pkgs.libglvnd}/lib:${pkgs.vulkan-loader}/lib:/run/opengl-driver/lib" \
       __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia \
       emulator -avd remembeer-pixel-9-api-36 -gpu host "$@"

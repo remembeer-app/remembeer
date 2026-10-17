@@ -4,6 +4,7 @@
   "scripts": {
     "convex:codegen": "convex codegen",
     "convex:dev": "convex dev",
+    "convex:setup": "scripts/setup_local_convex.sh",
     "convex:generate": "npm run convex:codegen && npm run dartvex:codegen && dart format lib/convex_api",
     "convex:typecheck": "tsc -p convex/tsconfig.json",
     "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api --flutter-widgets",
@@ -21,6 +22,7 @@
     "test:seed:drinks": "node --test test/drink/seed_data/convex_seed_test.mjs",
     "seed": "node scripts/seed_drinks.mjs",
     "seed:drinks": "convex run drink:seedGlobal",
+    "auth:jwks": "convex env set JWKS \"$(convex run auth:getLatestJwks | node -e 'process.stdout.write(JSON.parse(require(\"fs\").readFileSync(0, \"utf8\")))')\"",
     "lint": "oxlint --max-warnings=0 convex scripts test",
     "lint:fix": "npm run lint -- --fix",
     "format": "oxfmt .",
