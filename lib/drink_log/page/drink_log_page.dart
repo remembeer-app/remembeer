@@ -5,9 +5,10 @@ import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/widgets/drinkLog.dart';
 import 'package:remembeer/date/widget/date_selector.dart';
-import 'package:remembeer/drink_log/service/drink_log_service.dart';
+import 'package:remembeer/drink_log/action/add_default_drink_log.dart';
 import 'package:remembeer/drink_log/widget/drink_log_group_list.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/location/service/location_service.dart';
 import 'package:remembeer/routes.dart';
 import 'package:remembeer/session/widget/session_menu_button.dart';
 
@@ -19,7 +20,8 @@ class DrinkLogPage extends StatefulWidget {
 }
 
 class _DrinkLogPageState extends State<DrinkLogPage> {
-  final _logs = get<DrinkLogService>();
+  final _api = get<ConvexApi>();
+  final _locationService = get<LocationService>();
   double _at = DateTime.now().millisecondsSinceEpoch.toDouble();
   late final AppLifecycleListener _lifecycle;
   DateTime? _selectedDate;
@@ -106,7 +108,8 @@ class _DrinkLogPageState extends State<DrinkLogPage> {
 
   Future<void> _quickAdd() async {
     try {
-      await _logs.addDefaultDrinkLog();
+      await addDefaultDrinkLog(api: _api, locationService: _locationService);
+      showSuccessNotification('Default drink added!');
     } on Object catch (error) {
       showNotification(error.toString());
     }

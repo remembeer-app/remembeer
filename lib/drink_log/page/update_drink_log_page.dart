@@ -1,6 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/drinkLog.dart';
@@ -40,7 +40,7 @@ class UpdateDrinkLogPage extends StatelessWidget {
             initialVolume: log.volumeMl.toInt(),
             initialLocation: location == null
                 ? null
-                : GeoPoint(location.latitude, location.longitude),
+                : LatLng(location.latitude, location.longitude),
             onSubmit: (drink, consumedAt, volume, location, sessionId) async {
               await update(
                 id: log.id,

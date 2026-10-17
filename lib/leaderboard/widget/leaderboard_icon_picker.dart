@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart'
+    show CreateArgsIconName;
+import 'package:remembeer/leaderboard/extension/leaderboard_icon_extension.dart';
 
 class LeaderboardIconPicker extends StatelessWidget {
-  final LeaderboardIcon selectedIcon;
-  final ValueChanged<LeaderboardIcon> onIconSelected;
+  final CreateArgsIconName selectedIcon;
+  final ValueChanged<CreateArgsIconName> onIconSelected;
 
   const LeaderboardIconPicker({
     super.key,
@@ -24,7 +26,7 @@ class LeaderboardIconPicker extends StatelessWidget {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: LeaderboardIcon.values.map((icon) {
+          children: CreateArgsIconName.values.map((icon) {
             final isSelected = icon == selectedIcon;
 
             return InkWell(

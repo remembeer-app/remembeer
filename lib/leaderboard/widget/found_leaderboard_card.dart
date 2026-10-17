@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/convex_api/modules/leaderboard.dart';
 import 'package:remembeer/leaderboard/constants.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
+import 'package:remembeer/leaderboard/extension/leaderboard_icon_extension.dart';
 
 class FoundLeaderboardCard extends StatelessWidget {
   final FindByInviteCodeResult leaderboard;
@@ -19,7 +19,7 @@ class FoundLeaderboardCard extends StatelessWidget {
     final theme = Theme.of(context);
     final memberCount = leaderboard.memberCount.toInt();
     final isFull = memberCount >= maxLeaderboardMembers;
-    final icon = LeaderboardIcon.fromName(leaderboard.iconName);
+    final icon = leaderboardIconFor(leaderboard.iconName);
 
     return Column(
       children: [

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/convex_api/api.dart';
 import 'package:remembeer/convex_api/modules/leaderboard.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
+import 'package:remembeer/leaderboard/extension/leaderboard_icon_extension.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_standings.dart';
 import 'package:remembeer/routes.dart';
 
@@ -20,7 +20,7 @@ class LeaderboardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final memberCount = leaderboard.memberCount.toInt();
-    final icon = LeaderboardIcon.fromName(leaderboard.leaderboard.iconName);
+    final icon = leaderboardIconFor(leaderboard.leaderboard.iconName);
 
     return Card(
       child: ListTile(

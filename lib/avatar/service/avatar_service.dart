@@ -8,12 +8,14 @@ import 'package:remembeer/avatar/constants.dart';
 import 'package:remembeer/convex_api/api.dart';
 
 class AvatarService {
-  final ConvexApi api;
-  final ConvexStorage storage;
+  final ConvexApi _api;
+  final ConvexStorage _storage;
   final ImagePicker _imagePicker;
 
-  AvatarService({required this.api, required this.storage})
-    : _imagePicker = ImagePicker();
+  AvatarService({required ConvexApi api, required ConvexStorage storage})
+    : _api = api,
+      _storage = storage,
+      _imagePicker = ImagePicker();
 
   Future<String?> changeAvatar(BuildContext context, ImageSource source) async {
     final pickedImage = await _pickImage(source);
@@ -26,24 +28,22 @@ class AvatarService {
       return null;
     }
 
-    return uploadAvatar(croppedImage);
+    return _uploadAvatar(croppedImage);
   }
 
-  Future<String?> uploadAvatar(File image) async {
-    final storageId = await storage.uploadFile(
+  Future<String?> _uploadAvatar(File image) async {
+    final storageId = await _storage.uploadFile(
       uploadUrlAction: 'user:generateAvatarUploadUrl',
       bytes: await image.readAsBytes(),
       filename: 'avatar.jpg',
       contentType: 'image/jpeg',
     );
-    return api.user.updateAvatar(storageId: StorageId(storageId));
+    return _api.user.updateAvatar(storageId: StorageId(storageId));
   }
 
   Future<void> deleteAvatar() async {
-    await api.user.updateAvatar(storageId: null);
+    await _api.user.updateAvatar(storageId: null);
   }
-
-  Future<void> deleteAvatarFile() => deleteAvatar();
 
   Future<File?> _pickImage(ImageSource source) async {
     final pickedFile = await _imagePicker.pickImage(source: source);
