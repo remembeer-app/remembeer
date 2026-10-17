@@ -33,7 +33,6 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
-/coverage/
 /node_modules/
 
 # Symbolication related
@@ -46,9 +45,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
-# Firebase config (contains API keys)
-android/app/google-services.json
 
 # Devenv
 .devenv*
@@ -73,5 +69,4 @@ override.tf.json
 .android/
 
 # Convex backend related files
-/**/.env.local
-/**/node_modules
+.env.local

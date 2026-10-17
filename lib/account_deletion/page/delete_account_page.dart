@@ -1,9 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dartvex/dartvex.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/account_deletion/service/account_deletion_service.dart';
-import 'package:remembeer/auth/service/auth_service.dart';
-import 'package:remembeer/auth/util/firebase_error_mapper.dart';
+import 'package:remembeer/auth/service/convex_auth_service.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
 import 'package:remembeer/common/action/notifications.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
@@ -18,13 +16,10 @@ class DeleteAccountPage extends StatefulWidget {
 }
 
 class _DeleteAccountPageState extends State<DeleteAccountPage> {
-  final _authService = get<AuthService>();
-  final _accountDeletionService = get<AccountDeletionService>();
+  final _authService = get<ConvexAuthService>();
 
   final _passwordController = TextEditingController();
   var _obscurePassword = true;
-
-  late final _hasPassword = _authService.hasPasswordProvider;
 
   @override
   void dispose() {
@@ -39,29 +34,21 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       padding: const EdgeInsets.all(24),
       child: LoadingForm(
         errorMapper: (e) => switch (e) {
-          FirebaseAuthException() => mapFirebaseAuthError(e.code),
-          FirebaseException() =>
-            'Could not delete everything. Check your connection and try again.',
+          ConvexException(:final message, :final data) =>
+            data is String ? data : message,
           _ => e.toString(),
         },
         builder: (form) => ListView(
           children: [
             _buildSection(context, 'What will be deleted', [
-              'Your profile, username, email and avatar',
-              'Your drinks and their locations, except inside Party sessions',
-              'Your solo sessions and their photos',
+              'Your account, email and sign-in sessions',
+              'Your profile, username and avatar',
               'Custom drinks you created',
-              'Friend links and friend requests',
-              'Your settings and notification token',
-            ]),
-            const Gap(16),
-            _buildSection(context, 'What happens to shared things', [
-              'Your drinks are removed from shared sessions; the sessions stay for the other members',
-              'Shared sessions and leaderboards you own pass to another member',
-              'Party sessions keep your drinks, locations and scores, shown as "Deleted user"',
+              'Your badges and settings',
             ]),
             const Gap(24),
-            if (_hasPassword) ...[_buildPasswordField(form), const Gap(8)],
+            _buildPasswordField(form),
+            const Gap(8),
             form.buildErrorMessage(),
             const Gap(24),
             _buildDeleteButton(context, form),
@@ -128,12 +115,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
                 color: theme.colorScheme.onError,
               ),
             )
-          : Text(
-              _hasPassword
-                  ? 'Delete my account'
-                  : 'Confirm with Google and delete',
-              style: const TextStyle(fontSize: 16),
-            ),
+          : const Text('Delete my account', style: TextStyle(fontSize: 16)),
     );
   }
 
@@ -141,7 +123,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
     BuildContext context,
     LoadingFormState form,
   ) async {
-    if (_hasPassword && !form.validate()) {
+    if (!form.validate()) {
       return;
     }
 
@@ -149,8 +131,8 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
       context: context,
       title: 'Delete account?',
       text:
-          'This cannot be undone. Your profile, drinks, solo sessions and photos '
-          'will be permanently removed.',
+          'This cannot be undone. Your account, profile, avatar, custom drinks, '
+          'badges and settings will be permanently removed.',
       submitButtonText: 'Delete',
       isDestructive: true,
       onPressed: () => form.runAction(_deleteAccount),
@@ -158,20 +140,7 @@ class _DeleteAccountPageState extends State<DeleteAccountPage> {
   }
 
   Future<void> _deleteAccount() async {
-    final confirmed = await _reauthenticate();
-    if (!confirmed) {
-      return;
-    }
-
-    await _accountDeletionService.deleteAccount();
+    await _authService.deleteAccount(password: _passwordController.text);
     showSuccessNotification('Account deleted.');
-  }
-
-  Future<bool> _reauthenticate() async {
-    if (_hasPassword) {
-      await _authService.reauthenticateWithPassword(_passwordController.text);
-      return true;
-    }
-    return _authService.reauthenticateWithGoogle();
   }
 }

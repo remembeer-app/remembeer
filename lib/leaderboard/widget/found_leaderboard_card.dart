@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart';
 import 'package:remembeer/leaderboard/constants.dart';
-import 'package:remembeer/leaderboard/model/leaderboard.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
+import 'package:remembeer/leaderboard/extension/leaderboard_icon_extension.dart';
 
 class FoundLeaderboardCard extends StatelessWidget {
-  final Leaderboard leaderboard;
-  final VoidCallback onJoin;
+  final FindByInviteCodeResult leaderboard;
+  final VoidCallback? onJoin;
 
   const FoundLeaderboardCard({
     super.key,
@@ -17,9 +17,9 @@ class FoundLeaderboardCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final memberCount = leaderboard.memberIds.length;
+    final memberCount = leaderboard.memberCount.toInt();
     final isFull = memberCount >= maxLeaderboardMembers;
-    final icon = LeaderboardIcon.fromName(leaderboard.iconName);
+    final icon = leaderboardIconFor(leaderboard.iconName);
 
     return Column(
       children: [

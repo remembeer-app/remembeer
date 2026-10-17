@@ -1,327 +1,192 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/action/confirmation_dialog.dart';
-import 'package:remembeer/common/action/notifications.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
+import 'package:remembeer/common/widget/error_message_box.dart';
 import 'package:remembeer/common/widget/page_template.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/party/model/party_challenge.dart';
-import 'package:remembeer/party/model/party_state.dart';
-import 'package:remembeer/party/service/party_challenge_service.dart';
-import 'package:remembeer/party/service/party_service.dart';
-import 'package:remembeer/party/widget/challenge_card.dart';
-import 'package:remembeer/session/service/session_service.dart';
-import 'package:remembeer/user/model/user_model.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/convex_api/widgets/partyChallenge.dart';
+import 'package:remembeer/party/constants.dart';
+import 'package:remembeer/party/widget/party_creation_forms.dart';
+import 'package:remembeer/party/widget/party_games.dart';
+import 'package:remembeer/party/widget/party_scope.dart';
 
-class ChallengeDetailPage extends StatefulWidget {
-  ChallengeDetailPage({
+class ChallengeDetailPage extends StatelessWidget {
+  const ChallengeDetailPage({
     super.key,
     required this.sessionId,
     required this.challengeId,
-    PartyService? partyService,
-    SessionService? sessionService,
-    PartyChallengeService? challengeService,
-  }) : partyService = partyService ?? get<PartyService>(),
-       sessionService = sessionService ?? get<SessionService>(),
-       challengeService = challengeService ?? get<PartyChallengeService>();
-
+  });
   final String sessionId;
   final String challengeId;
-  final PartyService partyService;
-  final SessionService sessionService;
-  final PartyChallengeService challengeService;
 
   @override
-  State<ChallengeDetailPage> createState() => _ChallengeDetailPageState();
-}
-
-class _ChallengeDetailPageState extends State<ChallengeDetailPage> {
-  late final Timer _timer;
-  String? _pendingAction;
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
-      if (mounted) {
-        setState(() {});
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return PageTemplate(
-      title: const Text('Challenge'),
-      child: AsyncBuilder<PartyState>(
-        stream: widget.partyService.stateStream(widget.sessionId),
-        builder: (context, partyState) =>
-            AsyncBuilder<PartyChallengeDetailState>(
-              stream: widget.challengeService.challengeStateStream(
-                widget.sessionId,
-                widget.challengeId,
+  Widget build(BuildContext context) => PageTemplate(
+    title: const Text('Challenge'),
+    child: PartyScope(
+      sessionId: sessionId,
+      builder: (context, party, userId, members, isAdmin) => PartyChallengeGetTypeQuery(
+        id: PartyChallengeId(challengeId),
+        builder: (context, challenge) {
+          if (challenge.sessionId != party.id) {
+            return const Center(
+              child: Text('Challenge not found in this party.'),
+            );
+          }
+          final canManage =
+              isAdmin &&
+              party.endedAt == null &&
+              party.modules.partyChallengesEnabled;
+          final active =
+              challenge.status == PartyChallengeDocumentStatus.activeValue;
+          return ListView(
+            children: [
+              Text(
+                challenge.title,
+                style: Theme.of(context).textTheme.headlineSmall,
               ),
-              builder: (context, challengeState) {
-                final challenge = challengeState.challenge;
-                if (challenge == null) {
-                  return const Center(child: Text('Challenge not found.'));
-                }
-                return AsyncBuilder<List<UserModel>>(
-                  stream: widget.sessionService.sessionMembersStream(
-                    widget.sessionId,
-                  ),
-                  builder: (context, members) => _buildContent(
-                    context,
-                    partyState,
-                    challengeState,
-                    challenge,
-                    members,
-                  ),
-                );
-              },
-            ),
-      ),
-    );
-  }
-
-  Widget _buildContent(
-    BuildContext context,
-    PartyState partyState,
-    PartyChallengeDetailState challengeState,
-    PartyChallenge challenge,
-    List<UserModel> members,
-  ) {
-    final activeBeforeDeadline =
-        challenge.status == PartyChallengeStatus.active &&
-        DateTime.now().isBefore(challenge.endsAt);
-    final canAdminister =
-        partyState.isAdmin && partyState.isActive && activeBeforeDeadline;
-    final usersById = {for (final user in members) user.id: user};
-
-    return ListView(
-      children: [
-        ChallengeCard(challenge: challenge),
-        const Gap(20),
-        Text('Winners', style: Theme.of(context).textTheme.titleLarge),
-        const Gap(8),
-        if (challenge.winnerIds.isEmpty)
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.emoji_events_outlined),
-              title: Text('No winners yet'),
-            ),
-          )
-        else
-          for (final winnerId in challenge.winnerIds)
-            _WinnerTile(
-              name: usersById[winnerId]?.username ?? 'Unknown member',
-              isReversed: challengeState.reversedWinnerIds.contains(winnerId),
-              isPending: _pendingAction == 'reverse:$winnerId',
-              onReverse:
-                  (_pendingAction == null ||
-                          _pendingAction == 'reverse:$winnerId') &&
-                      partyState.isAdmin &&
-                      partyState.isActive &&
-                      challenge.status != PartyChallengeStatus.cancelled &&
-                      challenge.status != PartyChallengeStatus.expired &&
-                      !challengeState.reversedWinnerIds.contains(winnerId)
-                  ? () => _confirmReversal(context, challenge, winnerId)
-                  : null,
-            ),
-        if (canAdminister) ...[
-          const Gap(20),
-          Text('Award a winner', style: Theme.of(context).textTheme.titleLarge),
-          const Gap(8),
-          for (final member in members)
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.person_outline),
-                title: Text(member.username),
-                subtitle: challenge.winnerIds.contains(member.id)
-                    ? const Text('Already awarded')
-                    : null,
-                trailing: _pendingAction == 'award:${member.id}'
-                    ? const SizedBox.square(
-                        dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : FilledButton.tonal(
-                        onPressed:
-                            _pendingAction != null ||
-                                challenge.winnerIds.contains(member.id)
-                            ? null
-                            : () => _runAction(
-                                'award:${member.id}',
-                                () => widget.challengeService.awardWinner(
-                                  widget.sessionId,
-                                  challenge.id,
-                                  member.id,
-                                ),
-                                'Winner awarded.',
-                              ),
-                        child: const Text('Award'),
+              const Gap(12),
+              Text(challenge.instructions),
+              const Gap(12),
+              Text(
+                '${formatPartyScore(challenge.pointsUnits.toInt())} points per winner · ${challenge.status.value}',
+              ),
+              Text('Ends ${partyTime(challenge.endsAt)}'),
+              const Gap(24),
+              Text('Winners', style: Theme.of(context).textTheme.titleLarge),
+              if (challenge.winners.isEmpty)
+                const ListTile(title: Text('No winners yet.')),
+              PartyChallengeRemoveWinnerMutation(
+                builder: (context, remove, state) => Column(
+                  children: [
+                    if (state.error case final error?)
+                      ErrorMessageBox(message: error.toString()),
+                    for (final winner in challenge.winners)
+                      ListTile(
+                        title: Text(
+                          members
+                                  .where(
+                                    (entry) =>
+                                        entry.member.userId == winner.userId,
+                                  )
+                                  .firstOrNull
+                                  ?.username ??
+                              'Unavailable user',
+                        ),
+                        trailing: canManage
+                            ? IconButton(
+                                tooltip: 'Remove winner',
+                                icon: const Icon(Icons.undo),
+                                onPressed: state.isLoading
+                                    ? null
+                                    : () => showConfirmationDialog(
+                                        context: context,
+                                        title: 'Remove winner?',
+                                        text:
+                                            'Their challenge points will be removed.',
+                                        submitButtonText: 'Remove',
+                                        isDestructive: true,
+                                        onPressed: () async {
+                                          await remove(
+                                            id: challenge.id,
+                                            userId: winner.userId,
+                                          );
+                                        },
+                                      ),
+                              )
+                            : null,
                       ),
+                  ],
+                ),
               ),
-            ),
-          const Gap(20),
-          FilledButton.icon(
-            onPressed: _pendingAction == null
-                ? () => _confirmComplete(context, challenge)
-                : null,
-            icon: const Icon(Icons.check),
-            label: const Text('Complete challenge'),
-          ),
-          const Gap(8),
-          OutlinedButton.icon(
-            onPressed: _pendingAction == null
-                ? () => _confirmCancel(context, challenge)
-                : null,
-            icon: const Icon(Icons.cancel_outlined),
-            label: const Text('Cancel challenge'),
-          ),
-        ] else if (partyState.isArchived) ...[
-          const Gap(20),
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.archive_outlined),
-              title: Text('Archived Party'),
-              subtitle: Text('Challenge results are read-only.'),
-            ),
-          ),
-        ] else if (challenge.status == PartyChallengeStatus.active &&
-            !activeBeforeDeadline) ...[
-          const Gap(20),
-          const Card(
-            child: ListTile(
-              leading: Icon(Icons.timer_off_outlined),
-              title: Text('Time is up'),
-              subtitle: Text('This challenge can no longer be changed.'),
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  void _confirmReversal(
-    BuildContext context,
-    PartyChallenge challenge,
-    String winnerId,
-  ) {
-    showConfirmationDialog(
-      context: context,
-      title: 'Correct this winner?',
-      text:
-          'Their challenge points will be reversed. The audit history remains visible.',
-      submitButtonText: 'Reverse award',
-      isDestructive: true,
-      onPressed: () => _runAction(
-        'reverse:$winnerId',
-        () => widget.challengeService.reverseWinner(
-          widget.sessionId,
-          challenge.id,
-          winnerId,
-        ),
-        'Challenge award reversed.',
+              if (canManage) ...[
+                ExpansionTile(
+                  title: const Text('Edit challenge'),
+                  children: [
+                    PartyChallengeForm(
+                      key: ValueKey(challenge.updatedAt),
+                      sessionId: party.id,
+                      challenge: challenge,
+                    ),
+                  ],
+                ),
+                const Gap(16),
+                Text(
+                  'Award a winner',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                PartyChallengeAddWinnerMutation(
+                  builder: (context, add, state) => Column(
+                    children: [
+                      if (state.error case final error?)
+                        ErrorMessageBox(message: error.toString()),
+                      for (final entry in members.where(
+                        (entry) =>
+                            entry.member.sessionMemberStatus.isJoined &&
+                            !challenge.winners.any(
+                              (winner) => winner.userId == entry.member.userId,
+                            ),
+                      ))
+                        ListTile(
+                          title: Text(entry.username),
+                          trailing: TextButton(
+                            onPressed: state.isLoading
+                                ? null
+                                : () => add.run(
+                                    id: challenge.id,
+                                    userId: entry.member.userId,
+                                  ),
+                            child: const Text('Award'),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                if (active) ...[
+                  const Gap(24),
+                  PartyChallengeCompleteMutation(
+                    builder: (context, complete, state) => Column(
+                      children: [
+                        FilledButton(
+                          onPressed: state.isLoading
+                              ? null
+                              : () => complete.run(id: challenge.id),
+                          child: const Text('Complete challenge'),
+                        ),
+                        if (state.error case final error?)
+                          ErrorMessageBox(message: error.toString()),
+                      ],
+                    ),
+                  ),
+                  PartyChallengeCancelMutation(
+                    builder: (context, cancel, state) => Column(
+                      children: [
+                        TextButton(
+                          onPressed: state.isLoading
+                              ? null
+                              : () => showConfirmationDialog(
+                                  context: context,
+                                  title: 'Cancel challenge?',
+                                  text:
+                                      'The challenge will stop. Recorded winners keep their points.',
+                                  submitButtonText: 'Cancel challenge',
+                                  isDestructive: true,
+                                  onPressed: () async {
+                                    await cancel(id: challenge.id);
+                                  },
+                                ),
+                          child: const Text('Cancel challenge'),
+                        ),
+                        if (state.error case final error?)
+                          ErrorMessageBox(message: error.toString()),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ],
+          );
+        },
       ),
-    );
-  }
-
-  void _confirmComplete(BuildContext context, PartyChallenge challenge) {
-    showConfirmationDialog(
-      context: context,
-      title: 'Complete challenge?',
-      text: 'No more winners can be added after completion.',
-      submitButtonText: 'Complete',
-      onPressed: () => _runAction(
-        'complete',
-        () => widget.challengeService.completeChallenge(
-          widget.sessionId,
-          challenge.id,
-        ),
-        'Challenge completed.',
-      ),
-    );
-  }
-
-  void _confirmCancel(BuildContext context, PartyChallenge challenge) {
-    showConfirmationDialog(
-      context: context,
-      title: 'Cancel challenge?',
-      text: 'The challenge will end immediately. Existing awards are retained.',
-      submitButtonText: 'Cancel challenge',
-      isDestructive: true,
-      onPressed: () => _runAction(
-        'cancel',
-        () => widget.challengeService.cancelChallenge(
-          widget.sessionId,
-          challenge.id,
-        ),
-        'Challenge cancelled.',
-      ),
-    );
-  }
-
-  Future<void> _runAction(
-    String key,
-    Future<void> Function() action,
-    String successMessage,
-  ) async {
-    setState(() => _pendingAction = key);
-    try {
-      await action();
-      showSuccessNotification(successMessage);
-    } on Exception catch (error) {
-      showErrorNotification(error.toString());
-    } finally {
-      if (mounted) {
-        setState(() => _pendingAction = null);
-      }
-    }
-  }
-}
-
-class _WinnerTile extends StatelessWidget {
-  const _WinnerTile({
-    required this.name,
-    required this.isReversed,
-    required this.isPending,
-    required this.onReverse,
-  });
-
-  final String name;
-  final bool isReversed;
-  final bool isPending;
-  final VoidCallback? onReverse;
-
-  @override
-  Widget build(BuildContext context) => Card(
-    child: ListTile(
-      leading: Icon(
-        isReversed ? Icons.undo : Icons.emoji_events,
-        color: isReversed ? Theme.of(context).colorScheme.outline : null,
-      ),
-      title: Text(
-        name,
-        style: TextStyle(
-          decoration: isReversed ? TextDecoration.lineThrough : null,
-        ),
-      ),
-      subtitle: Text(isReversed ? 'Award reversed' : 'Challenge winner'),
-      trailing: onReverse == null
-          ? null
-          : TextButton(
-              onPressed: isPending ? null : onReverse,
-              child: Text(isPending ? 'Reversing...' : 'Correct'),
-            ),
     ),
   );
 }

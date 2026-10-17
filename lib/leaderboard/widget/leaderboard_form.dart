@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/widget/loading_form.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart'
+    show CreateArgsIconName;
 import 'package:remembeer/leaderboard/constants.dart';
-import 'package:remembeer/leaderboard/model/leaderboard_icon.dart';
+import 'package:remembeer/leaderboard/extension/leaderboard_icon_extension.dart';
 import 'package:remembeer/leaderboard/widget/leaderboard_icon_picker.dart';
 
 class LeaderboardForm extends StatefulWidget {
   final String initialName;
-  final LeaderboardIcon initialIcon;
+  final CreateArgsIconName initialIcon;
   final String submitButtonText;
   final bool isEditing;
-  final Future<void> Function(String name, LeaderboardIcon icon) onSubmit;
+  final Future<void> Function(String name, CreateArgsIconName icon) onSubmit;
 
   const LeaderboardForm({
     super.key,
@@ -28,7 +30,7 @@ class LeaderboardForm extends StatefulWidget {
 class _LeaderboardFormState extends State<LeaderboardForm> {
   final _nameController = TextEditingController();
 
-  late LeaderboardIcon _selectedIcon = widget.initialIcon;
+  late CreateArgsIconName _selectedIcon = widget.initialIcon;
 
   @override
   void initState() {
@@ -62,6 +64,7 @@ class _LeaderboardFormState extends State<LeaderboardForm> {
               ],
             ),
           ),
+          form.buildErrorMessage(),
           _buildSubmitButton(form),
         ],
       ),

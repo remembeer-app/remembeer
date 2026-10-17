@@ -122,3 +122,6 @@ BadgeDefinition getBadgeById(String id) {
     orElse: () => never('BadgeDefinition with id $id not found.'),
   );
 }
+
+BadgeDefinition? getBadgeByIdOrNull(String id) =>
+    _badgeDefinitions.where((badge) => badge.id == id).firstOrNull;

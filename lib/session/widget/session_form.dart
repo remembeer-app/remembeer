@@ -78,6 +78,7 @@ class _SessionFormState extends State<SessionForm> {
             widget.additionalActions!,
             const Gap(16),
           ],
+          form.buildErrorMessage(),
           _buildSubmitButton(form),
         ],
       ),

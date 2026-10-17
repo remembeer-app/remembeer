@@ -1,13 +1,35 @@
 {
-  "name": "remembeer-firestore-rules",
+  "name": "remembeer",
   "private": true,
   "scripts": {
-    "test": "node --test test/firestore-rules.test.js",
-    "seed": "node scripts/seed_drink_types.mjs"
+    "convex:codegen": "convex codegen",
+    "convex:dev": "convex dev",
+    "convex:generate": "npm run convex:codegen && npm run dartvex:codegen && dart format lib/convex_api",
+    "convex:typecheck": "tsc -p convex/tsconfig.json",
+    "dartvex:codegen": "dart run dartvex_codegen generate --project . --output lib/convex_api --flutter-widgets",
+    "seed:drinks": "convex run drink:seedGlobal",
+    "lint": "oxlint --max-warnings=0 convex scripts",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "oxfmt .",
+    "format:check": "oxfmt --check .",
+    "check": "npm run format:check && npm run lint && npm run convex:typecheck"
+  },
+  "dependencies": {
+    "@convex-dev/better-auth": "0.12.3",
+    "better-auth": "1.6.33",
+    "convex": "^1.46.0",
+    "convex-helpers": "^0.1.124",
+    "fluent-convex": "^0.13.0",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^5.0.0",
-    "firebase": "^12.2.1",
-    "firebase-admin": "^14.5.0"
+    "@types/node": "^24",
+    "oxfmt": "0.73.0",
+    "oxlint": "1.88.0",
+    "oxlint-tsgolint": "7.0.2004",
+    "typescript": "7.0.2"
+  },
+  "engines": {
+    "node": ">=24 <25"
   }
 }

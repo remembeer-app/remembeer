@@ -1,16 +1,13 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:remembeer/app.dart';
 import 'package:remembeer/app_icon/service/app_icon_service.dart';
-import 'package:remembeer/drink/service/drink_service.dart';
-import 'package:remembeer/firebase_options.dart';
+import 'package:remembeer/common/action/notifications.dart';
+import 'package:remembeer/convex_api/api.dart';
+import 'package:remembeer/drink_log/action/add_default_drink_log.dart';
 import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/notification/service/notification_service.dart';
-import 'package:remembeer/routes.dart';
+import 'package:remembeer/location/service/location_service.dart';
 
 const _quickAddChannel = MethodChannel('quick_add_action');
 
@@ -19,28 +16,22 @@ Future<void> main() async {
 
   await dotenv.load(fileName: '.env.client');
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-
-  await GoogleSignIn.instance.initialize(
-    serverClientId: dotenv.env['GOOGLE_AUTH_SERVER_CLIENT_ID'],
-  );
-
   IoCContainer.initialize();
-
-  await get<NotificationService>().initialize();
   get<AppIconService>().initialize();
 
   // For the Android and iOS home screen widgets.
   _quickAddChannel.setMethodCallHandler((call) async {
     if (call.method == 'quickAddPressed') {
-      await get<DrinkService>().addDefaultDrink();
+      try {
+        await addDefaultDrinkLog(
+          api: get<ConvexApi>(),
+          locationService: get<LocationService>(),
+        );
+        showSuccessNotification('Default drink added!');
+      } on Object catch (error) {
+        showNotification(error.toString());
+      }
     }
-  });
-
-  // Whenever the auth state changes, the redirect logic in the router
-  // is reevaluated.
-  FirebaseAuth.instance.authStateChanges().listen((user) {
-    router.refresh();
   });
 
   runApp(const App());

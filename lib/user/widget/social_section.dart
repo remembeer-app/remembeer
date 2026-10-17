@@ -1,22 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
+import 'package:remembeer/convex_api/modules/user.dart';
 import 'package:remembeer/routes.dart';
-import 'package:remembeer/user/model/user_model.dart';
-import 'package:remembeer/user/service/user_stats_service.dart';
 
 class SocialSection extends StatelessWidget {
-  final UserModel user;
+  final String userId;
+  final int friendCount;
   final bool isCurrentUser;
 
-  SocialSection({super.key, required this.user, required this.isCurrentUser});
+  const SocialSection({
+    super.key,
+    required this.userId,
+    required this.friendCount,
+    required this.isCurrentUser,
+    required this.userStats,
+  });
 
-  final _userStatsService = get<UserStatsService>();
+  final StatsResult userStats;
 
   @override
   Widget build(BuildContext context) {
-    final userStats = _userStatsService.fromUser(user);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
@@ -25,17 +28,17 @@ class SocialSection extends StatelessWidget {
           color: userStats.isStreakActive
               ? Colors.orange.shade700
               : Colors.grey,
-          value: userStats.streakDays.toString(),
+          value: userStats.streakDays.toInt().toString(),
           label: 'Day Streak',
         ),
         const Gap(12),
         _buildStatCard(
           icon: Icons.people_alt,
           color: Colors.blue.shade700,
-          value: user.friends.length.toString(),
+          value: friendCount.toString(),
           label: 'Friends',
           onTap: () {
-            final route = UserFriendsRoute(userId: user.id);
+            final route = UserFriendsRoute(userId: userId);
             if (isCurrentUser) {
               route.push<void>(context);
             } else {

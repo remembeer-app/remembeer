@@ -1,0 +1,1538 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND.
+// ignore_for_file: type=lint, unused_element, unused_import, unused_local_variable
+
+import '../runtime.dart';
+import '../schema.dart';
+import '../types.dart';
+
+import 'package:dartvex/dartvex.dart';
+
+class SessionMemberApi {
+  const SessionMemberApi(this._client);
+
+  final ConvexFunctionCaller _client;
+
+  Future<Null> accept({required SessionId sessionId}) async {
+    await _client.mutate(
+      'sessionMember:accept',
+      _encodeAcceptArgs((sessionId: sessionId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<AcceptArgs, void> get acceptMutation =>
+      acceptMutationReference;
+
+  Future<Null> ban({
+    required SessionId sessionId,
+    required UserId userId,
+  }) async {
+    await _client.mutate(
+      'sessionMember:ban',
+      _encodeBanArgs((sessionId: sessionId, userId: userId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<BanArgs, void> get banMutation =>
+      banMutationReference;
+
+  Future<Null> decline({required SessionId sessionId}) async {
+    await _client.mutate(
+      'sessionMember:decline',
+      _encodeDeclineArgs((sessionId: sessionId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<DeclineArgs, void> get declineMutation =>
+      declineMutationReference;
+
+  Future<List<FindInviteeResultItem>> findInvitee({
+    required SessionId sessionId,
+    required String username,
+  }) async {
+    final raw$ = await _client.query(
+      'sessionMember:findInvitee',
+      _encodeFindInviteeArgs((sessionId: sessionId, username: username)),
+    );
+    return expectList(
+      raw$,
+      label: 'FindInviteeResult',
+    ).map((item) => _decodeFindInviteeResultItem(item)).toList();
+  }
+
+  TypedConvexSubscription<List<FindInviteeResultItem>> findInviteeSubscribe({
+    required SessionId sessionId,
+    required String username,
+  }) {
+    final subscription$ = _client.subscribe(
+      'sessionMember:findInvitee',
+      _encodeFindInviteeArgs((sessionId: sessionId, username: username)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<List<FindInviteeResultItem>>(
+            expectList(
+              value,
+              label: 'FindInviteeResult',
+            ).map((item) => _decodeFindInviteeResultItem(item)).toList(),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<List<FindInviteeResultItem>>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<List<FindInviteeResultItem>>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<List<FindInviteeResultItem>>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<FindInviteeArgs, List<FindInviteeResultItem>>
+  get findInviteeQuery => findInviteeQueryReference;
+
+  Future<Null> invite({
+    required SessionId sessionId,
+    required UserId userId,
+  }) async {
+    await _client.mutate(
+      'sessionMember:invite',
+      _encodeInviteArgs((sessionId: sessionId, userId: userId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<InviteArgs, void> get inviteMutation =>
+      inviteMutationReference;
+
+  Future<Null> leave({required SessionId sessionId}) async {
+    await _client.mutate(
+      'sessionMember:leave',
+      _encodeLeaveArgs((sessionId: sessionId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<LeaveArgs, void> get leaveMutation =>
+      leaveMutationReference;
+
+  Future<List<ListForSessionResultItem>> listForSession({
+    required SessionId sessionId,
+  }) async {
+    final raw$ = await _client.query(
+      'sessionMember:listForSession',
+      _encodeListForSessionArgs((sessionId: sessionId)),
+    );
+    return expectList(
+      raw$,
+      label: 'ListForSessionResult',
+    ).map((item) => _decodeListForSessionResultItem(item)).toList();
+  }
+
+  TypedConvexSubscription<List<ListForSessionResultItem>>
+  listForSessionSubscribe({required SessionId sessionId}) {
+    final subscription$ = _client.subscribe(
+      'sessionMember:listForSession',
+      _encodeListForSessionArgs((sessionId: sessionId)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<List<ListForSessionResultItem>>(
+            expectList(
+              value,
+              label: 'ListForSessionResult',
+            ).map((item) => _decodeListForSessionResultItem(item)).toList(),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<List<ListForSessionResultItem>>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<List<ListForSessionResultItem>>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<List<ListForSessionResultItem>>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<ListForSessionArgs, List<ListForSessionResultItem>>
+  get listForSessionQuery => listForSessionQueryReference;
+
+  Future<List<ListInvitationsResultItem>> listInvitations() async {
+    final raw$ = await _client.query(
+      'sessionMember:listInvitations',
+      const <String, dynamic>{},
+    );
+    return expectList(
+      raw$,
+      label: 'ListInvitationsResult',
+    ).map((item) => _decodeListInvitationsResultItem(item)).toList();
+  }
+
+  TypedConvexSubscription<List<ListInvitationsResultItem>>
+  listInvitationsSubscribe() {
+    final subscription$ = _client.subscribe(
+      'sessionMember:listInvitations',
+      const <String, dynamic>{},
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<List<ListInvitationsResultItem>>(
+            expectList(
+              value,
+              label: 'ListInvitationsResult',
+            ).map((item) => _decodeListInvitationsResultItem(item)).toList(),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<List<ListInvitationsResultItem>>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<List<ListInvitationsResultItem>>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<List<ListInvitationsResultItem>>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<NoArgs, List<ListInvitationsResultItem>>
+  get listInvitationsQuery => listInvitationsQueryReference;
+
+  Future<Null> remove({
+    required SessionId sessionId,
+    required UserId userId,
+  }) async {
+    await _client.mutate(
+      'sessionMember:remove',
+      _encodeRemoveArgs((sessionId: sessionId, userId: userId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<RemoveArgs, void> get removeMutation =>
+      removeMutationReference;
+
+  Future<Null> setBeerpongOptIn({
+    required bool optedIn,
+    required SessionId sessionId,
+  }) async {
+    await _client.mutate(
+      'sessionMember:setBeerpongOptIn',
+      _encodeSetBeerpongOptInArgs((optedIn: optedIn, sessionId: sessionId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<SetBeerpongOptInArgs, void>
+  get setBeerpongOptInMutation => setBeerpongOptInMutationReference;
+
+  Future<Null> setClass({
+    required DrinkCategory? selectedClass,
+    required SessionId sessionId,
+    required UserId userId,
+  }) async {
+    await _client.mutate(
+      'sessionMember:setClass',
+      _encodeSetClassArgs((
+        selectedClass: selectedClass,
+        sessionId: sessionId,
+        userId: userId,
+      )),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<SetClassArgs, void> get setClassMutation =>
+      setClassMutationReference;
+
+  Future<Null> setRole({
+    required SessionMemberRole role,
+    required SessionId sessionId,
+    required UserId userId,
+  }) async {
+    await _client.mutate(
+      'sessionMember:setRole',
+      _encodeSetRoleArgs((role: role, sessionId: sessionId, userId: userId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<SetRoleArgs, void> get setRoleMutation =>
+      setRoleMutationReference;
+
+  Future<Null> unban({
+    required SessionId sessionId,
+    required UserId userId,
+  }) async {
+    await _client.mutate(
+      'sessionMember:unban',
+      _encodeUnbanArgs((sessionId: sessionId, userId: userId)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<UnbanArgs, void> get unbanMutation =>
+      unbanMutationReference;
+}
+
+typedef AcceptArgs = ({SessionId sessionId});
+
+Map<String, dynamic> _encodeAcceptArgs(AcceptArgs value$) {
+  final (sessionId: sessionId) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value};
+}
+
+AcceptArgs _decodeAcceptArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'AcceptArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException('Missing required field "sessionId" for AcceptArgs');
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'AcceptArgsSessionId'),
+    ),
+  );
+}
+
+typedef BanArgs = ({SessionId sessionId, UserId userId});
+
+Map<String, dynamic> _encodeBanArgs(BanArgs value$) {
+  final (sessionId: sessionId, userId: userId) = value$;
+  return <String, dynamic>{
+    'sessionId': sessionId.value,
+    'userId': userId.value,
+  };
+}
+
+BanArgs _decodeBanArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'BanArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException('Missing required field "sessionId" for BanArgs');
+  }
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for BanArgs');
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'BanArgsSessionId'),
+    ),
+    userId: UserId(expectString(map['userId'], label: 'BanArgsUserId')),
+  );
+}
+
+typedef DeclineArgs = ({SessionId sessionId});
+
+Map<String, dynamic> _encodeDeclineArgs(DeclineArgs value$) {
+  final (sessionId: sessionId) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value};
+}
+
+DeclineArgs _decodeDeclineArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'DeclineArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException('Missing required field "sessionId" for DeclineArgs');
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'DeclineArgsSessionId'),
+    ),
+  );
+}
+
+typedef FindInviteeResultItem = ({UserId id, String username});
+
+Map<String, dynamic> _encodeFindInviteeResultItem(
+  FindInviteeResultItem value$,
+) {
+  final (id: id, username: username) = value$;
+  return <String, dynamic>{'_id': id.value, 'username': username};
+}
+
+FindInviteeResultItem _decodeFindInviteeResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'FindInviteeResultItem');
+  if (!map.containsKey('_id')) {
+    throw FormatException(
+      'Missing required field "_id" for FindInviteeResultItem',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for FindInviteeResultItem',
+    );
+  }
+  return (
+    id: UserId(expectString(map['_id'], label: 'FindInviteeResultItemId')),
+    username: expectString(
+      map['username'],
+      label: 'FindInviteeResultItemUsername',
+    ),
+  );
+}
+
+typedef FindInviteeArgs = ({SessionId sessionId, String username});
+
+Map<String, dynamic> _encodeFindInviteeArgs(FindInviteeArgs value$) {
+  final (sessionId: sessionId, username: username) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value, 'username': username};
+}
+
+FindInviteeArgs _decodeFindInviteeArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'FindInviteeArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for FindInviteeArgs',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for FindInviteeArgs',
+    );
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'FindInviteeArgsSessionId'),
+    ),
+    username: expectString(map['username'], label: 'FindInviteeArgsUsername'),
+  );
+}
+
+typedef InviteArgs = ({SessionId sessionId, UserId userId});
+
+Map<String, dynamic> _encodeInviteArgs(InviteArgs value$) {
+  final (sessionId: sessionId, userId: userId) = value$;
+  return <String, dynamic>{
+    'sessionId': sessionId.value,
+    'userId': userId.value,
+  };
+}
+
+InviteArgs _decodeInviteArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'InviteArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException('Missing required field "sessionId" for InviteArgs');
+  }
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for InviteArgs');
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'InviteArgsSessionId'),
+    ),
+    userId: UserId(expectString(map['userId'], label: 'InviteArgsUserId')),
+  );
+}
+
+typedef LeaveArgs = ({SessionId sessionId});
+
+Map<String, dynamic> _encodeLeaveArgs(LeaveArgs value$) {
+  final (sessionId: sessionId) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value};
+}
+
+LeaveArgs _decodeLeaveArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'LeaveArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException('Missing required field "sessionId" for LeaveArgs');
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'LeaveArgsSessionId'),
+    ),
+  );
+}
+
+Map<String, dynamic> _encodeSessionMemberStatus(SessionMemberStatus value) {
+  switch (value) {
+    case Invited():
+      return <String, dynamic>{'kind': 'invited'};
+    case Joined():
+      return <String, dynamic>{'kind': 'joined'};
+    case Left():
+      return <String, dynamic>{'kind': 'left'};
+    case Banned():
+      return <String, dynamic>{'kind': 'banned'};
+    case Declined():
+      return <String, dynamic>{'kind': 'declined'};
+  }
+}
+
+SessionMemberStatus _decodeSessionMemberStatus(dynamic raw) {
+  final map = expectMap(raw, label: 'SessionMemberStatus');
+  if (!map.containsKey('kind')) {
+    throw FormatException(
+      'Missing discriminator "kind" for SessionMemberStatus',
+    );
+  }
+  final discriminator = expectString(
+    map['kind'],
+    label: 'SessionMemberStatusKind',
+  );
+  switch (discriminator) {
+    case 'invited':
+      return const Invited();
+    case 'joined':
+      return const Joined();
+    case 'left':
+      return const Left();
+    case 'banned':
+      return const Banned();
+    case 'declined':
+      return const Declined();
+    default:
+      throw FormatException(
+        'Unknown SessionMemberStatus discriminator: $discriminator',
+      );
+  }
+}
+
+Map<String, dynamic> _encodeSessionMemberRole(SessionMemberRole value) {
+  switch (value) {
+    case Member():
+      return <String, dynamic>{'kind': 'member'};
+    case Admin():
+      return <String, dynamic>{'kind': 'admin'};
+  }
+}
+
+SessionMemberRole _decodeSessionMemberRole(dynamic raw) {
+  final map = expectMap(raw, label: 'SessionMemberRole');
+  if (!map.containsKey('kind')) {
+    throw FormatException('Missing discriminator "kind" for SessionMemberRole');
+  }
+  final discriminator = expectString(
+    map['kind'],
+    label: 'SessionMemberRoleKind',
+  );
+  switch (discriminator) {
+    case 'member':
+      return const Member();
+    case 'admin':
+      return const Admin();
+    default:
+      throw FormatException(
+        'Unknown SessionMemberRole discriminator: $discriminator',
+      );
+  }
+}
+
+Map<String, dynamic> _encodeDrinkCategory(DrinkCategory value) {
+  switch (value) {
+    case Beer():
+      return <String, dynamic>{'kind': 'beer'};
+    case Cider():
+      return <String, dynamic>{'kind': 'cider'};
+    case Cocktail():
+      return <String, dynamic>{'kind': 'cocktail'};
+    case Spirit():
+      return <String, dynamic>{'kind': 'spirit'};
+    case Wine():
+      return <String, dynamic>{'kind': 'wine'};
+  }
+}
+
+DrinkCategory _decodeDrinkCategory(dynamic raw) {
+  final map = expectMap(raw, label: 'DrinkCategory');
+  if (!map.containsKey('kind')) {
+    throw FormatException('Missing discriminator "kind" for DrinkCategory');
+  }
+  final discriminator = expectString(map['kind'], label: 'DrinkCategoryKind');
+  switch (discriminator) {
+    case 'beer':
+      return const Beer();
+    case 'cider':
+      return const Cider();
+    case 'cocktail':
+      return const Cocktail();
+    case 'spirit':
+      return const Spirit();
+    case 'wine':
+      return const Wine();
+    default:
+      throw FormatException(
+        'Unknown DrinkCategory discriminator: $discriminator',
+      );
+  }
+}
+
+Map<String, dynamic> _encodeSessionMemberDocument(SessionMemberDocument value) {
+  switch (value) {
+    case SessionMember(
+      sessionId: final sessionId,
+      userId: final userId,
+      sessionMemberStatus: final sessionMemberStatus,
+      sessionMemberRole: final sessionMemberRole,
+      updatedAt: final updatedAt,
+      sessionEndedAt: final sessionEndedAt,
+      sessionDeletedAt: final sessionDeletedAt,
+      id: final id,
+      creationTime: final creationTime,
+    ):
+      return <String, dynamic>{
+        'kind': 'sessionMember',
+        'sessionId': sessionId.value,
+        'userId': userId.value,
+        'sessionMemberStatus': _encodeSessionMemberStatus(sessionMemberStatus),
+        'sessionMemberRole': _encodeSessionMemberRole(sessionMemberRole),
+        'updatedAt': updatedAt,
+        'sessionEndedAt': sessionEndedAt,
+        'sessionDeletedAt': sessionDeletedAt,
+        '_id': id.value,
+        '_creationTime': creationTime,
+      };
+    case PartyMember(
+      sessionId: final sessionId,
+      userId: final userId,
+      sessionMemberStatus: final sessionMemberStatus,
+      sessionMemberRole: final sessionMemberRole,
+      updatedAt: final updatedAt,
+      sessionEndedAt: final sessionEndedAt,
+      sessionDeletedAt: final sessionDeletedAt,
+      selectedClass: final selectedClass,
+      beerpongOptIn: final beerpongOptIn,
+      id: final id,
+      creationTime: final creationTime,
+    ):
+      return <String, dynamic>{
+        'kind': 'partyMember',
+        'sessionId': sessionId.value,
+        'userId': userId.value,
+        'sessionMemberStatus': _encodeSessionMemberStatus(sessionMemberStatus),
+        'sessionMemberRole': _encodeSessionMemberRole(sessionMemberRole),
+        'updatedAt': updatedAt,
+        'sessionEndedAt': sessionEndedAt,
+        'sessionDeletedAt': sessionDeletedAt,
+        'selectedClass': switch (selectedClass) {
+          null => null,
+          final v$ => _encodeDrinkCategory(v$),
+        },
+        'beerpongOptIn': beerpongOptIn,
+        '_id': id.value,
+        '_creationTime': creationTime,
+      };
+  }
+}
+
+SessionMemberDocument _decodeSessionMemberDocument(dynamic raw) {
+  final map = expectMap(raw, label: 'SessionMemberDocument');
+  if (!map.containsKey('kind')) {
+    throw FormatException(
+      'Missing discriminator "kind" for SessionMemberDocument',
+    );
+  }
+  final discriminator = expectString(
+    map['kind'],
+    label: 'SessionMemberDocumentKind',
+  );
+  switch (discriminator) {
+    case 'sessionMember':
+      if (!map.containsKey('sessionId')) {
+        throw FormatException(
+          'Missing required field "sessionId" for SessionMember',
+        );
+      }
+      if (!map.containsKey('userId')) {
+        throw FormatException(
+          'Missing required field "userId" for SessionMember',
+        );
+      }
+      if (!map.containsKey('sessionMemberStatus')) {
+        throw FormatException(
+          'Missing required field "sessionMemberStatus" for SessionMember',
+        );
+      }
+      if (!map.containsKey('sessionMemberRole')) {
+        throw FormatException(
+          'Missing required field "sessionMemberRole" for SessionMember',
+        );
+      }
+      if (!map.containsKey('updatedAt')) {
+        throw FormatException(
+          'Missing required field "updatedAt" for SessionMember',
+        );
+      }
+      if (!map.containsKey('sessionEndedAt')) {
+        throw FormatException(
+          'Missing required field "sessionEndedAt" for SessionMember',
+        );
+      }
+      if (!map.containsKey('sessionDeletedAt')) {
+        throw FormatException(
+          'Missing required field "sessionDeletedAt" for SessionMember',
+        );
+      }
+      if (!map.containsKey('_id')) {
+        throw FormatException('Missing required field "_id" for SessionMember');
+      }
+      if (!map.containsKey('_creationTime')) {
+        throw FormatException(
+          'Missing required field "_creationTime" for SessionMember',
+        );
+      }
+      return SessionMember(
+        sessionId: SessionId(
+          expectString(
+            map['sessionId'],
+            label: 'SessionMemberDocumentSessionId',
+          ),
+        ),
+        userId: UserId(
+          expectString(map['userId'], label: 'SessionMemberDocumentUserId'),
+        ),
+        sessionMemberStatus: _decodeSessionMemberStatus(
+          map['sessionMemberStatus'],
+        ),
+        sessionMemberRole: _decodeSessionMemberRole(map['sessionMemberRole']),
+        updatedAt: expectDouble(
+          map['updatedAt'],
+          label: 'SessionMemberDocumentUpdatedAt',
+        ),
+        sessionEndedAt: map['sessionEndedAt'] == null
+            ? null
+            : expectDouble(
+                map['sessionEndedAt'],
+                label: 'SessionMemberDocumentSessionEndedAt',
+              ),
+        sessionDeletedAt: map['sessionDeletedAt'] == null
+            ? null
+            : expectDouble(
+                map['sessionDeletedAt'],
+                label: 'SessionMemberDocumentSessionDeletedAt',
+              ),
+        id: SessionMemberId(
+          expectString(map['_id'], label: 'SessionMemberDocumentId'),
+        ),
+        creationTime: expectDouble(
+          map['_creationTime'],
+          label: 'SessionMemberDocumentCreationTime',
+        ),
+      );
+    case 'partyMember':
+      if (!map.containsKey('sessionId')) {
+        throw FormatException(
+          'Missing required field "sessionId" for PartyMember',
+        );
+      }
+      if (!map.containsKey('userId')) {
+        throw FormatException(
+          'Missing required field "userId" for PartyMember',
+        );
+      }
+      if (!map.containsKey('sessionMemberStatus')) {
+        throw FormatException(
+          'Missing required field "sessionMemberStatus" for PartyMember',
+        );
+      }
+      if (!map.containsKey('sessionMemberRole')) {
+        throw FormatException(
+          'Missing required field "sessionMemberRole" for PartyMember',
+        );
+      }
+      if (!map.containsKey('updatedAt')) {
+        throw FormatException(
+          'Missing required field "updatedAt" for PartyMember',
+        );
+      }
+      if (!map.containsKey('sessionEndedAt')) {
+        throw FormatException(
+          'Missing required field "sessionEndedAt" for PartyMember',
+        );
+      }
+      if (!map.containsKey('sessionDeletedAt')) {
+        throw FormatException(
+          'Missing required field "sessionDeletedAt" for PartyMember',
+        );
+      }
+      if (!map.containsKey('selectedClass')) {
+        throw FormatException(
+          'Missing required field "selectedClass" for PartyMember',
+        );
+      }
+      if (!map.containsKey('beerpongOptIn')) {
+        throw FormatException(
+          'Missing required field "beerpongOptIn" for PartyMember',
+        );
+      }
+      if (!map.containsKey('_id')) {
+        throw FormatException('Missing required field "_id" for PartyMember');
+      }
+      if (!map.containsKey('_creationTime')) {
+        throw FormatException(
+          'Missing required field "_creationTime" for PartyMember',
+        );
+      }
+      return PartyMember(
+        sessionId: SessionId(
+          expectString(
+            map['sessionId'],
+            label: 'SessionMemberDocumentSessionId',
+          ),
+        ),
+        userId: UserId(
+          expectString(map['userId'], label: 'SessionMemberDocumentUserId'),
+        ),
+        sessionMemberStatus: _decodeSessionMemberStatus(
+          map['sessionMemberStatus'],
+        ),
+        sessionMemberRole: _decodeSessionMemberRole(map['sessionMemberRole']),
+        updatedAt: expectDouble(
+          map['updatedAt'],
+          label: 'SessionMemberDocumentUpdatedAt',
+        ),
+        sessionEndedAt: map['sessionEndedAt'] == null
+            ? null
+            : expectDouble(
+                map['sessionEndedAt'],
+                label: 'SessionMemberDocumentSessionEndedAt',
+              ),
+        sessionDeletedAt: map['sessionDeletedAt'] == null
+            ? null
+            : expectDouble(
+                map['sessionDeletedAt'],
+                label: 'SessionMemberDocumentSessionDeletedAt',
+              ),
+        selectedClass: map['selectedClass'] == null
+            ? null
+            : _decodeDrinkCategory(map['selectedClass']),
+        beerpongOptIn: expectBool(
+          map['beerpongOptIn'],
+          label: 'PartyMemberBeerpongOptIn',
+        ),
+        id: SessionMemberId(
+          expectString(map['_id'], label: 'SessionMemberDocumentId'),
+        ),
+        creationTime: expectDouble(
+          map['_creationTime'],
+          label: 'SessionMemberDocumentCreationTime',
+        ),
+      );
+    default:
+      throw FormatException(
+        'Unknown SessionMemberDocument discriminator: $discriminator',
+      );
+  }
+}
+
+typedef ListForSessionResultItem = ({
+  SessionMemberDocument member,
+  String username,
+});
+
+Map<String, dynamic> _encodeListForSessionResultItem(
+  ListForSessionResultItem value$,
+) {
+  final (member: member, username: username) = value$;
+  return <String, dynamic>{
+    'member': _encodeSessionMemberDocument(member),
+    'username': username,
+  };
+}
+
+ListForSessionResultItem _decodeListForSessionResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ListForSessionResultItem');
+  if (!map.containsKey('member')) {
+    throw FormatException(
+      'Missing required field "member" for ListForSessionResultItem',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for ListForSessionResultItem',
+    );
+  }
+  return (
+    member: _decodeSessionMemberDocument(map['member']),
+    username: expectString(
+      map['username'],
+      label: 'ListForSessionResultItemUsername',
+    ),
+  );
+}
+
+typedef ListForSessionArgs = ({SessionId sessionId});
+
+Map<String, dynamic> _encodeListForSessionArgs(ListForSessionArgs value$) {
+  final (sessionId: sessionId) = value$;
+  return <String, dynamic>{'sessionId': sessionId.value};
+}
+
+ListForSessionArgs _decodeListForSessionArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'ListForSessionArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for ListForSessionArgs',
+    );
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'ListForSessionArgsSessionId'),
+    ),
+  );
+}
+
+Map<String, dynamic> _encodePartyModules(PartyModules value$) {
+  final (
+    socialQuestsEnabled: socialQuestsEnabled,
+    partyChallengesEnabled: partyChallengesEnabled,
+    beerpongEnabled: beerpongEnabled,
+  ) = value$;
+  return <String, dynamic>{
+    'socialQuestsEnabled': socialQuestsEnabled,
+    'partyChallengesEnabled': partyChallengesEnabled,
+    'beerpongEnabled': beerpongEnabled,
+  };
+}
+
+PartyModules _decodePartyModules(dynamic raw) {
+  final map = expectMap(raw, label: 'PartyModules');
+  if (!map.containsKey('socialQuestsEnabled')) {
+    throw FormatException(
+      'Missing required field "socialQuestsEnabled" for PartyModules',
+    );
+  }
+  if (!map.containsKey('partyChallengesEnabled')) {
+    throw FormatException(
+      'Missing required field "partyChallengesEnabled" for PartyModules',
+    );
+  }
+  if (!map.containsKey('beerpongEnabled')) {
+    throw FormatException(
+      'Missing required field "beerpongEnabled" for PartyModules',
+    );
+  }
+  return (
+    socialQuestsEnabled: expectBool(
+      map['socialQuestsEnabled'],
+      label: 'PartyModulesSocialQuestsEnabled',
+    ),
+    partyChallengesEnabled: expectBool(
+      map['partyChallengesEnabled'],
+      label: 'PartyModulesPartyChallengesEnabled',
+    ),
+    beerpongEnabled: expectBool(
+      map['beerpongEnabled'],
+      label: 'PartyModulesBeerpongEnabled',
+    ),
+  );
+}
+
+Map<String, dynamic> _encodePartyQuestSchedule(PartyQuestSchedule value$) {
+  final (
+    minIntervalMinutes: minIntervalMinutes,
+    maxIntervalMinutes: maxIntervalMinutes,
+    defaultDurationMinutes: defaultDurationMinutes,
+    nextQuestAt: nextQuestAt,
+    scheduledFunctionId: scheduledFunctionId,
+  ) = value$;
+  return <String, dynamic>{
+    'minIntervalMinutes': minIntervalMinutes,
+    'maxIntervalMinutes': maxIntervalMinutes,
+    'defaultDurationMinutes': defaultDurationMinutes,
+    'nextQuestAt': nextQuestAt,
+    'scheduledFunctionId': switch (scheduledFunctionId) {
+      null => null,
+      final v$ => v$.value,
+    },
+  };
+}
+
+PartyQuestSchedule _decodePartyQuestSchedule(dynamic raw) {
+  final map = expectMap(raw, label: 'PartyQuestSchedule');
+  if (!map.containsKey('minIntervalMinutes')) {
+    throw FormatException(
+      'Missing required field "minIntervalMinutes" for PartyQuestSchedule',
+    );
+  }
+  if (!map.containsKey('maxIntervalMinutes')) {
+    throw FormatException(
+      'Missing required field "maxIntervalMinutes" for PartyQuestSchedule',
+    );
+  }
+  if (!map.containsKey('defaultDurationMinutes')) {
+    throw FormatException(
+      'Missing required field "defaultDurationMinutes" for PartyQuestSchedule',
+    );
+  }
+  if (!map.containsKey('nextQuestAt')) {
+    throw FormatException(
+      'Missing required field "nextQuestAt" for PartyQuestSchedule',
+    );
+  }
+  if (!map.containsKey('scheduledFunctionId')) {
+    throw FormatException(
+      'Missing required field "scheduledFunctionId" for PartyQuestSchedule',
+    );
+  }
+  return (
+    minIntervalMinutes: expectDouble(
+      map['minIntervalMinutes'],
+      label: 'PartyQuestScheduleMinIntervalMinutes',
+    ),
+    maxIntervalMinutes: expectDouble(
+      map['maxIntervalMinutes'],
+      label: 'PartyQuestScheduleMaxIntervalMinutes',
+    ),
+    defaultDurationMinutes: expectDouble(
+      map['defaultDurationMinutes'],
+      label: 'PartyQuestScheduleDefaultDurationMinutes',
+    ),
+    nextQuestAt: map['nextQuestAt'] == null
+        ? null
+        : expectDouble(
+            map['nextQuestAt'],
+            label: 'PartyQuestScheduleNextQuestAt',
+          ),
+    scheduledFunctionId: map['scheduledFunctionId'] == null
+        ? null
+        : ScheduledFunctionsId(
+            expectString(
+              map['scheduledFunctionId'],
+              label: 'PartyQuestScheduleScheduledFunctionId',
+            ),
+          ),
+  );
+}
+
+Map<String, dynamic> _encodeSessionDocument(SessionDocument value) {
+  switch (value) {
+    case Session(
+      ownerId: final ownerId,
+      name: final name,
+      description: final description,
+      startedAt: final startedAt,
+      endedAt: final endedAt,
+      updatedAt: final updatedAt,
+      deletedAt: final deletedAt,
+      id: final id,
+      creationTime: final creationTime,
+    ):
+      return <String, dynamic>{
+        'kind': 'session',
+        'ownerId': ownerId.value,
+        'name': name,
+        'description': description,
+        'startedAt': startedAt,
+        'endedAt': endedAt,
+        'updatedAt': updatedAt,
+        'deletedAt': deletedAt,
+        '_id': id.value,
+        '_creationTime': creationTime,
+      };
+    case Party(
+      ownerId: final ownerId,
+      name: final name,
+      description: final description,
+      startedAt: final startedAt,
+      endedAt: final endedAt,
+      updatedAt: final updatedAt,
+      deletedAt: final deletedAt,
+      activatedAt: final activatedAt,
+      activatedByUserId: final activatedByUserId,
+      modules: final modules,
+      questSchedule: final questSchedule,
+      id: final id,
+      creationTime: final creationTime,
+    ):
+      return <String, dynamic>{
+        'kind': 'party',
+        'ownerId': ownerId.value,
+        'name': name,
+        'description': description,
+        'startedAt': startedAt,
+        'endedAt': endedAt,
+        'updatedAt': updatedAt,
+        'deletedAt': deletedAt,
+        'activatedAt': activatedAt,
+        'activatedByUserId': activatedByUserId.value,
+        'modules': _encodePartyModules(modules),
+        'questSchedule': _encodePartyQuestSchedule(questSchedule),
+        '_id': id.value,
+        '_creationTime': creationTime,
+      };
+  }
+}
+
+SessionDocument _decodeSessionDocument(dynamic raw) {
+  final map = expectMap(raw, label: 'SessionDocument');
+  if (!map.containsKey('kind')) {
+    throw FormatException('Missing discriminator "kind" for SessionDocument');
+  }
+  final discriminator = expectString(map['kind'], label: 'SessionDocumentKind');
+  switch (discriminator) {
+    case 'session':
+      if (!map.containsKey('ownerId')) {
+        throw FormatException('Missing required field "ownerId" for Session');
+      }
+      if (!map.containsKey('name')) {
+        throw FormatException('Missing required field "name" for Session');
+      }
+      if (!map.containsKey('description')) {
+        throw FormatException(
+          'Missing required field "description" for Session',
+        );
+      }
+      if (!map.containsKey('startedAt')) {
+        throw FormatException('Missing required field "startedAt" for Session');
+      }
+      if (!map.containsKey('endedAt')) {
+        throw FormatException('Missing required field "endedAt" for Session');
+      }
+      if (!map.containsKey('updatedAt')) {
+        throw FormatException('Missing required field "updatedAt" for Session');
+      }
+      if (!map.containsKey('deletedAt')) {
+        throw FormatException('Missing required field "deletedAt" for Session');
+      }
+      if (!map.containsKey('_id')) {
+        throw FormatException('Missing required field "_id" for Session');
+      }
+      if (!map.containsKey('_creationTime')) {
+        throw FormatException(
+          'Missing required field "_creationTime" for Session',
+        );
+      }
+      return Session(
+        ownerId: UserId(
+          expectString(map['ownerId'], label: 'SessionDocumentOwnerId'),
+        ),
+        name: expectString(map['name'], label: 'SessionDocumentName'),
+        description: expectString(
+          map['description'],
+          label: 'SessionDocumentDescription',
+        ),
+        startedAt: expectDouble(
+          map['startedAt'],
+          label: 'SessionDocumentStartedAt',
+        ),
+        endedAt: map['endedAt'] == null
+            ? null
+            : expectDouble(map['endedAt'], label: 'SessionDocumentEndedAt'),
+        updatedAt: expectDouble(
+          map['updatedAt'],
+          label: 'SessionDocumentUpdatedAt',
+        ),
+        deletedAt: map['deletedAt'] == null
+            ? null
+            : expectDouble(map['deletedAt'], label: 'SessionDocumentDeletedAt'),
+        id: SessionId(expectString(map['_id'], label: 'SessionDocumentId')),
+        creationTime: expectDouble(
+          map['_creationTime'],
+          label: 'SessionDocumentCreationTime',
+        ),
+      );
+    case 'party':
+      if (!map.containsKey('ownerId')) {
+        throw FormatException('Missing required field "ownerId" for Party');
+      }
+      if (!map.containsKey('name')) {
+        throw FormatException('Missing required field "name" for Party');
+      }
+      if (!map.containsKey('description')) {
+        throw FormatException('Missing required field "description" for Party');
+      }
+      if (!map.containsKey('startedAt')) {
+        throw FormatException('Missing required field "startedAt" for Party');
+      }
+      if (!map.containsKey('endedAt')) {
+        throw FormatException('Missing required field "endedAt" for Party');
+      }
+      if (!map.containsKey('updatedAt')) {
+        throw FormatException('Missing required field "updatedAt" for Party');
+      }
+      if (!map.containsKey('deletedAt')) {
+        throw FormatException('Missing required field "deletedAt" for Party');
+      }
+      if (!map.containsKey('activatedAt')) {
+        throw FormatException('Missing required field "activatedAt" for Party');
+      }
+      if (!map.containsKey('activatedByUserId')) {
+        throw FormatException(
+          'Missing required field "activatedByUserId" for Party',
+        );
+      }
+      if (!map.containsKey('modules')) {
+        throw FormatException('Missing required field "modules" for Party');
+      }
+      if (!map.containsKey('questSchedule')) {
+        throw FormatException(
+          'Missing required field "questSchedule" for Party',
+        );
+      }
+      if (!map.containsKey('_id')) {
+        throw FormatException('Missing required field "_id" for Party');
+      }
+      if (!map.containsKey('_creationTime')) {
+        throw FormatException(
+          'Missing required field "_creationTime" for Party',
+        );
+      }
+      return Party(
+        ownerId: UserId(
+          expectString(map['ownerId'], label: 'SessionDocumentOwnerId'),
+        ),
+        name: expectString(map['name'], label: 'SessionDocumentName'),
+        description: expectString(
+          map['description'],
+          label: 'SessionDocumentDescription',
+        ),
+        startedAt: expectDouble(
+          map['startedAt'],
+          label: 'SessionDocumentStartedAt',
+        ),
+        endedAt: map['endedAt'] == null
+            ? null
+            : expectDouble(map['endedAt'], label: 'SessionDocumentEndedAt'),
+        updatedAt: expectDouble(
+          map['updatedAt'],
+          label: 'SessionDocumentUpdatedAt',
+        ),
+        deletedAt: map['deletedAt'] == null
+            ? null
+            : expectDouble(map['deletedAt'], label: 'SessionDocumentDeletedAt'),
+        activatedAt: expectDouble(
+          map['activatedAt'],
+          label: 'PartyActivatedAt',
+        ),
+        activatedByUserId: UserId(
+          expectString(
+            map['activatedByUserId'],
+            label: 'PartyActivatedByUserId',
+          ),
+        ),
+        modules: _decodePartyModules(map['modules']),
+        questSchedule: _decodePartyQuestSchedule(map['questSchedule']),
+        id: SessionId(expectString(map['_id'], label: 'SessionDocumentId')),
+        creationTime: expectDouble(
+          map['_creationTime'],
+          label: 'SessionDocumentCreationTime',
+        ),
+      );
+    default:
+      throw FormatException(
+        'Unknown SessionDocument discriminator: $discriminator',
+      );
+  }
+}
+
+typedef ListInvitationsResultItem = ({
+  SessionMemberDocument member,
+  SessionDocument session,
+});
+
+Map<String, dynamic> _encodeListInvitationsResultItem(
+  ListInvitationsResultItem value$,
+) {
+  final (member: member, session: session) = value$;
+  return <String, dynamic>{
+    'member': _encodeSessionMemberDocument(member),
+    'session': _encodeSessionDocument(session),
+  };
+}
+
+ListInvitationsResultItem _decodeListInvitationsResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'ListInvitationsResultItem');
+  if (!map.containsKey('member')) {
+    throw FormatException(
+      'Missing required field "member" for ListInvitationsResultItem',
+    );
+  }
+  if (!map.containsKey('session')) {
+    throw FormatException(
+      'Missing required field "session" for ListInvitationsResultItem',
+    );
+  }
+  return (
+    member: _decodeSessionMemberDocument(map['member']),
+    session: _decodeSessionDocument(map['session']),
+  );
+}
+
+typedef RemoveArgs = ({SessionId sessionId, UserId userId});
+
+Map<String, dynamic> _encodeRemoveArgs(RemoveArgs value$) {
+  final (sessionId: sessionId, userId: userId) = value$;
+  return <String, dynamic>{
+    'sessionId': sessionId.value,
+    'userId': userId.value,
+  };
+}
+
+RemoveArgs _decodeRemoveArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'RemoveArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException('Missing required field "sessionId" for RemoveArgs');
+  }
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for RemoveArgs');
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'RemoveArgsSessionId'),
+    ),
+    userId: UserId(expectString(map['userId'], label: 'RemoveArgsUserId')),
+  );
+}
+
+typedef SetBeerpongOptInArgs = ({bool optedIn, SessionId sessionId});
+
+Map<String, dynamic> _encodeSetBeerpongOptInArgs(SetBeerpongOptInArgs value$) {
+  final (optedIn: optedIn, sessionId: sessionId) = value$;
+  return <String, dynamic>{'optedIn': optedIn, 'sessionId': sessionId.value};
+}
+
+SetBeerpongOptInArgs _decodeSetBeerpongOptInArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SetBeerpongOptInArgs');
+  if (!map.containsKey('optedIn')) {
+    throw FormatException(
+      'Missing required field "optedIn" for SetBeerpongOptInArgs',
+    );
+  }
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for SetBeerpongOptInArgs',
+    );
+  }
+  return (
+    optedIn: expectBool(map['optedIn'], label: 'SetBeerpongOptInArgsOptedIn'),
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'SetBeerpongOptInArgsSessionId'),
+    ),
+  );
+}
+
+typedef SetClassArgs = ({
+  DrinkCategory? selectedClass,
+  SessionId sessionId,
+  UserId userId,
+});
+
+Map<String, dynamic> _encodeSetClassArgs(SetClassArgs value$) {
+  final (selectedClass: selectedClass, sessionId: sessionId, userId: userId) =
+      value$;
+  return <String, dynamic>{
+    'selectedClass': switch (selectedClass) {
+      null => null,
+      final v$ => _encodeDrinkCategory(v$),
+    },
+    'sessionId': sessionId.value,
+    'userId': userId.value,
+  };
+}
+
+SetClassArgs _decodeSetClassArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SetClassArgs');
+  if (!map.containsKey('selectedClass')) {
+    throw FormatException(
+      'Missing required field "selectedClass" for SetClassArgs',
+    );
+  }
+  if (!map.containsKey('sessionId')) {
+    throw FormatException(
+      'Missing required field "sessionId" for SetClassArgs',
+    );
+  }
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for SetClassArgs');
+  }
+  return (
+    selectedClass: map['selectedClass'] == null
+        ? null
+        : _decodeDrinkCategory(map['selectedClass']),
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'SetClassArgsSessionId'),
+    ),
+    userId: UserId(expectString(map['userId'], label: 'SetClassArgsUserId')),
+  );
+}
+
+typedef SetRoleArgs = ({
+  SessionMemberRole role,
+  SessionId sessionId,
+  UserId userId,
+});
+
+Map<String, dynamic> _encodeSetRoleArgs(SetRoleArgs value$) {
+  final (role: role, sessionId: sessionId, userId: userId) = value$;
+  return <String, dynamic>{
+    'role': _encodeSessionMemberRole(role),
+    'sessionId': sessionId.value,
+    'userId': userId.value,
+  };
+}
+
+SetRoleArgs _decodeSetRoleArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SetRoleArgs');
+  if (!map.containsKey('role')) {
+    throw FormatException('Missing required field "role" for SetRoleArgs');
+  }
+  if (!map.containsKey('sessionId')) {
+    throw FormatException('Missing required field "sessionId" for SetRoleArgs');
+  }
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for SetRoleArgs');
+  }
+  return (
+    role: _decodeSessionMemberRole(map['role']),
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'SetRoleArgsSessionId'),
+    ),
+    userId: UserId(expectString(map['userId'], label: 'SetRoleArgsUserId')),
+  );
+}
+
+typedef UnbanArgs = ({SessionId sessionId, UserId userId});
+
+Map<String, dynamic> _encodeUnbanArgs(UnbanArgs value$) {
+  final (sessionId: sessionId, userId: userId) = value$;
+  return <String, dynamic>{
+    'sessionId': sessionId.value,
+    'userId': userId.value,
+  };
+}
+
+UnbanArgs _decodeUnbanArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UnbanArgs');
+  if (!map.containsKey('sessionId')) {
+    throw FormatException('Missing required field "sessionId" for UnbanArgs');
+  }
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for UnbanArgs');
+  }
+  return (
+    sessionId: SessionId(
+      expectString(map['sessionId'], label: 'UnbanArgsSessionId'),
+    ),
+    userId: UserId(expectString(map['userId'], label: 'UnbanArgsUserId')),
+  );
+}
+
+final ConvexMutationReference<AcceptArgs, void> acceptMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:accept',
+      encode: (args) => _encodeAcceptArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexMutationReference<BanArgs, void> banMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:ban',
+      encode: (args) => _encodeBanArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexMutationReference<DeclineArgs, void> declineMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:decline',
+      encode: (args) => _encodeDeclineArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexQueryReference<FindInviteeArgs, List<FindInviteeResultItem>>
+findInviteeQueryReference = ConvexQueryReference(
+  name: 'sessionMember:findInvitee',
+  encode: (args) => _encodeFindInviteeArgs(args),
+  decodeArgs: (raw) => _decodeFindInviteeArgs(raw),
+  decode: (raw) => expectList(
+    raw,
+    label: 'FindInviteeResult',
+  ).map((item) => _decodeFindInviteeResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodeFindInviteeResultItem(item)).toList(),
+);
+
+final ConvexMutationReference<InviteArgs, void> inviteMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:invite',
+      encode: (args) => _encodeInviteArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexMutationReference<LeaveArgs, void> leaveMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:leave',
+      encode: (args) => _encodeLeaveArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexQueryReference<ListForSessionArgs, List<ListForSessionResultItem>>
+listForSessionQueryReference = ConvexQueryReference(
+  name: 'sessionMember:listForSession',
+  encode: (args) => _encodeListForSessionArgs(args),
+  decodeArgs: (raw) => _decodeListForSessionArgs(raw),
+  decode: (raw) => expectList(
+    raw,
+    label: 'ListForSessionResult',
+  ).map((item) => _decodeListForSessionResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodeListForSessionResultItem(item)).toList(),
+);
+
+final ConvexQueryReference<NoArgs, List<ListInvitationsResultItem>>
+listInvitationsQueryReference = ConvexQueryReference(
+  name: 'sessionMember:listInvitations',
+  encode: (args) => const <String, dynamic>{},
+  decodeArgs: (raw) => const NoArgs(),
+  decode: (raw) => expectList(
+    raw,
+    label: 'ListInvitationsResult',
+  ).map((item) => _decodeListInvitationsResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodeListInvitationsResultItem(item)).toList(),
+);
+
+final ConvexMutationReference<RemoveArgs, void> removeMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:remove',
+      encode: (args) => _encodeRemoveArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexMutationReference<SetBeerpongOptInArgs, void>
+setBeerpongOptInMutationReference = ConvexMutationReference(
+  name: 'sessionMember:setBeerpongOptIn',
+  encode: (args) => _encodeSetBeerpongOptInArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<SetClassArgs, void> setClassMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:setClass',
+      encode: (args) => _encodeSetClassArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexMutationReference<SetRoleArgs, void> setRoleMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:setRole',
+      encode: (args) => _encodeSetRoleArgs(args),
+      decode: (raw) => null,
+    );
+
+final ConvexMutationReference<UnbanArgs, void> unbanMutationReference =
+    ConvexMutationReference(
+      name: 'sessionMember:unban',
+      encode: (args) => _encodeUnbanArgs(args),
+      decode: (raw) => null,
+    );

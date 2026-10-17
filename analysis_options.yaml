@@ -4,7 +4,6 @@ analyzer:
   exclude:
     - build/**
     - "**/*.g.dart"
-    - "**/*.freezed.dart"
     - android/**
     - ios/**
     - web/**
@@ -119,6 +118,5 @@ linter:
     use_raw_strings: true
     use_setters_to_change_properties: true
     use_string_buffers: true
-    use_test_throws_matchers: true
     use_to_and_as_if_applicable: true
     use_truncating_division: true

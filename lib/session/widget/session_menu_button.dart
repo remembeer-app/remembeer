@@ -15,11 +15,6 @@ class SessionMenuButton extends StatelessWidget {
         switch (value) {
           case 'create':
             const CreateSessionRoute().push<void>(context);
-          case 'summary':
-            const SessionSummaryRoute().push<void>(context);
-          case 'signature':
-            // TODO(ohtenkay): Implement signature drinks
-            break;
           case 'manage':
             const SessionManagementRoute().push<void>(context);
         }
@@ -30,22 +25,6 @@ class SessionMenuButton extends StatelessWidget {
           child: ListTile(
             leading: Icon(Icons.add),
             title: Text('Create Session'),
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'summary',
-          child: ListTile(
-            leading: Icon(Icons.summarize),
-            title: Text('Generate Summary'),
-            contentPadding: EdgeInsets.zero,
-          ),
-        ),
-        const PopupMenuItem(
-          value: 'signature',
-          child: ListTile(
-            leading: Icon(Icons.local_bar),
-            title: Text('Signature Drinks'),
             contentPadding: EdgeInsets.zero,
           ),
         ),

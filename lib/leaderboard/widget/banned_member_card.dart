@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:remembeer/avatar/widget/user_avatar.dart';
-import 'package:remembeer/user/model/user_model.dart';
+import 'package:remembeer/convex_api/modules/leaderboard.dart';
 
 class BannedMemberCard extends StatelessWidget {
-  final UserModel user;
-  final VoidCallback onUnban;
+  final GetTypeResultBannedMembersItem user;
+  final VoidCallback? onUnban;
 
   const BannedMemberCard({
     super.key,
@@ -18,7 +18,7 @@ class BannedMemberCard extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: UserAvatar(user: user),
+        leading: UserAvatar(avatarUrl: user.avatarUrl),
         title: Text(
           user.username,
           style: const TextStyle(fontWeight: FontWeight.bold),

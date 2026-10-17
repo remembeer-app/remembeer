@@ -4,4 +4,6 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- TODO(ohtenkay): Remove once the app uses an HTTPS Convex endpoint. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

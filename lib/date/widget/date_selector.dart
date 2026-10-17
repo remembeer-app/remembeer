@@ -2,60 +2,56 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:remembeer/common/enum/swipe_direction.dart';
 import 'package:remembeer/common/formatter/time_formatter.dart';
-import 'package:remembeer/common/widget/async_builder.dart';
-import 'package:remembeer/date/service/date_service.dart';
 import 'package:remembeer/date/type/date_state.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
 
 class DateSelector extends StatelessWidget {
-  DateSelector({super.key});
+  final DateState dateState;
+  final ValueChanged<DateTime?> onDateChanged;
 
-  final _dateService = get<DateService>();
+  const DateSelector({
+    super.key,
+    required this.dateState,
+    required this.onDateChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return AsyncBuilder<DateState>(
-      stream: _dateService.selectedDateStateStream,
-      builder: (context, dateState) {
-        final isToday = DateUtils.isSameDay(
-          dateState.selectedDate,
-          dateState.effectiveToday,
-        );
+    final isToday = DateUtils.isSameDay(
+      dateState.selectedDate,
+      dateState.effectiveToday,
+    );
 
-        final theme = Theme.of(context);
+    final theme = Theme.of(context);
 
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          elevation: 0,
-          color: theme.colorScheme.surfaceContainerHighest,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(color: theme.colorScheme.outlineVariant),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: InkWell(
-            onTap: () => _showDatePicker(context, dateState),
-            borderRadius: BorderRadius.circular(12),
-            child: Padding(
-              padding: const EdgeInsets.all(4),
-              child: GestureDetector(
-                onHorizontalDragEnd: (details) =>
-                    _handleSwipe(details, isToday),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildChevron(direction: SwipeDirection.left),
-                    _buildDateDisplay(dateState, context, isToday),
-                    _buildChevron(
-                      direction: SwipeDirection.right,
-                      enabled: !isToday,
-                    ),
-                  ],
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      elevation: 0,
+      color: theme.colorScheme.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: theme.colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: InkWell(
+        onTap: () => _showDatePicker(context, dateState),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(4),
+          child: GestureDetector(
+            onHorizontalDragEnd: (details) => _handleSwipe(details, isToday),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _buildChevron(direction: SwipeDirection.left),
+                _buildDateDisplay(dateState, context, isToday),
+                _buildChevron(
+                  direction: SwipeDirection.right,
+                  enabled: !isToday,
                 ),
-              ),
+              ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -89,7 +85,7 @@ class DateSelector extends StatelessWidget {
 
   Widget _buildReturnToToday(BuildContext context) {
     return InkWell(
-      onTap: _dateService.goToToday,
+      onTap: () => onDateChanged(null),
       borderRadius: BorderRadius.circular(12),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
@@ -109,8 +105,8 @@ class DateSelector extends StatelessWidget {
     bool enabled = true,
   }) {
     final (icon, moveFunction) = switch (direction) {
-      SwipeDirection.left => (Icons.chevron_left, _dateService.previousDay),
-      SwipeDirection.right => (Icons.chevron_right, _dateService.nextDay),
+      SwipeDirection.left => (Icons.chevron_left, () => _moveDate(-1)),
+      SwipeDirection.right => (Icons.chevron_right, () => _moveDate(1)),
     };
 
     return IconButton(
@@ -125,17 +121,16 @@ class DateSelector extends StatelessWidget {
     BuildContext context,
     DateState dateState,
   ) async {
-    // TODO(ohtenkay): Try out a package like https://pub.dev/packages/syncfusion_flutter_datepicker
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: dateState.selectedDate,
       firstDate: DateTime(2020),
       lastDate: dateState.effectiveToday,
-      currentDate: dateState.selectedDate,
+      currentDate: dateState.effectiveToday,
     );
 
     if (pickedDate != null) {
-      _dateService.setDate(pickedDate);
+      onDateChanged(pickedDate);
     }
   }
 
@@ -143,15 +138,18 @@ class DateSelector extends StatelessWidget {
     return formatRelativeDay(dateState.selectedDate, dateState.effectiveToday);
   }
 
+  void _moveDate(int days) =>
+      onDateChanged(dateState.selectedDate.add(Duration(days: days)));
+
   void _handleSwipe(DragEndDetails details, bool isToday) {
     if (details.primaryVelocity == null) {
       return;
     }
 
     if (details.primaryVelocity! > 0) {
-      _dateService.previousDay();
+      _moveDate(-1);
     } else if (details.primaryVelocity! < 0 && !isToday) {
-      _dateService.nextDay();
+      _moveDate(1);
     }
   }
 }

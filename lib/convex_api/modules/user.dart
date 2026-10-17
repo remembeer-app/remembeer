@@ -1,0 +1,1336 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND.
+// ignore_for_file: type=lint, unused_element, unused_import, unused_local_variable
+
+import '../runtime.dart';
+import '../schema.dart';
+
+import 'package:dartvex/dartvex.dart';
+
+class UserApi {
+  const UserApi(this._client);
+
+  final ConvexFunctionCaller _client;
+
+  Future<CurrentResult> current() async {
+    final raw$ = await _client.query('user:current', const <String, dynamic>{});
+    return _decodeCurrentResult(raw$);
+  }
+
+  TypedConvexSubscription<CurrentResult> currentSubscribe() {
+    final subscription$ = _client.subscribe(
+      'user:current',
+      const <String, dynamic>{},
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<CurrentResult>(_decodeCurrentResult(value));
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<CurrentResult>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<CurrentResult>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<CurrentResult>(subscription$, typedStream$);
+  }
+
+  ConvexQueryReference<NoArgs, CurrentResult> get currentQuery =>
+      currentQueryReference;
+
+  Future<CurrentDayConsumptionResult> currentDayConsumption({
+    Optional<double> refreshAt = const Optional.absent(),
+  }) async {
+    final raw$ = await _client.query(
+      'user:currentDayConsumption',
+      _encodeCurrentDayConsumptionArgs((refreshAt: refreshAt)),
+    );
+    return _decodeCurrentDayConsumptionResult(raw$);
+  }
+
+  TypedConvexSubscription<CurrentDayConsumptionResult>
+  currentDayConsumptionSubscribe({
+    Optional<double> refreshAt = const Optional.absent(),
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:currentDayConsumption',
+      _encodeCurrentDayConsumptionArgs((refreshAt: refreshAt)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<CurrentDayConsumptionResult>(
+            _decodeCurrentDayConsumptionResult(value),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<CurrentDayConsumptionResult>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<CurrentDayConsumptionResult>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<CurrentDayConsumptionResult>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<CurrentDayConsumptionArgs, CurrentDayConsumptionResult>
+  get currentDayConsumptionQuery => currentDayConsumptionQueryReference;
+
+  Future<Null> deleteCurrent({required String password}) async {
+    await _client.mutate(
+      'user:deleteCurrent',
+      _encodeDeleteCurrentArgs((password: password)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<DeleteCurrentArgs, void> get deleteCurrentMutation =>
+      deleteCurrentMutationReference;
+
+  Future<UserId> ensureCurrent({
+    Optional<String> timeZone = const Optional.absent(),
+  }) async {
+    final raw$ = await _client.mutate(
+      'user:ensureCurrent',
+      _encodeEnsureCurrentArgs((timeZone: timeZone)),
+    );
+    return UserId(expectString(raw$, label: 'EnsureCurrentResult'));
+  }
+
+  ConvexMutationReference<EnsureCurrentArgs, UserId>
+  get ensureCurrentMutation => ensureCurrentMutationReference;
+
+  Future<String> generateAvatarUploadUrl() async {
+    final raw$ = await _client.mutate(
+      'user:generateAvatarUploadUrl',
+      const <String, dynamic>{},
+    );
+    return expectString(raw$, label: 'GenerateAvatarUploadUrlResult');
+  }
+
+  ConvexMutationReference<NoArgs, String> get generateAvatarUploadUrlMutation =>
+      generateAvatarUploadUrlMutationReference;
+
+  Future<GetTypeResult> getValue({required UserId userId}) async {
+    final raw$ = await _client.query(
+      'user:get',
+      _encodeGetTypeArgs((userId: userId)),
+    );
+    return _decodeGetTypeResult(raw$);
+  }
+
+  TypedConvexSubscription<GetTypeResult> getValueSubscribe({
+    required UserId userId,
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:get',
+      _encodeGetTypeArgs((userId: userId)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<GetTypeResult>(_decodeGetTypeResult(value));
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<GetTypeResult>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<GetTypeResult>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<GetTypeResult>(subscription$, typedStream$);
+  }
+
+  ConvexQueryReference<GetTypeArgs, GetTypeResult> get getValueQuery =>
+      getValueQueryReference;
+
+  Future<List<SearchResultItem>> search({required String query}) async {
+    final raw$ = await _client.query(
+      'user:search',
+      _encodeSearchArgs((query: query)),
+    );
+    return expectList(
+      raw$,
+      label: 'SearchResult',
+    ).map((item) => _decodeSearchResultItem(item)).toList();
+  }
+
+  TypedConvexSubscription<List<SearchResultItem>> searchSubscribe({
+    required String query,
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:search',
+      _encodeSearchArgs((query: query)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<List<SearchResultItem>>(
+            expectList(
+              value,
+              label: 'SearchResult',
+            ).map((item) => _decodeSearchResultItem(item)).toList(),
+          );
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<List<SearchResultItem>>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<List<SearchResultItem>>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<List<SearchResultItem>>(
+      subscription$,
+      typedStream$,
+    );
+  }
+
+  ConvexQueryReference<SearchArgs, List<SearchResultItem>> get searchQuery =>
+      searchQueryReference;
+
+  Future<StatsResult> stats({
+    Optional<double> refreshAt = const Optional.absent(),
+    required UserId userId,
+  }) async {
+    final raw$ = await _client.query(
+      'user:stats',
+      _encodeStatsArgs((refreshAt: refreshAt, userId: userId)),
+    );
+    return _decodeStatsResult(raw$);
+  }
+
+  TypedConvexSubscription<StatsResult> statsSubscribe({
+    Optional<double> refreshAt = const Optional.absent(),
+    required UserId userId,
+  }) {
+    final subscription$ = _client.subscribe(
+      'user:stats',
+      _encodeStatsArgs((refreshAt: refreshAt, userId: userId)),
+    );
+    final typedStream$ = subscription$.stream.map((event) {
+      switch (event) {
+        case QuerySuccess(:final value):
+          return TypedQuerySuccess<StatsResult>(_decodeStatsResult(value));
+        case QueryLoading(:final hasPendingWrites):
+          return TypedQueryLoading<StatsResult>(
+            hasPendingWrites: hasPendingWrites,
+          );
+        case QueryError(:final message, :final data, :final logLines):
+          return TypedQueryError<StatsResult>(
+            message,
+            data: data,
+            logLines: logLines,
+          );
+      }
+    });
+    return TypedConvexSubscription<StatsResult>(subscription$, typedStream$);
+  }
+
+  ConvexQueryReference<StatsArgs, StatsResult> get statsQuery =>
+      statsQueryReference;
+
+  Future<Null> updateAccentColor({
+    required UpdateAccentColorArgsAccentColor accentColor,
+  }) async {
+    await _client.mutate(
+      'user:updateAccentColor',
+      _encodeUpdateAccentColorArgs((accentColor: accentColor)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<UpdateAccentColorArgs, void>
+  get updateAccentColorMutation => updateAccentColorMutationReference;
+
+  Future<String?> updateAvatar({required StorageId? storageId}) async {
+    final raw$ = await _client.mutate(
+      'user:updateAvatar',
+      _encodeUpdateAvatarArgs((storageId: storageId)),
+    );
+    return raw$ == null
+        ? null
+        : expectString(raw$, label: 'UpdateAvatarResult');
+  }
+
+  ConvexMutationReference<UpdateAvatarArgs, String?> get updateAvatarMutation =>
+      updateAvatarMutationReference;
+
+  Future<Null> updateDefaultDrink({required DrinkId? defaultDrink}) async {
+    await _client.mutate(
+      'user:updateDefaultDrink',
+      _encodeUpdateDefaultDrinkArgs((defaultDrink: defaultDrink)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<UpdateDefaultDrinkArgs, void>
+  get updateDefaultDrinkMutation => updateDefaultDrinkMutationReference;
+
+  Future<Null> updateDrinkLogSortOrder({
+    required UpdateDrinkLogSortOrderArgsDrinkLogSortOrder drinkLogSortOrder,
+  }) async {
+    await _client.mutate(
+      'user:updateDrinkLogSortOrder',
+      _encodeUpdateDrinkLogSortOrderArgs((
+        drinkLogSortOrder: drinkLogSortOrder,
+      )),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<UpdateDrinkLogSortOrderArgs, void>
+  get updateDrinkLogSortOrderMutation =>
+      updateDrinkLogSortOrderMutationReference;
+
+  Future<Null> updateEndOfDayBoundary({
+    required double endOfDayBoundary,
+  }) async {
+    await _client.mutate(
+      'user:updateEndOfDayBoundary',
+      _encodeUpdateEndOfDayBoundaryArgs((endOfDayBoundary: endOfDayBoundary)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<UpdateEndOfDayBoundaryArgs, void>
+  get updateEndOfDayBoundaryMutation => updateEndOfDayBoundaryMutationReference;
+
+  Future<Null> updateTimeZone({required String timeZone}) async {
+    await _client.mutate(
+      'user:updateTimeZone',
+      _encodeUpdateTimeZoneArgs((timeZone: timeZone)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<UpdateTimeZoneArgs, void>
+  get updateTimeZoneMutation => updateTimeZoneMutationReference;
+
+  Future<Null> updateUsername({required String username}) async {
+    await _client.mutate(
+      'user:updateUsername',
+      _encodeUpdateUsernameArgs((username: username)),
+    );
+    return null;
+  }
+
+  ConvexMutationReference<UpdateUsernameArgs, void>
+  get updateUsernameMutation => updateUsernameMutationReference;
+}
+
+enum CurrentResultAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const CurrentResultAccentColor(this.value);
+  final Object? value;
+
+  static CurrentResultAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return CurrentResultAccentColor.amberValue;
+      case 'rose':
+        return CurrentResultAccentColor.roseValue;
+      case 'violet':
+        return CurrentResultAccentColor.violetValue;
+      case 'sky':
+        return CurrentResultAccentColor.skyValue;
+      case 'emerald':
+        return CurrentResultAccentColor.emeraldValue;
+      case 'lime':
+        return CurrentResultAccentColor.limeValue;
+      case 'orange':
+        return CurrentResultAccentColor.orangeValue;
+      case 'fuchsia':
+        return CurrentResultAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for CurrentResultAccentColor',
+        );
+    }
+  }
+}
+
+enum CurrentResultDrinkLogSortOrder {
+  ascValue('asc'),
+  descValue('desc');
+
+  const CurrentResultDrinkLogSortOrder(this.value);
+  final Object? value;
+
+  static CurrentResultDrinkLogSortOrder fromJson(dynamic raw) {
+    switch (raw) {
+      case 'asc':
+        return CurrentResultDrinkLogSortOrder.ascValue;
+      case 'desc':
+        return CurrentResultDrinkLogSortOrder.descValue;
+      default:
+        throw FormatException(
+          'Expected one of asc, desc for CurrentResultDrinkLogSortOrder',
+        );
+    }
+  }
+}
+
+typedef CurrentResult = ({
+  double creationTime,
+  UserId id,
+  CurrentResultAccentColor accentColor,
+  String authUserId,
+  String? avatarUrl,
+  DrinkId? defaultDrink,
+  CurrentResultDrinkLogSortOrder drinkLogSortOrder,
+  double endOfDayBoundary,
+  String normalizedUsername,
+  String timeZone,
+  String username,
+});
+
+Map<String, dynamic> _encodeCurrentResult(CurrentResult value$) {
+  final (
+    creationTime: creationTime,
+    id: id,
+    accentColor: accentColor,
+    authUserId: authUserId,
+    avatarUrl: avatarUrl,
+    defaultDrink: defaultDrink,
+    drinkLogSortOrder: drinkLogSortOrder,
+    endOfDayBoundary: endOfDayBoundary,
+    normalizedUsername: normalizedUsername,
+    timeZone: timeZone,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_creationTime': creationTime,
+    '_id': id.value,
+    'accentColor': accentColor.value,
+    'authUserId': authUserId,
+    'avatarUrl': avatarUrl,
+    'defaultDrink': switch (defaultDrink) {
+      null => null,
+      final v$ => v$.value,
+    },
+    'drinkLogSortOrder': drinkLogSortOrder.value,
+    'endOfDayBoundary': endOfDayBoundary,
+    'normalizedUsername': normalizedUsername,
+    'timeZone': timeZone,
+    'username': username,
+  };
+}
+
+CurrentResult _decodeCurrentResult(dynamic raw) {
+  final map = expectMap(raw, label: 'CurrentResult');
+  if (!map.containsKey('_creationTime')) {
+    throw FormatException(
+      'Missing required field "_creationTime" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('_id')) {
+    throw FormatException('Missing required field "_id" for CurrentResult');
+  }
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('authUserId')) {
+    throw FormatException(
+      'Missing required field "authUserId" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('avatarUrl')) {
+    throw FormatException(
+      'Missing required field "avatarUrl" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('defaultDrink')) {
+    throw FormatException(
+      'Missing required field "defaultDrink" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('drinkLogSortOrder')) {
+    throw FormatException(
+      'Missing required field "drinkLogSortOrder" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('endOfDayBoundary')) {
+    throw FormatException(
+      'Missing required field "endOfDayBoundary" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('normalizedUsername')) {
+    throw FormatException(
+      'Missing required field "normalizedUsername" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('timeZone')) {
+    throw FormatException(
+      'Missing required field "timeZone" for CurrentResult',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for CurrentResult',
+    );
+  }
+  return (
+    creationTime: expectDouble(
+      map['_creationTime'],
+      label: 'CurrentResultCreationTime',
+    ),
+    id: UserId(expectString(map['_id'], label: 'CurrentResultId')),
+    accentColor: CurrentResultAccentColor.fromJson(map['accentColor']),
+    authUserId: expectString(
+      map['authUserId'],
+      label: 'CurrentResultAuthUserId',
+    ),
+    avatarUrl: map['avatarUrl'] == null
+        ? null
+        : expectString(map['avatarUrl'], label: 'CurrentResultAvatarUrl'),
+    defaultDrink: map['defaultDrink'] == null
+        ? null
+        : DrinkId(
+            expectString(
+              map['defaultDrink'],
+              label: 'CurrentResultDefaultDrink',
+            ),
+          ),
+    drinkLogSortOrder: CurrentResultDrinkLogSortOrder.fromJson(
+      map['drinkLogSortOrder'],
+    ),
+    endOfDayBoundary: expectDouble(
+      map['endOfDayBoundary'],
+      label: 'CurrentResultEndOfDayBoundary',
+    ),
+    normalizedUsername: expectString(
+      map['normalizedUsername'],
+      label: 'CurrentResultNormalizedUsername',
+    ),
+    timeZone: expectString(map['timeZone'], label: 'CurrentResultTimeZone'),
+    username: expectString(map['username'], label: 'CurrentResultUsername'),
+  );
+}
+
+typedef CurrentDayConsumptionResult = ({
+  double alcoholConsumedMl,
+  double nextRefreshAt,
+});
+
+Map<String, dynamic> _encodeCurrentDayConsumptionResult(
+  CurrentDayConsumptionResult value$,
+) {
+  final (alcoholConsumedMl: alcoholConsumedMl, nextRefreshAt: nextRefreshAt) =
+      value$;
+  return <String, dynamic>{
+    'alcoholConsumedMl': alcoholConsumedMl,
+    'nextRefreshAt': nextRefreshAt,
+  };
+}
+
+CurrentDayConsumptionResult _decodeCurrentDayConsumptionResult(dynamic raw) {
+  final map = expectMap(raw, label: 'CurrentDayConsumptionResult');
+  if (!map.containsKey('alcoholConsumedMl')) {
+    throw FormatException(
+      'Missing required field "alcoholConsumedMl" for CurrentDayConsumptionResult',
+    );
+  }
+  if (!map.containsKey('nextRefreshAt')) {
+    throw FormatException(
+      'Missing required field "nextRefreshAt" for CurrentDayConsumptionResult',
+    );
+  }
+  return (
+    alcoholConsumedMl: expectDouble(
+      map['alcoholConsumedMl'],
+      label: 'CurrentDayConsumptionResultAlcoholConsumedMl',
+    ),
+    nextRefreshAt: expectDouble(
+      map['nextRefreshAt'],
+      label: 'CurrentDayConsumptionResultNextRefreshAt',
+    ),
+  );
+}
+
+typedef CurrentDayConsumptionArgs = ({Optional<double> refreshAt});
+
+Map<String, dynamic> _encodeCurrentDayConsumptionArgs(
+  CurrentDayConsumptionArgs value$,
+) {
+  final (refreshAt: refreshAt) = value$;
+  return <String, dynamic>{
+    if (refreshAt.isDefined) 'refreshAt': refreshAt.value,
+  };
+}
+
+CurrentDayConsumptionArgs _decodeCurrentDayConsumptionArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'CurrentDayConsumptionArgs');
+  return (
+    refreshAt: map.containsKey('refreshAt')
+        ? Optional.of(
+            expectDouble(
+              map['refreshAt'],
+              label: 'CurrentDayConsumptionArgsRefreshAt',
+            ),
+          )
+        : const Optional.absent(),
+  );
+}
+
+typedef DeleteCurrentArgs = ({String password});
+
+Map<String, dynamic> _encodeDeleteCurrentArgs(DeleteCurrentArgs value$) {
+  final (password: password) = value$;
+  return <String, dynamic>{'password': password};
+}
+
+DeleteCurrentArgs _decodeDeleteCurrentArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'DeleteCurrentArgs');
+  if (!map.containsKey('password')) {
+    throw FormatException(
+      'Missing required field "password" for DeleteCurrentArgs',
+    );
+  }
+  return (
+    password: expectString(map['password'], label: 'DeleteCurrentArgsPassword'),
+  );
+}
+
+typedef EnsureCurrentArgs = ({Optional<String> timeZone});
+
+Map<String, dynamic> _encodeEnsureCurrentArgs(EnsureCurrentArgs value$) {
+  final (timeZone: timeZone) = value$;
+  return <String, dynamic>{if (timeZone.isDefined) 'timeZone': timeZone.value};
+}
+
+EnsureCurrentArgs _decodeEnsureCurrentArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'EnsureCurrentArgs');
+  return (
+    timeZone: map.containsKey('timeZone')
+        ? Optional.of(
+            expectString(map['timeZone'], label: 'EnsureCurrentArgsTimeZone'),
+          )
+        : const Optional.absent(),
+  );
+}
+
+enum GetTypeResultAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const GetTypeResultAccentColor(this.value);
+  final Object? value;
+
+  static GetTypeResultAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return GetTypeResultAccentColor.amberValue;
+      case 'rose':
+        return GetTypeResultAccentColor.roseValue;
+      case 'violet':
+        return GetTypeResultAccentColor.violetValue;
+      case 'sky':
+        return GetTypeResultAccentColor.skyValue;
+      case 'emerald':
+        return GetTypeResultAccentColor.emeraldValue;
+      case 'lime':
+        return GetTypeResultAccentColor.limeValue;
+      case 'orange':
+        return GetTypeResultAccentColor.orangeValue;
+      case 'fuchsia':
+        return GetTypeResultAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for GetTypeResultAccentColor',
+        );
+    }
+  }
+}
+
+typedef GetTypeResult = ({
+  UserId id,
+  GetTypeResultAccentColor accentColor,
+  String? avatarUrl,
+  String username,
+});
+
+Map<String, dynamic> _encodeGetTypeResult(GetTypeResult value$) {
+  final (
+    id: id,
+    accentColor: accentColor,
+    avatarUrl: avatarUrl,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_id': id.value,
+    'accentColor': accentColor.value,
+    'avatarUrl': avatarUrl,
+    'username': username,
+  };
+}
+
+GetTypeResult _decodeGetTypeResult(dynamic raw) {
+  final map = expectMap(raw, label: 'GetTypeResult');
+  if (!map.containsKey('_id')) {
+    throw FormatException('Missing required field "_id" for GetTypeResult');
+  }
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for GetTypeResult',
+    );
+  }
+  if (!map.containsKey('avatarUrl')) {
+    throw FormatException(
+      'Missing required field "avatarUrl" for GetTypeResult',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for GetTypeResult',
+    );
+  }
+  return (
+    id: UserId(expectString(map['_id'], label: 'GetTypeResultId')),
+    accentColor: GetTypeResultAccentColor.fromJson(map['accentColor']),
+    avatarUrl: map['avatarUrl'] == null
+        ? null
+        : expectString(map['avatarUrl'], label: 'GetTypeResultAvatarUrl'),
+    username: expectString(map['username'], label: 'GetTypeResultUsername'),
+  );
+}
+
+typedef GetTypeArgs = ({UserId userId});
+
+Map<String, dynamic> _encodeGetTypeArgs(GetTypeArgs value$) {
+  final (userId: userId) = value$;
+  return <String, dynamic>{'userId': userId.value};
+}
+
+GetTypeArgs _decodeGetTypeArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'GetTypeArgs');
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for GetTypeArgs');
+  }
+  return (
+    userId: UserId(expectString(map['userId'], label: 'GetTypeArgsUserId')),
+  );
+}
+
+enum SearchResultItemAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const SearchResultItemAccentColor(this.value);
+  final Object? value;
+
+  static SearchResultItemAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return SearchResultItemAccentColor.amberValue;
+      case 'rose':
+        return SearchResultItemAccentColor.roseValue;
+      case 'violet':
+        return SearchResultItemAccentColor.violetValue;
+      case 'sky':
+        return SearchResultItemAccentColor.skyValue;
+      case 'emerald':
+        return SearchResultItemAccentColor.emeraldValue;
+      case 'lime':
+        return SearchResultItemAccentColor.limeValue;
+      case 'orange':
+        return SearchResultItemAccentColor.orangeValue;
+      case 'fuchsia':
+        return SearchResultItemAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for SearchResultItemAccentColor',
+        );
+    }
+  }
+}
+
+typedef SearchResultItem = ({
+  UserId id,
+  SearchResultItemAccentColor accentColor,
+  String? avatarUrl,
+  String username,
+});
+
+Map<String, dynamic> _encodeSearchResultItem(SearchResultItem value$) {
+  final (
+    id: id,
+    accentColor: accentColor,
+    avatarUrl: avatarUrl,
+    username: username,
+  ) = value$;
+  return <String, dynamic>{
+    '_id': id.value,
+    'accentColor': accentColor.value,
+    'avatarUrl': avatarUrl,
+    'username': username,
+  };
+}
+
+SearchResultItem _decodeSearchResultItem(dynamic raw) {
+  final map = expectMap(raw, label: 'SearchResultItem');
+  if (!map.containsKey('_id')) {
+    throw FormatException('Missing required field "_id" for SearchResultItem');
+  }
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for SearchResultItem',
+    );
+  }
+  if (!map.containsKey('avatarUrl')) {
+    throw FormatException(
+      'Missing required field "avatarUrl" for SearchResultItem',
+    );
+  }
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for SearchResultItem',
+    );
+  }
+  return (
+    id: UserId(expectString(map['_id'], label: 'SearchResultItemId')),
+    accentColor: SearchResultItemAccentColor.fromJson(map['accentColor']),
+    avatarUrl: map['avatarUrl'] == null
+        ? null
+        : expectString(map['avatarUrl'], label: 'SearchResultItemAvatarUrl'),
+    username: expectString(map['username'], label: 'SearchResultItemUsername'),
+  );
+}
+
+typedef SearchArgs = ({String query});
+
+Map<String, dynamic> _encodeSearchArgs(SearchArgs value$) {
+  final (query: query) = value$;
+  return <String, dynamic>{'query': query};
+}
+
+SearchArgs _decodeSearchArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'SearchArgs');
+  if (!map.containsKey('query')) {
+    throw FormatException('Missing required field "query" for SearchArgs');
+  }
+  return (query: expectString(map['query'], label: 'SearchArgsQuery'));
+}
+
+typedef StatsResult = ({
+  double alcoholConsumedLast30Days,
+  double beersConsumedLast30Days,
+  bool isStreakActive,
+  double nextRefreshAt,
+  double streakDays,
+  double totalAlcoholConsumed,
+  double totalBeersConsumed,
+});
+
+Map<String, dynamic> _encodeStatsResult(StatsResult value$) {
+  final (
+    alcoholConsumedLast30Days: alcoholConsumedLast30Days,
+    beersConsumedLast30Days: beersConsumedLast30Days,
+    isStreakActive: isStreakActive,
+    nextRefreshAt: nextRefreshAt,
+    streakDays: streakDays,
+    totalAlcoholConsumed: totalAlcoholConsumed,
+    totalBeersConsumed: totalBeersConsumed,
+  ) = value$;
+  return <String, dynamic>{
+    'alcoholConsumedLast30Days': alcoholConsumedLast30Days,
+    'beersConsumedLast30Days': beersConsumedLast30Days,
+    'isStreakActive': isStreakActive,
+    'nextRefreshAt': nextRefreshAt,
+    'streakDays': streakDays,
+    'totalAlcoholConsumed': totalAlcoholConsumed,
+    'totalBeersConsumed': totalBeersConsumed,
+  };
+}
+
+StatsResult _decodeStatsResult(dynamic raw) {
+  final map = expectMap(raw, label: 'StatsResult');
+  if (!map.containsKey('alcoholConsumedLast30Days')) {
+    throw FormatException(
+      'Missing required field "alcoholConsumedLast30Days" for StatsResult',
+    );
+  }
+  if (!map.containsKey('beersConsumedLast30Days')) {
+    throw FormatException(
+      'Missing required field "beersConsumedLast30Days" for StatsResult',
+    );
+  }
+  if (!map.containsKey('isStreakActive')) {
+    throw FormatException(
+      'Missing required field "isStreakActive" for StatsResult',
+    );
+  }
+  if (!map.containsKey('nextRefreshAt')) {
+    throw FormatException(
+      'Missing required field "nextRefreshAt" for StatsResult',
+    );
+  }
+  if (!map.containsKey('streakDays')) {
+    throw FormatException(
+      'Missing required field "streakDays" for StatsResult',
+    );
+  }
+  if (!map.containsKey('totalAlcoholConsumed')) {
+    throw FormatException(
+      'Missing required field "totalAlcoholConsumed" for StatsResult',
+    );
+  }
+  if (!map.containsKey('totalBeersConsumed')) {
+    throw FormatException(
+      'Missing required field "totalBeersConsumed" for StatsResult',
+    );
+  }
+  return (
+    alcoholConsumedLast30Days: expectDouble(
+      map['alcoholConsumedLast30Days'],
+      label: 'StatsResultAlcoholConsumedLast30Days',
+    ),
+    beersConsumedLast30Days: expectDouble(
+      map['beersConsumedLast30Days'],
+      label: 'StatsResultBeersConsumedLast30Days',
+    ),
+    isStreakActive: expectBool(
+      map['isStreakActive'],
+      label: 'StatsResultIsStreakActive',
+    ),
+    nextRefreshAt: expectDouble(
+      map['nextRefreshAt'],
+      label: 'StatsResultNextRefreshAt',
+    ),
+    streakDays: expectDouble(map['streakDays'], label: 'StatsResultStreakDays'),
+    totalAlcoholConsumed: expectDouble(
+      map['totalAlcoholConsumed'],
+      label: 'StatsResultTotalAlcoholConsumed',
+    ),
+    totalBeersConsumed: expectDouble(
+      map['totalBeersConsumed'],
+      label: 'StatsResultTotalBeersConsumed',
+    ),
+  );
+}
+
+typedef StatsArgs = ({Optional<double> refreshAt, UserId userId});
+
+Map<String, dynamic> _encodeStatsArgs(StatsArgs value$) {
+  final (refreshAt: refreshAt, userId: userId) = value$;
+  return <String, dynamic>{
+    if (refreshAt.isDefined) 'refreshAt': refreshAt.value,
+    'userId': userId.value,
+  };
+}
+
+StatsArgs _decodeStatsArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'StatsArgs');
+  if (!map.containsKey('userId')) {
+    throw FormatException('Missing required field "userId" for StatsArgs');
+  }
+  return (
+    refreshAt: map.containsKey('refreshAt')
+        ? Optional.of(
+            expectDouble(map['refreshAt'], label: 'StatsArgsRefreshAt'),
+          )
+        : const Optional.absent(),
+    userId: UserId(expectString(map['userId'], label: 'StatsArgsUserId')),
+  );
+}
+
+enum UpdateAccentColorArgsAccentColor {
+  amberValue('amber'),
+  roseValue('rose'),
+  violetValue('violet'),
+  skyValue('sky'),
+  emeraldValue('emerald'),
+  limeValue('lime'),
+  orangeValue('orange'),
+  fuchsiaValue('fuchsia');
+
+  const UpdateAccentColorArgsAccentColor(this.value);
+  final Object? value;
+
+  static UpdateAccentColorArgsAccentColor fromJson(dynamic raw) {
+    switch (raw) {
+      case 'amber':
+        return UpdateAccentColorArgsAccentColor.amberValue;
+      case 'rose':
+        return UpdateAccentColorArgsAccentColor.roseValue;
+      case 'violet':
+        return UpdateAccentColorArgsAccentColor.violetValue;
+      case 'sky':
+        return UpdateAccentColorArgsAccentColor.skyValue;
+      case 'emerald':
+        return UpdateAccentColorArgsAccentColor.emeraldValue;
+      case 'lime':
+        return UpdateAccentColorArgsAccentColor.limeValue;
+      case 'orange':
+        return UpdateAccentColorArgsAccentColor.orangeValue;
+      case 'fuchsia':
+        return UpdateAccentColorArgsAccentColor.fuchsiaValue;
+      default:
+        throw FormatException(
+          'Expected one of amber, rose, violet, sky, emerald, lime, orange, fuchsia for UpdateAccentColorArgsAccentColor',
+        );
+    }
+  }
+}
+
+typedef UpdateAccentColorArgs = ({
+  UpdateAccentColorArgsAccentColor accentColor,
+});
+
+Map<String, dynamic> _encodeUpdateAccentColorArgs(
+  UpdateAccentColorArgs value$,
+) {
+  final (accentColor: accentColor) = value$;
+  return <String, dynamic>{'accentColor': accentColor.value};
+}
+
+UpdateAccentColorArgs _decodeUpdateAccentColorArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateAccentColorArgs');
+  if (!map.containsKey('accentColor')) {
+    throw FormatException(
+      'Missing required field "accentColor" for UpdateAccentColorArgs',
+    );
+  }
+  return (
+    accentColor: UpdateAccentColorArgsAccentColor.fromJson(map['accentColor']),
+  );
+}
+
+typedef UpdateAvatarArgs = ({StorageId? storageId});
+
+Map<String, dynamic> _encodeUpdateAvatarArgs(UpdateAvatarArgs value$) {
+  final (storageId: storageId) = value$;
+  return <String, dynamic>{
+    'storageId': switch (storageId) {
+      null => null,
+      final v$ => v$.value,
+    },
+  };
+}
+
+UpdateAvatarArgs _decodeUpdateAvatarArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateAvatarArgs');
+  if (!map.containsKey('storageId')) {
+    throw FormatException(
+      'Missing required field "storageId" for UpdateAvatarArgs',
+    );
+  }
+  return (
+    storageId: map['storageId'] == null
+        ? null
+        : StorageId(
+            expectString(map['storageId'], label: 'UpdateAvatarArgsStorageId'),
+          ),
+  );
+}
+
+typedef UpdateDefaultDrinkArgs = ({DrinkId? defaultDrink});
+
+Map<String, dynamic> _encodeUpdateDefaultDrinkArgs(
+  UpdateDefaultDrinkArgs value$,
+) {
+  final (defaultDrink: defaultDrink) = value$;
+  return <String, dynamic>{
+    'defaultDrink': switch (defaultDrink) {
+      null => null,
+      final v$ => v$.value,
+    },
+  };
+}
+
+UpdateDefaultDrinkArgs _decodeUpdateDefaultDrinkArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateDefaultDrinkArgs');
+  if (!map.containsKey('defaultDrink')) {
+    throw FormatException(
+      'Missing required field "defaultDrink" for UpdateDefaultDrinkArgs',
+    );
+  }
+  return (
+    defaultDrink: map['defaultDrink'] == null
+        ? null
+        : DrinkId(
+            expectString(
+              map['defaultDrink'],
+              label: 'UpdateDefaultDrinkArgsDefaultDrink',
+            ),
+          ),
+  );
+}
+
+enum UpdateDrinkLogSortOrderArgsDrinkLogSortOrder {
+  ascValue('asc'),
+  descValue('desc');
+
+  const UpdateDrinkLogSortOrderArgsDrinkLogSortOrder(this.value);
+  final Object? value;
+
+  static UpdateDrinkLogSortOrderArgsDrinkLogSortOrder fromJson(dynamic raw) {
+    switch (raw) {
+      case 'asc':
+        return UpdateDrinkLogSortOrderArgsDrinkLogSortOrder.ascValue;
+      case 'desc':
+        return UpdateDrinkLogSortOrderArgsDrinkLogSortOrder.descValue;
+      default:
+        throw FormatException(
+          'Expected one of asc, desc for UpdateDrinkLogSortOrderArgsDrinkLogSortOrder',
+        );
+    }
+  }
+}
+
+typedef UpdateDrinkLogSortOrderArgs = ({
+  UpdateDrinkLogSortOrderArgsDrinkLogSortOrder drinkLogSortOrder,
+});
+
+Map<String, dynamic> _encodeUpdateDrinkLogSortOrderArgs(
+  UpdateDrinkLogSortOrderArgs value$,
+) {
+  final (drinkLogSortOrder: drinkLogSortOrder) = value$;
+  return <String, dynamic>{'drinkLogSortOrder': drinkLogSortOrder.value};
+}
+
+UpdateDrinkLogSortOrderArgs _decodeUpdateDrinkLogSortOrderArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateDrinkLogSortOrderArgs');
+  if (!map.containsKey('drinkLogSortOrder')) {
+    throw FormatException(
+      'Missing required field "drinkLogSortOrder" for UpdateDrinkLogSortOrderArgs',
+    );
+  }
+  return (
+    drinkLogSortOrder: UpdateDrinkLogSortOrderArgsDrinkLogSortOrder.fromJson(
+      map['drinkLogSortOrder'],
+    ),
+  );
+}
+
+typedef UpdateEndOfDayBoundaryArgs = ({double endOfDayBoundary});
+
+Map<String, dynamic> _encodeUpdateEndOfDayBoundaryArgs(
+  UpdateEndOfDayBoundaryArgs value$,
+) {
+  final (endOfDayBoundary: endOfDayBoundary) = value$;
+  return <String, dynamic>{'endOfDayBoundary': endOfDayBoundary};
+}
+
+UpdateEndOfDayBoundaryArgs _decodeUpdateEndOfDayBoundaryArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateEndOfDayBoundaryArgs');
+  if (!map.containsKey('endOfDayBoundary')) {
+    throw FormatException(
+      'Missing required field "endOfDayBoundary" for UpdateEndOfDayBoundaryArgs',
+    );
+  }
+  return (
+    endOfDayBoundary: expectDouble(
+      map['endOfDayBoundary'],
+      label: 'UpdateEndOfDayBoundaryArgsEndOfDayBoundary',
+    ),
+  );
+}
+
+typedef UpdateTimeZoneArgs = ({String timeZone});
+
+Map<String, dynamic> _encodeUpdateTimeZoneArgs(UpdateTimeZoneArgs value$) {
+  final (timeZone: timeZone) = value$;
+  return <String, dynamic>{'timeZone': timeZone};
+}
+
+UpdateTimeZoneArgs _decodeUpdateTimeZoneArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateTimeZoneArgs');
+  if (!map.containsKey('timeZone')) {
+    throw FormatException(
+      'Missing required field "timeZone" for UpdateTimeZoneArgs',
+    );
+  }
+  return (
+    timeZone: expectString(
+      map['timeZone'],
+      label: 'UpdateTimeZoneArgsTimeZone',
+    ),
+  );
+}
+
+typedef UpdateUsernameArgs = ({String username});
+
+Map<String, dynamic> _encodeUpdateUsernameArgs(UpdateUsernameArgs value$) {
+  final (username: username) = value$;
+  return <String, dynamic>{'username': username};
+}
+
+UpdateUsernameArgs _decodeUpdateUsernameArgs(dynamic raw) {
+  final map = expectMap(raw, label: 'UpdateUsernameArgs');
+  if (!map.containsKey('username')) {
+    throw FormatException(
+      'Missing required field "username" for UpdateUsernameArgs',
+    );
+  }
+  return (
+    username: expectString(
+      map['username'],
+      label: 'UpdateUsernameArgsUsername',
+    ),
+  );
+}
+
+final ConvexQueryReference<NoArgs, CurrentResult> currentQueryReference =
+    ConvexQueryReference(
+      name: 'user:current',
+      encode: (args) => const <String, dynamic>{},
+      decodeArgs: (raw) => const NoArgs(),
+      decode: (raw) => _decodeCurrentResult(raw),
+      encodeResult: (value) => _encodeCurrentResult(value),
+    );
+
+final ConvexQueryReference<
+  CurrentDayConsumptionArgs,
+  CurrentDayConsumptionResult
+>
+currentDayConsumptionQueryReference = ConvexQueryReference(
+  name: 'user:currentDayConsumption',
+  encode: (args) => _encodeCurrentDayConsumptionArgs(args),
+  decodeArgs: (raw) => _decodeCurrentDayConsumptionArgs(raw),
+  decode: (raw) => _decodeCurrentDayConsumptionResult(raw),
+  encodeResult: (value) => _encodeCurrentDayConsumptionResult(value),
+);
+
+final ConvexMutationReference<DeleteCurrentArgs, void>
+deleteCurrentMutationReference = ConvexMutationReference(
+  name: 'user:deleteCurrent',
+  encode: (args) => _encodeDeleteCurrentArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<EnsureCurrentArgs, UserId>
+ensureCurrentMutationReference = ConvexMutationReference(
+  name: 'user:ensureCurrent',
+  encode: (args) => _encodeEnsureCurrentArgs(args),
+  decode: (raw) => UserId(expectString(raw, label: 'EnsureCurrentResult')),
+);
+
+final ConvexMutationReference<NoArgs, String>
+generateAvatarUploadUrlMutationReference = ConvexMutationReference(
+  name: 'user:generateAvatarUploadUrl',
+  encode: (args) => const <String, dynamic>{},
+  decode: (raw) => expectString(raw, label: 'GenerateAvatarUploadUrlResult'),
+);
+
+final ConvexQueryReference<GetTypeArgs, GetTypeResult> getValueQueryReference =
+    ConvexQueryReference(
+      name: 'user:get',
+      encode: (args) => _encodeGetTypeArgs(args),
+      decodeArgs: (raw) => _decodeGetTypeArgs(raw),
+      decode: (raw) => _decodeGetTypeResult(raw),
+      encodeResult: (value) => _encodeGetTypeResult(value),
+    );
+
+final ConvexQueryReference<SearchArgs, List<SearchResultItem>>
+searchQueryReference = ConvexQueryReference(
+  name: 'user:search',
+  encode: (args) => _encodeSearchArgs(args),
+  decodeArgs: (raw) => _decodeSearchArgs(raw),
+  decode: (raw) => expectList(
+    raw,
+    label: 'SearchResult',
+  ).map((item) => _decodeSearchResultItem(item)).toList(),
+  encodeResult: (value) =>
+      value.map((item) => _encodeSearchResultItem(item)).toList(),
+);
+
+final ConvexQueryReference<StatsArgs, StatsResult> statsQueryReference =
+    ConvexQueryReference(
+      name: 'user:stats',
+      encode: (args) => _encodeStatsArgs(args),
+      decodeArgs: (raw) => _decodeStatsArgs(raw),
+      decode: (raw) => _decodeStatsResult(raw),
+      encodeResult: (value) => _encodeStatsResult(value),
+    );
+
+final ConvexMutationReference<UpdateAccentColorArgs, void>
+updateAccentColorMutationReference = ConvexMutationReference(
+  name: 'user:updateAccentColor',
+  encode: (args) => _encodeUpdateAccentColorArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<UpdateAvatarArgs, String?>
+updateAvatarMutationReference = ConvexMutationReference(
+  name: 'user:updateAvatar',
+  encode: (args) => _encodeUpdateAvatarArgs(args),
+  decode: (raw) =>
+      raw == null ? null : expectString(raw, label: 'UpdateAvatarResult'),
+);
+
+final ConvexMutationReference<UpdateDefaultDrinkArgs, void>
+updateDefaultDrinkMutationReference = ConvexMutationReference(
+  name: 'user:updateDefaultDrink',
+  encode: (args) => _encodeUpdateDefaultDrinkArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<UpdateDrinkLogSortOrderArgs, void>
+updateDrinkLogSortOrderMutationReference = ConvexMutationReference(
+  name: 'user:updateDrinkLogSortOrder',
+  encode: (args) => _encodeUpdateDrinkLogSortOrderArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<UpdateEndOfDayBoundaryArgs, void>
+updateEndOfDayBoundaryMutationReference = ConvexMutationReference(
+  name: 'user:updateEndOfDayBoundary',
+  encode: (args) => _encodeUpdateEndOfDayBoundaryArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<UpdateTimeZoneArgs, void>
+updateTimeZoneMutationReference = ConvexMutationReference(
+  name: 'user:updateTimeZone',
+  encode: (args) => _encodeUpdateTimeZoneArgs(args),
+  decode: (raw) => null,
+);
+
+final ConvexMutationReference<UpdateUsernameArgs, void>
+updateUsernameMutationReference = ConvexMutationReference(
+  name: 'user:updateUsername',
+  encode: (args) => _encodeUpdateUsernameArgs(args),
+  decode: (raw) => null,
+);

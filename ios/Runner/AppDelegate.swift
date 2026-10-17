@@ -1,6 +1,5 @@
 import Flutter
 import UIKit
-import UserNotifications
 
 @main
 @objc class AppDelegate: FlutterAppDelegate, FlutterImplicitEngineDelegate, FlutterSceneLifeCycleDelegate {
@@ -33,8 +32,6 @@ import UserNotifications
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
-    UNUserNotificationCenter.current().delegate = self
-
     // setAlternateIconName only works while the app is active, so retry any
     // pending change when the app comes to the foreground.
     NotificationCenter.default.addObserver(

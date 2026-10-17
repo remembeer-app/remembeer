@@ -1,36 +1,32 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
-import 'package:remembeer/common/formatter/time_formatter.dart';
-import 'package:remembeer/common/widget/loading_form.dart';
-import 'package:remembeer/drink_type/model/drink_type_core.dart';
-import 'package:remembeer/drink_type/widget/drink_type_picker.dart';
-import 'package:remembeer/ioc/ioc_container.dart';
-import 'package:remembeer/location/service/location_service.dart';
-import 'package:remembeer/routes.dart';
-
-const _defaultPosition = GeoPoint(49.2099, 16.5990);
+import 'package:go_router/go_router.dart';
+import 'package:remembeer/common/action/confirmation_dialog.dart';
+import 'package:remembeer/common/widget/app_form.dart';
+import 'package:remembeer/convex_api/types.dart';
+import 'package:remembeer/drink/formatter/alcohol_percentage_formatter.dart';
+import 'package:remembeer/drink/widget/alcohol_percentage_field.dart';
+import 'package:remembeer/drink/widget/drink_category_field.dart';
+import 'package:remembeer/drink/widget/drink_name_field.dart';
 
 class DrinkForm extends StatefulWidget {
-  final DrinkTypeCore initialDrinkType;
-  final DateTime initialConsumedAt;
-  final int initialVolume;
-  final GeoPoint? initialLocation;
-  final Future<void> Function(
-    DrinkTypeCore drinkType,
-    DateTime consumedAt,
-    int volumeInMilliliters,
-    GeoPoint? location,
-  )
-  onSubmit;
+  final String initialName;
+  final double initialAlcoholPercentage;
+  final DrinkCategory initialDrinkCategory;
+  final bool isLoading;
+  final Object? error;
+  final void Function(String, double, DrinkCategory) onSubmit;
+  final VoidCallback? onDelete;
 
   const DrinkForm({
     super.key,
-    required this.initialDrinkType,
-    required this.initialConsumedAt,
-    required this.initialVolume,
-    this.initialLocation,
+    required this.initialName,
+    required this.initialAlcoholPercentage,
+    required this.initialDrinkCategory,
+    required this.isLoading,
+    required this.error,
     required this.onSubmit,
+    this.onDelete,
   });
 
   @override
@@ -38,266 +34,86 @@ class DrinkForm extends StatefulWidget {
 }
 
 class _DrinkFormState extends State<DrinkForm> {
-  final _locationService = get<LocationService>();
-
-  late DrinkTypeCore _selectedDrinkType = widget.initialDrinkType;
-  late DateTime _selectedConsumedAt = widget.initialConsumedAt;
-  final _volumeController = TextEditingController();
-  final _consumedAtController = TextEditingController();
-  final _locationController = TextEditingController();
-
-  GeoPoint? _location;
-  var _isLoadingLocation = false;
+  late DrinkCategory? _selectedCategory = widget.initialDrinkCategory;
+  final _nameController = TextEditingController();
+  final _percentageController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _consumedAtController.text = formatFullDateTime(_selectedConsumedAt);
-    _volumeController.text = widget.initialVolume.toString();
-    _volumeController.addListener(() => setState(() {}));
-    _location = widget.initialLocation;
-    _updateLocationText();
+    _nameController.text = widget.initialName;
+    _percentageController.text = AlcoholPercentageFormatter.formatPercentage(
+      widget.initialAlcoholPercentage,
+    );
   }
 
   @override
   void dispose() {
-    _volumeController.dispose();
-    _consumedAtController.dispose();
-    _locationController.dispose();
+    _nameController.dispose();
+    _percentageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return LoadingForm(
-      builder: (form) => Column(
-        children: [
-          Expanded(
-            child: ListView(
-              children: [
-                _buildDrinkTypeDropdown(),
-                const Gap(16),
-                _buildVolumeInput(form),
-                const Gap(8),
-                _buildPredefinedVolumesRow(),
-                const Gap(16),
-                _buildConsumedAtInput(form),
-                const Gap(16),
-                _buildLocationInput(form),
-              ],
-            ),
+    return AppForm(
+      isSubmitting: widget.isLoading,
+      error: widget.error,
+      submitLabel: widget.onDelete == null ? 'Create drink' : 'Save drink',
+      submittingLabel: 'Saving...',
+      onSubmit: _submit,
+      onBack: () => context.pop(),
+      actions: [
+        if (widget.onDelete != null)
+          AppFormAction(
+            label: 'Delete drink',
+            icon: Icons.delete_outline,
+            isDestructive: true,
+            onPressed: _confirmDelete,
           ),
-          _buildSubmitButton(form),
+      ],
+      builder: (context, submit) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          DrinkNameField(
+            controller: _nameController,
+            enabled: !widget.isLoading,
+          ),
+          const Gap(16),
+          AlcoholPercentageField(
+            controller: _percentageController,
+            enabled: !widget.isLoading,
+          ),
+          const Gap(16),
+          DrinkCategoryField(
+            initialValue: _selectedCategory,
+            enabled: !widget.isLoading,
+            onChanged: (category) =>
+                setState(() => _selectedCategory = category),
+            onFieldSubmitted: submit,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildLocationInput(LoadingFormState form) {
-    final isDisabled = form.isLoading || _isLoadingLocation;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextFormField(
-          controller: _locationController,
-          readOnly: true,
-          enabled: !form.isLoading,
-          onTap: isDisabled ? null : _openLocationPicker,
-          decoration: InputDecoration(
-            labelText: 'Location (optional)',
-            hintText: 'Tap to set location',
-            border: const OutlineInputBorder(),
-            prefixIcon: const Icon(Icons.location_on),
-            suffixIcon: _location != null
-                ? IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      setState(() {
-                        _location = null;
-                        _updateLocationText();
-                      });
-                    },
-                  )
-                : null,
-          ),
-        ),
-        const Gap(8),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: isDisabled ? null : _fetchCurrentLocation,
-                icon: _isLoadingLocation
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.my_location),
-                label: const Text('Current location'),
-              ),
-            ),
-            const Gap(8),
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: isDisabled ? null : _openLocationPicker,
-                icon: const Icon(Icons.map),
-                label: const Text('Pick on map'),
-              ),
-            ),
-          ],
-        ),
-      ],
+  void _submit() {
+    final percentage = double.parse(_percentageController.text);
+    widget.onSubmit(
+      _nameController.text,
+      (percentage * 100).round() / 100,
+      _selectedCategory!,
     );
   }
 
-  Future<void> _openLocationPicker() async {
-    var startLocation = _location;
-    if (startLocation == null) {
-      setState(() => _isLoadingLocation = true);
-      final position = await _locationService.getCurrentPosition();
-      if (mounted) {
-        setState(() => _isLoadingLocation = false);
-      }
-      if (position != null) {
-        startLocation = GeoPoint(position.latitude, position.longitude);
-      } else {
-        startLocation = _defaultPosition;
-      }
-    }
-
-    if (!mounted) return;
-
-    final newLocation = await LocationPickerRoute(
-      latitude: startLocation.latitude,
-      longitude: startLocation.longitude,
-    ).push<GeoPoint>(context);
-
-    if (newLocation != null && mounted) {
-      setState(() {
-        _location = newLocation;
-        _updateLocationText();
-      });
-    }
-  }
-
-  Widget _buildDrinkTypeDropdown() {
-    return DrinkTypePicker(
-      selectedDrinkType: _selectedDrinkType,
-      onChanged: (newValue) {
-        setState(() {
-          if (newValue.category != _selectedDrinkType.category) {
-            _volumeController.text = newValue.category.defaultVolume.toString();
-          }
-          _selectedDrinkType = newValue;
-        });
-      },
+  void _confirmDelete() {
+    showConfirmationDialog(
+      context: context,
+      title: 'Delete Drink',
+      text: 'Are you sure you want to delete "${_nameController.text}"?',
+      submitButtonText: 'Delete',
+      isDestructive: true,
+      onPressed: () async => widget.onDelete!(),
     );
-  }
-
-  Widget _buildVolumeInput(LoadingFormState form) {
-    return form.buildTextField(
-      controller: _volumeController,
-      label: 'Volume (ml)',
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please enter a volume.';
-        }
-        final volume = int.tryParse(value);
-        if (volume == null || volume <= 0) {
-          return 'Please enter a valid number.';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildVolumeButton({required String name, required int volume}) {
-    final currentVolume = int.tryParse(_volumeController.text);
-    final isSelected = currentVolume == volume;
-
-    return Expanded(
-      child: isSelected
-          ? FilledButton(
-              onPressed: () => _volumeController.text = volume.toString(),
-              child: Text(name),
-            )
-          : OutlinedButton(
-              onPressed: () => _volumeController.text = volume.toString(),
-              child: Text(name),
-            ),
-    );
-  }
-
-  Widget _buildPredefinedVolumesRow() {
-    final volumes = _selectedDrinkType.category.predefinedVolumes;
-    final buttons = <Widget>[];
-    volumes.forEach((name, volume) {
-      buttons
-        ..add(_buildVolumeButton(name: name, volume: volume))
-        ..add(const Gap(8));
-    });
-
-    if (buttons.isNotEmpty) {
-      buttons.removeLast();
-    }
-
-    return Row(children: buttons);
-  }
-
-  Widget _buildConsumedAtInput(LoadingFormState form) {
-    return form.buildDateTimeField(
-      controller: _consumedAtController,
-      label: 'Consumed at',
-      selectedDateTime: _selectedConsumedAt,
-      onChanged: (newDateTime) =>
-          setState(() => _selectedConsumedAt = newDateTime),
-      lastDate: DateTime.now(),
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return 'Please select when you consumed the drink.';
-        }
-        return null;
-      },
-    );
-  }
-
-  Widget _buildSubmitButton(LoadingFormState form) {
-    return form.buildSubmitButton(
-      text: 'Submit',
-      margin: const EdgeInsets.only(bottom: 16),
-      onSubmit: () => widget.onSubmit(
-        _selectedDrinkType,
-        _selectedConsumedAt,
-        int.parse(_volumeController.text),
-        _location,
-      ),
-    );
-  }
-
-  void _updateLocationText() {
-    if (_location != null) {
-      _locationController.text =
-          '${_location!.latitude.toStringAsFixed(5)}, ${_location!.longitude.toStringAsFixed(5)}';
-    } else {
-      _locationController.text = '';
-    }
-  }
-
-  Future<void> _fetchCurrentLocation() async {
-    setState(() => _isLoadingLocation = true);
-
-    final position = await _locationService.getCurrentPosition();
-    if (mounted) {
-      setState(() {
-        _isLoadingLocation = false;
-        if (position != null) {
-          _location = GeoPoint(position.latitude, position.longitude);
-          _updateLocationText();
-        }
-      });
-    }
   }
 }

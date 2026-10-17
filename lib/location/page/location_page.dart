@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +5,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:remembeer/common/widget/page_template.dart';
 
 class LocationPage extends StatefulWidget {
-  final GeoPoint location;
+  final LatLng location;
 
   const LocationPage({super.key, required this.location});
 
@@ -19,7 +18,7 @@ class _LocationPageState extends State<LocationPage> {
 
   @override
   Widget build(BuildContext context) {
-    final point = LatLng(widget.location.latitude, widget.location.longitude);
+    final point = widget.location;
 
     return PageTemplate(
       title: const Text('Adjust Location'),
@@ -61,7 +60,6 @@ class _LocationPageState extends State<LocationPage> {
 
   void _confirmLocation() {
     final center = _mapController.camera.center;
-    final geoPoint = GeoPoint(center.latitude, center.longitude);
-    context.pop(geoPoint);
+    context.pop(center);
   }
 }
